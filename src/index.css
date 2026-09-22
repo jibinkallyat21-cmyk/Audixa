@@ -106,6 +106,32 @@ body {
   animation: audixaGlow 5s ease-in-out infinite alternate;
 }
 
+@keyframes audixaDataDrift {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(calc(var(--drift-y, 24px) * -1)); }
+}
+
+/* Landing page — trusted-by carousel: two rows scrolling opposite
+   directions, content duplicated once so translateX(-50%) loops seamlessly. */
+@keyframes landingScrollLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes landingScrollRight {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.landing-scroll-left {
+  animation: landingScrollLeft 30s linear infinite;
+}
+.landing-scroll-right {
+  animation: landingScrollRight 30s linear infinite;
+}
+.landing-carousel-row:hover .landing-scroll-left,
+.landing-carousel-row:hover .landing-scroll-right {
+  animation-play-state: paused;
+}
+
 /* ============================================================
    Visual Polish Pass — card depth system + typography baseline
    Card markup app-wide is written as `rounded-xl border border-slate-200

@@ -54,9 +54,9 @@ export default function ClientQueries() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[2fr_3fr]">
+        <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-12">
           {/* Left panel */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm md:col-span-4">
             <div className="border-b border-slate-100 p-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -129,7 +129,7 @@ export default function ClientQueries() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 24 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm"
+              className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm md:col-span-8"
             >
               <div className="border-b border-slate-100 px-5 py-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -182,21 +182,6 @@ export default function ClientQueries() {
                 ))}
               </div>
 
-              {selectedQuery.id === 'QRY-01' && (
-                <div className="flex flex-wrap gap-3 border-t border-slate-100 px-5 py-4">
-                  <button className="rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
-                    Upload Delivery Notes
-                  </button>
-                  <button
-                    onClick={() => setMeetingModalOpen(true)}
-                    className="flex items-center gap-1.5 rounded-lg border border-brand px-4 py-2 text-xs font-semibold text-brand hover:bg-brand/5"
-                  >
-                    <CalendarDays className="h-3.5 w-3.5" />
-                    Request Meeting with Audit Team
-                  </button>
-                </div>
-              )}
-
               <form onSubmit={handleReply} className="border-t border-slate-100 px-5 py-4">
                 <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
                   <Paperclip className="h-4 w-4 shrink-0 text-slate-400" />
@@ -221,6 +206,29 @@ export default function ClientQueries() {
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {selectedQuery.id === 'QRY-01' && (
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-12">
+            <div className="rounded-xl border border-emerald/30 bg-emerald/5 p-4 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-4">
+              <p className="text-sm font-semibold text-navy">Upload Delivery Notes</p>
+              <p className="mt-1 text-xs text-slate-500">Attach the requested delivery notes for this query.</p>
+              <button className="mt-3 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
+                Upload Delivery Notes
+              </button>
+            </div>
+            <div className="rounded-xl border border-navy/20 bg-navy/5 p-4 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-4">
+              <p className="text-sm font-semibold text-navy">Request Meeting</p>
+              <p className="mt-1 text-xs text-slate-500">Discuss this query directly with the audit team.</p>
+              <button
+                onClick={() => setMeetingModalOpen(true)}
+                className="mt-3 flex items-center gap-1.5 rounded-lg border border-brand px-4 py-2 text-xs font-semibold text-brand hover:bg-brand/5"
+              >
+                <CalendarDays className="h-3.5 w-3.5" />
+                Request Meeting with Audit Team
+              </button>
+            </div>
+          </div>
+        )}
       </PageTransition>
 
       <MeetingRequestModal open={meetingModalOpen} onClose={() => setMeetingModalOpen(false)} />

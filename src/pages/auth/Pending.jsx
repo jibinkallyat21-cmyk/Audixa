@@ -4,18 +4,6 @@ import { Clock, Check, ArrowLeft } from 'lucide-react'
 import PageTransition from '../../components/shared/PageTransition'
 import { AnalytixMark } from '../../components/shared/AnalytixLogo'
 
-const STEPS = [
-  { label: 'Request Submitted', state: 'completed' },
-  { label: 'Manager Review', state: 'active' },
-  { label: 'Account Activated', state: 'pending' },
-]
-
-const STEP_STYLES = {
-  completed: { dot: 'bg-emerald-50 text-emerald-600 border border-emerald-200', label: 'text-[#0D1B2A]' },
-  active: { dot: 'bg-brand/10 text-brand border border-brand/30 animate-pulse', label: 'text-brand' },
-  pending: { dot: 'bg-slate-100 text-slate-400 border border-slate-200', label: 'text-slate-400' },
-}
-
 const CARD_SHADOW = {
   boxShadow:
     'rgba(0, 0, 0, 0.04) 0px 2px 4px, rgba(0, 0, 0, 0.08) 0px 8px 24px, rgba(0, 0, 0, 0.06) 0px 24px 48px, rgba(255, 255, 255, 0.9) 0px 1px 0px inset',
@@ -77,22 +65,6 @@ export default function Pending() {
             will be notified by email once your access is activated.
           </motion.p>
 
-          <div
-            className="mt-6 space-y-3.5 rounded-xl border border-amber-400/30 bg-amber-50/30 p-4 text-left"
-          >
-            {STEPS.map((step, idx) => {
-              const style = STEP_STYLES[step.state]
-              return (
-                <div key={step.label} className="flex items-center gap-3">
-                  <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${style.dot}`}>
-                    {step.state === 'completed' ? <Check className="h-3.5 w-3.5" /> : idx + 1}
-                  </div>
-                  <span className={`text-sm font-semibold ${style.label}`}>{step.label}</span>
-                </div>
-              )
-            })}
-          </div>
-
           <Link to="/login">
             <motion.button
               type="button"
@@ -105,6 +77,27 @@ export default function Pending() {
             </motion.button>
           </Link>
         </motion.div>
+
+        <div className="mt-5 grid w-full max-w-[500px] grid-cols-1 items-start gap-3 md:grid-cols-12 md:gap-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-4">
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-600">
+              <Check className="h-3 w-3" /> Request Submitted
+            </span>
+            <p className="mt-2 text-[11px] text-slate-400">05 Nov 2024, 09:14 AM</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-4">
+            <span className="inline-flex animate-pulse items-center gap-1 rounded-full border border-brand/30 bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand">
+              <Clock className="h-3 w-3" /> Manager Review
+            </span>
+            <p className="mt-2 text-[11px] text-slate-400">Usually within 24 hours.</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-4">
+            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-400">
+              Account Activated
+            </span>
+            <p className="mt-2 text-[11px] text-slate-400">Email notification sent.</p>
+          </div>
+        </div>
 
         <p className="mt-6 text-xs text-[#525f71]">
           AUDIXA by Analytix — © 2026 Analytix. All rights reserved.

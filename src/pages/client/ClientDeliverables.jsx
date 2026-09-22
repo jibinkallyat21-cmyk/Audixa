@@ -12,8 +12,31 @@ const ICONS = {
   filing: FileCheck2,
 }
 
-function DeliverableCard({ card, index }) {
+function DeliverableCard({ card, index, hero }) {
   const Icon = card.id === 'dl-3' ? FileSignature : ICONS[card.type]
+
+  if (hero) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.08, duration: 0.35 }}
+        whileHover={{ y: -2 }}
+        className="relative overflow-hidden rounded-xl bg-navy p-8 text-white shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-6 md:row-span-2"
+      >
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-white/10 text-white">
+          <Icon className="h-8 w-8" />
+        </div>
+        <p className="mt-6 text-xl font-bold leading-snug">{card.title}</p>
+        <p className="mt-3 text-sm text-white/60">{card.meta}</p>
+
+        <button className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
+          <Download className="h-4 w-4" />
+          {card.action}
+        </button>
+      </motion.div>
+    )
+  }
 
   return (
     <motion.div
@@ -21,7 +44,9 @@ function DeliverableCard({ card, index }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.35 }}
       whileHover={{ y: -2 }}
-      className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-lg"
+      className={`group relative overflow-hidden rounded-xl border p-6 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-6 ${
+        card.style === 'red' ? 'border-emerald/30 bg-emerald/5' : 'border-slate-200 bg-white'
+      }`}
     >
       <span className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-brand transition-transform duration-300 group-hover:scale-x-100" />
 
@@ -67,9 +92,9 @@ export default function ClientDeliverables() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-12">
             {deliverables.cards.map((card, idx) => (
-              <DeliverableCard key={card.id} card={card} index={idx} />
+              <DeliverableCard key={card.id} card={card} index={idx} hero={idx === 0} />
             ))}
           </div>
 

@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion'
 import { ToastProvider } from './components/shared/Toast'
 import { ModalProvider } from './components/shared/Modal'
 import CinematicIntro from './components/shared/CinematicIntro'
+import LandingPage from './pages/LandingPage'
 
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
@@ -57,12 +58,14 @@ function AnimatedRoutes() {
   const location = useLocation()
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+    <>
+      {location.pathname === '/' && <CinematicIntro />}
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<LandingPage />} />
 
-        {/* Auth */}
-        <Route path="/login" element={<Login />} />
+          {/* Auth */}
+          <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pending" element={<Pending />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -116,8 +119,9 @@ function AnimatedRoutes() {
         <Route path="/management/notifications" element={<ManagementNotifications />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </AnimatePresence>
+        </Routes>
+      </AnimatePresence>
+    </>
   )
 }
 
@@ -126,7 +130,6 @@ export default function App() {
     <BrowserRouter>
       <ToastProvider>
         <ModalProvider>
-          <CinematicIntro />
           <AnimatedRoutes />
         </ModalProvider>
       </ToastProvider>

@@ -312,38 +312,42 @@ function AIFlagPanel({ item, onApprove }) {
                 </motion.span>
               </div>
 
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                readOnly={!editable || approved}
-                rows={3}
-                className={`mt-3 w-full rounded-lg border px-3.5 py-2.5 text-sm text-navy outline-none focus:border-navy disabled:bg-slate-50 ${
-                  editable && !approved ? 'border-navy bg-white' : 'border-slate-200 bg-slate-50'
-                }`}
-              />
+              {/* Internal bento: textarea/context left, actions right */}
+              <div className="mt-3 grid grid-cols-1 items-start gap-4 md:grid-cols-12">
+                <div className="md:col-span-8">
+                  <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    readOnly={!editable || approved}
+                    rows={5}
+                    className={`w-full rounded-lg border px-3.5 py-2.5 text-sm text-navy outline-none focus:border-navy disabled:bg-slate-50 ${
+                      editable && !approved ? 'border-navy bg-white' : 'border-slate-200 bg-slate-50'
+                    }`}
+                  />
+                  {approved && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-emerald"
+                    >
+                      <Check className="h-4 w-4" /> Approved — rejection sent to client.
+                    </motion.p>
+                  )}
+                </div>
 
-              {approved ? (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-emerald"
-                >
-                  <Check className="h-4 w-4" /> Approved — rejection sent to client.
-                </motion.p>
-              ) : (
-                <>
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.01 }}
-                    onClick={handleApprove}
-                    className="mt-4 w-full rounded-lg bg-brand py-3 text-sm font-bold text-white shadow-sm shadow-brand/30"
-                  >
-                    Approve &amp; Send to Client
-                  </motion.button>
-                  <div className="mt-2.5 flex gap-2.5">
+                {!approved && (
+                  <div className="md:col-span-4">
+                    <motion.button
+                      type="button"
+                      whileHover={{ scale: 1.01 }}
+                      onClick={handleApprove}
+                      className="w-full rounded-lg bg-brand py-3 text-sm font-bold text-white shadow-sm shadow-brand/30"
+                    >
+                      Approve &amp; Send to Client
+                    </motion.button>
                     <button
                       onClick={() => setEditable(true)}
-                      className={`flex-1 rounded-lg border py-2 text-xs font-semibold hover:bg-navy/5 ${
+                      className={`mt-2.5 w-full rounded-lg border py-2 text-xs font-semibold hover:bg-navy/5 ${
                         editable ? 'border-navy bg-navy/5 text-navy' : 'border-navy/30 text-navy'
                       }`}
                     >
@@ -351,18 +355,17 @@ function AIFlagPanel({ item, onApprove }) {
                     </button>
                     <button
                       onClick={handleOverride}
-                      className="flex-1 rounded-lg border border-slate-300 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50"
+                      className="mt-2.5 w-full rounded-lg border border-slate-300 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50"
                     >
                       Override
                     </button>
+                    <p className="mt-3 text-center text-[11px] italic text-slate-400">
+                      This rejection will not be sent to the client until you approve.
+                    </p>
+                    <AIHintBox text="AI checked this document against pre-defined criteria and drafted this rejection reason. You are responsible for the final decision — the AI draft is a suggestion only. Your approval is what gets sent to the client — nothing is sent without it." />
                   </div>
-                  <p className="mt-3 text-center text-[11px] italic text-slate-400">
-                    This rejection will not be sent to the client until you approve. You can edit the text
-                    before approving.
-                  </p>
-                  <AIHintBox text="AI checked this document against pre-defined criteria and drafted this rejection reason. You are responsible for the final decision — the AI draft is a suggestion only. Editing and approving is recommended over direct approval without review. Your approval is what gets sent to the client — nothing is sent without it." />
-                </>
-              )}
+                )}
+              </div>
           </motion.div>
         </motion.div>
       )}

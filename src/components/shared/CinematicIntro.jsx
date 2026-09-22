@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import { AnalytixMark } from './AnalytixLogo'
+import FinancialDataBackground from './FinancialDataBackground'
 
 const SESSION_KEY = 'audixa-intro-played'
 const SPRING_EASE = [0.16, 1, 0.3, 1]
 const LETTERS = 'AUDIXA'.split('')
+const AUDIXA_START = 1.8 // seconds — when the GSAP letter reveal begins
 
 export default function CinematicIntro() {
   const [alreadyPlayed] = useState(() => {
@@ -18,12 +21,61 @@ export default function CinematicIntro() {
   const [exiting, setExiting] = useState(false)
   const [done, setDone] = useState(alreadyPlayed)
 
+  const wordRef = useRef(null)
+  const sweepRef = useRef(null)
+
+  // GSAP timeline: letters emerge from shadow (fade + scale-up + 3D tilt),
+  // then a light sweeps across the settled wordmark once. Kept separate
+  // from the Framer Motion beats around it, which handle simpler fades.
+  useEffect(() => {
+    if (alreadyPlayed || !wordRef.current) return undefined
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const letters = wordRef.current.querySelectorAll('.audixa-letter')
+
+    const ctx = gsap.context(() => {
+      if (reduceMotion) {
+        gsap.set(letters, { opacity: 1, y: 0, scale: 1, rotateX: 0 })
+        gsap.set(sweepRef.current, { opacity: 0 })
+        return
+      }
+
+      gsap.set(wordRef.current, { transformPerspective: 600 })
+      gsap.set(letters, { opacity: 0, y: 26, scale: 0.82, rotateX: -55, transformOrigin: '50% 100%' })
+      gsap.set(sweepRef.current, { xPercent: -160, opacity: 0 })
+
+      const tl = gsap.timeline({ delay: AUDIXA_START })
+      tl.to(letters, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotateX: 0,
+        duration: 0.9,
+        ease: 'back.out(1.5)',
+        stagger: 0.09,
+      }).to(
+        sweepRef.current,
+        {
+          xPercent: 160,
+          opacity: 1,
+          duration: 1.0,
+          ease: 'power2.inOut',
+          onComplete: () => gsap.set(sweepRef.current, { opacity: 0 }),
+        },
+        '-=0.2',
+      )
+    })
+
+    return () => ctx.revert()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alreadyPlayed])
+
   useEffect(() => {
     if (alreadyPlayed) return undefined
 
     const skipTimer = setTimeout(() => setShowSkip(true), 1000)
-    const exitTimer = setTimeout(() => setExiting(true), 2700)
-    const doneTimer = setTimeout(() => finish(), 3200)
+    const exitTimer = setTimeout(() => setExiting(true), 5400)
+    const doneTimer = setTimeout(() => finish(), 5900)
 
     return () => {
       clearTimeout(skipTimer)
@@ -57,15 +109,17 @@ export default function CinematicIntro() {
           className="fixed inset-0 z-[999] flex items-center justify-center overflow-hidden bg-navy"
           initial={{ opacity: 1, y: 0 }}
           animate={exiting ? { y: '-100%', opacity: 0.4 } : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: SPRING_EASE }}
+          transition={{ duration: 0.6, ease: SPRING_EASE }}
           onAnimationComplete={() => {
             if (exiting) finish()
           }}
         >
+          <FinancialDataBackground />
+
           <motion.div
-            className="flex flex-col items-center"
+            className="relative z-10 flex flex-col items-center"
             animate={exiting ? { y: -40, opacity: 0.6 } : { y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: SPRING_EASE }}
+            transition={{ duration: 0.6, ease: SPRING_EASE }}
           >
             {/* Beat 2 — logo mark with pulsing ambient glow */}
             <motion.div
@@ -81,51 +135,64 @@ export default function CinematicIntro() {
                 ],
               }}
               transition={{
-                opacity: { delay: 0.4, duration: 0.5, ease: SPRING_EASE },
-                scale: { delay: 0.4, duration: 0.5, ease: SPRING_EASE },
-                filter: { delay: 0.9, duration: 1.2, repeat: Infinity, ease: 'easeInOut' },
+                opacity: { delay: 0.6, duration: 0.7, ease: SPRING_EASE },
+                scale: { delay: 0.6, duration: 0.7, ease: SPRING_EASE },
+                filter: { delay: 1.3, duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
               }}
             >
-              <AnalytixMark size={64} />
+              <AnalytixMark size={72} />
             </motion.div>
 
             {/* Beat 3 — ANALYTIX wordmark */}
             <motion.p
-              className="mt-4 text-[13px] font-black text-white"
+              className="mt-5 text-[15px] font-black text-white"
               style={{ letterSpacing: '0.2em' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.4, ease: SPRING_EASE }}
+              transition={{ delay: 1.2, duration: 0.6, ease: SPRING_EASE }}
             >
               ANALYTIX
             </motion.p>
 
-            {/* Beat 4 — AUDIXA, letter-by-letter reveal */}
-            <div className="mt-3 flex overflow-hidden">
+            {/* Beat 4 — AUDIXA: GSAP letter reveal + sweeping light, metallic gradient fill */}
+            <div ref={wordRef} className="relative mt-4 flex overflow-hidden" style={{ perspective: 600 }}>
               {LETTERS.map((letter, i) => (
-                <motion.span
+                <span
                   key={`${letter}-${i}`}
-                  className="text-[52px] font-black text-white"
-                  style={{ letterSpacing: '-0.03em' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.1 + i * 0.04, duration: 0.4, ease: SPRING_EASE }}
+                  className="audixa-letter text-[64px] font-black"
+                  style={{
+                    letterSpacing: '-0.03em',
+                    backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #e6e9ef 40%, #aab2c0 60%, #ffffff 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.35)',
+                    display: 'inline-block',
+                  }}
                 >
                   {letter}
-                </motion.span>
+                </span>
               ))}
+              <span
+                ref={sweepRef}
+                className="pointer-events-none absolute inset-y-0 left-0 w-1/3"
+                style={{
+                  background: 'linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)',
+                  mixBlendMode: 'overlay',
+                }}
+              />
             </div>
 
             {/* Beat 5 — staged tagline phrases */}
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 text-center">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 text-center">
               {['Intelligent Audits.', 'Seamless Engagements.', 'Trusted Outcomes.'].map((phrase, i) => (
                 <motion.span
                   key={phrase}
-                  className="text-[14px]"
-                  style={{ color: 'rgba(255,255,255,0.45)', letterSpacing: '0.01em' }}
+                  className="text-[17px]"
+                  style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.01em' }}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.6 + i * 0.15, duration: 0.35, ease: SPRING_EASE }}
+                  transition={{ delay: 3.4 + i * 0.25, duration: 0.45, ease: SPRING_EASE }}
                 >
                   {phrase}
                 </motion.span>
@@ -134,11 +201,11 @@ export default function CinematicIntro() {
 
             {/* Beat 6 — horizontal line draws outward from center */}
             <motion.div
-              className="mt-10 h-px w-[70vw] max-w-md"
+              className="mt-12 h-px w-[70vw] max-w-md"
               style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ delay: 2.2, duration: 0.6, ease: SPRING_EASE }}
+              transition={{ delay: 4.4, duration: 0.8, ease: SPRING_EASE }}
             />
           </motion.div>
 
@@ -147,7 +214,7 @@ export default function CinematicIntro() {
               <motion.button
                 type="button"
                 onClick={handleSkip}
-                className="absolute bottom-6 right-6 text-[11px] font-medium text-white"
+                className="absolute bottom-6 right-6 z-10 text-[12px] font-medium text-white"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.3 }}
                 exit={{ opacity: 0 }}

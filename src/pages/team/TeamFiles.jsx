@@ -96,23 +96,26 @@ export default function TeamFiles() {
             </div>
           </div>
 
-          {/* File grid */}
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {/* File grid — bento: urgent files widest, then high-priority, then standard */}
+          <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-12">
             {visibleFiles.length === 0 && (
-              <p className="col-span-full py-8 text-center text-sm text-slate-400">No files match this filter.</p>
+              <p className="py-8 text-center text-sm text-slate-400 md:col-span-12">No files match this filter.</p>
             )}
-            {visibleFiles.map((f, idx) => (
+            {visibleFiles.map((f, idx) => {
+              const isHighPriority = !f.urgent && (f.attentionLevel === 'URGENT' || f.attentionLevel === 'PENDING')
+              const span = f.urgent ? 'md:col-span-6' : isHighPriority ? 'md:col-span-4' : 'md:col-span-3'
+              return (
               <motion.div
                 key={f.code}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.06, duration: 0.3 }}
                 whileHover={{ y: -3 }}
-                className={`relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-lg ${
-                  f.urgent ? 'shadow-[0_10px_24px_-14px_rgba(220,38,38,0.4)]' : ''
+                className={`relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-lg ${span} ${
+                  f.urgent ? 'border-b-2 border-b-alert-red' : ''
                 }`}
+                style={f.urgent ? { boxShadow: '0 4px 16px rgba(220,38,38,0.12)' } : undefined}
               >
-                {f.urgent && <span className="absolute inset-x-0 bottom-0 h-1 bg-alert-red/60" />}
 
                 <p className="font-mono text-[11px] text-slate-400">{f.code}</p>
                 <p className="mt-1 text-sm font-bold text-navy">{f.client}</p>
@@ -168,7 +171,8 @@ export default function TeamFiles() {
                   </button>
                 </div>
               </motion.div>
-            ))}
+              )
+            })}
           </div>
 
           {/* Bottom status bar */}

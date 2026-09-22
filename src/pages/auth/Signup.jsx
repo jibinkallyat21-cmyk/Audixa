@@ -64,13 +64,24 @@ export default function Signup() {
               </div>
             </div>
 
-            <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold tracking-tight text-[#0D1B2A]">
-                Request Team Account
-              </h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-[#525f71]">
-                Your account will be activated after Audit Manager approval.
-              </p>
+            <div className="mb-6 grid grid-cols-1 items-start gap-3 md:grid-cols-12 md:gap-4">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-8 md:text-left">
+                <h2 className="text-2xl font-bold tracking-tight text-[#0D1B2A]">Request Team Access</h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-[#525f71]">
+                  Your account will be activated after Audit Manager approval.
+                </p>
+              </div>
+              <div className="flex flex-col justify-center gap-2 rounded-xl bg-navy p-4 text-white md:col-span-4">
+                <p className="text-sm font-bold leading-tight">Analytix Fintech International</p>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="rounded-md border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold">
+                    ABCPA
+                  </span>
+                  <span className="rounded-md border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold">
+                    MISCPA
+                  </span>
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

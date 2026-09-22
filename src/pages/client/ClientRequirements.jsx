@@ -115,11 +115,16 @@ function RequirementRow({ item, index }) {
   )
 }
 
-function CategorySection({ category }) {
+// Bento spans by category position: the expanded/priority category (index 1
+// — Revenue & Receivables) gets the largest footprint; the others scale down
+// to reflect how much of their content is typically visible at rest.
+const CATEGORY_SPAN = ['md:col-span-5', 'md:col-span-7 md:row-span-2', 'md:col-span-7', 'md:col-span-5']
+
+function CategorySection({ category, span }) {
   const [open, setOpen] = useState(category.defaultOpen)
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-lg ${span}`}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -202,10 +207,10 @@ export default function ClientRequirements() {
             </div>
           </div>
 
-          {/* Categories */}
-          <div className="space-y-4">
-            {requirementCategories.map((category) => (
-              <CategorySection key={category.id} category={category} />
+          {/* Categories — bento: the expanded/priority category gets more space */}
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-12">
+            {requirementCategories.map((category, idx) => (
+              <CategorySection key={category.id} category={category} span={CATEGORY_SPAN[idx] || 'md:col-span-6'} />
             ))}
           </div>
 

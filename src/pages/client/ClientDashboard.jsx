@@ -27,7 +27,7 @@ function useCountUp(target, duration = 800) {
   return value
 }
 
-function StatCard({ label, value, color, sub, icon: Icon, delay }) {
+function StatCard({ label, value, color, sub, icon: Icon, delay, className = '', suffix = '' }) {
   const count = useCountUp(value)
 
   return (
@@ -36,14 +36,57 @@ function StatCard({ label, value, color, sub, icon: Icon, delay }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.35 }}
       whileHover={{ y: -2 }}
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-lg"
+      className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-lg ${className}`}
     >
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       <div className="mt-2 flex items-end gap-2">
-        <span className={`text-3xl font-bold ${color}`}>{count}</span>
+        <span className={`text-3xl font-bold ${color}`}>
+          {count}
+          {suffix}
+        </span>
         {Icon && <Icon className={`mb-1 h-4 w-4 ${color}`} />}
       </div>
       {sub && <p className="mt-1 text-xs font-medium text-slate-500">{sub}</p>}
+    </motion.div>
+  )
+}
+
+function TotalRequirementsHeroCard({ value, percent, delay }) {
+  const count = useCountUp(value)
+  const radius = 42
+  const circumference = 2 * Math.PI * radius
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.35 }}
+      whileHover={{ y: -2 }}
+      className="flex items-center gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-6 md:row-span-2"
+    >
+      <div className="relative flex h-28 w-28 shrink-0 items-center justify-center">
+        <svg viewBox="0 0 100 100" className="h-28 w-28 -rotate-90">
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="#F1F5F9" strokeWidth="8" />
+          <motion.circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke="#059669"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: circumference * (1 - percent / 100) }}
+            transition={{ duration: 1, ease: 'easeOut', delay }}
+          />
+        </svg>
+        <span className="absolute text-xs font-bold text-emerald">{percent}%</span>
+      </div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Requirements</p>
+        <p className="mt-1 text-[48px] font-black leading-none text-navy">{count}</p>
+      </div>
     </motion.div>
   )
 }
@@ -91,9 +134,14 @@ export default function ClientDashboard() {
                 </span>
               </div>
 
-              <div className="mt-6">
-                <LifecycleStepper stages={clientPortal.stages} />
-              </div>
+            </div>
+
+            {/* Stage stepper — its own dedicated progress module */}
+            <div
+              className="rounded-xl border border-slate-200 p-6 shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)' }}
+            >
+              <LifecycleStepper stages={clientPortal.stages} />
             </div>
 
             {/* On Hold banner */}
@@ -118,12 +166,11 @@ export default function ClientDashboard() {
               </motion.div>
             )}
 
-            {/* Stat cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                label="Total Requirements"
+            {/* Stat cards — bento: hero completion ring + 4 supporting metrics */}
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-12">
+              <TotalRequirementsHeroCard
                 value={clientPortal.stats.totalRequirements}
-                color="text-navy"
+                percent={Math.round((clientPortal.stats.documentsAccepted / clientPortal.stats.totalRequirements) * 100)}
                 delay={0}
               />
               <StatCard
@@ -132,6 +179,7 @@ export default function ClientDashboard() {
                 color="text-emerald"
                 icon={TrendingUp}
                 delay={0.05}
+                className="md:col-span-3"
               />
               <StatCard
                 label="Pending Action"
@@ -139,6 +187,7 @@ export default function ClientDashboard() {
                 color="text-amber"
                 sub={`${clientPortal.stats.pendingDueThisWeek} Due This Week`}
                 delay={0.1}
+                className="md:col-span-3"
               />
               <StatCard
                 label="Open Queries"
@@ -146,6 +195,16 @@ export default function ClientDashboard() {
                 color="text-alert-red"
                 sub={`${clientPortal.stats.criticalQueries} Critical Audits`}
                 delay={0.15}
+                className="md:col-span-3"
+              />
+              <StatCard
+                label="Filing Deadline"
+                value={clientPortal.daysRemaining}
+                suffix=" Days"
+                color="text-navy"
+                sub={clientPortal.statutoryDeadline}
+                delay={0.2}
+                className="md:col-span-3"
               />
             </div>
 

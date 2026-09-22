@@ -21,29 +21,33 @@ function FloatingInput({ id, label, type = 'text', value, onChange, trailing }) 
 
   return (
     <div className="relative pt-4">
-      <div className="flex items-end justify-between">
-        <label
-          htmlFor={id}
-          className="pointer-events-none absolute left-0 origin-left text-[#94A3B8] transition-all duration-150"
-          style={
-            focused || filled
-              ? { top: '-2px', fontSize: '11px', color: focused ? '#E8323C' : '#94A3B8' }
-              : { top: '16px', fontSize: '14px' }
-          }
-        >
-          {label}
-        </label>
-        {trailing}
+      <label
+        htmlFor={id}
+        className="pointer-events-none absolute left-0 origin-left text-[#94A3B8] transition-all duration-150"
+        style={
+          focused || filled
+            ? { top: '-2px', fontSize: '11px', color: focused ? '#E8323C' : '#94A3B8' }
+            : { top: '16px', fontSize: '14px' }
+        }
+      >
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className={`w-full border-0 border-b border-[#E2E8F0] bg-transparent pb-2 pt-5 text-sm text-[#0D1B2A] outline-none ${
+            trailing ? 'pr-12' : ''
+          }`}
+        />
+        {trailing && (
+          <div className="absolute right-0 top-1/2 flex -translate-y-1/2 items-center">{trailing}</div>
+        )}
       </div>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={onChange}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        className="w-full border-0 border-b border-[#E2E8F0] bg-transparent pb-2 pt-5 text-sm text-[#0D1B2A] outline-none"
-      />
       <div className="relative h-[1px] w-full bg-transparent">
         <motion.div
           className="absolute inset-0 origin-left bg-brand"
@@ -148,7 +152,7 @@ export default function Login() {
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
                       tabIndex={-1}
-                      className="mb-2 text-[11px] font-semibold text-brand hover:underline"
+                      className="cursor-pointer text-[11px] font-semibold text-brand hover:text-[#D12C35] hover:underline"
                     >
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
