@@ -107,7 +107,7 @@ function AddLeadModalBody({ onSubmit, onCancel }) {
         <button
           disabled={!name.trim()}
           onClick={() => onSubmit({ name: name.trim(), email, seniority })}
-          className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731] disabled:opacity-40"
+          className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] disabled:opacity-40"
         >
           Add Lead
         </button>
@@ -138,7 +138,7 @@ function AddAssociateModalBody({ leadName, onSubmit, onCancel }) {
         <button
           disabled={!name.trim()}
           onClick={() => onSubmit({ name: name.trim(), email })}
-          className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731] disabled:opacity-40"
+          className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] disabled:opacity-40"
         >
           Add
         </button>
@@ -216,7 +216,7 @@ export default function ManagerTeamPlan() {
                 setEditMode((v) => !v)
                 showToast(editMode ? 'Edit mode off' : 'Edit mode on — rows are now editable')
               }}
-              className="rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+              className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
             >
               {editMode ? 'Done Editing' : 'Edit Plan'}
             </button>
@@ -266,7 +266,7 @@ export default function ManagerTeamPlan() {
             <div className="px-5 pb-5 pt-2">
               <button
                 onClick={handleAddLead}
-                className="flex items-center gap-1.5 rounded-lg border border-brand-red px-4 py-2 text-xs font-semibold text-brand-red hover:bg-brand-red/5"
+                className="flex items-center gap-1.5 rounded-lg border border-brand px-4 py-2 text-xs font-semibold text-brand hover:bg-brand/5"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Add Lead

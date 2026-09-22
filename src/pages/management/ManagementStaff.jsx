@@ -78,7 +78,7 @@ export default function ManagementStaff() {
                 className={`relative pb-3 text-sm font-semibold transition-colors ${tab === t ? 'text-navy' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 {t}
-                {tab === t && <motion.div layoutId="mgmt-staff-tab-underline" className="absolute -bottom-px left-0 right-0 h-0.5 bg-brand-red" />}
+                {tab === t && <motion.div layoutId="mgmt-staff-tab-underline" className="absolute -bottom-px left-0 right-0 h-0.5 bg-brand" />}
               </button>
             ))}
           </div>
@@ -315,7 +315,7 @@ function TransferPanel({ staff, onClose, onConfirm }) {
           </button>
           <button
             onClick={() => onConfirm({ toDept, effectiveDate, reason, notes })}
-            className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white hover:bg-[#D42731]"
+            className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]"
           >
             Confirm Transfer
           </button>

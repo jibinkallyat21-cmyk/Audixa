@@ -40,7 +40,7 @@ function AllocationCard({ file, onConfirm }) {
         </select>
         <button
           onClick={() => onConfirm(file, lead)}
-          className="rounded-lg bg-brand-red px-3.5 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+          className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
         >
           Confirm Allocation
         </button>
@@ -73,7 +73,7 @@ export default function ManagerWorkload() {
               </button>
               <button
                 onClick={() => setPanelOpen(true)}
-                className="flex items-center gap-2 rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
               >
                 <UserPlus className="h-3.5 w-3.5" />
                 Allocate New File

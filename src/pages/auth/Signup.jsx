@@ -148,9 +148,9 @@ export default function Signup() {
               <motion.div custom={5} initial="hidden" animate="visible" variants={fieldVariants} className="pt-2">
                 <motion.button
                   type="submit"
-                  whileHover={{ y: -1, boxShadow: '0 12px 24px -8px rgba(232,50,60,0.45)' }}
+                  whileHover={{ y: -1, boxShadow: '0 12px 24px -8px rgba(232, 50, 60,0.45)' }}
                   whileTap={{ scale: 0.98 }}
-                  className="h-11 w-full rounded-lg bg-brand-red text-sm font-semibold text-white shadow-md shadow-brand-red/20 transition-shadow"
+                  className="h-11 w-full rounded-lg bg-brand text-sm font-semibold text-white shadow-md shadow-brand/20 transition-shadow"
                 >
                   Request Account
                 </motion.button>
@@ -159,7 +159,7 @@ export default function Signup() {
 
             <p className="mt-6 text-center text-xs text-[#525f71]">
               Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-[#0D1B2A] hover:text-brand-red hover:underline">
+              <Link to="/login" className="font-semibold text-[#0D1B2A] hover:text-brand hover:underline">
                 Sign in
               </Link>
             </p>

@@ -35,12 +35,12 @@ export default function ForgotPassword() {
           </div>
 
           <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center">
-            <div className="absolute inset-0 rounded-full bg-brand-red/10" />
+            <div className="absolute inset-0 rounded-full bg-brand/10" />
             <div
-              className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full bg-brand-red/10"
+              className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full bg-brand/10"
               style={{ boxShadow: 'rgba(232, 50, 60, 0.12) 0px 0px 18px' }}
             >
-              <Mail className="h-6 w-6 text-brand-red" />
+              <Mail className="h-6 w-6 text-brand" />
             </div>
           </div>
 
@@ -66,17 +66,17 @@ export default function ForgotPassword() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
                 disabled={status !== 'idle'}
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-[#0D1B2A] outline-none transition-all duration-150 placeholder:text-slate-400 focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 disabled:bg-slate-50"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-[#0D1B2A] outline-none transition-all duration-150 placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-slate-50"
               />
             </div>
 
             <motion.button
               type="submit"
               disabled={status !== 'idle'}
-              whileHover={status === 'idle' ? { y: -1, boxShadow: '0 12px 24px -8px rgba(232,50,60,0.45)' } : {}}
+              whileHover={status === 'idle' ? { y: -1, boxShadow: '0 12px 24px -8px rgba(232, 50, 60,0.45)' } : {}}
               whileTap={status === 'idle' ? { scale: 0.98 } : {}}
               className={`flex h-11 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white shadow-md transition-colors ${
-                status === 'sent' ? 'bg-emerald shadow-emerald/20' : 'bg-brand-red shadow-brand-red/20'
+                status === 'sent' ? 'bg-emerald shadow-emerald/20' : 'bg-brand shadow-brand/20'
               }`}
             >
               {status === 'loading' && (
@@ -102,7 +102,7 @@ export default function ForgotPassword() {
 
           <Link
             to="/login"
-            className="mt-6 inline-block text-sm font-medium text-[#525f71] transition-colors hover:text-brand-red"
+            className="mt-6 inline-block text-sm font-medium text-[#525f71] transition-colors hover:text-brand"
           >
             ← Back to Sign In
           </Link>

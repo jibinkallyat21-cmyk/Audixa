@@ -12,13 +12,13 @@ export default function Header({ title, hasNotifications = false, userName = 'Gu
   return (
     <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
       <div className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-red">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand">
           <BarChart3 className="h-4 w-4 text-white" />
         </div>
         <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIXA</span>
       </div>
 
-      <h1 className="absolute left-1/2 -translate-x-1/2 text-base font-semibold text-white">
+      <h1 className="absolute left-1/2 max-w-[150px] -translate-x-1/2 truncate text-center text-sm font-semibold text-white lg:max-w-none lg:text-base">
         {title}
       </h1>
 
@@ -36,7 +36,7 @@ export default function Header({ title, hasNotifications = false, userName = 'Gu
         >
           <Bell className="h-5 w-5 text-white/80" />
           {hasNotifications && (
-            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-navy bg-brand-red" />
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-navy bg-brand" />
           )}
         </motion.button>
 

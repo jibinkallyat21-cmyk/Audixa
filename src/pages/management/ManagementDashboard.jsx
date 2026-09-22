@@ -103,7 +103,7 @@ function DeptColumn({ portfolio }) {
                 {f.days}d · {f.status}
               </p>
             </div>
-            <button onClick={() => navigate('/manager/status-board')} className="font-semibold text-brand-red hover:underline">
+            <button onClick={() => navigate('/manager/status-board')} className="font-semibold text-brand hover:underline">
               Open
             </button>
           </div>
@@ -226,7 +226,7 @@ export default function ManagementDashboard() {
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-navy">Lead Conversion — This Month</h2>
-              <button onClick={() => navigate('/fo/leads')} className="text-xs font-semibold text-brand-red hover:underline">
+              <button onClick={() => navigate('/fo/leads')} className="text-xs font-semibold text-brand hover:underline">
                 View Full Pipeline
               </button>
             </div>

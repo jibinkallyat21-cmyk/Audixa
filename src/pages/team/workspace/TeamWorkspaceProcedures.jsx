@@ -78,7 +78,7 @@ export default function TeamWorkspaceProcedures() {
                 </select>
                 <button
                   onClick={() => showToast(`Procedures assigned to ${file.associate}`)}
-                  className="rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                  className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                 >
                   Assign
                 </button>
@@ -118,7 +118,7 @@ export default function TeamWorkspaceProcedures() {
                     onClick={() => advance(p.id)}
                     className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${
                       p.status === 'In Progress'
-                        ? 'bg-brand-red text-white hover:bg-[#D42731]'
+                        ? 'bg-brand text-white hover:bg-[#D12C35]'
                         : 'border border-slate-300 text-navy hover:bg-slate-50'
                     }`}
                   >

@@ -101,7 +101,7 @@ export default function TeamTasks() {
                       </div>
                       <button
                         onClick={() => navigate('/team/workspace/requirements')}
-                        className="shrink-0 whitespace-nowrap text-xs font-semibold text-brand-red hover:underline"
+                        className="shrink-0 whitespace-nowrap text-xs font-semibold text-brand hover:underline"
                       >
                         Go to File
                       </button>

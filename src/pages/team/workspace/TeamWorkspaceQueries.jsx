@@ -46,7 +46,7 @@ function RaiseQueryModalBody({ onSubmit, onCancel }) {
         <button
           disabled={!subject.trim()}
           onClick={() => onSubmit(subject.trim(), linkedRef.trim() || null)}
-          className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731] disabled:opacity-40"
+          className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] disabled:opacity-40"
         >
           Raise Query
         </button>
@@ -193,7 +193,7 @@ export default function TeamWorkspaceQueries() {
                     transition={{ delay: idx * 0.05, duration: 0.25 }}
                     onClick={() => setSelectedId(query.id)}
                     className={`block w-full border-b border-slate-50 px-4 py-3.5 text-left transition-colors last:border-0 ${
-                      isSelected ? 'border-l-4 border-l-brand-red bg-brand-red/5' : 'border-l-4 border-l-transparent hover:bg-slate-50'
+                      isSelected ? 'border-l-4 border-l-brand bg-brand/5' : 'border-l-4 border-l-transparent hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -241,7 +241,7 @@ export default function TeamWorkspaceQueries() {
                 <div className="flex gap-2">
                   <button
                     onClick={handleRaiseQuery}
-                    className="rounded-lg bg-brand-red px-3.5 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                    className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                   >
                     Raise New Query
                   </button>
@@ -274,7 +274,7 @@ export default function TeamWorkspaceQueries() {
                           setAiSuggestOpen(false)
                           showToast('AI-suggested query approved and added to thread')
                         }}
-                        className="rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]"
+                        className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]"
                       >
                         Approve
                       </button>
@@ -349,7 +349,7 @@ export default function TeamWorkspaceQueries() {
                   />
                   <button
                     onClick={handleSend}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-red text-white hover:bg-[#D42731]"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand text-white hover:bg-[#D12C35]"
                   >
                     <Send className="h-3.5 w-3.5" />
                   </button>
@@ -359,7 +359,7 @@ export default function TeamWorkspaceQueries() {
                     <button
                       disabled={selectedQuery.status === 'Closed'}
                       onClick={handleCloseQuery}
-                      className="rounded-lg border border-brand-red px-4 py-2 text-xs font-semibold text-brand-red hover:bg-brand-red/5 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-lg border border-brand px-4 py-2 text-xs font-semibold text-brand hover:bg-brand/5 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Close Query
                     </button>

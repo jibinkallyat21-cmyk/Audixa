@@ -127,7 +127,7 @@ export default function FODashboard() {
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-navy">Lead Pipeline — Today's View</h2>
-              <button onClick={() => navigate('/fo/leads')} className="text-xs font-semibold text-brand-red hover:underline">
+              <button onClick={() => navigate('/fo/leads')} className="text-xs font-semibold text-brand hover:underline">
                 View Full Pipeline
               </button>
             </div>
@@ -165,7 +165,7 @@ export default function FODashboard() {
               <div className="space-y-3">
                 <button
                   onClick={() => navigate('/fo/registration')}
-                  className="w-full rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                  className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                 >
                   Register New Client
                 </button>
@@ -189,7 +189,7 @@ export default function FODashboard() {
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-navy">Leads Due for Follow-Up Today — 12 Leads</h2>
-                <button onClick={() => navigate('/fo/leads')} className="text-xs font-semibold text-brand-red hover:underline">
+                <button onClick={() => navigate('/fo/leads')} className="text-xs font-semibold text-brand hover:underline">
                   View All
                 </button>
               </div>

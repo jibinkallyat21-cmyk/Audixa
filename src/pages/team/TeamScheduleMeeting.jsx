@@ -173,7 +173,7 @@ export default function TeamScheduleMeeting() {
                 </div>
                 <button
                   onClick={() => setClientAttendees((prev) => [...prev, `Additional Attendee ${prev.length + 1}`])}
-                  className="mt-1.5 text-xs font-semibold text-brand-red hover:underline"
+                  className="mt-1.5 text-xs font-semibold text-brand hover:underline"
                 >
                   Add Attendee
                 </button>
@@ -188,7 +188,7 @@ export default function TeamScheduleMeeting() {
                     </div>
                   ))}
                 </div>
-                <button onClick={() => showToast('Team member picker coming soon')} className="mt-1.5 text-xs font-semibold text-brand-red hover:underline">
+                <button onClick={() => showToast('Team member picker coming soon')} className="mt-1.5 text-xs font-semibold text-brand hover:underline">
                   Add Team Member
                 </button>
               </div>
@@ -233,7 +233,7 @@ export default function TeamScheduleMeeting() {
           <div className="space-y-3">
             <button
               onClick={handleGenerate}
-              className="w-full rounded-lg bg-brand-red py-3.5 text-sm font-bold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+              className="w-full rounded-lg bg-brand py-3.5 text-sm font-bold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
             >
               Generate Teams Link &amp; Send to Client
             </button>

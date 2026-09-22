@@ -123,7 +123,7 @@ export default function ManagementAnalytics() {
                   </option>
                 ))}
               </select>
-              <button onClick={handleDownload} className="flex items-center gap-2 rounded-lg bg-brand-red px-4 py-2 text-sm font-semibold text-white hover:bg-[#D42731]">
+              <button onClick={handleDownload} className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">
                 <Download className="h-4 w-4" /> Download Board Pack
               </button>
             </div>

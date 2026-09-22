@@ -11,14 +11,14 @@ function NotificationItem({ item, tone, onAction }) {
 
   return (
     <motion.div
-      animate={{ backgroundColor: item.unread ? 'rgba(232,50,60,0.05)' : 'rgba(255,255,255,1)' }}
+      animate={{ backgroundColor: item.unread ? 'rgba(232, 50, 60,0.05)' : 'rgba(255,255,255,1)' }}
       transition={{ duration: 0.5 }}
-      className={`border-l-4 px-4 py-3.5 ${tone === 'action' ? 'border-l-brand-red' : 'border-l-navy'}`}
+      className={`border-l-4 px-4 py-3.5 ${tone === 'action' ? 'border-l-brand' : 'border-l-navy'}`}
     >
       <div className="flex gap-3">
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-            tone === 'action' ? 'bg-brand-red/10 text-brand-red' : 'bg-slate-100 text-slate-500'
+            tone === 'action' ? 'bg-brand/10 text-brand' : 'bg-slate-100 text-slate-500'
           }`}
         >
           <Icon className="h-4 w-4" />
@@ -38,7 +38,7 @@ function NotificationItem({ item, tone, onAction }) {
             {item.action && (
               <button
                 onClick={() => onAction(item)}
-                className="shrink-0 rounded-md bg-brand-red px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-[#D42731]"
+                className="shrink-0 rounded-md bg-brand px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-[#D12C35]"
               >
                 {item.action.label}
               </button>
@@ -90,7 +90,7 @@ export default function ClientNotificationsPanel() {
       >
         <Bell className="h-5 w-5 text-white/80" />
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-navy bg-brand-red text-[8px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-navy bg-brand text-[8px] font-bold text-white">
             {unreadCount}
           </span>
         )}
@@ -109,7 +109,7 @@ export default function ClientNotificationsPanel() {
             <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
               <h3 className="text-sm font-bold text-navy">Notifications</h3>
               <div className="flex items-center gap-3">
-                <button onClick={markAllRead} className="text-xs font-semibold text-brand-red hover:underline">
+                <button onClick={markAllRead} className="text-xs font-semibold text-brand hover:underline">
                   Mark All as Read
                 </button>
                 <button onClick={() => setOpen(false)} aria-label="Close" className="text-slate-400 hover:text-navy">

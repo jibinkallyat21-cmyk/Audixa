@@ -111,7 +111,7 @@ export default function ManagerPerformance() {
             <h1 className="text-2xl font-bold text-navy">Performance Analysis — ABCPA Department</h1>
             <button
               onClick={() => showToast('Performance report exported')}
-              className="rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+              className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
             >
               Export Performance Report
             </button>

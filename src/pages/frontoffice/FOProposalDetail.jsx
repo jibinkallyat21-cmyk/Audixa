@@ -165,7 +165,7 @@ export default function FOProposalDetail() {
                 <button
                   onClick={handleApprove}
                   disabled={status === 'Sent to Client'}
-                  className="w-full rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Approve & Send
                 </button>

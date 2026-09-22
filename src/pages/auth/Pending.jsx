@@ -12,7 +12,7 @@ const STEPS = [
 
 const STEP_STYLES = {
   completed: { dot: 'bg-emerald-50 text-emerald-600 border border-emerald-200', label: 'text-[#0D1B2A]' },
-  active: { dot: 'bg-brand-red/10 text-brand-red border border-brand-red/30 animate-pulse', label: 'text-brand-red' },
+  active: { dot: 'bg-brand/10 text-brand border border-brand/30 animate-pulse', label: 'text-brand' },
   pending: { dot: 'bg-slate-100 text-slate-400 border border-slate-200', label: 'text-slate-400' },
 }
 
@@ -43,16 +43,16 @@ export default function Pending() {
 
           <div className="relative mx-auto mb-7 flex h-20 w-20 items-center justify-center">
             <div
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-red/10"
+              className="flex h-20 w-20 items-center justify-center rounded-full bg-brand/10"
               style={{ boxShadow: 'rgba(232, 50, 60, 0.12) 0px 0px 18px' }}
             >
-              <Clock className="h-9 w-9 text-brand-red" />
+              <Clock className="h-9 w-9 text-brand" />
             </div>
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.5, type: 'spring', stiffness: 400, damping: 14 }}
-              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-brand-red shadow-md"
+              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-brand shadow-md"
             >
               <Check className="h-4 w-4 text-white" />
             </motion.div>
@@ -96,9 +96,9 @@ export default function Pending() {
           <Link to="/login">
             <motion.button
               type="button"
-              whileHover={{ y: -1, boxShadow: '0 12px 24px -8px rgba(232,50,60,0.45)' }}
+              whileHover={{ y: -1, boxShadow: '0 12px 24px -8px rgba(232, 50, 60,0.45)' }}
               whileTap={{ scale: 0.98 }}
-              className="mt-7 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand-red text-sm font-semibold text-white shadow-md shadow-brand-red/20"
+              className="mt-7 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand text-sm font-semibold text-white shadow-md shadow-brand/20"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Sign In

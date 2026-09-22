@@ -51,7 +51,7 @@ export default function TeamWorkspaceAuditTrail() {
               </button>
               <button
                 onClick={() => showToast('Audit trail exported to PDF')}
-                className="flex items-center gap-2 rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
               >
                 <FileDown className="h-3.5 w-3.5" />
                 Export to PDF

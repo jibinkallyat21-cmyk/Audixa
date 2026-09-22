@@ -11,7 +11,7 @@ import { Check } from 'lucide-react'
 
 const LABEL_STYLE = {
   completed: 'text-[#0D1B2A] font-medium',
-  active: 'text-brand-red font-semibold',
+  active: 'text-brand font-semibold',
   upcoming: 'text-slate-400',
 }
 
@@ -52,7 +52,8 @@ export default function LifecycleStepper({ stages }) {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 380, damping: 14, delay: idx * 0.1 }}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald text-white shadow-sm"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald text-white"
+              style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.3)' }}
             >
               <Check className="h-5 w-5" />
             </motion.div>
@@ -61,18 +62,30 @@ export default function LifecycleStepper({ stages }) {
           {stage.status === 'active' && (
             <div className="relative flex h-10 w-10 items-center justify-center">
               <motion.div
-                className="absolute h-10 w-10 rounded-full bg-brand-red/30"
-                animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.15, 0.6] }}
+                className="absolute h-10 w-10 rounded-full"
+                animate={{
+                  boxShadow: [
+                    '0 0 0 4px rgba(232,50,60,0.15), 0 0 0 8px rgba(232,50,60,0.08)',
+                    '0 0 0 6px rgba(232,50,60,0.08), 0 0 0 12px rgba(232,50,60,0.03)',
+                    '0 0 0 4px rgba(232,50,60,0.15), 0 0 0 8px rgba(232,50,60,0.08)',
+                  ],
+                }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               />
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-brand-red text-white shadow-md shadow-brand-red/30">
+              <div
+                className="relative flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white"
+                style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.3)' }}
+              >
                 <span className="h-2.5 w-2.5 rounded-full bg-white" />
               </div>
             </div>
           )}
 
           {stage.status === 'upcoming' && (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-200 bg-slate-100 text-slate-400">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-200 bg-slate-100 text-slate-400"
+              style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.08)' }}
+            >
               <span className="text-xs font-semibold">{idx + 1}</span>
             </div>
           )}

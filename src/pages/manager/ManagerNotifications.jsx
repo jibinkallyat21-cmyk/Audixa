@@ -28,7 +28,7 @@ export default function ManagerNotifications() {
                 </div>
                 <button
                   onClick={() => navigate(n.route)}
-                  className="shrink-0 rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]"
+                  className="shrink-0 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]"
                 >
                   View
                 </button>

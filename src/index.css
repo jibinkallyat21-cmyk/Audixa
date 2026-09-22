@@ -6,10 +6,19 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Emil Kowalski motion primitives: strong custom curves, not the weak
+     CSS built-ins. Entrances/exits use ease-out; on-screen movement uses
+     ease-in-out; never ease-in on UI. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 body {
   margin: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #F8FAFC;
+  background-color: #F8F9FB;
   color: #0D1B2A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -89,9 +98,9 @@ body {
 .delay-600 { animation-delay: 600ms; }
 
 @keyframes audixaGlow {
-  0%   { background-position: 0% 50%;   filter: drop-shadow(0 0 16px rgba(232,50,60,0.35)); }
-  50%  { background-position: 100% 50%; filter: drop-shadow(0 0 28px rgba(232,50,60,0.65)); }
-  100% { background-position: 0% 50%;   filter: drop-shadow(0 0 16px rgba(232,50,60,0.35)); }
+  0%   { background-position: 0% 50%;   filter: drop-shadow(0 0 16px rgba(232, 50, 60,0.35)); }
+  50%  { background-position: 100% 50%; filter: drop-shadow(0 0 28px rgba(232, 50, 60,0.65)); }
+  100% { background-position: 0% 50%;   filter: drop-shadow(0 0 16px rgba(232, 50, 60,0.35)); }
 }
 .animate-audixa-glow {
   animation: audixaGlow 5s ease-in-out infinite alternate;
@@ -120,3 +129,82 @@ body {
 h1 { font-size: 24px; font-weight: 700; color: #1B2A4A; letter-spacing: -0.01em; }
 h2, h3 { font-weight: 700; color: #1B2A4A; }
 body { font-size: 13.5px; line-height: 1.55; color: #374151; }
+
+/* ============================================================
+   Redesign pass — motion and tactile feedback (Emil Kowalski
+   principles: exact-property transitions, custom ease-out, press
+   feedback via subtle scale, never scale(0) on entrance).
+   ============================================================ */
+
+button:not(:disabled) {
+  transition: transform 160ms var(--ease-out), background-color 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  a, button {
+    transition-property: transform, background-color, box-shadow, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(232, 50, 60, 0.28);
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   Premium redesign pass — depth, glass, and 3D surface treatment.
+   Scoped to element type (aside/header), not the bg-navy utility
+   itself, since bg-navy is also used on small chips/buttons/bubbles
+   that should stay flat.
+   ============================================================ */
+
+aside.bg-navy {
+  background: linear-gradient(180deg, #0D1B2A 0%, #0a1520 100%) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+}
+
+header.bg-navy {
+  background: rgba(13, 27, 42, 0.98) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar active nav item: red left border + fading gradient wash */
+aside [class*="bg-white/10"] {
+  background: linear-gradient(90deg, rgba(232, 50, 60, 0.12) 0%, transparent 100%) !important;
+}
+
+/* Status pills app-wide: frosted glass instead of flat fills */
+[data-type] {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Stat-tile numbers: physical weight via a soft text-shadow */
+.stat-number,
+[class*="text-2xl"][class*="font-bold"],
+[class*="text-xl"][class*="font-bold"] {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Tier-1/2 card hover lift already handled by .hover\:shadow-lg above;
+   add will-change so the compositor handles it without jank. */
+.hover\:shadow-lg,
+.hover\:shadow-xl {
+  will-change: transform;
+}

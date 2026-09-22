@@ -60,7 +60,7 @@ export default function MeetingRequestModal({ open, onClose }) {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Preferred Date <span className="text-brand-red">*</span>
+                        Preferred Date <span className="text-brand">*</span>
                       </label>
                       <input
                         type="date"
@@ -72,7 +72,7 @@ export default function MeetingRequestModal({ open, onClose }) {
                     </div>
                     <div>
                       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Preferred Time <span className="text-brand-red">*</span>
+                        Preferred Time <span className="text-brand">*</span>
                       </label>
                       <input
                         type="time"
@@ -103,7 +103,7 @@ export default function MeetingRequestModal({ open, onClose }) {
 
                   <div>
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Meeting Topic <span className="text-brand-red">*</span>
+                      Meeting Topic <span className="text-brand">*</span>
                     </label>
                     <input
                       type="text"
@@ -129,7 +129,7 @@ export default function MeetingRequestModal({ open, onClose }) {
 
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                   >
                     <CalendarDays className="h-4 w-4" />
                     Send Meeting Request

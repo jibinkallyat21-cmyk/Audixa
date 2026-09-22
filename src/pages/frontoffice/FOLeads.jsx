@@ -273,7 +273,7 @@ function LogContactModal({ lead, onClose, onSubmit }) {
           <button onClick={onClose} className="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50">
             Cancel
           </button>
-          <button onClick={() => onSubmit(lead, note, nextFollowUp)} className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white hover:bg-[#D42731]">
+          <button onClick={() => onSubmit(lead, note, nextFollowUp)} className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]">
             Save Log
           </button>
         </div>

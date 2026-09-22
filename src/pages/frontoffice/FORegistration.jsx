@@ -195,7 +195,7 @@ export default function FORegistration() {
               />
             </div>
 
-            <button type="submit" className="w-full rounded-lg bg-brand-red py-3 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731] sm:w-auto sm:px-8">
+            <button type="submit" className="w-full rounded-lg bg-brand py-3 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] sm:w-auto sm:px-8">
               Register Client
             </button>
           </form>
@@ -260,7 +260,7 @@ export default function FORegistration() {
                 <div className="mt-6 space-y-2">
                   <button
                     onClick={() => navigate('/manager/status-board')}
-                    className="w-full rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white hover:bg-[#D42731]"
+                    className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]"
                   >
                     View Engagement
                   </button>

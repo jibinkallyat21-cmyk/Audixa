@@ -93,7 +93,7 @@ export default function TeamWorkspaceDeliverables() {
                       type="checkbox"
                       checked={checked[idx]}
                       onChange={() => toggleCheck(idx)}
-                      className="h-3.5 w-3.5 rounded border-slate-300 text-brand-red focus:ring-brand-red"
+                      className="h-3.5 w-3.5 rounded border-slate-300 text-brand focus:ring-brand"
                     />
                     {c}
                   </label>
@@ -108,7 +108,7 @@ export default function TeamWorkspaceDeliverables() {
                 onClick={() => allChecked && showToast('Uploading to Qawaem Portal…')}
                 className={`mt-4 w-full rounded-lg py-2.5 text-sm font-semibold ${
                   allChecked
-                    ? 'bg-brand-red text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]'
+                    ? 'bg-brand text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]'
                     : 'cursor-not-allowed bg-slate-200 text-slate-400'
                 }`}
               >

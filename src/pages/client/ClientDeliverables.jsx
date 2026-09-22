@@ -23,7 +23,7 @@ function DeliverableCard({ card, index }) {
       whileHover={{ y: -2 }}
       className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-lg"
     >
-      <span className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-brand-red transition-transform duration-300 group-hover:scale-x-100" />
+      <span className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-brand transition-transform duration-300 group-hover:scale-x-100" />
 
       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-navy/10 text-navy">
         <Icon className="h-6 w-6" />
@@ -34,7 +34,7 @@ function DeliverableCard({ card, index }) {
       <button
         className={`mt-5 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
           card.style === 'red'
-            ? 'bg-brand-red text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]'
+            ? 'bg-brand text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]'
             : 'border border-slate-300 text-navy hover:bg-slate-50'
         }`}
       >

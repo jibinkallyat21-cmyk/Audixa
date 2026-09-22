@@ -69,7 +69,7 @@ export default function ClientDraftReview() {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <button className="flex items-center gap-2 rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]">
+              <button className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
                 <Eye className="h-4 w-4" />
                 View Full Document
               </button>
@@ -124,11 +124,11 @@ export default function ClientDraftReview() {
               replaced with a simple info box (Addition 3). */}
           {isAuthorisedSignatory ? (
             <div
-              className="relative overflow-hidden rounded-xl border border-brand-red/30 bg-white p-6 shadow-sm"
-              style={{ boxShadow: '0 0 0 1px rgba(232,50,60,0.08), 0 8px 24px -8px rgba(232,50,60,0.15)' }}
+              className="relative overflow-hidden rounded-xl border border-brand/30 bg-white p-6 shadow-sm"
+              style={{ boxShadow: '0 0 0 1px rgba(232, 50, 60,0.08), 0 8px 24px -8px rgba(232, 50, 60,0.15)' }}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-red/10 text-brand-red">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <Lock className="h-5 w-5" />
                 </div>
                 <h2 className="text-base font-bold text-navy">Authorised Sign-Off Required</h2>
@@ -139,7 +139,7 @@ export default function ClientDraftReview() {
 
               <button
                 onClick={() => setSignedOff(true)}
-                className="mt-5 w-full rounded-lg bg-brand-red py-3 text-sm font-semibold text-white shadow-sm shadow-brand-red/20"
+                className="mt-5 w-full rounded-lg bg-brand py-3 text-sm font-semibold text-white shadow-sm shadow-brand/20"
               >
                 Confirm &amp; Approve Draft
               </button>

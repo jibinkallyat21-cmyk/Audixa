@@ -117,7 +117,7 @@ function SelfReviewModalBody({ onConfirm, onCancel }) {
               type="checkbox"
               checked={checked[idx]}
               onChange={() => setChecked((prev) => prev.map((v, i) => (i === idx ? !v : v)))}
-              className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-brand-red focus:ring-brand-red"
+              className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-brand focus:ring-brand"
             />
             {label}
           </label>
@@ -127,7 +127,7 @@ function SelfReviewModalBody({ onConfirm, onCancel }) {
         <button
           disabled={!allChecked}
           onClick={onConfirm}
-          className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-bold text-white shadow-sm shadow-brand-red/30 hover:bg-[#D42731] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+          className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-bold text-white shadow-sm shadow-brand/30 hover:bg-[#D12C35] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         >
           Sign Off Section 02
         </button>
@@ -169,7 +169,7 @@ function RaiseReviewPointModalBody({ onSubmit, onCancel }) {
         <button
           disabled={!description.trim()}
           onClick={() => onSubmit(description.trim(), raisedAgainst)}
-          className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731] disabled:opacity-40"
+          className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] disabled:opacity-40"
         >
           Raise
         </button>
@@ -218,7 +218,7 @@ function RejectModalBody({ item, onSubmit, onCancel }) {
       <div className="mt-4 space-y-2.5">
         <button
           onClick={() => onSubmit(text)}
-          className="w-full rounded-lg bg-brand-red py-2.5 text-sm font-bold text-white shadow-sm shadow-brand-red/30 hover:bg-[#D42731]"
+          className="w-full rounded-lg bg-brand py-2.5 text-sm font-bold text-white shadow-sm shadow-brand/30 hover:bg-[#D12C35]"
         >
           Approve &amp; Send to Client
         </button>
@@ -285,20 +285,18 @@ function AIFlagPanel({ item, onApprove }) {
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="mt-4 overflow-hidden"
         >
-          <div
-            className="relative overflow-hidden rounded-xl p-[2px]"
+          <motion.div
+            className="relative overflow-hidden rounded-xl p-5"
             style={{
-              background: 'linear-gradient(120deg, #E8323C, #D97706, #E8323C)',
-              backgroundSize: '200% 200%',
-              animation: 'aiFlagGradient 3s ease infinite',
-              boxShadow: '0 0 24px rgba(232,50,50,0.2), 0 4px 16px rgba(0,0,0,0.08)',
+              background: 'linear-gradient(135deg, rgba(254,242,242,0.95) 0%, rgba(255,247,237,0.90) 100%)',
+              boxShadow: '0 0 0 1px rgba(232,50,60,0.08), 0 4px 16px rgba(232,50,60,0.12), 0 16px 48px rgba(232,50,60,0.08)',
             }}
+            animate={{
+              borderColor: ['rgba(232,50,60,0.3)', 'rgba(245,158,11,0.4)', 'rgba(232,50,60,0.3)'],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            initial={{ borderWidth: '1.5px', borderStyle: 'solid' }}
           >
-            <style>{`@keyframes aiFlagGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }`}</style>
-            <div
-              className="rounded-[10px] p-5"
-              style={{ background: 'linear-gradient(135deg, rgba(254,242,242,0.8), rgba(255,237,213,0.4))' }}
-            >
               <div className="flex items-center gap-2">
                 <motion.span
                   animate={{ opacity: [1, 0.3, 1] }}
@@ -338,7 +336,7 @@ function AIFlagPanel({ item, onApprove }) {
                     type="button"
                     whileHover={{ scale: 1.01 }}
                     onClick={handleApprove}
-                    className="mt-4 w-full rounded-lg bg-brand-red py-3 text-sm font-bold text-white shadow-sm shadow-brand-red/30"
+                    className="mt-4 w-full rounded-lg bg-brand py-3 text-sm font-bold text-white shadow-sm shadow-brand/30"
                   >
                     Approve &amp; Send to Client
                   </motion.button>
@@ -365,8 +363,7 @@ function AIFlagPanel({ item, onApprove }) {
                   <AIHintBox text="AI checked this document against pre-defined criteria and drafted this rejection reason. You are responsible for the final decision — the AI draft is a suggestion only. Editing and approving is recommended over direct approval without review. Your approval is what gets sent to the client — nothing is sent without it." />
                 </>
               )}
-            </div>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -666,7 +663,7 @@ function ReviewPointsSection({ canRaise }) {
               <div className="px-5 py-4">
                 <button
                   onClick={raisePoint}
-                  className="rounded-lg border border-brand-red px-4 py-2 text-xs font-semibold text-brand-red hover:bg-brand-red/5"
+                  className="rounded-lg border border-brand px-4 py-2 text-xs font-semibold text-brand hover:bg-brand/5"
                 >
                   Raise Review Point
                 </button>
@@ -772,7 +769,7 @@ export default function TeamWorkspaceRequirements() {
             </button>
             <button
               onClick={() => showToast('PBC Tracker exported')}
-              className="rounded-lg bg-brand-red px-3.5 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+              className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
             >
               Export PBC Tracker
             </button>
@@ -825,7 +822,7 @@ export default function TeamWorkspaceRequirements() {
                 <button
                   disabled={signedOff}
                   onClick={handleSignOffClick}
-                  className="rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {signedOff ? 'Section 02 Signed Off' : 'Sign Off Section 02'}
                 </button>

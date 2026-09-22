@@ -5,7 +5,7 @@ export default function Sidebar({ navItems = [], activeItem, userName = 'Guest U
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-navy text-white">
       <div className="flex items-center gap-2 px-5 py-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-red">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
           <BarChart3 className="h-5 w-5 text-white" />
         </div>
         <div className="leading-tight">
@@ -24,7 +24,7 @@ export default function Sidebar({ navItems = [], activeItem, userName = 'Guest U
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active-indicator"
-                    className="absolute left-0 top-0 h-full w-[3px] rounded-r bg-brand-red"
+                    className="absolute left-0 top-0 h-full w-[3px] rounded-r bg-brand"
                     transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   />
                 )}

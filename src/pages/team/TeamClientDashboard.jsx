@@ -125,7 +125,7 @@ export default function TeamClientDashboard() {
               </p>
               <button
                 onClick={() => navigate('/team/workspace/requirements')}
-                className="mt-2 text-xs font-semibold text-brand-red hover:underline"
+                className="mt-2 text-xs font-semibold text-brand hover:underline"
               >
                 View Requirements
               </button>
@@ -149,7 +149,7 @@ export default function TeamClientDashboard() {
               </div>
               <button
                 onClick={() => navigate('/team/workspace/queries')}
-                className="mt-3 text-xs font-semibold text-brand-red hover:underline"
+                className="mt-3 text-xs font-semibold text-brand hover:underline"
               >
                 View All Queries
               </button>
@@ -170,7 +170,7 @@ export default function TeamClientDashboard() {
               </div>
               <button
                 onClick={() => navigate('/team/workspace/requirements')}
-                className="mt-3 text-xs font-semibold text-brand-red hover:underline"
+                className="mt-3 text-xs font-semibold text-brand hover:underline"
               >
                 View All Documents
               </button>
@@ -182,7 +182,7 @@ export default function TeamClientDashboard() {
                 <h2 className="text-sm font-semibold text-navy">Meetings</h2>
                 <button
                   onClick={() => navigate('/team/schedule-meeting')}
-                  className="rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]"
+                  className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]"
                 >
                   Schedule Meeting
                 </button>
@@ -209,7 +209,7 @@ export default function TeamClientDashboard() {
                   </div>
                 ))}
               </div>
-              <button onClick={() => navigate('/team/meetings')} className="mt-3 text-xs font-semibold text-brand-red hover:underline">
+              <button onClick={() => navigate('/team/meetings')} className="mt-3 text-xs font-semibold text-brand hover:underline">
                 View All Meetings
               </button>
             </div>
@@ -235,7 +235,7 @@ export default function TeamClientDashboard() {
               </div>
               <button
                 onClick={() => navigate('/team/workspace/audit-trail')}
-                className="mt-3 text-xs font-semibold text-brand-red hover:underline"
+                className="mt-3 text-xs font-semibold text-brand hover:underline"
               >
                 View Full Audit Trail
               </button>

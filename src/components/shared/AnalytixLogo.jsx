@@ -1,14 +1,22 @@
+let markIdCounter = 0
+
 export function AnalytixMark({ size = 22, className = '' }) {
+  const id = `analytix-mark-${++markIdCounter}`
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" className={className}>
-      <path
-        d="M50 8 C53.5 8 56.7 9.9 58.3 13 L85.5 76.5 C88.3 83 84 88 76.8 88 L23.2 88 C16 88 11.7 83 14.5 76.5 L41.7 13 C43.3 9.9 46.5 8 50 8 Z"
-        fill="#E8323C"
-      />
-      <path
-        d="M50 28 L65 49 L55 49 L55 60 C55 73 45 80 34 74 C44 70 46 61 46 50 L36 49 Z"
-        fill="#F8FAFC"
-      />
+      <mask id={id} maskUnits="userSpaceOnUse">
+        <path
+          d="M50 8 C53.5 8 56.7 9.9 58.3 13 L85.5 76.5 C88.3 83 84 88 76.8 88 L23.2 88 C16 88 11.7 83 14.5 76.5 L41.7 13 C43.3 9.9 46.5 8 50 8 Z"
+          fill="white"
+        />
+        <path
+          d="M50 28 L65 49 L55 49 L55 60 C55 73 45 80 34 74 C44 70 46 61 46 50 L36 49 Z"
+          fill="black"
+        />
+      </mask>
+      {/* True transparent cutout: the arrow shape is a hole in the triangle,
+          not a color match, so the mark sits natively on any background. */}
+      <rect x="0" y="0" width="100" height="100" fill="#E8323C" mask={`url(#${id})`} />
     </svg>
   )
 }
@@ -23,7 +31,7 @@ export default function AnalytixLogo({ light = false, size = 'md', className = '
       <span
         className={`${textSize} font-bold tracking-[0.16em] ${light ? 'text-white' : 'text-[#0D1B2A]'}`}
       >
-        ANALYTI<span className="text-brand-red">X</span>
+        ANALYTI<span className="text-brand">X</span>
       </span>
     </div>
   )

@@ -212,7 +212,7 @@ export default function ClientRequirements() {
           {/* Bottom actions — "Request Client Resubmission" removed: that is
               an audit-team action, not a client one (Correction 4). */}
           <div className="flex flex-wrap items-center justify-end gap-3 pb-2">
-            <button className="rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]">
+            <button className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
               Sign Off Section 02
             </button>
           </div>

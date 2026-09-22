@@ -116,7 +116,7 @@ export default function ManagerEscalation() {
                       <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[2].chip}`}>{f.daysOverdue} days overdue</span>
                       <button
                         onClick={() => handleEscalateToTier3(f)}
-                        className="rounded-lg bg-brand-red px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                        className="rounded-lg bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                       >
                         Escalate
                       </button>
@@ -152,7 +152,7 @@ export default function ManagerEscalation() {
                       <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[3].chip}`}>{f.daysOverdue} days overdue</span>
                       <button
                         onClick={() => handleEscalateToManagement(f)}
-                        className="rounded-lg bg-brand-red px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                        className="rounded-lg bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                       >
                         Escalate to Management
                       </button>

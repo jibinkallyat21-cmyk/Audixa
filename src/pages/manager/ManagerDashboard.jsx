@@ -165,7 +165,7 @@ export default function ManagerDashboard() {
                         <span className={`text-xs font-semibold ${STATUS_TONE[f.status]}`}>{f.status}</span>
                         <button
                           onClick={() => navigate('/manager/status-board')}
-                          className="text-xs font-semibold text-brand-red hover:underline"
+                          className="text-xs font-semibold text-brand hover:underline"
                         >
                           Open
                         </button>
@@ -227,7 +227,7 @@ export default function ManagerDashboard() {
                   <div className="flex items-center gap-3">
                     <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${REASON_STYLE[f.reason]}`}>{f.reason}</span>
                     <span className={`text-xs font-semibold ${f.days > 10 ? 'text-alert-red' : 'text-slate-500'}`}>{f.days}d</span>
-                    <button onClick={() => navigate('/manager/status-board')} className="text-xs font-semibold text-brand-red hover:underline">
+                    <button onClick={() => navigate('/manager/status-board')} className="text-xs font-semibold text-brand hover:underline">
                       Review
                     </button>
                   </div>
@@ -245,7 +245,7 @@ export default function ManagerDashboard() {
                   <div key={a.client + a.event} className="border-b border-slate-50 pb-3 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs font-semibold text-navy">{a.client}</p>
-                      <button onClick={() => navigate('/manager/status-board')} className="shrink-0 text-[11px] font-semibold text-brand-red hover:underline">
+                      <button onClick={() => navigate('/manager/status-board')} className="shrink-0 text-[11px] font-semibold text-brand hover:underline">
                         Open
                       </button>
                     </div>
@@ -269,7 +269,7 @@ export default function ManagerDashboard() {
                     </div>
                     <button
                       onClick={() => navigate('/manager/escalation')}
-                      className="flex shrink-0 items-center gap-1 rounded-md bg-brand-red px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#D42731]"
+                      className="flex shrink-0 items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#D12C35]"
                     >
                       Escalate <ArrowRight className="h-3 w-3" />
                     </button>

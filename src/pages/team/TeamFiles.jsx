@@ -162,7 +162,7 @@ export default function TeamFiles() {
                   </div>
                   <button
                     onClick={() => navigate('/team/workspace/requirements')}
-                    className="rounded-md bg-brand-red px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                    className="rounded-md bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                   >
                     Open Workspace
                   </button>
@@ -194,7 +194,7 @@ export default function TeamFiles() {
               </button>
               <button
                 onClick={() => showToast('New engagement assignment started')}
-                className="flex items-center gap-2 rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
               >
                 <UserPlus className="h-3.5 w-3.5" />
                 Assign Engagement

@@ -66,7 +66,7 @@ function FileDrawer({ file, onClose }) {
         <div className="mt-6 space-y-2.5">
           <button
             onClick={() => navigate('/team/workspace/requirements')}
-            className="w-full rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+            className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
           >
             Open Workspace
           </button>
@@ -131,7 +131,7 @@ export default function ManagerStatusBoard() {
               </button>
               <button
                 onClick={() => navigate('/frontoffice/intake')}
-                className="flex items-center gap-2 rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
               >
                 <Plus className="h-3.5 w-3.5" />
                 New Engagement File
@@ -242,13 +242,13 @@ export default function ManagerStatusBoard() {
               <div className="space-y-3">
                 <div className="rounded-lg border border-alert-red/30 bg-alert-red/5 p-3.5">
                   <p className="text-xs text-navy">Al-Yamamah Steel Industries — 18 days overdue, no client response.</p>
-                  <button onClick={() => navigate('/manager/escalation')} className="mt-2 rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]">
+                  <button onClick={() => navigate('/manager/escalation')} className="mt-2 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]">
                     Escalate Now
                   </button>
                 </div>
                 <div className="rounded-lg border border-alert-red/30 bg-alert-red/5 p-3.5">
                   <p className="text-xs text-navy">Dammam Hospitality Holdings — client unresponsive &gt;5 days.</p>
-                  <button onClick={() => showToast('Automated nudge sent to client')} className="mt-2 rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]">
+                  <button onClick={() => showToast('Automated nudge sent to client')} className="mt-2 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]">
                     Send Automated Nudge
                   </button>
                 </div>

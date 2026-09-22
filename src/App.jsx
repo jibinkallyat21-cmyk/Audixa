@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 
 import { ToastProvider } from './components/shared/Toast'
 import { ModalProvider } from './components/shared/Modal'
+import CinematicIntro from './components/shared/CinematicIntro'
 
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
@@ -125,6 +126,7 @@ export default function App() {
     <BrowserRouter>
       <ToastProvider>
         <ModalProvider>
+          <CinematicIntro />
           <AnimatedRoutes />
         </ModalProvider>
       </ToastProvider>

@@ -72,7 +72,7 @@ export default function ManagementLog() {
               </button>
               <button
                 onClick={() => showToast('Audit log exported to PDF')}
-                className="flex items-center gap-1.5 rounded-lg bg-brand-red px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#D42731]"
+                className="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#D12C35]"
               >
                 <FileText className="h-3.5 w-3.5" /> Export to PDF
               </button>
@@ -118,7 +118,7 @@ export default function ManagementLog() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.04, duration: 0.25 }}
-                  className="flex items-start gap-4 rounded-xl border border-l-4 border-slate-200 border-l-transparent bg-white p-4 shadow-sm transition-colors hover:border-l-brand-red"
+                  className="flex items-start gap-4 rounded-xl border border-l-4 border-slate-200 border-l-transparent bg-white p-4 shadow-sm transition-colors hover:border-l-brand"
                 >
                   <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${cls}`}>
                     <Icon className="h-4.5 w-4.5" />

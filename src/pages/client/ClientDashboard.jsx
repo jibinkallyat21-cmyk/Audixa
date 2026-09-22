@@ -181,7 +181,7 @@ export default function ClientDashboard() {
                       <td className="px-5 py-3 text-slate-500">{row.timestamp}</td>
                       <td className="px-5 py-3 text-slate-500">
                         {row.actionRequired ? (
-                          <button className="rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]">
+                          <button className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
                             Upload Now
                           </button>
                         ) : (
@@ -223,7 +223,7 @@ export default function ClientDashboard() {
               <button
                 type="button"
                 onClick={() => setMeetingModalOpen(true)}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-brand-red px-3 py-2.5 text-xs font-semibold text-brand-red hover:bg-brand-red/5"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-brand px-3 py-2.5 text-xs font-semibold text-brand hover:bg-brand/5"
               >
                 <CalendarDays className="h-3.5 w-3.5" />
                 Request Meeting with Audit Team
@@ -257,7 +257,7 @@ export default function ClientDashboard() {
                 />
                 <button
                   type="submit"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-red text-white hover:bg-[#D42731]"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand text-white hover:bg-[#D12C35]"
                 >
                   <Send className="h-3.5 w-3.5" />
                 </button>

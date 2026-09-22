@@ -35,9 +35,8 @@ export function ModalProvider({ children }) {
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 8 }}
-              transition={{ duration: 0.2 }}
+              animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, scale: 0.96, y: 4, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl"
             >
@@ -60,7 +59,7 @@ export function ModalProvider({ children }) {
                 {modal.onConfirm && (
                   <button
                     onClick={handleConfirm}
-                    className="rounded-lg bg-brand-red px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+                    className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                   >
                     {modal.confirmLabel || 'Save'}
                   </button>

@@ -26,10 +26,9 @@ export function ToastProvider({ children }) {
         <AnimatePresence>
           {message && (
             <motion.div
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: -12, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, y: -8, scale: 0.97, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }}
               className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-navy px-4 py-3 text-sm text-white shadow-xl"
             >
               <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald" />

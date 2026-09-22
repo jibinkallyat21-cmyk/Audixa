@@ -101,7 +101,7 @@ export default function TeamChat() {
                     key={c.id}
                     onClick={() => openConversation(c.id)}
                     className={`flex w-full items-center gap-3 border-l-4 px-4 py-3 text-left transition-colors ${
-                      isActive ? 'border-l-brand-red bg-white/10' : 'border-l-transparent hover:bg-white/5'
+                      isActive ? 'border-l-brand bg-white/10' : 'border-l-transparent hover:bg-white/5'
                     }`}
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white">
@@ -114,7 +114,7 @@ export default function TeamChat() {
                     <div className="shrink-0 text-right">
                       <p className="text-[10px] text-white/40">{c.timestamp}</p>
                       {c.unread > 0 && (
-                        <span className="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand-red text-[9px] font-bold text-white">
+                        <span className="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white">
                           {c.unread}
                         </span>
                       )}
@@ -147,7 +147,7 @@ export default function TeamChat() {
               <div className="flex gap-2">
                 <button
                   onClick={() => navigate('/team/client/al-marai')}
-                  className="text-xs font-semibold text-brand-red hover:underline"
+                  className="text-xs font-semibold text-brand hover:underline"
                 >
                   View Client Dashboard
                 </button>
@@ -196,7 +196,7 @@ export default function TeamChat() {
                 <Smile className="h-4 w-4 shrink-0 text-slate-400" />
                 <button
                   onClick={handleSend}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-red text-white hover:bg-[#D42731]"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand text-white hover:bg-[#D12C35]"
                 >
                   <Send className="h-3.5 w-3.5" />
                 </button>

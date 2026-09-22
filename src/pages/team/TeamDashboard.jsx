@@ -153,7 +153,7 @@ export default function TeamDashboard() {
                       <td className="py-3 text-right">
                         <button
                           onClick={() => navigate('/team/workspace/requirements')}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-brand-red hover:underline"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
                         >
                           Open Workspace <ArrowRight className="h-3 w-3" />
                         </button>
@@ -177,7 +177,7 @@ export default function TeamDashboard() {
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-navy">Today's Priority Tasks</h2>
-                <button onClick={() => navigate('/team/tasks')} className="text-xs font-semibold text-brand-red hover:underline">
+                <button onClick={() => navigate('/team/tasks')} className="text-xs font-semibold text-brand hover:underline">
                   View All Tasks
                 </button>
               </div>
@@ -204,7 +204,7 @@ export default function TeamDashboard() {
                 <h2 className="text-sm font-semibold text-navy">Recent Activity on My Files</h2>
                 <button
                   onClick={() => navigate('/team/workspace/audit-trail')}
-                  className="text-xs font-semibold text-brand-red hover:underline"
+                  className="text-xs font-semibold text-brand hover:underline"
                 >
                   View Full Audit Log
                 </button>

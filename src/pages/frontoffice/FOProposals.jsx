@@ -38,7 +38,7 @@ export default function FOProposals() {
               >
                 {t.label}
                 {tab === t.id && (
-                  <motion.div layoutId="fo-proposals-tab-underline" className="absolute -bottom-px left-0 right-0 h-0.5 bg-brand-red" />
+                  <motion.div layoutId="fo-proposals-tab-underline" className="absolute -bottom-px left-0 right-0 h-0.5 bg-brand" />
                 )}
               </button>
             ))}
@@ -141,7 +141,7 @@ function ProposalsTab() {
                   View Proposal
                 </button>
                 {status === 'Awaiting Approval' && (
-                  <button onClick={() => handleApprove(p)} className="rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]">
+                  <button onClick={() => handleApprove(p)} className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]">
                     Approve & Send
                   </button>
                 )}
@@ -250,7 +250,7 @@ function EngagementLettersTab() {
                   </button>
                 )}
                 {status === 'Received Ready to Forward' && (
-                  <button onClick={() => forwardToClient(el)} className="rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]">
+                  <button onClick={() => forwardToClient(el)} className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]">
                     Forward to Client
                   </button>
                 )}
@@ -306,7 +306,7 @@ function UploadSignedCopy({ client, onDone }) {
 
   return (
     <div>
-      <label className="flex cursor-pointer items-center gap-2 rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D42731]">
+      <label className="flex cursor-pointer items-center gap-2 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]">
         <Upload className="h-3.5 w-3.5" /> Upload Signed Copy
         <input type="file" accept="application/pdf" className="hidden" onChange={handleFile} />
       </label>
@@ -375,7 +375,7 @@ function UploadSignedElModal({ onClose }) {
           <button onClick={onClose} className="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50">
             Cancel
           </button>
-          <button onClick={submit} className="flex-1 rounded-lg bg-brand-red py-2.5 text-sm font-semibold text-white hover:bg-[#D42731]">
+          <button onClick={submit} className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]">
             Upload
           </button>
         </div>

@@ -193,7 +193,7 @@ function ChatFloatButton() {
                 />
                 <button
                   onClick={handleSend}
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand-red text-white hover:bg-[#D42731]"
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand text-white hover:bg-[#D12C35]"
                 >
                   <Send className="h-3 w-3" />
                 </button>
@@ -211,8 +211,8 @@ function ChatFloatButton() {
 
       <motion.button
         onClick={handleOpen}
-        whileHover={{ scale: 1.05, boxShadow: '0 8px 24px -4px rgba(232,50,60,0.5)' }}
-        className="relative flex h-[52px] w-[52px] items-center justify-center rounded-full bg-brand-red text-white shadow-lg shadow-brand-red/30"
+        whileHover={{ scale: 1.05, boxShadow: '0 8px 24px -4px rgba(232, 50, 60,0.5)' }}
+        className="relative flex h-[52px] w-[52px] items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand/30"
         aria-label="Open chat"
       >
         <MessageCircle className="h-5 w-5" />
@@ -283,14 +283,14 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
                 key={tab.id}
                 to={tab.href}
                 className={`relative flex items-center gap-1.5 pb-3 text-sm font-medium transition-colors ${
-                  active ? 'text-brand-red' : 'text-slate-500 hover:text-navy'
+                  active ? 'text-brand' : 'text-slate-500 hover:text-navy'
                 }`}
               >
                 {tab.label}
                 <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${badgeClass[tab.badgeTone]}`}>
                   {tab.badge}
                 </span>
-                {active && <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-brand-red" />}
+                {active && <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-brand" />}
               </Link>
             )
           })}

@@ -33,7 +33,7 @@ export default function TeamMeetings() {
             <h1 className="text-2xl font-bold text-navy">Meetings — All Engagements</h1>
             <button
               onClick={() => navigate('/team/schedule-meeting')}
-              className="rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]"
+              className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
             >
               Schedule New Meeting
             </button>
@@ -149,7 +149,7 @@ export default function TeamMeetings() {
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <button
               onClick={() => setShowCompleted((v) => !v)}
-              className="text-sm font-semibold text-brand-red hover:underline"
+              className="text-sm font-semibold text-brand hover:underline"
             >
               {showCompleted ? 'Hide Completed Meetings' : `Show ${teamMeetingsCompletedCount} Completed Meetings`}
             </button>

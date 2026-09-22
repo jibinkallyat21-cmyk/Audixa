@@ -99,7 +99,7 @@ export default function ClientQueries() {
                     transition={{ delay: idx * 0.05, duration: 0.25 }}
                     onClick={() => setSelectedId(query.id)}
                     className={`block w-full border-b border-slate-50 px-4 py-3.5 text-left transition-colors last:border-0 ${
-                      isSelected ? 'border-l-4 border-l-brand-red bg-brand-red/5' : 'border-l-4 border-l-transparent hover:bg-slate-50'
+                      isSelected ? 'border-l-4 border-l-brand bg-brand/5' : 'border-l-4 border-l-transparent hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -184,12 +184,12 @@ export default function ClientQueries() {
 
               {selectedQuery.id === 'QRY-01' && (
                 <div className="flex flex-wrap gap-3 border-t border-slate-100 px-5 py-4">
-                  <button className="rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-red/20 hover:bg-[#D42731]">
+                  <button className="rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
                     Upload Delivery Notes
                   </button>
                   <button
                     onClick={() => setMeetingModalOpen(true)}
-                    className="flex items-center gap-1.5 rounded-lg border border-brand-red px-4 py-2 text-xs font-semibold text-brand-red hover:bg-brand-red/5"
+                    className="flex items-center gap-1.5 rounded-lg border border-brand px-4 py-2 text-xs font-semibold text-brand hover:bg-brand/5"
                   >
                     <CalendarDays className="h-3.5 w-3.5" />
                     Request Meeting with Audit Team
@@ -209,7 +209,7 @@ export default function ClientQueries() {
                   <Smile className="h-4 w-4 shrink-0 text-slate-400" />
                   <button
                     type="submit"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-red text-white hover:bg-[#D42731]"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand text-white hover:bg-[#D12C35]"
                   >
                     <Send className="h-3.5 w-3.5" />
                   </button>

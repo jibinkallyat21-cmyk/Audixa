@@ -10,7 +10,7 @@ import { teamNotifications, teamStatusNotifications, teamLongPendingItems } from
 const ICONS = { ShieldAlert, FileText, Clock, MessageCircle, Plus, Calendar, User }
 
 const ACTION_TONE = {
-  red: 'bg-brand-red text-white hover:bg-[#D42731]',
+  red: 'bg-brand text-white hover:bg-[#D12C35]',
   amber: 'text-amber hover:underline',
 }
 
@@ -130,7 +130,7 @@ export default function TeamNotifications() {
                 ))}
               </div>
               {!showAllFyi && (
-                <button onClick={() => setShowAllFyi(true)} className="mt-3 text-xs font-semibold text-brand-red hover:underline">
+                <button onClick={() => setShowAllFyi(true)} className="mt-3 text-xs font-semibold text-brand hover:underline">
                   Show 16 FYI notifications
                 </button>
               )}
@@ -146,7 +146,7 @@ export default function TeamNotifications() {
                   <span className="font-medium text-navy">{item.client}</span>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-slate-500">{item.daysStalled} days stalled</span>
-                    <button onClick={() => navigate('/team/files')} className="text-xs font-semibold text-brand-red hover:underline">
+                    <button onClick={() => navigate('/team/files')} className="text-xs font-semibold text-brand hover:underline">
                       Review
                     </button>
                   </div>
