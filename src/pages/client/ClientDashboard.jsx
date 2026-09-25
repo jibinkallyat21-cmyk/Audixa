@@ -1,49 +1,49 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock, TrendingUp, CheckCircle2, AlertCircle, HelpCircle, FileText, ChevronRight } from 'lucide-react'
+import {
+  Lock, TrendingUp, CheckCircle2, AlertCircle, FileText, ChevronRight,
+  Calendar, ChevronDown, X, Send,
+} from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
-import StatusPill from '../../components/shared/StatusPill'
 import LifecycleStepper from '../../components/shared/LifecycleStepper'
 import { clientPortal } from '../../data/sampleData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 import { getActivityEvents } from '../../data/activityLog'
+import { useToast } from '../../components/shared/Toast'
 
-function useCountUp(target, duration = 800) {
+function useCountUp(target, duration = 700) {
   const [value, setValue] = useState(0)
   const startRef = useRef(null)
-
   useEffect(() => {
     setValue(0)
     startRef.current = null
     let frame
-    const step = (timestamp) => {
-      if (startRef.current === null) startRef.current = timestamp
-      const progress = Math.min((timestamp - startRef.current) / duration, 1)
-      setValue(Math.round(progress * target))
-      if (progress < 1) frame = requestAnimationFrame(step)
+    const step = (ts) => {
+      if (startRef.current === null) startRef.current = ts
+      const p = Math.min((ts - startRef.current) / duration, 1)
+      setValue(Math.round(p * target))
+      if (p < 1) frame = requestAnimationFrame(step)
     }
     frame = requestAnimationFrame(step)
     return () => cancelAnimationFrame(frame)
   }, [target, duration])
-
   return value
 }
 
-// FY-specific data for demo
 function getFYData(fy) {
   if (fy === 'FY2023') {
     return {
       stats: { totalRequirements: 78, documentsAccepted: 78, pendingAction: 0, pendingDueThisWeek: 0, openQueries: 0, criticalQueries: 0 },
       engagementRef: ENGAGEMENT_REFS['FY2023'],
       stages: [
-        { id: 'onboarding', label: 'Getting Started', status: 'completed' },
-        { id: 'data-collection', label: 'Sending Your Documents', status: 'completed' },
-        { id: 'under-audit', label: 'Audit in Progress', status: 'completed' },
-        { id: 'draft-issued', label: 'Review Your Draft', status: 'completed' },
-        { id: 'finalized', label: 'Audit Complete', status: 'completed' },
-        { id: 'filed', label: 'Submitted to Authority', status: 'completed', qawaemRef: 'QAW-2023-77203' },
+        { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
+        { id: 'pbc', label: 'PBC Submission', status: 'completed' },
+        { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
+        { id: 'draft', label: 'Draft FS Review', status: 'completed' },
+        { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
+        { id: 'filing', label: 'Regulatory Filing', status: 'completed', qawaemRef: 'QAW-2023-77203' },
       ],
     }
   }
@@ -52,12 +52,12 @@ function getFYData(fy) {
       stats: { totalRequirements: 72, documentsAccepted: 72, pendingAction: 0, pendingDueThisWeek: 0, openQueries: 0, criticalQueries: 0 },
       engagementRef: ENGAGEMENT_REFS['FY2022'],
       stages: [
-        { id: 'onboarding', label: 'Getting Started', status: 'completed' },
-        { id: 'data-collection', label: 'Sending Your Documents', status: 'completed' },
-        { id: 'under-audit', label: 'Audit in Progress', status: 'completed' },
-        { id: 'draft-issued', label: 'Review Your Draft', status: 'completed' },
-        { id: 'finalized', label: 'Audit Complete', status: 'completed' },
-        { id: 'filed', label: 'Submitted to Authority', status: 'completed', qawaemRef: 'QAW-2022-62018' },
+        { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
+        { id: 'pbc', label: 'PBC Submission', status: 'completed' },
+        { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
+        { id: 'draft', label: 'Draft FS Review', status: 'completed' },
+        { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
+        { id: 'filing', label: 'Regulatory Filing', status: 'completed', qawaemRef: 'QAW-2022-62018' },
       ],
     }
   }
@@ -65,115 +65,154 @@ function getFYData(fy) {
     stats: clientPortal.stats,
     engagementRef: ENGAGEMENT_REFS['FY2024'],
     stages: [
-      { id: 'onboarding', label: 'Getting Started', status: 'completed' },
-      { id: 'data-collection', label: 'Sending Your Documents', status: 'completed' },
-      { id: 'under-audit', label: 'Audit in Progress', status: 'active' },
-      { id: 'draft-issued', label: 'Review Your Draft', status: 'upcoming' },
-      { id: 'finalized', label: 'Audit Complete', status: 'upcoming' },
-      { id: 'filed', label: 'Submitted to Authority', status: 'upcoming', qawaemRef: 'QAW-2024-88412' },
+      { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
+      { id: 'pbc', label: 'PBC Submission', status: 'completed' },
+      { id: 'fieldwork', label: 'Audit Field Work', status: 'active' },
+      { id: 'draft', label: 'Draft FS Review', status: 'upcoming' },
+      { id: 'signoff', label: 'Sign-off & Completion', status: 'upcoming' },
+      { id: 'filing', label: 'Regulatory Filing', status: 'upcoming', qawaemRef: 'QAW-2024-88412' },
     ],
   }
 }
 
 const STAGE_TOOLTIPS = {
-  'Getting Started': 'We set up your audit file and you sign the engagement letter.',
-  'Sending Your Documents': 'You upload documents and records we need for the audit.',
-  'Audit in Progress': 'Our team reviews your documents and performs audit testing.',
-  'Review Your Draft': 'You review and confirm the draft financial statements.',
-  'Audit Complete': 'All reviews are done and the final report is signed.',
-  'Submitted to Authority': 'Your audit report is filed with the relevant authority.',
+  'Engagement Acceptance': 'Engagement letter issued and agreed; audit terms confirmed.',
+  'PBC Submission': 'Client submits Prepared by Client (PBC) documents and records.',
+  'Audit Field Work': 'Audit team performs substantive procedures and testing.',
+  'Draft FS Review': 'Client reviews draft financial statements and confirms accuracy.',
+  'Sign-off & Completion': 'Engagement partner signs off; audit report finalised.',
+  'Regulatory Filing': 'Audited financials filed with the relevant authority (ZATCA / MISA).',
 }
 
-const ICON_COLOR = {
-  emerald: 'text-emerald',
-  red: 'text-alert-red',
-  amber: 'text-amber',
-  blue: 'text-blue-500',
-  navy: 'text-navy',
-}
+const EVENT_ICONS = { emerald: CheckCircle2, red: AlertCircle, amber: AlertCircle, blue: FileText, navy: TrendingUp }
+const ICON_COLOR = { emerald: 'text-emerald', red: 'text-alert-red', amber: 'text-amber', blue: 'text-blue-500', navy: 'text-navy' }
 
-const EVENT_ICONS = {
-  emerald: CheckCircle2,
-  red: AlertCircle,
-  amber: AlertCircle,
-  blue: FileText,
-  navy: TrendingUp,
-}
-
-function ActivityEventRow({ event }) {
-  const Icon = EVENT_ICONS[event.icon] || FileText
+function StatCard({ label, sub, value, color, icon: Icon, className = '' }) {
+  const count = useCountUp(value)
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-slate-50 last:border-0">
-      <span className={`mt-0.5 shrink-0 ${ICON_COLOR[event.icon] || 'text-navy'}`}>
-        <Icon className="h-4 w-4" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm text-navy">{event.description}</p>
-        <p className="text-xs text-slate-400 mt-0.5">{event.timestamp}</p>
+    <div className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm ${className}`}>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+      <div className="mt-1.5 flex items-end gap-1.5">
+        <span className={`text-2xl font-black ${color}`}>{count}</span>
+        {Icon && <Icon className={`mb-0.5 h-4 w-4 ${color}`} />}
       </div>
-      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
-        {event.section}
-      </span>
+      {sub && <p className="mt-1 text-[11px] font-medium text-slate-500">{sub}</p>}
     </div>
   )
 }
 
-function AuditProgressHero({ total, accepted, delay, fy }) {
+function PBCRing({ total, accepted, fy }) {
   const count = useCountUp(accepted)
-  const percent = total > 0 ? Math.round((accepted / total) * 100) : 0
-  const radius = 42
-  const circumference = 2 * Math.PI * radius
-
+  const pct = total > 0 ? Math.round((accepted / total) * 100) : 0
+  const r = 36
+  const circ = 2 * Math.PI * r
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      className="flex items-center gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-6"
-    >
-      <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
-        <svg viewBox="0 0 100 100" className="h-24 w-24 -rotate-90">
-          <circle cx="50" cy="50" r={radius} fill="none" stroke="#F1F5F9" strokeWidth="8" />
+    <div className="flex items-center gap-4">
+      <div className="relative flex h-20 w-20 shrink-0 items-center justify-center">
+        <svg viewBox="0 0 88 88" className="h-20 w-20 -rotate-90">
+          <circle cx="44" cy="44" r={r} fill="none" stroke="#F1F5F9" strokeWidth="7" />
           <motion.circle
-            key={fy}
-            cx="50" cy="50" r={radius} fill="none"
-            stroke="#059669" strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={circumference}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: circumference * (1 - percent / 100) }}
-            transition={{ duration: 1, ease: 'easeOut', delay }}
+            key={fy} cx="44" cy="44" r={r} fill="none"
+            stroke="#059669" strokeWidth="7" strokeLinecap="round"
+            strokeDasharray={circ}
+            initial={{ strokeDashoffset: circ }}
+            animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
+            transition={{ duration: 0.9, ease: 'easeOut' }}
           />
         </svg>
-        <span className="absolute text-xs font-bold text-emerald">{percent}%</span>
+        <span className="absolute text-xs font-bold text-emerald">{pct}%</span>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Audit Progress</p>
-        <p className="mt-1 text-3xl font-black text-navy">
-          {count} <span className="text-lg font-medium text-slate-400">of {total}</span>
-        </p>
-        <p className="text-xs text-slate-500 mt-1">documents submitted</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">PBC Completion</p>
+        <p className="mt-0.5 text-2xl font-black text-navy">{count} <span className="text-sm font-medium text-slate-400">/ {total}</span></p>
+        <p className="text-[11px] text-slate-500">PBC items submitted</p>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
-function StatCard({ label, sub, value, color, icon: Icon, delay, className = '', suffix = '' }) {
-  const count = useCountUp(value)
+function RequestMeetingModal({ onClose }) {
+  const showToast = useToast()
+  const [date, setDate] = useState('')
+  const [time, setTime] = useState('')
+  const [topic, setTopic] = useState('')
+  const [notes, setNotes] = useState('')
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const handle = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [onClose])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!date || !topic) return
+    showToast('Meeting request submitted — your engagement team will confirm shortly')
+    onClose()
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      whileHover={{ y: -2 }}
-      className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-lg ${className}`}
-    >
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <div className="mt-2 flex items-end gap-2">
-        <span className={`text-3xl font-bold ${color}`}>{count}{suffix}</span>
-        {Icon && <Icon className={`mb-1 h-4 w-4 ${color}`} />}
-      </div>
-      {sub && <p className="mt-1 text-xs font-medium text-slate-500">{sub}</p>}
-    </motion.div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <motion.div
+        ref={ref}
+        initial={{ scale: 0.95, opacity: 0, y: 16 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 16 }}
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-md rounded-2xl bg-white shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div>
+            <h2 className="text-base font-bold text-navy">Request a Meeting</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Your engagement team will confirm availability</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-navy"><X className="h-5 w-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">Meeting Topic <span className="text-alert-red">*</span></label>
+            <select value={topic} onChange={(e) => setTopic(e.target.value)} required className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-navy">
+              <option value="">Select topic...</option>
+              <option>PBC Document Requirements</option>
+              <option>Audit Progress & Status Update</option>
+              <option>Draft Financial Statements Review</option>
+              <option>Zakat & Tax Matters</option>
+              <option>Audit Query Clarification</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Preferred Date <span className="text-alert-red">*</span></label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-navy" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Preferred Time</label>
+              <select value={time} onChange={(e) => setTime(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-navy">
+                <option value="">Flexible</option>
+                <option>09:00 – 10:00</option>
+                <option>10:00 – 11:00</option>
+                <option>11:00 – 12:00</option>
+                <option>13:00 – 14:00</option>
+                <option>14:00 – 15:00</option>
+                <option>15:00 – 16:00</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">Additional Notes</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Any specific agenda items or background information..." className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-navy resize-none" />
+          </div>
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+            <button type="submit" className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]">
+              <Send className="h-4 w-4" /> Submit Request
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
   )
 }
 
@@ -181,140 +220,169 @@ export default function ClientDashboard() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const fyData = getFYData(selectedFY)
   const isAuthorisedSignatory = clientPortal.clientRole === 'Authorised Signatory'
-  const recentEvents = getActivityEvents().slice(0, 5)
+  const recentEvents = getActivityEvents().slice(0, 8)
+  const [meetingModal, setMeetingModal] = useState(false)
 
   return (
-    <ClientLayout title="Dashboard">
+    <ClientLayout title="Engagement Dashboard" fullHeight>
       <PageTransition>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedFY}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-6"
-          >
-            {/* Greeting */}
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h1 className="text-2xl font-bold text-navy">Welcome, {clientPortal.clientName}</h1>
-              <p className="mt-1 text-sm text-slate-500">
-                Statutory Filing Deadline: <span className="font-medium text-navy">{clientPortal.statutoryDeadline}</span>
-                <span className="ml-3 rounded-full bg-amber/10 px-3 py-0.5 text-xs font-semibold text-amber">
-                  {clientPortal.daysRemaining} Days Remaining
-                </span>
-              </p>
-            </div>
+        <div className="flex h-full gap-5">
 
-            {/* FY Selector row */}
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-sm">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-xs text-slate-500">You are viewing:</span>
-                <div className="flex gap-1">
-                  {availableFYs.map((fy) => (
-                    <button
-                      key={fy}
-                      onClick={() => setSelectedFY(fy)}
-                      className={`relative px-4 py-1.5 text-sm font-semibold transition-colors ${
-                        selectedFY === fy
-                          ? 'text-navy'
-                          : 'text-slate-400 hover:text-slate-600'
-                      }`}
-                    >
-                      {fy}
-                      {selectedFY === fy && (
-                        <motion.div
-                          layoutId="fy-underline"
-                          className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-brand"
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                {fyData.engagementRef}
-              </span>
-            </div>
-
-            {/* Stage stepper */}
-            <div className="rounded-xl border border-slate-200 p-6 shadow-sm" style={{ background: 'linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)' }}>
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-navy">Your Audit Journey</h2>
-              </div>
-              <LifecycleStepper stages={fyData.stages} tooltips={STAGE_TOOLTIPS} />
-            </div>
-
-            {/* On Hold banner */}
-            {selectedFY === 'FY2024' && clientPortal.onHold.active && (
+          {/* ── LEFT COLUMN ── */}
+          <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+            <AnimatePresence mode="wait">
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                transition={{ duration: 0.4 }}
-                className="flex items-center justify-between gap-4 rounded-xl border border-amber/30 bg-amber/10 px-5 py-4"
+                key={selectedFY}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="flex flex-col gap-4"
               >
-                <p className="text-sm font-medium text-amber">{clientPortal.onHold.message}</p>
-                {isAuthorisedSignatory && (
-                  <div className="flex shrink-0 items-center gap-2 text-amber/80">
-                    <Lock className="h-4 w-4" />
-                    <span className="text-[11px]">Account Owner notice</span>
+                {/* Header row — client name + FY dropdown + ref */}
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Engagement Dashboard</p>
+                    <p className="mt-0.5 text-base font-bold text-navy">{clientPortal.clientName}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-mono font-medium text-slate-600">{fyData.engagementRef}</span>
+                    {/* FY Dropdown */}
+                    <div className="relative">
+                      <select
+                        value={selectedFY}
+                        onChange={(e) => setSelectedFY(e.target.value)}
+                        className="appearance-none cursor-pointer rounded-lg border border-navy/20 bg-navy/5 py-1.5 pl-3 pr-7 text-xs font-bold text-navy outline-none focus:border-navy"
+                      >
+                        {availableFYs.map((fy) => (
+                          <option key={fy} value={fy}>{fy}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-navy/60" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* On Hold banner */}
+                {selectedFY === 'FY2024' && clientPortal.onHold.active && (
+                  <div className="flex items-center justify-between gap-4 rounded-xl border border-amber/30 bg-amber/5 px-4 py-3">
+                    <p className="text-sm font-medium text-amber">{clientPortal.onHold.message}</p>
+                    {isAuthorisedSignatory && (
+                      <div className="flex shrink-0 items-center gap-1.5 text-amber/80">
+                        <Lock className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-semibold">Authorised Signatory notice</span>
+                      </div>
+                    )}
                   </div>
                 )}
-              </motion.div>
-            )}
 
-            {/* Stat tiles */}
-            <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-12">
-              <AuditProgressHero
-                total={fyData.stats.totalRequirements}
-                accepted={fyData.stats.documentsAccepted}
-                delay={0}
-                fy={selectedFY}
-              />
-              <StatCard label="Approved Documents" value={fyData.stats.documentsAccepted} color="text-emerald" icon={CheckCircle2} delay={0.05} className="md:col-span-3" />
-              <StatCard label="Still Needed from You" value={fyData.stats.pendingAction} color="text-amber" sub={fyData.stats.pendingDueThisWeek > 0 ? `${fyData.stats.pendingDueThisWeek} due this week` : 'All uploaded'} delay={0.1} className="md:col-span-3" />
-              <StatCard label="Questions from Your Auditor" value={fyData.stats.openQueries} color="text-alert-red" sub={fyData.stats.criticalQueries > 0 ? `${fyData.stats.criticalQueries} need urgent reply` : 'All answered'} delay={0.15} className="md:col-span-3" />
-              <StatCard label="Days to Deadline" value={clientPortal.daysRemaining} color="text-navy" sub={clientPortal.statutoryDeadline} delay={0.2} className="md:col-span-3" />
-            </div>
+                {/* Audit lifecycle stepper */}
+                <div className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Engagement Phase</p>
+                  <LifecycleStepper stages={fyData.stages} tooltips={STAGE_TOOLTIPS} />
+                </div>
 
-            {/* Audit team strip */}
-            <div className="rounded-xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-navy">Your Audit Team</h2>
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy/10 text-sm font-bold text-navy">TA</div>
-                  <div>
-                    <p className="text-sm font-semibold text-navy">Tariq Al-Harbi</p>
-                    <p className="text-xs text-slate-500">Lead Auditor — Analytix Audit Team</p>
+                {/* Stats grid: PBC ring + 4 tiles */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* PBC ring spans full width on small, col-span-2 */}
+                  <div className="col-span-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <PBCRing total={fyData.stats.totalRequirements} accepted={fyData.stats.documentsAccepted} fy={selectedFY} />
                   </div>
+                  <StatCard
+                    label="Accepted PBC Items"
+                    value={fyData.stats.documentsAccepted}
+                    color="text-emerald"
+                    icon={CheckCircle2}
+                    sub="Received & verified"
+                  />
+                  <StatCard
+                    label="Outstanding Items"
+                    value={fyData.stats.pendingAction}
+                    color="text-amber"
+                    icon={null}
+                    sub={fyData.stats.pendingDueThisWeek > 0 ? `${fyData.stats.pendingDueThisWeek} overdue` : 'No overdue items'}
+                  />
+                  <StatCard
+                    label="Open Audit Queries"
+                    value={fyData.stats.openQueries}
+                    color="text-alert-red"
+                    icon={null}
+                    sub={fyData.stats.criticalQueries > 0 ? `${fyData.stats.criticalQueries} require urgent response` : 'No urgent queries'}
+                  />
+                  <StatCard
+                    label="Days to Statutory Deadline"
+                    value={clientPortal.daysRemaining}
+                    color="text-navy"
+                    sub={clientPortal.statutoryDeadline}
+                  />
                 </div>
-                <div className="flex flex-wrap gap-2 ml-2">
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">Analytix Audit Team</span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">Proper Audit</span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{selectedFY}</span>
+
+                {/* Request Meeting */}
+                <button
+                  onClick={() => setMeetingModal(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-navy/20 bg-navy/5 py-3 text-sm font-semibold text-navy transition-colors hover:bg-navy/10"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Request a Meeting with Your Engagement Team
+                </button>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* ── RIGHT COLUMN ── */}
+          <div className="flex w-72 shrink-0 flex-col gap-4 overflow-y-auto">
+            {/* Engagement team */}
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Engagement Team</p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-bold text-white">TA</div>
+                <div>
+                  <p className="text-sm font-semibold text-navy">Tariq Al-Harbi</p>
+                  <p className="text-xs text-slate-500">Engagement Partner</p>
+                  <p className="text-xs text-slate-400">Analytix Audit & Assurance</p>
                 </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-500">Statutory Audit</span>
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-500">{selectedFY}</span>
+                <span className="rounded-full bg-emerald/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald">Active</span>
               </div>
             </div>
 
             {/* Recent Activity */}
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                <h2 className="text-sm font-semibold text-navy">Recent Activity</h2>
+            <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Recent Activity</p>
               </div>
-              <div className="px-5 py-2">
-                {recentEvents.map((event) => (
-                  <ActivityEventRow key={event.id} event={event} />
-                ))}
+              <div className="flex-1 overflow-y-auto px-4 py-2">
+                {recentEvents.map((event) => {
+                  const Icon = EVENT_ICONS[event.icon] || FileText
+                  return (
+                    <div key={event.id} className="flex items-start gap-3 border-b border-slate-50 py-2.5 last:border-0">
+                      <span className={`mt-0.5 shrink-0 ${ICON_COLOR[event.icon] || 'text-navy'}`}>
+                        <Icon className="h-3.5 w-3.5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-navy leading-snug">{event.description}</p>
+                        <p className="mt-0.5 text-[10px] text-slate-400">{event.timestamp}</p>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-              <div className="border-t border-slate-100 px-5 py-3">
+              <div className="border-t border-slate-100 px-4 py-2.5">
                 <Link to="/client/activity" className="flex items-center gap-1 text-xs font-semibold text-brand hover:underline">
-                  View Full Activity Log <ChevronRight className="h-3 w-3" />
+                  Full Activity Log <ChevronRight className="h-3 w-3" />
                 </Link>
               </div>
             </div>
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </div>
       </PageTransition>
+
+      <AnimatePresence>
+        {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} />}
+      </AnimatePresence>
     </ClientLayout>
   )
 }

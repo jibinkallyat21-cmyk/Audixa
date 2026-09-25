@@ -315,22 +315,22 @@ export default function ClientDocuments() {
   })
 
   return (
-    <ClientLayout title="My Documents">
+    <ClientLayout title="Requirement List">
       <PageTransition>
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold text-navy">My Documents</h1>
+            <h1 className="text-2xl font-bold text-navy">PBC Requirement List</h1>
             <span className="rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">KSA-2024-8841</span>
           </div>
 
           {/* Bento stat cards */}
           <div className="grid grid-cols-12 gap-3">
             {[
-              { label: 'Total Requested', value: total, color: 'text-navy', bg: 'bg-navy/5', span: 'col-span-12 sm:col-span-3', sub: null },
-              { label: 'Submitted by You', value: submitted, color: 'text-blue-600', bg: 'bg-blue-50', span: 'col-span-6 sm:col-span-2', sub: null },
-              { label: 'Approved', value: approved, color: 'text-emerald', bg: 'bg-emerald/5', span: 'col-span-6 sm:col-span-2', sub: null },
-              { label: 'Still Needed from You', value: stillNeeded, color: 'text-amber', bg: 'bg-amber/5', span: 'col-span-12 sm:col-span-3', sub: 'Please upload these' },
-              { label: 'Needs Correction', value: needsCorrection, color: 'text-alert-red', bg: 'bg-red-50', span: 'col-span-12 sm:col-span-2', sub: 'Please re-upload' },
+              { label: 'Total PBC Items', value: total, color: 'text-navy', bg: 'bg-navy/5', span: 'col-span-12 sm:col-span-3', sub: null },
+              { label: 'Submitted', value: submitted, color: 'text-blue-600', bg: 'bg-blue-50', span: 'col-span-6 sm:col-span-2', sub: null },
+              { label: 'Accepted', value: approved, color: 'text-emerald', bg: 'bg-emerald/5', span: 'col-span-6 sm:col-span-2', sub: null },
+              { label: 'Outstanding Items', value: stillNeeded, color: 'text-amber', bg: 'bg-amber/5', span: 'col-span-12 sm:col-span-3', sub: 'Submission required' },
+              { label: 'Requires Resubmission', value: needsCorrection, color: 'text-alert-red', bg: 'bg-red-50', span: 'col-span-12 sm:col-span-2', sub: 'Refer to rejection notes' },
             ].map((card, i) => (
               <motion.div
                 key={card.label}
@@ -362,7 +362,7 @@ export default function ClientDocuments() {
               onClick={() => setBulkOpen(true)}
               className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
             >
-              <Upload className="h-4 w-4" /> Upload Multiple at Once
+              <Upload className="h-4 w-4" /> Bulk Upload PBC Documents
             </button>
           </div>
 
@@ -372,7 +372,7 @@ export default function ClientDocuments() {
             <div className="hidden items-center gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2.5 md:flex">
               <span className="w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Ref #</span>
               <span className="flex-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Document Name</span>
-              <span className="hidden w-48 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 lg:block">What We Need</span>
+              <span className="hidden w-48 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 lg:block">Description</span>
               <span className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Status</span>
               <span className="hidden w-40 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 md:block">Submitted File</span>
               <span className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Action</span>

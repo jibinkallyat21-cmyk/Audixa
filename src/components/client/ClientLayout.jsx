@@ -24,9 +24,9 @@ import { ClientFYProvider, useClientFY, AVAILABLE_FYS } from '../../context/Clie
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/client/dashboard', icon: LayoutDashboard },
-  { id: 'documents', label: 'My Documents', href: '/client/documents', icon: ListChecks },
+  { id: 'documents', label: 'Requirement List', href: '/client/documents', icon: ListChecks },
+  { id: 'queries', label: 'Audit Queries', href: '/client/queries', icon: MessageSquare },
   { id: 'working-tb', label: 'Working Trial Balance', href: '/client/working-tb', icon: Table2 },
-  { id: 'queries', label: 'Auditor Questions', href: '/client/queries', icon: MessageSquare },
   { id: 'reports', label: 'Reports & Documents', href: '/client/reports', icon: FolderOpen },
   { id: 'activity', label: 'Activity Log', href: '/client/activity', icon: Activity },
 ]
@@ -306,17 +306,17 @@ function ClientHeader({ title }) {
   )
 }
 
-function ClientLayoutInner({ title, children }) {
+function ClientLayoutInner({ title, children, fullHeight }) {
   return (
     <SidebarDrawerProvider>
       <div className="flex min-h-screen w-full bg-background">
         <MobileSidebarWrap>
           <ClientSidebar />
         </MobileSidebarWrap>
-        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
           <ClientHeader title={title} />
-          <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">{children}</main>
-          <Footer />
+          <main className={`min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'}`}>{children}</main>
+          {!fullHeight && <Footer />}
         </div>
       </div>
       <QuickChatFloat />
@@ -324,6 +324,6 @@ function ClientLayoutInner({ title, children }) {
   )
 }
 
-export default function ClientLayout({ title, children }) {
-  return <ClientLayoutInner title={title}>{children}</ClientLayoutInner>
+export default function ClientLayout({ title, children, fullHeight }) {
+  return <ClientLayoutInner title={title} fullHeight={fullHeight}>{children}</ClientLayoutInner>
 }

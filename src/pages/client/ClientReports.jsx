@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FileText, FileCheck2, Eye, Download, CheckCircle2, Lock, Info, AlertTriangle, FileSignature } from 'lucide-react'
+import { FileText, FileCheck2, Eye, Download, CheckCircle2, Lock, Info, FileSignature, Upload, X, Paperclip } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
 import { clientPortal } from '../../data/sampleData'
 import { useClientFY } from '../../context/ClientFYContext'
+import { getClientUpload, setClientUpload, onUploadsChange } from '../../data/clientUploads'
 
 function StatusChip({ label, tone }) {
   const styles = {
@@ -21,7 +22,65 @@ function StatusChip({ label, tone }) {
   )
 }
 
-// FY-aware data
+function UploadZone({ uploadKey, label, description, accept = '.pdf,.docx,.doc,.png,.jpg' }) {
+  const showToast = useToast()
+  const fileRef = useRef(null)
+  const [current, setCurrent] = useState(() => getClientUpload(uploadKey))
+  const [dragging, setDragging] = useState(false)
+
+  useEffect(() => {
+    const unsub = onUploadsChange(() => setCurrent(getClientUpload(uploadKey)))
+    return unsub
+  }, [uploadKey])
+
+  const handleFile = (file) => {
+    if (!file) return
+    const info = { name: file.name, size: `${(file.size / 1024).toFixed(0)} KB`, uploadedAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }
+    setClientUpload(uploadKey, info)
+    showToast(`${label} uploaded — your engagement team has been notified`)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragging(false)
+    handleFile(e.dataTransfer.files?.[0])
+  }
+
+  if (current) {
+    return (
+      <div className="mt-4 flex items-center gap-3 rounded-xl border border-emerald/30 bg-emerald/5 px-4 py-3">
+        <Paperclip className="h-5 w-5 shrink-0 text-emerald" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-navy">{current.name}</p>
+          <p className="text-xs text-slate-400">{current.size} · Uploaded {current.uploadedAt}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusChip label="Submitted" tone="emerald" />
+          <button onClick={() => { setClientUpload(uploadKey, null); showToast('Upload removed') }} className="text-slate-400 hover:text-alert-red">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={handleDrop}
+      className={`mt-4 cursor-pointer rounded-xl border-2 border-dashed px-6 py-5 text-center transition-colors ${dragging ? 'border-navy bg-navy/5' : 'border-slate-200 bg-slate-50 hover:border-navy/40 hover:bg-slate-100/50'}`}
+      onClick={() => fileRef.current?.click()}
+    >
+      <input ref={fileRef} type="file" accept={accept} className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
+      <Upload className="mx-auto mb-2 h-6 w-6 text-slate-400" />
+      <p className="text-sm font-semibold text-navy">{label}</p>
+      <p className="mt-0.5 text-xs text-slate-400">{description}</p>
+      <p className="mt-2 text-[10px] text-slate-300">Drag & drop or click to browse · PDF, DOCX, PNG accepted</p>
+    </div>
+  )
+}
+
 function getReportsData(fy) {
   const isComplete = fy === 'FY2023' || fy === 'FY2022'
   const qawaemRef = fy === 'FY2022' ? 'QAW-2022-62018' : fy === 'FY2023' ? 'QAW-2023-77203' : null
@@ -32,7 +91,7 @@ function getReportsData(fy) {
     engagementLetter: {
       available: true,
       filename: `Engagement Letter — ${fy}.pdf`,
-      size: '1.1MB',
+      size: '1.1 MB',
       issuedDate: fy === 'FY2022' ? '01 Aug 2022' : fy === 'FY2023' ? '01 Aug 2023' : '01 Aug 2024',
     },
     zakatReturn: {
@@ -44,14 +103,14 @@ function getReportsData(fy) {
     draftAFS: {
       available: isComplete,
       confirmed: isComplete,
-      filename: isComplete ? `Draft AFS — Kingdom Retail Holdings LLC — ${fy}.pdf` : null,
+      filename: isComplete ? `Draft Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null,
       pages: 24,
-      size: '2.8MB',
+      size: '2.8 MB',
     },
     finalAFS: {
       available: isComplete,
-      filename: isComplete ? `Final Signed AFS — Kingdom Retail Holdings LLC — ${fy}.pdf` : null,
-      size: '3.2MB',
+      filename: isComplete ? `Final Audited Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null,
+      size: '3.2 MB',
       issuedDate: isComplete ? issuedDate : null,
       qawaemRef: isComplete ? qawaemRef : null,
       filedDate: isComplete ? filedDate : null,
@@ -64,7 +123,7 @@ export default function ClientReports() {
   const { selectedFY } = useClientFY()
   const [comments, setComments] = useState([
     { id: 'c1', author: 'Analytix Audit Team', side: 'team', text: 'Please note the related party disclosure on Note 7 has been updated per your confirmation on 12 Oct.' },
-    { id: 'c2', author: 'You', side: 'client', text: 'Confirmed, looks correct. Note 12 — Zakat provision also reviewed.' },
+    { id: 'c2', author: 'You', side: 'client', text: 'Confirmed, the note is accurate. Note 12 (Zakat provision) has also been reviewed.' },
   ])
   const [newComment, setNewComment] = useState('')
   const [signedOff, setSignedOff] = useState(false)
@@ -81,7 +140,7 @@ export default function ClientReports() {
   }
 
   return (
-    <ClientLayout title="Reports & Documents">
+    <ClientLayout title="Reports &amp; Documents">
       <PageTransition>
         <AnimatePresence mode="wait">
           <motion.div
@@ -100,13 +159,13 @@ export default function ClientReports() {
             <div className="flex items-start gap-3 rounded-xl border border-amber/30 bg-amber/5 px-5 py-4">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber" />
               <p className="text-sm text-amber">
-                Documents in this section are prepared and shared by your Analytix audit team. Contact your auditor if anything is missing.
+                Documents in this section are issued by your Analytix engagement team. Where indicated, your signed copies are required to proceed. Contact your auditor for any queries.
               </p>
             </div>
 
-            {/* Bento grid */}
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              {/* Card 1 — Engagement Letter */}
+
+              {/* Card 1 — Engagement Letter + signed upload */}
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy/5">
@@ -114,12 +173,12 @@ export default function ClientReports() {
                   </div>
                   <div>
                     <h2 className="text-sm font-bold text-navy">Engagement Letter</h2>
-                    <p className="text-xs text-slate-500">Your official agreement with Analytix for this audit</p>
+                    <p className="text-xs text-slate-500">Formal engagement terms issued by Analytix</p>
                   </div>
                 </div>
                 {data.engagementLetter.available ? (
                   <>
-                    <StatusChip label="Shared by Analytix" tone="emerald" />
+                    <StatusChip label="Issued by Analytix" tone="emerald" />
                     <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
                       <FileText className="h-8 w-8 text-navy/40" />
                       <div className="flex-1 min-w-0">
@@ -127,16 +186,27 @@ export default function ClientReports() {
                         <p className="text-xs text-slate-400">{data.engagementLetter.size} · Issued {data.engagementLetter.issuedDate}</p>
                       </div>
                     </div>
-                    <button onClick={() => showToast('Downloading engagement letter...')} className="mt-4 w-full rounded-lg border border-navy px-4 py-2.5 text-sm font-semibold text-navy hover:bg-navy/5">
+                    <button onClick={() => showToast('Downloading engagement letter...')} className="mt-3 w-full rounded-lg border border-navy px-4 py-2.5 text-sm font-semibold text-navy hover:bg-navy/5">
                       <Download className="mr-2 inline h-4 w-4" /> Download
                     </button>
+
+                    {/* Signed EL upload */}
+                    <div className="mt-5 border-t border-slate-100 pt-5">
+                      <p className="text-xs font-semibold text-navy">Upload Signed Engagement Letter</p>
+                      <p className="mt-0.5 text-xs text-slate-400">Please sign and return the engagement letter to your auditor. Your submission will be visible to the engagement team.</p>
+                      <UploadZone
+                        uploadKey="signedEngagementLetter"
+                        label="Signed Engagement Letter"
+                        description="Upload the countersigned copy received from Analytix"
+                      />
+                    </div>
                   </>
                 ) : (
                   <StatusChip label="Not yet issued" tone="grey" />
                 )}
               </motion.div>
 
-              {/* Card 2 — Zakat Return */}
+              {/* Card 2 — Zakat Return + supporting docs upload */}
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10">
@@ -144,13 +214,13 @@ export default function ClientReports() {
                   </div>
                   <div>
                     <h2 className="text-sm font-bold text-navy">Zakat Return &amp; Tax Reports</h2>
-                    <p className="text-xs text-slate-500">Your Zakat and tax filings prepared by Analytix</p>
+                    <p className="text-xs text-slate-500">Zakat and tax filings prepared by Analytix</p>
                   </div>
                 </div>
                 {data.zakatReturn.available ? (
                   <>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <StatusChip label="Filed" tone="emerald" />
+                      <StatusChip label="Filed with ZATCA" tone="emerald" />
                       {data.zakatReturn.qawaemRef && (
                         <span className="rounded-full bg-navy/5 px-3 py-0.5 text-xs font-mono font-semibold text-navy">{data.zakatReturn.qawaemRef}</span>
                       )}
@@ -162,16 +232,27 @@ export default function ClientReports() {
                         <p className="text-xs text-slate-400">Filed {data.zakatReturn.filedDate}</p>
                       </div>
                     </div>
-                    <button onClick={() => showToast('Downloading Zakat return...')} className="mt-4 w-full rounded-lg border border-navy px-4 py-2.5 text-sm font-semibold text-navy hover:bg-navy/5">
+                    <button onClick={() => showToast('Downloading Zakat return...')} className="mt-3 w-full rounded-lg border border-navy px-4 py-2.5 text-sm font-semibold text-navy hover:bg-navy/5">
                       <Download className="mr-2 inline h-4 w-4" /> Download
                     </button>
                   </>
                 ) : (
                   <StatusChip label="In Preparation" tone="amber" />
                 )}
+
+                {/* Zakat supporting docs upload */}
+                <div className={`${data.zakatReturn.available ? 'mt-5 border-t border-slate-100 pt-5' : 'mt-4'}`}>
+                  <p className="text-xs font-semibold text-navy">Upload Zakat Supporting Documents</p>
+                  <p className="mt-0.5 text-xs text-slate-400">Submit signed declarations, ownership certificates, or other Zakat-related documents required by the engagement team.</p>
+                  <UploadZone
+                    uploadKey="zakatSupportingDocs"
+                    label="Zakat Supporting Documentation"
+                    description="Signed Zakat declarations, ZATCA correspondence, ownership schedule"
+                  />
+                </div>
               </motion.div>
 
-              {/* Card 3 — Draft AFS (full width) */}
+              {/* Card 3 — Draft AFS + signed upload (full width) */}
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
@@ -180,7 +261,7 @@ export default function ClientReports() {
                     </div>
                     <div>
                       <h2 className="text-sm font-bold text-navy">Draft Financial Statements</h2>
-                      <p className="text-xs text-slate-500">Please review carefully — your confirmation is needed before we issue the final version</p>
+                      <p className="text-xs text-slate-500">Review and confirm accuracy — your authorisation is required before the final report is issued</p>
                     </div>
                   </div>
                   {/* Demo role toggle */}
@@ -198,7 +279,7 @@ export default function ClientReports() {
                   <>
                     <motion.div animate={!data.draftAFS.confirmed && !signedOff ? { opacity: [1, 0.7, 1] } : {}} transition={{ duration: 2, repeat: Infinity }}>
                       <StatusChip
-                        label={signedOff || data.draftAFS.confirmed ? 'Confirmed by You' : 'Awaiting Your Review'}
+                        label={signedOff || data.draftAFS.confirmed ? 'Confirmed by Management' : 'Awaiting Management Review'}
                         tone={signedOff || data.draftAFS.confirmed ? 'emerald' : 'amber'}
                       />
                     </motion.div>
@@ -210,7 +291,7 @@ export default function ClientReports() {
                       </div>
                       <div className="flex gap-2">
                         <button onClick={() => showToast('Opening draft document...')} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">
-                          View Full Document
+                          View Document
                         </button>
                         <button onClick={() => showToast('Downloading draft...')} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">
                           <Download className="h-4 w-4" />
@@ -220,7 +301,7 @@ export default function ClientReports() {
 
                     {/* Comment thread */}
                     <div className="mt-5">
-                      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Comments</h3>
+                      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Review Comments</h3>
                       <div className="space-y-3 mb-3">
                         {comments.map((c) => (
                           <div key={c.id} className={`flex ${c.side === 'client' ? 'justify-end' : 'justify-start'}`}>
@@ -232,22 +313,22 @@ export default function ClientReports() {
                         ))}
                       </div>
                       <form onSubmit={handleAddComment} className="flex gap-2">
-                        <input value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Add a comment..." className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy" />
+                        <input value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Add a review comment..." className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy" />
                         <button type="submit" className="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">Post</button>
                       </form>
                     </div>
 
-                    {/* Sign-off */}
+                    {/* Management sign-off */}
                     <div className={`mt-5 rounded-xl p-5 ${isAuthorisedSignatory ? 'border border-emerald/30 bg-emerald/5' : 'border border-slate-200 bg-slate-50'}`}>
                       <div className="flex items-start gap-3">
                         {isAuthorisedSignatory ? (
                           <>
                             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald" />
                             <div className="flex-1">
-                              <p className="text-sm font-semibold text-navy">Account Owner Sign-Off</p>
-                              <p className="mt-0.5 text-xs text-slate-500">By confirming, you agree the draft financial statements are correct and authorise Analytix to issue the final version.</p>
+                              <p className="text-sm font-semibold text-navy">Management Representation — Account Owner</p>
+                              <p className="mt-0.5 text-xs text-slate-500">By confirming, management represents that the draft financial statements fairly present the company's financial position and authorises Analytix to issue the final signed audit report.</p>
                               {signedOff || data.draftAFS.confirmed ? (
-                                <p className="mt-3 text-sm font-semibold text-emerald">✓ Draft confirmed — final report will be issued shortly</p>
+                                <p className="mt-3 text-sm font-semibold text-emerald">✓ Management representation received — final report will be issued shortly</p>
                               ) : (
                                 <button onClick={() => setSignedOff(true)} className="mt-3 rounded-lg bg-emerald px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald/90">
                                   Confirm Draft Financial Statements
@@ -259,12 +340,23 @@ export default function ClientReports() {
                           <>
                             <Lock className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
                             <div>
-                              <p className="text-sm font-semibold text-slate-600">Sign-Off — Account Owner Only</p>
-                              <p className="mt-0.5 text-xs text-slate-400">Only the Account Owner can confirm the draft financial statements.</p>
+                              <p className="text-sm font-semibold text-slate-600">Management Representation — Account Owner Required</p>
+                              <p className="mt-0.5 text-xs text-slate-400">Confirmation of the draft financial statements must be provided by the designated Account Owner.</p>
                             </div>
                           </>
                         )}
                       </div>
+                    </div>
+
+                    {/* Signed Draft AFS upload */}
+                    <div className="mt-5 border-t border-slate-100 pt-5">
+                      <p className="text-xs font-semibold text-navy">Upload Signed Draft Financial Statements</p>
+                      <p className="mt-0.5 text-xs text-slate-400">Once reviewed and approved internally, upload the management-signed copy. This will be made available to your engagement team immediately.</p>
+                      <UploadZone
+                        uploadKey="signedDraftAFS"
+                        label="Signed Draft Financial Statements"
+                        description="Management-signed copy of the draft AFS as reviewed"
+                      />
                     </div>
                   </>
                 ) : (
@@ -280,7 +372,7 @@ export default function ClientReports() {
                   </div>
                   <div>
                     <h2 className="text-sm font-bold text-navy">Final Audited Financial Statements</h2>
-                    <p className="text-xs text-slate-500">Your completed, signed audit report</p>
+                    <p className="text-xs text-slate-500">Signed audit report — available upon completion of all review procedures</p>
                   </div>
                 </div>
 
@@ -301,7 +393,7 @@ export default function ClientReports() {
                       {[
                         { label: 'Qawaem Reference', value: data.finalAFS.qawaemRef },
                         { label: 'Filing Date', value: data.finalAFS.filedDate },
-                        { label: 'Auditor', value: 'Tariq Al-Harbi' },
+                        { label: 'Engagement Partner', value: 'Tariq Al-Harbi' },
                         { label: 'Status', value: 'Filed & Complete' },
                       ].map((f) => (
                         <div key={f.label} className="rounded-lg bg-slate-50 px-3 py-2.5">
@@ -313,11 +405,12 @@ export default function ClientReports() {
                   </>
                 ) : (
                   <>
-                    <StatusChip label="Pending — Draft must be confirmed first" tone="grey" />
-                    <p className="mt-3 text-xs text-slate-400">The final report will be available once you confirm the draft above.</p>
+                    <StatusChip label="Pending — Management confirmation required" tone="grey" />
+                    <p className="mt-3 text-xs text-slate-400">The final audited report will be issued once the draft financial statements have been confirmed by management above.</p>
                   </>
                 )}
               </motion.div>
+
             </div>
           </motion.div>
         </AnimatePresence>

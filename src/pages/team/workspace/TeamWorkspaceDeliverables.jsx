@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Check } from 'lucide-react'
+import { Check, Paperclip, AlertCircle } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { useToast } from '../../../components/shared/Toast'
 import { teamDeliverables } from '../../../data/sampleData'
+import { getAllClientUploads, onUploadsChange } from '../../../data/clientUploads'
 
 const { draftAfs, finalAfs, qawaem, timeline } = teamDeliverables
 
@@ -26,6 +27,49 @@ function Field({ label, value }) {
     <div className="flex items-center justify-between border-b border-slate-50 py-2 text-xs last:border-0">
       <span className="text-slate-400">{label}</span>
       <span className="font-medium text-navy">{value || '—'}</span>
+    </div>
+  )
+}
+
+function ClientSignedDocumentsPanel() {
+  const [uploads, setUploads] = useState(getAllClientUploads)
+  useEffect(() => onUploadsChange(() => setUploads(getAllClientUploads())), [])
+
+  const ITEMS = [
+    { key: 'signedEngagementLetter', label: 'Signed Engagement Letter' },
+    { key: 'signedDraftAFS', label: 'Signed Draft Financial Statements' },
+    { key: 'zakatSupportingDocs', label: 'Zakat Supporting Documentation' },
+  ]
+
+  const hasAny = ITEMS.some((i) => uploads[i.key])
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-navy">Client-Submitted Signed Documents</h2>
+        {!hasAny && <span className="rounded-full bg-amber/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber border border-amber/30">Awaiting Client Submission</span>}
+        {hasAny && <span className="rounded-full bg-emerald/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald border border-emerald/30">Documents Received</span>}
+      </div>
+      <div className="space-y-2.5">
+        {ITEMS.map(({ key, label }) => {
+          const doc = uploads[key]
+          return (
+            <div key={key} className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${doc ? 'border-emerald/30 bg-emerald/5' : 'border-slate-100 bg-slate-50'}`}>
+              {doc ? <Paperclip className="h-4 w-4 shrink-0 text-emerald" /> : <AlertCircle className="h-4 w-4 shrink-0 text-slate-300" />}
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-navy">{label}</p>
+                {doc ? (
+                  <p className="text-[11px] text-slate-500 truncate">{doc.name} · {doc.size} · {doc.uploadedAt}</p>
+                ) : (
+                  <p className="text-[11px] text-slate-400">Not yet submitted by client</p>
+                )}
+              </div>
+              {doc && <span className="shrink-0 rounded-full bg-emerald text-white px-2 py-0.5 text-[10px] font-bold">Received</span>}
+            </div>
+          )
+        })}
+      </div>
+      <p className="mt-3 text-[11px] text-slate-400">Documents submitted by the client are reflected here in real time.</p>
     </div>
   )
 }
@@ -121,6 +165,8 @@ export default function TeamWorkspaceDeliverables() {
               </div>
             </SectionCard>
           </div>
+
+          <ClientSignedDocumentsPanel />
 
           {/* Timeline */}
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
