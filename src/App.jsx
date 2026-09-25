@@ -1,5 +1,31 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import { Component } from 'react'
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { error: null }
+  }
+  static getDerivedStateFromError(error) {
+    return { error }
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding: '2rem', fontFamily: 'monospace', background: '#080C18', color: '#F1F5F9', minHeight: '100vh' }}>
+          <h2 style={{ color: '#E8323C', marginBottom: '1rem' }}>Runtime Error</h2>
+          <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '13px', color: '#94A3B8' }}>
+            {this.state.error?.message}
+            {'\n\n'}
+            {this.state.error?.stack}
+          </pre>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 import { ToastProvider } from './components/shared/Toast'
 import { ModalProvider } from './components/shared/Modal'
@@ -141,17 +167,19 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <ToastProvider>
-          <ModalProvider>
-            <ClientFYProvider>
-              <TBProvider>
-                <AnimatedRoutes />
-              </TBProvider>
-            </ClientFYProvider>
-          </ModalProvider>
-        </ToastProvider>
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <ToastProvider>
+            <ModalProvider>
+              <ClientFYProvider>
+                <TBProvider>
+                  <AnimatedRoutes />
+                </TBProvider>
+              </ClientFYProvider>
+            </ModalProvider>
+          </ToastProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   )
 }
