@@ -913,55 +913,41 @@ export const REQ_STATUS_TONE = {
 export const ROLES = {
   client: {
     id: 'client',
-    label: 'Client Portal',
+    label: 'Client Login',
     name: clientPortal.clientName,
-    who: 'Client portal — engagement tracker, requirements & queries',
+    who: 'Client portal — engagement tracker, requirements & audit queries',
     route: '/client/dashboard',
   },
-  'audit-lead': {
-    id: 'audit-lead',
-    label: 'Audit Lead',
+  'execution-team': {
+    id: 'execution-team',
+    label: 'Execution Team',
     name: 'Rijin Philip · Audit Lead',
-    who: 'Engagement file — tracker, requirements, testing & review',
+    who: 'Engagement file — requirements, fieldwork, testing & deliverables',
     route: '/team/dashboard',
   },
-  'audit-associate': {
-    id: 'audit-associate',
-    label: 'Audit Associate',
-    name: 'Pavithra Joy · Audit Associate',
-    who: 'Assigned files — data collection, sampling & schedules',
-    route: '/team/dashboard',
-  },
-  'audit-manager': {
-    id: 'audit-manager',
-    label: 'Audit Manager',
-    name: 'Ansa Davis · Team Lead',
-    who: 'All clients — engagement, portfolio, review & team',
+  'audit-management': {
+    id: 'audit-management',
+    label: 'Audit Management',
+    name: 'Ansa Davis · Audit Manager',
+    who: 'Portfolio oversight, team workload, escalations & review',
     route: '/manager/dashboard',
   },
-  'assistant-manager': {
-    id: 'assistant-manager',
-    label: 'Assistant Manager',
-    name: 'Assistant Manager',
-    who: 'Team workload, allocation & file status board',
-    route: '/manager/dashboard',
-  },
-  'front-office': {
-    id: 'front-office',
-    label: 'Front Office',
+  'sales-fe': {
+    id: 'sales-fe',
+    label: 'Sales & FE Operations',
     name: 'Layla Al-Khatib · Front Office',
-    who: 'Client intake, lead pipeline & proposals',
+    who: 'Client intake, lead pipeline, proposals & front-office coordination',
     route: '/fo/dashboard',
   },
-  management: {
-    id: 'management',
-    label: 'Management',
+  managerial: {
+    id: 'managerial',
+    label: 'Managerial',
     name: 'Mohammed Al-Rashid · Partner',
-    who: 'Firm-wide portfolio, analytics & quality control',
+    who: 'Firm-wide portfolio, analytics, quality control & partner reporting',
     route: '/management/dashboard',
   },
 }
-export const ROLE_ORDER = ['client', 'audit-lead', 'audit-associate', 'audit-manager', 'assistant-manager', 'front-office', 'management']
+export const ROLE_ORDER = ['client', 'execution-team', 'audit-management', 'sales-fe', 'managerial']
 
 // ── Module 3 — Audit Team Portal ────────────────────────────────────────────
 // Logged-in user throughout Module 3.

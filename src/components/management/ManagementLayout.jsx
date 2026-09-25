@@ -5,6 +5,7 @@ import { LayoutDashboard, BarChart3, Users2, ScrollText, Bell } from 'lucide-rea
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
+import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import { mgmtUser, mgmtNotifications } from '../../data/sampleData'
 
@@ -160,6 +161,8 @@ function ManagementHeader({ title }) {
         </span>
 
         <NotificationsDropdown />
+
+        <ThemeToggle variant="dark" />
 
         <ExitDemoButton />
 

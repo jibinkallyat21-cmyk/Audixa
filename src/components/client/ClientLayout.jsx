@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import ExitDemoButton from '../shared/ExitDemoButton'
+import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import ClientNotificationsPanel from './ClientNotificationsPanel'
 import { clientPortal } from '../../data/sampleData'
@@ -297,6 +298,7 @@ function ClientHeader({ title }) {
         <LiveClock />
         <FYDropdown />
         <ClientNotificationsPanel />
+        <ThemeToggle variant="dark" />
         <ExitDemoButton />
         <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid ${D.border}` }}>
           KR

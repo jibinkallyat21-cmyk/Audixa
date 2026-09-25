@@ -59,6 +59,7 @@ import ManagementNotifications from './pages/management/ManagementNotifications'
 
 import { ClientFYProvider } from './context/ClientFYContext'
 import { TBProvider } from './context/TBContext'
+import { ThemeProvider } from './context/ThemeContext'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -140,15 +141,17 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <ModalProvider>
-          <ClientFYProvider>
-            <TBProvider>
-              <AnimatedRoutes />
-            </TBProvider>
-          </ClientFYProvider>
-        </ModalProvider>
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <ModalProvider>
+            <ClientFYProvider>
+              <TBProvider>
+                <AnimatedRoutes />
+              </TBProvider>
+            </ClientFYProvider>
+          </ModalProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

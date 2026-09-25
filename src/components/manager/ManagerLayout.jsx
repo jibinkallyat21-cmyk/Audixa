@@ -14,6 +14,7 @@ import {
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
+import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import { managerUser, managerNotifications } from '../../data/sampleData'
 
@@ -182,6 +183,8 @@ function ManagerHeader({ title }) {
         </span>
 
         <NotificationsDropdown />
+
+        <ThemeToggle variant="dark" />
 
         <ExitDemoButton />
 

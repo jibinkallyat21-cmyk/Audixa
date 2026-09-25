@@ -5,6 +5,7 @@ import PageTransition from '../../components/shared/PageTransition'
 import AuthLeftPanel from '../../components/shared/AuthLeftPanel'
 import { AnalytixMark } from '../../components/shared/AnalytixLogo'
 import Footer from '../../components/shared/Footer'
+import ThemeToggle from '../../components/shared/ThemeToggle'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
 
 const DEMO_ROLES = ROLE_ORDER.map((id) => ({
@@ -99,6 +100,10 @@ export default function Login() {
               ← Back
             </button>
           )}
+
+          <div className="absolute right-6 top-6 lg:right-12 lg:top-12">
+            <ThemeToggle />
+          </div>
 
           <div className="flex flex-1 items-center justify-center p-8 lg:p-12">
             <div className="w-full max-w-[360px]">

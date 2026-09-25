@@ -12,6 +12,7 @@ import {
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
+import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import { foUser } from '../../data/sampleData'
 
@@ -117,6 +118,8 @@ function FrontOfficeHeader({ title }) {
             4
           </span>
         </motion.button>
+
+        <ThemeToggle variant="dark" />
 
         <ExitDemoButton />
 

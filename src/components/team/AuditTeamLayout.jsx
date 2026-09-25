@@ -15,6 +15,7 @@ import {
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
+import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import { useTeamRole } from '../../hooks/useTeamRole'
 import { teamUser, teamNotifications } from '../../data/sampleData'
@@ -212,6 +213,8 @@ function TeamHeader({ title }) {
         </span>
 
         <NotificationsDropdown />
+
+        <ThemeToggle variant="dark" />
 
         <ExitDemoButton />
 

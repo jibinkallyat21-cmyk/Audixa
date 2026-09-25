@@ -192,6 +192,84 @@ button:not(:disabled):active {
 }
 
 /* ============================================================
+   Dark mode — toggled via html.dark (ThemeContext)
+   Overrides the light-mode utility classes used throughout
+   the team/manager/FO/management portals.
+   ============================================================ */
+
+html.dark {
+  color-scheme: dark;
+}
+html.dark body {
+  background-color: #080C18;
+  color: #CBD5E1;
+}
+html.dark h1, html.dark h2, html.dark h3 {
+  color: #F1F5F9;
+}
+
+/* Page / layout backgrounds */
+html.dark .bg-background { background-color: #080C18 !important; }
+html.dark .bg-white        { background-color: #0F1629 !important; }
+html.dark .bg-slate-50     { background-color: #0A1225 !important; }
+html.dark .bg-slate-100    { background-color: #0F1629 !important; }
+html.dark .bg-gray-50      { background-color: #0A1225 !important; }
+
+/* Borders */
+html.dark .border-slate-200,
+html.dark .border-slate-100,
+html.dark .border-gray-200  { border-color: rgba(255,255,255,0.08) !important; }
+html.dark .border-slate-300 { border-color: rgba(255,255,255,0.12) !important; }
+html.dark .divide-slate-200 > * + * { border-color: rgba(255,255,255,0.06) !important; }
+
+/* Text */
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700    { color: #F1F5F9 !important; }
+html.dark .text-slate-600,
+html.dark .text-gray-600    { color: #CBD5E1 !important; }
+html.dark .text-slate-500,
+html.dark .text-gray-500    { color: #94A3B8 !important; }
+html.dark .text-slate-400,
+html.dark .text-gray-400    { color: #64748B !important; }
+
+/* Inputs */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="search"],
+html.dark textarea,
+html.dark select {
+  background-color: rgba(255,255,255,0.05) !important;
+  color: #F1F5F9 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: #475569 !important; }
+
+/* Shadow override for dark cards */
+html.dark .shadow-sm {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+html.dark .hover\:shadow-lg:hover,
+html.dark .hover\:shadow-xl:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+
+/* Login page dark overrides (hardcoded hex classes) */
+html.dark .bg-\[\#F8FAFC\],
+html.dark .bg-\[\#F1F5F9\]  { background-color: #0A0E1C !important; }
+html.dark .text-\[\#0D1B2A\] { color: #F1F5F9 !important; }
+html.dark .text-\[\#374151\] { color: #CBD5E1 !important; }
+html.dark .text-\[\#525f71\] { color: #94A3B8 !important; }
+html.dark .text-\[\#9CA3AF\] { color: #475569 !important; }
+html.dark .border-\[\#E2E8F0\] { border-color: rgba(255,255,255,0.08) !important; }
+html.dark .border-b.border-\[\#E2E8F0\] { border-color: rgba(255,255,255,0.08) !important; }
+
+/* ============================================================
    Premium redesign pass — depth, glass, and 3D surface treatment.
    Scoped to element type (aside/header), not the bg-navy utility
    itself, since bg-navy is also used on small chips/buttons/bubbles
