@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Shield, Activity, Users } from 'lucide-react'
+import { Shield, LineChart, Users } from 'lucide-react'
 import ParticleField from './ParticleField'
 import { AnalytixMark } from './AnalytixLogo'
 
 const BENEFITS = [
   { Icon: Shield, label: 'AI-verified document processing' },
-  { Icon: Activity, label: 'Real-time engagement tracking' },
+  { Icon: LineChart, label: 'Real-time engagement tracking' },
   { Icon: Users, label: 'Seamless client collaboration' },
 ]
 

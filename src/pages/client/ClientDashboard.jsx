@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Lock, CheckCircle2, AlertCircle, FileText, ChevronRight,
-  Calendar, ChevronDown, X, Send, TrendingUp, Search,
+  Calendar, ChevronDown, X, Send, TrendingUp, Search, LineChart,
 } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import ClientGreeting from '../../components/client/ClientGreeting'
@@ -402,7 +402,7 @@ export default function ClientDashboard() {
               {/* Activity log link — always visible at bottom */}
               <div className="shrink-0 px-4 py-3" style={{ borderTop: `1px solid ${D.border}` }}>
                 <Link to="/client/activity" className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand/80 transition-colors">
-                  <Activity className="h-3.5 w-3.5" />
+                  <LineChart className="h-3.5 w-3.5" />
                   View Full Activity Log
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
