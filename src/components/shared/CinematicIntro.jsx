@@ -143,17 +143,6 @@ export default function CinematicIntro() {
               <AnalytixMark size={72} />
             </motion.div>
 
-            {/* Beat 3 — ANALYTIX wordmark */}
-            <motion.p
-              className="mt-5 text-[15px] font-black text-white"
-              style={{ letterSpacing: '0.2em' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2, duration: 0.6, ease: SPRING_EASE }}
-            >
-              ANALYTIX
-            </motion.p>
-
             {/* Beat 4 — AUDIT 360: GSAP letter reveal + sweeping light, metallic gradient fill */}
             <div ref={wordRef} className="relative mt-4 flex overflow-hidden" style={{ perspective: 600 }}>
               {LETTERS.map((letter, i) => (
