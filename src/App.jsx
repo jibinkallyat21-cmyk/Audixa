@@ -57,6 +57,7 @@ import ManagementStaff from './pages/management/ManagementStaff'
 import ManagementLog from './pages/management/ManagementLog'
 import ManagementNotifications from './pages/management/ManagementNotifications'
 
+import { ClientFYProvider } from './context/ClientFYContext'
 import { TBProvider } from './context/TBContext'
 
 function AnimatedRoutes() {
@@ -76,25 +77,25 @@ function AnimatedRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Client */}
-        <Route path="/client/dashboard" element={<TBProvider><ClientDashboard /></TBProvider>} />
-        <Route path="/client/documents" element={<TBProvider><ClientDocuments /></TBProvider>} />
+        <Route path="/client/dashboard" element={<ClientDashboard />} />
+        <Route path="/client/documents" element={<ClientDocuments />} />
         <Route path="/client/requirements" element={<Navigate to="/client/documents" replace />} />
-        <Route path="/client/queries" element={<TBProvider><ClientQueries /></TBProvider>} />
-        <Route path="/client/reports" element={<TBProvider><ClientReports /></TBProvider>} />
+        <Route path="/client/queries" element={<ClientQueries />} />
+        <Route path="/client/reports" element={<ClientReports />} />
         <Route path="/client/draft-review" element={<Navigate to="/client/reports" replace />} />
         <Route path="/client/deliverables" element={<Navigate to="/client/reports" replace />} />
-        <Route path="/client/activity" element={<TBProvider><ClientActivityLog /></TBProvider>} />
-        <Route path="/client/working-tb" element={<TBProvider><ClientWorkingTB /></TBProvider>} />
+        <Route path="/client/activity" element={<ClientActivityLog />} />
+        <Route path="/client/working-tb" element={<ClientWorkingTB />} />
 
         {/* Audit Team (Module 3) */}
         <Route path="/team/dashboard" element={<TeamDashboard />} />
         <Route path="/team/files" element={<TeamFiles />} />
-        <Route path="/team/workspace/requirements" element={<TBProvider><TeamWorkspaceRequirements /></TBProvider>} />
-        <Route path="/team/workspace/queries" element={<TBProvider><TeamWorkspaceQueries /></TBProvider>} />
-        <Route path="/team/workspace/procedures" element={<TBProvider><TeamWorkspaceProcedures /></TBProvider>} />
-        <Route path="/team/workspace/working-tb" element={<TBProvider><TeamWorkspaceWorkingTB /></TBProvider>} />
-        <Route path="/team/workspace/deliverables" element={<TBProvider><TeamWorkspaceDeliverables /></TBProvider>} />
-        <Route path="/team/workspace/audit-trail" element={<TBProvider><TeamWorkspaceAuditTrail /></TBProvider>} />
+        <Route path="/team/workspace/requirements" element={<TeamWorkspaceRequirements />} />
+        <Route path="/team/workspace/queries" element={<TeamWorkspaceQueries />} />
+        <Route path="/team/workspace/procedures" element={<TeamWorkspaceProcedures />} />
+        <Route path="/team/workspace/working-tb" element={<TeamWorkspaceWorkingTB />} />
+        <Route path="/team/workspace/deliverables" element={<TeamWorkspaceDeliverables />} />
+        <Route path="/team/workspace/audit-trail" element={<TeamWorkspaceAuditTrail />} />
         <Route path="/team/tasks" element={<TeamTasks />} />
         <Route path="/team/notifications" element={<TeamNotifications />} />
         <Route path="/team/client/al-marai" element={<TeamClientDashboard />} />
@@ -141,7 +142,11 @@ export default function App() {
     <BrowserRouter>
       <ToastProvider>
         <ModalProvider>
-          <AnimatedRoutes />
+          <ClientFYProvider>
+            <TBProvider>
+              <AnimatedRoutes />
+            </TBProvider>
+          </ClientFYProvider>
         </ModalProvider>
       </ToastProvider>
     </BrowserRouter>

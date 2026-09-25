@@ -325,9 +325,5 @@ function ClientLayoutInner({ title, children }) {
 }
 
 export default function ClientLayout({ title, children }) {
-  return (
-    <ClientFYProvider>
-      <ClientLayoutInner title={title}>{children}</ClientLayoutInner>
-    </ClientFYProvider>
-  )
+  return <ClientLayoutInner title={title}>{children}</ClientLayoutInner>
 }
