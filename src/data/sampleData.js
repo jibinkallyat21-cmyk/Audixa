@@ -2110,6 +2110,61 @@ export const mgmtRecentActivity = [
   { title: 'Stage Changed', client: 'Noor FinTech Micro-Lending', dept: 'MISCPA', user: 'System', timestamp: '03 Nov 2024, 09:00 AM' },
 ]
 
+// ── Management Dashboard — new data blocks ──────────────────────────────────
+
+// Total turnover across all 148 engaged files (FY2025)
+export const mgmtTotalTurnover = { value: 'SAR 4.84B', raw: 4840000000, note: '148 files · FY2025' }
+
+// FO-manager-wise file allocation
+export const mgmtFOFiles = [
+  { fo: 'AL', name: 'Allen', role: 'FO Senior', color: '#DC2626', total: 36, active: 32, won: 14, pipeline: 6 },
+  { fo: 'MA', name: 'M Ali', role: 'Front Officer', color: '#D97706', total: 35, active: 30, won: 11, pipeline: 8 },
+  { fo: 'FY', name: 'Fayis', role: 'Front Officer', color: '#2563EB', total: 29, active: 25, won: 9, pipeline: 5 },
+  { fo: 'UV', name: 'Uvais', role: 'Front Officer', color: '#0F766E', total: 27, active: 23, won: 8, pipeline: 4 },
+  { fo: 'AZ', name: 'Azhar', role: 'Front Officer', color: '#7C3AED', total: 21, active: 17, won: 6, pipeline: 5 },
+]
+
+// AR summary — clients with pending payments
+export const mgmtARPending = [
+  { client: 'Al-Yamamah Steel Industries', code: 'ZK-011', fee: 95000, paid: 47500, balance: 47500, daysOverdue: 42, dept: 'ABCPA', contact: 'Nabil Al-Yamamah', phone: '+966 11 499 7100', status: 'Overdue' },
+  { client: 'Al-Rowad Trading Co.', code: 'ZK-001', fee: 38000, paid: 19000, balance: 19000, daysOverdue: 28, dept: 'ABCPA', contact: 'Khalid Al-Rowad', phone: '+966 11 462 7788', status: 'Overdue' },
+  { client: 'Saudi Petrochem Logistics', code: 'ZK-018', fee: 120000, paid: 60000, balance: 60000, daysOverdue: 18, dept: 'MISCPA', contact: 'Ibrahim Al-Saud', phone: '+966 13 551 2200', status: 'Overdue' },
+  { client: 'Najd Manufacturing Ltd.', code: 'ZK-002', fee: 72000, paid: 36000, balance: 36000, daysOverdue: 14, dept: 'MISCPA', contact: 'Sara Al-Najdi', phone: '+966 13 331 4020', status: 'Overdue' },
+  { client: 'Hijaz Logistics WLL', code: 'ZK-006', fee: 44000, paid: 22000, balance: 22000, daysOverdue: 7, dept: 'ABCPA', contact: 'Yousef Hijaz', phone: '+966 12 770 1123', status: 'Due Soon' },
+  { client: 'Qassim Petrochemical Co.', code: 'ZK-009', fee: 88000, paid: 44000, balance: 44000, daysOverdue: 3, dept: 'ABCPA', contact: 'Faris Al-Qassim', phone: '+966 16 433 8800', status: 'Due Soon' },
+  { client: 'Salam Services WLL', code: 'ZK-004', fee: 28000, paid: 14000, balance: 14000, daysOverdue: 0, dept: 'MISCPA', contact: 'Nada Salam', phone: '+966 11 208 5567', status: 'Due Today' },
+]
+
+// Full escalation history
+export const mgmtAllEscalations = [
+  { id: 'ESC-041', client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', tier: 3, daysOverdue: 18, lead: 'Fahad Al-Otaibi', date: '05 Nov 2024', reason: 'TB schedules outstanding >14 days; client unresponsive to 3 follow-ups', status: 'Open', raisedBy: 'Tariq Al-Ghamdi' },
+  { id: 'ESC-040', client: 'Saudi Petrochem Logistics', dept: 'MISCPA', tier: 3, daysOverdue: 14, lead: 'Khalid Al-Farsi', date: '04 Nov 2024', reason: 'Statutory deadline breach imminent; audit plan not signed off', status: 'Open', raisedBy: 'Khalid Al-Farsi' },
+  { id: 'ESC-039', client: 'Dammam Hospitality', dept: 'ABCPA', tier: 2, daysOverdue: 8, lead: 'Majed Al-Subaie', date: '04 Nov 2024', reason: 'Related party disclosures disputed; management representation delayed', status: 'Under Review', raisedBy: 'Majed Al-Subaie' },
+  { id: 'ESC-038', client: 'Al-Rajhi Heavy Industries', dept: 'ABCPA', tier: 2, daysOverdue: 11, lead: 'Rijin Philip', date: '02 Nov 2024', reason: 'Cash & bank confirmations not received from 2 banks after 30-day chase', status: 'Resolved', raisedBy: 'Rijin Philip' },
+  { id: 'ESC-037', client: 'Noor FinTech Micro-Lending', dept: 'MISCPA', tier: 2, daysOverdue: 6, lead: 'Pavithra Joy', date: '01 Nov 2024', reason: 'Provisioning policy disagreement — client seeking qualified opinion', status: 'Resolved', raisedBy: 'Ansa Davis' },
+  { id: 'ESC-036', client: 'Gulf Contracting Est.', dept: 'ABCPA', tier: 3, daysOverdue: 22, lead: 'Jefin Jose', date: '30 Oct 2024', reason: 'Contract work-in-progress valuation dispute; legal counsel involved', status: 'Resolved', raisedBy: 'Tariq Al-Ghamdi' },
+  { id: 'ESC-035', client: 'Tabuk Foods Co.', dept: 'MISCPA', tier: 2, daysOverdue: 5, lead: 'Deepak Suresh', date: '28 Oct 2024', reason: 'Inventory count discrepancy — SAR 1.8M variance unresolved at cut-off', status: 'Resolved', raisedBy: 'Khalid Al-Farsi' },
+  { id: 'ESC-034', client: 'Al-Andalus Pharmaceutical', dept: 'MISCPA', tier: 2, daysOverdue: 9, lead: 'Yousef Al-Dosari', date: '25 Oct 2024', reason: 'Regulatory licence not renewed; going concern implication flagged', status: 'Resolved', raisedBy: 'Lina Al-Zahrani' },
+  { id: 'ESC-033', client: 'Arabian Cloud Computing', dept: 'ABCPA', tier: 2, daysOverdue: 4, lead: 'Sara Al-Qahtani', date: '22 Oct 2024', reason: 'Revenue recognition policy — IFRS 15 variable consideration treatment disputed', status: 'Resolved', raisedBy: 'Noura Al-Zahrani' },
+  { id: 'ESC-032', client: 'Jeddah Hospitality Holdings', dept: 'ABCPA', tier: 3, daysOverdue: 19, lead: 'Omar Al-Harbi', date: '18 Oct 2024', reason: 'Prior year restatement identified; comparative figures to be restated', status: 'Resolved', raisedBy: 'Tariq Al-Ghamdi' },
+]
+
+// Searchable client directory (full 148-file universe — abbreviated for demo)
+export const mgmtClientDirectory = [
+  { code: 'ZK-001', name: 'Al-Rowad Trading Co.', sector: 'Trading', city: 'Riyadh', fy: 'FY2025', turnover: 'SAR 42.0M', fee: 'SAR 38K', progress: 58, status: 'crit', phase: 'Under Audit', lead: 'Rijin Philip', fo: 'Fayis', dept: 'ABCPA', feePaid: 'SAR 19K', balance: 'SAR 19K', dueDate: '20 Sep 2026', exceptions: 3 },
+  { code: 'ZK-002', name: 'Najd Manufacturing Ltd.', sector: 'Manufacturing', city: 'Dammam', fy: 'FY2025', turnover: 'SAR 96.4M', fee: 'SAR 72K', progress: 34, status: 'warn', phase: 'Data Collection', lead: 'Deepak Suresh', fo: 'Uvais', dept: 'MISCPA', feePaid: 'SAR 36K', balance: 'SAR 36K', dueDate: '15 Oct 2026', exceptions: 1 },
+  { code: 'ZK-003', name: 'Gulf Contracting Est.', sector: 'Contracting', city: 'Jeddah', fy: 'FY2025', turnover: 'SAR 61.8M', fee: 'SAR 56K', progress: 82, status: 'ok', phase: 'Draft Issued', lead: 'Ansa Davis', fo: 'M Ali', dept: 'ABCPA', feePaid: 'SAR 56K', balance: 'SAR 0', dueDate: '30 Sep 2026', exceptions: 0 },
+  { code: 'ZK-004', name: 'Salam Services WLL', sector: 'Services', city: 'Riyadh', fy: 'FY2025', turnover: 'SAR 12.3M', fee: 'SAR 28K', progress: 18, status: 'warn', phase: 'Onboarding', lead: 'Ansa Davis', fo: 'Azhar', dept: 'MISCPA', feePaid: 'SAR 14K', balance: 'SAR 14K', dueDate: '30 Nov 2026', exceptions: 2 },
+  { code: 'ZK-005', name: 'Tabuk Foods Co.', sector: 'FMCG', city: 'Tabuk', fy: 'FY2025', turnover: 'SAR 78.9M', fee: 'SAR 65K', progress: 94, status: 'ok', phase: 'Finalized', lead: 'Deepak Suresh', fo: 'Allen', dept: 'MISCPA', feePaid: 'SAR 65K', balance: 'SAR 0', dueDate: '12 Sep 2026', exceptions: 0 },
+  { code: 'ZK-006', name: 'Hijaz Logistics WLL', sector: 'Logistics', city: 'Jeddah', fy: 'FY2025', turnover: 'SAR 33.5M', fee: 'SAR 44K', progress: 46, status: 'warn', phase: 'Under Audit', lead: 'Rijin Philip', fo: 'Fayis', dept: 'ABCPA', feePaid: 'SAR 22K', balance: 'SAR 22K', dueDate: '31 Oct 2026', exceptions: 1 },
+  { code: 'ZK-007', name: 'Al-Rajhi Heavy Industries', sector: 'Heavy Industries', city: 'Riyadh', fy: 'FY2025', turnover: 'SAR 214.0M', fee: 'SAR 185K', progress: 67, status: 'warn', phase: 'Under Audit', lead: 'Rijin Philip', fo: 'Allen', dept: 'ABCPA', feePaid: 'SAR 92K', balance: 'SAR 93K', dueDate: '15 Oct 2026', exceptions: 2 },
+  { code: 'ZK-008', name: 'Riyadh Fintech Group', sector: 'FinTech', city: 'Riyadh', fy: 'FY2025', turnover: 'SAR 48.7M', fee: 'SAR 52K', progress: 71, status: 'ok', phase: 'Under Audit', lead: 'Sara Al-Qahtani', fo: 'Uvais', dept: 'ABCPA', feePaid: 'SAR 52K', balance: 'SAR 0', dueDate: '28 Oct 2026', exceptions: 0 },
+  { code: 'ZK-009', name: 'Qassim Petrochemical Co.', sector: 'Petrochemicals', city: 'Buraidah', fy: 'FY2025', turnover: 'SAR 182.0M', fee: 'SAR 88K', progress: 55, status: 'warn', phase: 'Under Audit', lead: 'Omar Al-Harbi', fo: 'M Ali', dept: 'ABCPA', feePaid: 'SAR 44K', balance: 'SAR 44K', dueDate: '10 Nov 2026', exceptions: 3 },
+  { code: 'ZK-010', name: 'Eastern Petrochemical Supplies', sector: 'Petrochemicals', city: 'Dhahran', fy: 'FY2025', turnover: 'SAR 126.4M', fee: 'SAR 98K', progress: 42, status: 'warn', phase: 'Data Collection', lead: 'Yousef Al-Dosari', fo: 'Azhar', dept: 'MISCPA', feePaid: 'SAR 49K', balance: 'SAR 49K', dueDate: '20 Nov 2026', exceptions: 1 },
+  { code: 'ZK-011', name: 'Al-Yamamah Steel Industries', sector: 'Steel', city: 'Riyadh', fy: 'FY2025', turnover: 'SAR 310.0M', fee: 'SAR 95K', progress: 28, status: 'crit', phase: 'Data Collection', lead: 'Fahad Al-Otaibi', fo: 'Allen', dept: 'ABCPA', feePaid: 'SAR 47K', balance: 'SAR 48K', dueDate: '05 Nov 2026', exceptions: 5 },
+  { code: 'ZK-012', name: 'Arabian Cloud Computing', sector: 'Technology', city: 'Riyadh', fy: 'FY2025', turnover: 'SAR 35.2M', fee: 'SAR 41K', progress: 88, status: 'ok', phase: 'Draft Issued', lead: 'Sara Al-Qahtani', fo: 'Fayis', dept: 'ABCPA', feePaid: 'SAR 41K', balance: 'SAR 0', dueDate: '25 Sep 2026', exceptions: 0 },
+]
+
 // ── Firm Analytics (screen 35) ───────────────────────────────────────────────
 export const mgmtReportingPeriods = ['Q4 FY2024 (Oct–Dec)', 'Q3 FY2024', 'Q2 FY2024', 'Full Year FY2024']
 

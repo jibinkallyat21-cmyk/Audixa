@@ -174,17 +174,17 @@ function ManagementHeader({ title }) {
   )
 }
 
-export default function ManagementLayout({ title, children }) {
+export default function ManagementLayout({ title, children, fullHeight = false }) {
   return (
     <SidebarDrawerProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className={`flex w-full bg-background ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
         <MobileSidebarWrap>
           <ManagementSidebar />
         </MobileSidebarWrap>
-        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
           <ManagementHeader title={title} />
-          <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">{children}</main>
-          <Footer />
+          <main className={`min-w-0 flex-1 ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'} px-4 py-5 sm:px-6 sm:py-6`}>{children}</main>
+          {!fullHeight && <Footer />}
         </div>
       </div>
     </SidebarDrawerProvider>
