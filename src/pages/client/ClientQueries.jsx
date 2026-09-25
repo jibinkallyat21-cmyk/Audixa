@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Paperclip, Smile, Send, Check, CheckCheck, CalendarDays } from 'lucide-react'
+import { Search, Paperclip, Send, Check, CheckCheck, X } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
-import MeetingRequestModal from '../../components/client/MeetingRequestModal'
 import { clientPortal, clientQueries, queryThreadMessages } from '../../data/sampleData'
 
 const FILTERS = [
@@ -19,8 +18,9 @@ export default function ClientQueries() {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [reply, setReply] = useState('')
+  const [attachment, setAttachment] = useState(null)
   const [extraMessages, setExtraMessages] = useState({})
-  const [meetingModalOpen, setMeetingModalOpen] = useState(false)
+  const fileRef = useRef(null)
 
   const activeFilter = FILTERS.find((f) => f.id === filter)
   const visibleQueries = clientQueries.filter(
@@ -33,22 +33,31 @@ export default function ClientQueries() {
 
   const handleReply = (e) => {
     e.preventDefault()
-    if (!reply.trim()) return
+    if (!reply.trim() && !attachment) return
     setExtraMessages((prev) => ({
       ...prev,
       [selectedQuery.id]: [
         ...(prev[selectedQuery.id] || []),
-        { side: 'right', author: 'You', role: 'Finance Director', timestamp: 'Just now', text: reply.trim(), deliveredRead: false },
+        {
+          side: 'right',
+          author: 'You',
+          role: 'Finance Director',
+          timestamp: 'Just now',
+          text: reply.trim(),
+          deliveredRead: false,
+          attachment: attachment ? { name: attachment.name, size: `${(attachment.size / 1024).toFixed(0)} KB` } : null,
+        },
       ],
     }))
     setReply('')
+    setAttachment(null)
   }
 
   return (
-    <ClientLayout title="Queries">
+    <ClientLayout title="Auditor Questions">
       <PageTransition>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-navy">Queries — Audit Clarifications</h1>
+          <h1 className="text-2xl font-bold text-navy">Questions from Your Auditor</h1>
           <span className="rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
             {clientPortal.engagementRef}
           </span>
@@ -63,7 +72,7 @@ export default function ClientQueries() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search queries..."
+                  placeholder="Search questions..."
                   className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-navy"
                 />
               </div>
@@ -169,7 +178,15 @@ export default function ClientQueries() {
                           msg.side === 'right' ? 'bg-navy text-white' : 'bg-slate-100 text-navy'
                         }`}
                       >
-                        {msg.text}
+                        {msg.text && <p>{msg.text}</p>}
+                        {msg.attachment && (
+                          <div className="mt-2 flex items-center gap-2 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs">
+                            <Paperclip className="h-3 w-3" />
+                            <span className="font-medium">{msg.attachment.name}</span>
+                            <span className="opacity-70">{msg.attachment.size}</span>
+                            <button className="ml-1 underline opacity-80 hover:opacity-100">Download</button>
+                          </div>
+                        )}
                       </div>
                       <p className="mt-1 text-[10px] text-slate-400">{msg.timestamp}</p>
                       {msg.side === 'right' && msg.deliveredRead && (
@@ -182,56 +199,59 @@ export default function ClientQueries() {
                 ))}
               </div>
 
+              {/* Attachment chip */}
+              {attachment && (
+                <div className="flex items-center gap-2 border-t border-slate-100 bg-slate-50 px-5 py-2 text-xs">
+                  <Paperclip className="h-3 w-3 text-slate-400" />
+                  <span className="truncate text-slate-600">{attachment.name}</span>
+                  <span className="text-slate-400">{(attachment.size / 1024).toFixed(0)} KB</span>
+                  <button onClick={() => setAttachment(null)} className="ml-auto text-slate-400 hover:text-red-500">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Reply input — upgraded with attachment */}
               <form onSubmit={handleReply} className="border-t border-slate-100 px-5 py-4">
                 <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
-                  <Paperclip className="h-4 w-4 shrink-0 text-slate-400" />
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="shrink-0 text-slate-400 hover:text-navy"
+                    title="Attach a file"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </button>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.xlsx,.docx,.xml,.csv,.jpg,.png"
+                    onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                  />
                   <input
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
-                    placeholder="Reply to auditor or attach reference..."
+                    placeholder="Attach a file or type a reply..."
                     className="w-full text-sm outline-none"
+                    style={{ width: '70%' }}
                   />
-                  <Smile className="h-4 w-4 shrink-0 text-slate-400" />
                   <button
                     type="submit"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand text-white hover:bg-[#D12C35]"
+                    disabled={!reply.trim() && !attachment}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand text-white hover:bg-[#D12C35] disabled:opacity-40"
                   >
                     <Send className="h-3.5 w-3.5" />
                   </button>
                 </div>
                 <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
-                  <Check className="h-3 w-3" /> Only the audit team can close this query.
+                  <Check className="h-3 w-3" /> Only the audit team can close this question.
                 </p>
               </form>
             </motion.div>
           </AnimatePresence>
         </div>
-
-        {selectedQuery.id === 'QRY-01' && (
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-12">
-            <div className="rounded-xl border border-emerald/30 bg-emerald/5 p-4 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-4">
-              <p className="text-sm font-semibold text-navy">Upload Delivery Notes</p>
-              <p className="mt-1 text-xs text-slate-500">Attach the requested delivery notes for this query.</p>
-              <button className="mt-3 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
-                Upload Delivery Notes
-              </button>
-            </div>
-            <div className="rounded-xl border border-navy/20 bg-navy/5 p-4 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-4">
-              <p className="text-sm font-semibold text-navy">Request Meeting</p>
-              <p className="mt-1 text-xs text-slate-500">Discuss this query directly with the audit team.</p>
-              <button
-                onClick={() => setMeetingModalOpen(true)}
-                className="mt-3 flex items-center gap-1.5 rounded-lg border border-brand px-4 py-2 text-xs font-semibold text-brand hover:bg-brand/5"
-              >
-                <CalendarDays className="h-3.5 w-3.5" />
-                Request Meeting with Audit Team
-              </button>
-            </div>
-          </div>
-        )}
       </PageTransition>
-
-      <MeetingRequestModal open={meetingModalOpen} onClose={() => setMeetingModalOpen(false)} />
     </ClientLayout>
   )
 }

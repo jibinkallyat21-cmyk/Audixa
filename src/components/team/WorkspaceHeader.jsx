@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, MessageCircle, X, Send } from 'lucide-react'
+import { Check, MessageCircle, X, Send, Table2 } from 'lucide-react'
 import AuditorChip from '../shared/AuditorChip'
 import AuditTypeChip from '../shared/AuditTypeChip'
 import {
@@ -12,11 +12,13 @@ import {
   engagementStateTemplate,
   getLifecycleStages,
 } from '../../data/sampleData'
+import { useTB } from '../../context/TBContext'
 
 const TABS_BASE = [
   { id: 'requirements', label: 'Requirements', href: '/team/workspace/requirements' },
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries' },
   { id: 'procedures', label: 'Procedures', href: '/team/workspace/procedures' },
+  { id: 'working-tb', label: 'Working TB', href: '/team/workspace/working-tb' },
   { id: 'deliverables', label: 'Deliverables', href: '/team/workspace/deliverables' },
   { id: 'audit-trail', label: 'Audit Trail', href: '/team/workspace/audit-trail' },
 ]
@@ -229,6 +231,7 @@ function ChatFloatButton() {
 export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
   const file = getTeamFile(fileSlug)
   const location = useLocation()
+  const { pendingAdjustments } = useTB()
 
   const openQueries = teamQueries.filter((q) => q.status === 'Open').length
   const inProgressProcedures = teamProcedures.filter((p) => p.status === 'In Progress').length
@@ -237,6 +240,7 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
     if (tab.id === 'requirements') return { ...tab, badge: `${file.pbcTotal}`, badgeTone: 'grey' }
     if (tab.id === 'queries') return { ...tab, badge: `${openQueries} open`, badgeTone: openQueries > 0 ? 'red' : 'grey' }
     if (tab.id === 'procedures') return { ...tab, badge: `${inProgressProcedures} in progress`, badgeTone: 'amber' }
+    if (tab.id === 'working-tb') return { ...tab, badge: pendingAdjustments.length > 0 ? `${pendingAdjustments.length} pending` : 'TB', badgeTone: pendingAdjustments.length > 0 ? 'amber' : 'grey' }
     if (tab.id === 'deliverables') return { ...tab, badge: 'pending', badgeTone: 'grey' }
     if (tab.id === 'audit-trail') return { ...tab, badge: '47', badgeTone: 'grey' }
     return tab

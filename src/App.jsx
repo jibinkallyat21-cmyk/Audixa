@@ -12,10 +12,11 @@ import Pending from './pages/auth/Pending'
 import ForgotPassword from './pages/auth/ForgotPassword'
 
 import ClientDashboard from './pages/client/ClientDashboard'
-import ClientRequirements from './pages/client/ClientRequirements'
+import ClientDocuments from './pages/client/ClientDocuments'
 import ClientQueries from './pages/client/ClientQueries'
-import ClientDraftReview from './pages/client/ClientDraftReview'
-import ClientDeliverables from './pages/client/ClientDeliverables'
+import ClientReports from './pages/client/ClientReports'
+import ClientActivityLog from './pages/client/ClientActivityLog'
+import ClientWorkingTB from './pages/client/ClientWorkingTB'
 
 import TeamDashboard from './pages/team/TeamDashboard'
 import TeamFiles from './pages/team/TeamFiles'
@@ -24,6 +25,7 @@ import TeamWorkspaceQueries from './pages/team/workspace/TeamWorkspaceQueries'
 import TeamWorkspaceProcedures from './pages/team/workspace/TeamWorkspaceProcedures'
 import TeamWorkspaceDeliverables from './pages/team/workspace/TeamWorkspaceDeliverables'
 import TeamWorkspaceAuditTrail from './pages/team/workspace/TeamWorkspaceAuditTrail'
+import TeamWorkspaceWorkingTB from './pages/team/workspace/TeamWorkspaceWorkingTB'
 import TeamTasks from './pages/team/TeamTasks'
 import TeamNotifications from './pages/team/TeamNotifications'
 import TeamClientDashboard from './pages/team/TeamClientDashboard'
@@ -47,12 +49,15 @@ import FOProposals from './pages/frontoffice/FOProposals'
 import FOProposalDetail from './pages/frontoffice/FOProposalDetail'
 import FOMeetings from './pages/frontoffice/FOMeetings'
 import FONotifications from './pages/frontoffice/FONotifications'
+import FOClientDocuments from './pages/frontoffice/FOClientDocuments'
 
 import ManagementDashboard from './pages/management/ManagementDashboard'
 import ManagementAnalytics from './pages/management/ManagementAnalytics'
 import ManagementStaff from './pages/management/ManagementStaff'
 import ManagementLog from './pages/management/ManagementLog'
 import ManagementNotifications from './pages/management/ManagementNotifications'
+
+import { TBProvider } from './context/TBContext'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -71,20 +76,25 @@ function AnimatedRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Client */}
-        <Route path="/client/dashboard" element={<ClientDashboard />} />
-        <Route path="/client/requirements" element={<ClientRequirements />} />
-        <Route path="/client/queries" element={<ClientQueries />} />
-        <Route path="/client/draft-review" element={<ClientDraftReview />} />
-        <Route path="/client/deliverables" element={<ClientDeliverables />} />
+        <Route path="/client/dashboard" element={<TBProvider><ClientDashboard /></TBProvider>} />
+        <Route path="/client/documents" element={<TBProvider><ClientDocuments /></TBProvider>} />
+        <Route path="/client/requirements" element={<Navigate to="/client/documents" replace />} />
+        <Route path="/client/queries" element={<TBProvider><ClientQueries /></TBProvider>} />
+        <Route path="/client/reports" element={<TBProvider><ClientReports /></TBProvider>} />
+        <Route path="/client/draft-review" element={<Navigate to="/client/reports" replace />} />
+        <Route path="/client/deliverables" element={<Navigate to="/client/reports" replace />} />
+        <Route path="/client/activity" element={<TBProvider><ClientActivityLog /></TBProvider>} />
+        <Route path="/client/working-tb" element={<TBProvider><ClientWorkingTB /></TBProvider>} />
 
         {/* Audit Team (Module 3) */}
         <Route path="/team/dashboard" element={<TeamDashboard />} />
         <Route path="/team/files" element={<TeamFiles />} />
-        <Route path="/team/workspace/requirements" element={<TeamWorkspaceRequirements />} />
-        <Route path="/team/workspace/queries" element={<TeamWorkspaceQueries />} />
-        <Route path="/team/workspace/procedures" element={<TeamWorkspaceProcedures />} />
-        <Route path="/team/workspace/deliverables" element={<TeamWorkspaceDeliverables />} />
-        <Route path="/team/workspace/audit-trail" element={<TeamWorkspaceAuditTrail />} />
+        <Route path="/team/workspace/requirements" element={<TBProvider><TeamWorkspaceRequirements /></TBProvider>} />
+        <Route path="/team/workspace/queries" element={<TBProvider><TeamWorkspaceQueries /></TBProvider>} />
+        <Route path="/team/workspace/procedures" element={<TBProvider><TeamWorkspaceProcedures /></TBProvider>} />
+        <Route path="/team/workspace/working-tb" element={<TBProvider><TeamWorkspaceWorkingTB /></TBProvider>} />
+        <Route path="/team/workspace/deliverables" element={<TBProvider><TeamWorkspaceDeliverables /></TBProvider>} />
+        <Route path="/team/workspace/audit-trail" element={<TBProvider><TeamWorkspaceAuditTrail /></TBProvider>} />
         <Route path="/team/tasks" element={<TeamTasks />} />
         <Route path="/team/notifications" element={<TeamNotifications />} />
         <Route path="/team/client/al-marai" element={<TeamClientDashboard />} />
@@ -109,6 +119,7 @@ function AnimatedRoutes() {
         <Route path="/fo/proposals" element={<FOProposals />} />
         <Route path="/fo/proposal/:id" element={<FOProposalDetail />} />
         <Route path="/fo/meetings" element={<FOMeetings />} />
+        <Route path="/fo/client-documents" element={<FOClientDocuments />} />
         <Route path="/fo/notifications" element={<FONotifications />} />
 
         {/* Management */}

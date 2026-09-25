@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Lock, TrendingUp, Send, CalendarDays } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Lock, TrendingUp, CheckCircle2, AlertCircle, HelpCircle, FileText, ChevronRight } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import LifecycleStepper from '../../components/shared/LifecycleStepper'
-import MeetingRequestModal from '../../components/client/MeetingRequestModal'
 import { clientPortal } from '../../data/sampleData'
+import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
+import { getActivityEvents } from '../../data/activityLog'
 
 function useCountUp(target, duration = 800) {
   const [value, setValue] = useState(0)
   const startRef = useRef(null)
 
   useEffect(() => {
+    setValue(0)
+    startRef.current = null
     let frame
     const step = (timestamp) => {
       if (startRef.current === null) startRef.current = timestamp
@@ -27,32 +31,96 @@ function useCountUp(target, duration = 800) {
   return value
 }
 
-function StatCard({ label, value, color, sub, icon: Icon, delay, className = '', suffix = '' }) {
-  const count = useCountUp(value)
+// FY-specific data for demo
+function getFYData(fy) {
+  if (fy === 'FY2023') {
+    return {
+      stats: { totalRequirements: 78, documentsAccepted: 78, pendingAction: 0, pendingDueThisWeek: 0, openQueries: 0, criticalQueries: 0 },
+      engagementRef: ENGAGEMENT_REFS['FY2023'],
+      stages: [
+        { id: 'onboarding', label: 'Getting Started', status: 'completed' },
+        { id: 'data-collection', label: 'Sending Your Documents', status: 'completed' },
+        { id: 'under-audit', label: 'Audit in Progress', status: 'completed' },
+        { id: 'draft-issued', label: 'Review Your Draft', status: 'completed' },
+        { id: 'finalized', label: 'Audit Complete', status: 'completed' },
+        { id: 'filed', label: 'Submitted to Authority', status: 'completed', qawaemRef: 'QAW-2023-77203' },
+      ],
+    }
+  }
+  if (fy === 'FY2022') {
+    return {
+      stats: { totalRequirements: 72, documentsAccepted: 72, pendingAction: 0, pendingDueThisWeek: 0, openQueries: 0, criticalQueries: 0 },
+      engagementRef: ENGAGEMENT_REFS['FY2022'],
+      stages: [
+        { id: 'onboarding', label: 'Getting Started', status: 'completed' },
+        { id: 'data-collection', label: 'Sending Your Documents', status: 'completed' },
+        { id: 'under-audit', label: 'Audit in Progress', status: 'completed' },
+        { id: 'draft-issued', label: 'Review Your Draft', status: 'completed' },
+        { id: 'finalized', label: 'Audit Complete', status: 'completed' },
+        { id: 'filed', label: 'Submitted to Authority', status: 'completed', qawaemRef: 'QAW-2022-62018' },
+      ],
+    }
+  }
+  return {
+    stats: clientPortal.stats,
+    engagementRef: ENGAGEMENT_REFS['FY2024'],
+    stages: [
+      { id: 'onboarding', label: 'Getting Started', status: 'completed' },
+      { id: 'data-collection', label: 'Sending Your Documents', status: 'completed' },
+      { id: 'under-audit', label: 'Audit in Progress', status: 'active' },
+      { id: 'draft-issued', label: 'Review Your Draft', status: 'upcoming' },
+      { id: 'finalized', label: 'Audit Complete', status: 'upcoming' },
+      { id: 'filed', label: 'Submitted to Authority', status: 'upcoming', qawaemRef: 'QAW-2024-88412' },
+    ],
+  }
+}
 
+const STAGE_TOOLTIPS = {
+  'Getting Started': 'We set up your audit file and you sign the engagement letter.',
+  'Sending Your Documents': 'You upload documents and records we need for the audit.',
+  'Audit in Progress': 'Our team reviews your documents and performs audit testing.',
+  'Review Your Draft': 'You review and confirm the draft financial statements.',
+  'Audit Complete': 'All reviews are done and the final report is signed.',
+  'Submitted to Authority': 'Your audit report is filed with the relevant authority.',
+}
+
+const ICON_COLOR = {
+  emerald: 'text-emerald',
+  red: 'text-alert-red',
+  amber: 'text-amber',
+  blue: 'text-blue-500',
+  navy: 'text-navy',
+}
+
+const EVENT_ICONS = {
+  emerald: CheckCircle2,
+  red: AlertCircle,
+  amber: AlertCircle,
+  blue: FileText,
+  navy: TrendingUp,
+}
+
+function ActivityEventRow({ event }) {
+  const Icon = EVENT_ICONS[event.icon] || FileText
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      whileHover={{ y: -2 }}
-      className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-lg ${className}`}
-    >
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <div className="mt-2 flex items-end gap-2">
-        <span className={`text-3xl font-bold ${color}`}>
-          {count}
-          {suffix}
-        </span>
-        {Icon && <Icon className={`mb-1 h-4 w-4 ${color}`} />}
+    <div className="flex items-start gap-3 py-2.5 border-b border-slate-50 last:border-0">
+      <span className={`mt-0.5 shrink-0 ${ICON_COLOR[event.icon] || 'text-navy'}`}>
+        <Icon className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm text-navy">{event.description}</p>
+        <p className="text-xs text-slate-400 mt-0.5">{event.timestamp}</p>
       </div>
-      {sub && <p className="mt-1 text-xs font-medium text-slate-500">{sub}</p>}
-    </motion.div>
+      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+        {event.section}
+      </span>
+    </div>
   )
 }
 
-function TotalRequirementsHeroCard({ value, percent, delay }) {
-  const count = useCountUp(value)
+function AuditProgressHero({ total, accepted, delay, fy }) {
+  const count = useCountUp(accepted)
+  const percent = total > 0 ? Math.round((accepted / total) * 100) : 0
   const radius = 42
   const circumference = 2 * Math.PI * radius
 
@@ -61,20 +129,15 @@ function TotalRequirementsHeroCard({ value, percent, delay }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.35 }}
-      whileHover={{ y: -2 }}
-      className="flex items-center gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-lg md:col-span-6 md:row-span-2"
+      className="flex items-center gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-6"
     >
-      <div className="relative flex h-28 w-28 shrink-0 items-center justify-center">
-        <svg viewBox="0 0 100 100" className="h-28 w-28 -rotate-90">
+      <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
+        <svg viewBox="0 0 100 100" className="h-24 w-24 -rotate-90">
           <circle cx="50" cy="50" r={radius} fill="none" stroke="#F1F5F9" strokeWidth="8" />
           <motion.circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            stroke="#059669"
-            strokeWidth="8"
-            strokeLinecap="round"
+            key={fy}
+            cx="50" cy="50" r={radius} fill="none"
+            stroke="#059669" strokeWidth="8" strokeLinecap="round"
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset: circumference * (1 - percent / 100) }}
@@ -84,249 +147,174 @@ function TotalRequirementsHeroCard({ value, percent, delay }) {
         <span className="absolute text-xs font-bold text-emerald">{percent}%</span>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Requirements</p>
-        <p className="mt-1 text-[48px] font-black leading-none text-navy">{count}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Audit Progress</p>
+        <p className="mt-1 text-3xl font-black text-navy">
+          {count} <span className="text-lg font-medium text-slate-400">of {total}</span>
+        </p>
+        <p className="text-xs text-slate-500 mt-1">documents submitted</p>
       </div>
     </motion.div>
   )
 }
 
-export default function ClientDashboard() {
-  const [threadMessages, setThreadMessages] = useState(clientPortal.engagementThread)
-  const [draft, setDraft] = useState('')
-  const [meetingModalOpen, setMeetingModalOpen] = useState(false)
-  const isAuthorisedSignatory = clientPortal.clientRole === 'Authorised Signatory'
+function StatCard({ label, sub, value, color, icon: Icon, delay, className = '', suffix = '' }) {
+  const count = useCountUp(value)
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.35 }}
+      whileHover={{ y: -2 }}
+      className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-lg ${className}`}
+    >
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <div className="mt-2 flex items-end gap-2">
+        <span className={`text-3xl font-bold ${color}`}>{count}{suffix}</span>
+        {Icon && <Icon className={`mb-1 h-4 w-4 ${color}`} />}
+      </div>
+      {sub && <p className="mt-1 text-xs font-medium text-slate-500">{sub}</p>}
+    </motion.div>
+  )
+}
 
-  const handleSend = (e) => {
-    e.preventDefault()
-    if (!draft.trim()) return
-    setThreadMessages((prev) => [
-      ...prev,
-      { author: 'You', timestamp: 'Just now', text: draft.trim() },
-    ])
-    setDraft('')
-  }
+export default function ClientDashboard() {
+  const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
+  const fyData = getFYData(selectedFY)
+  const isAuthorisedSignatory = clientPortal.clientRole === 'Authorised Signatory'
+  const recentEvents = getActivityEvents().slice(0, 5)
 
   return (
     <ClientLayout title="Dashboard">
       <PageTransition>
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
-          <div className="space-y-6">
-            {/* Greeting card */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedFY}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-6"
+          >
+            {/* Greeting */}
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-bold text-navy">
-                  Welcome, {clientPortal.clientName}
-                </h1>
-                <span className="rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                  {clientPortal.fiscalYear}
-                </span>
-                <span className="rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                  {clientPortal.engagementRef}
-                </span>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <p className="text-sm text-slate-500">
-                  Statutory Filing Deadline: <span className="font-medium text-navy">{clientPortal.statutoryDeadline}</span>
-                </p>
-                <span className="rounded-full bg-amber/10 px-3 py-1 text-xs font-semibold text-amber">
+              <h1 className="text-2xl font-bold text-navy">Welcome, {clientPortal.clientName}</h1>
+              <p className="mt-1 text-sm text-slate-500">
+                Statutory Filing Deadline: <span className="font-medium text-navy">{clientPortal.statutoryDeadline}</span>
+                <span className="ml-3 rounded-full bg-amber/10 px-3 py-0.5 text-xs font-semibold text-amber">
                   {clientPortal.daysRemaining} Days Remaining
                 </span>
-              </div>
-
+              </p>
             </div>
 
-            {/* Stage stepper — its own dedicated progress module */}
-            <div
-              className="rounded-xl border border-slate-200 p-6 shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)' }}
-            >
-              <LifecycleStepper stages={clientPortal.stages} />
+            {/* FY Selector row */}
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-sm">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-xs text-slate-500">You are viewing:</span>
+                <div className="flex gap-1">
+                  {availableFYs.map((fy) => (
+                    <button
+                      key={fy}
+                      onClick={() => setSelectedFY(fy)}
+                      className={`relative px-4 py-1.5 text-sm font-semibold transition-colors ${
+                        selectedFY === fy
+                          ? 'text-navy'
+                          : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                    >
+                      {fy}
+                      {selectedFY === fy && (
+                        <motion.div
+                          layoutId="fy-underline"
+                          className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-brand"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                {fyData.engagementRef}
+              </span>
+            </div>
+
+            {/* Stage stepper */}
+            <div className="rounded-xl border border-slate-200 p-6 shadow-sm" style={{ background: 'linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)' }}>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-navy">Your Audit Journey</h2>
+              </div>
+              <LifecycleStepper stages={fyData.stages} tooltips={STAGE_TOOLTIPS} />
             </div>
 
             {/* On Hold banner */}
-            {clientPortal.onHold.active && (
+            {selectedFY === 'FY2024' && clientPortal.onHold.active && (
               <motion.div
-                initial={{ opacity: 0, height: 0, y: -10 }}
-                animate={{ opacity: 1, height: 'auto', y: 0 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="flex items-center justify-between gap-4 overflow-hidden rounded-xl border border-amber/30 bg-amber/10 px-5 py-4"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.4 }}
+                className="flex items-center justify-between gap-4 rounded-xl border border-amber/30 bg-amber/10 px-5 py-4"
               >
                 <p className="text-sm font-medium text-amber">{clientPortal.onHold.message}</p>
-                {/* Addition 2: fully removed from the DOM for Standard Users —
-                    not just visually hidden. */}
                 {isAuthorisedSignatory && (
                   <div className="flex shrink-0 items-center gap-2 text-amber/80">
                     <Lock className="h-4 w-4" />
-                    <span className="max-w-[140px] text-[11px] leading-tight">
-                      Pending Payment Notice — Authorised Signatory only.
-                    </span>
+                    <span className="text-[11px]">Account Owner notice</span>
                   </div>
                 )}
               </motion.div>
             )}
 
-            {/* Stat cards — bento: hero completion ring + 4 supporting metrics */}
-            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-12">
-              <TotalRequirementsHeroCard
-                value={clientPortal.stats.totalRequirements}
-                percent={Math.round((clientPortal.stats.documentsAccepted / clientPortal.stats.totalRequirements) * 100)}
+            {/* Stat tiles */}
+            <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-12">
+              <AuditProgressHero
+                total={fyData.stats.totalRequirements}
+                accepted={fyData.stats.documentsAccepted}
                 delay={0}
+                fy={selectedFY}
               />
-              <StatCard
-                label="Documents Accepted"
-                value={clientPortal.stats.documentsAccepted}
-                color="text-emerald"
-                icon={TrendingUp}
-                delay={0.05}
-                className="md:col-span-3"
-              />
-              <StatCard
-                label="Pending Action"
-                value={clientPortal.stats.pendingAction}
-                color="text-amber"
-                sub={`${clientPortal.stats.pendingDueThisWeek} Due This Week`}
-                delay={0.1}
-                className="md:col-span-3"
-              />
-              <StatCard
-                label="Open Queries"
-                value={clientPortal.stats.openQueries}
-                color="text-alert-red"
-                sub={`${clientPortal.stats.criticalQueries} Critical Audits`}
-                delay={0.15}
-                className="md:col-span-3"
-              />
-              <StatCard
-                label="Filing Deadline"
-                value={clientPortal.daysRemaining}
-                suffix=" Days"
-                color="text-navy"
-                sub={clientPortal.statutoryDeadline}
-                delay={0.2}
-                className="md:col-span-3"
-              />
+              <StatCard label="Approved Documents" value={fyData.stats.documentsAccepted} color="text-emerald" icon={CheckCircle2} delay={0.05} className="md:col-span-3" />
+              <StatCard label="Still Needed from You" value={fyData.stats.pendingAction} color="text-amber" sub={fyData.stats.pendingDueThisWeek > 0 ? `${fyData.stats.pendingDueThisWeek} due this week` : 'All uploaded'} delay={0.1} className="md:col-span-3" />
+              <StatCard label="Questions from Your Auditor" value={fyData.stats.openQueries} color="text-alert-red" sub={fyData.stats.criticalQueries > 0 ? `${fyData.stats.criticalQueries} need urgent reply` : 'All answered'} delay={0.15} className="md:col-span-3" />
+              <StatCard label="Days to Deadline" value={clientPortal.daysRemaining} color="text-navy" sub={clientPortal.statutoryDeadline} delay={0.2} className="md:col-span-3" />
             </div>
 
-            {/* Recent submissions table */}
+            {/* Audit team strip */}
+            <div className="rounded-xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-navy">Your Audit Team</h2>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy/10 text-sm font-bold text-navy">TA</div>
+                  <div>
+                    <p className="text-sm font-semibold text-navy">Tariq Al-Harbi</p>
+                    <p className="text-xs text-slate-500">Lead Auditor — Analytix Audit Team</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 ml-2">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">Analytix Audit Team</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">Proper Audit</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{selectedFY}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b border-slate-100 px-5 py-4">
-                <h2 className="text-sm font-semibold text-navy">Recent Submissions &amp; Stage Milestones</h2>
+              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <h2 className="text-sm font-semibold text-navy">Recent Activity</h2>
               </div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
-                    <th className="px-5 py-2 font-medium">Document Name</th>
-                    <th className="px-5 py-2 font-medium">Status</th>
-                    <th className="px-5 py-2 font-medium">File Name</th>
-                    <th className="px-5 py-2 font-medium">Timestamp</th>
-                    <th className="px-5 py-2 font-medium">Reviewer</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clientPortal.recentSubmissions.map((row, idx) => (
-                    <motion.tr
-                      key={row.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05, duration: 0.3 }}
-                      className="border-b border-slate-50 last:border-0"
-                    >
-                      <td className="px-5 py-3 font-medium text-navy">{row.name}</td>
-                      <td className="px-5 py-3">
-                        <StatusPill status={row.status} />
-                      </td>
-                      <td className="px-5 py-3 text-slate-500">{row.fileName}</td>
-                      <td className="px-5 py-3 text-slate-500">{row.timestamp}</td>
-                      <td className="px-5 py-3 text-slate-500">
-                        {row.actionRequired ? (
-                          <button className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
-                            Upload Now
-                          </button>
-                        ) : (
-                          row.reviewer
-                        )}
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Right panel */}
-          <div className="space-y-6">
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-4 text-sm font-semibold text-navy">Engagement Team</h2>
-              <div className="space-y-3">
-                {clientPortal.engagementTeam.map((member) => (
-                  <div key={member.name} className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy/10 text-xs font-semibold text-navy">
-                        {member.initials}
-                      </div>
-                      <span
-                        className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white ${
-                          member.online ? 'bg-emerald' : 'bg-slate-300'
-                        }`}
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-navy">{member.name}</p>
-                      <p className="truncate text-xs text-slate-500">{member.role}</p>
-                    </div>
-                  </div>
+              <div className="px-5 py-2">
+                {recentEvents.map((event) => (
+                  <ActivityEventRow key={event.id} event={event} />
                 ))}
               </div>
-
-              <button
-                type="button"
-                onClick={() => setMeetingModalOpen(true)}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-brand px-3 py-2.5 text-xs font-semibold text-brand hover:bg-brand/5"
-              >
-                <CalendarDays className="h-3.5 w-3.5" />
-                Request Meeting with Audit Team
-              </button>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-navy">Direct Engagement Thread</h2>
-              <div className="space-y-3">
-                {threadMessages.map((msg, idx) => (
-                  <div key={idx} className={msg.author === 'You' ? 'text-right' : 'text-left'}>
-                    <div
-                      className={`inline-block max-w-[85%] rounded-lg px-3 py-2 text-xs ${
-                        msg.author === 'You' ? 'bg-navy text-white' : 'bg-slate-100 text-navy'
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                    <p className="mt-0.5 text-[10px] text-slate-400">
-                      {msg.author} · {msg.timestamp}
-                    </p>
-                  </div>
-                ))}
+              <div className="border-t border-slate-100 px-5 py-3">
+                <Link to="/client/activity" className="flex items-center gap-1 text-xs font-semibold text-brand hover:underline">
+                  View Full Activity Log <ChevronRight className="h-3 w-3" />
+                </Link>
               </div>
-              <form onSubmit={handleSend} className="mt-3 flex items-center gap-2">
-                <input
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  placeholder="Reply or attach reference..."
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy"
-                />
-                <button
-                  type="submit"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand text-white hover:bg-[#D12C35]"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                </button>
-              </form>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </PageTransition>
-
-      <MeetingRequestModal open={meetingModalOpen} onClose={() => setMeetingModalOpen(false)} />
     </ClientLayout>
   )
 }
