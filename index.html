@@ -18,6 +18,23 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Catch errors that happen before/outside React (module-level crashes)
+      window.__initErrors = []
+      window.addEventListener('error', function(e) {
+        window.__initErrors.push(e)
+        var root = document.getElementById('root')
+        if (root && !root.childElementCount) {
+          root.innerHTML = '<div style="padding:2rem;font-family:monospace;background:#080C18;color:#F1F5F9;min-height:100vh"><h2 style="color:#E8323C;margin-bottom:1rem">Init Error</h2><pre style="white-space:pre-wrap;word-break:break-word;font-size:12px;color:#94A3B8">' + (e.message || '') + '\n' + (e.filename || '') + ':' + (e.lineno || '') + '\n\n' + ((e.error && e.error.stack) || '') + '</pre></div>'
+        }
+      })
+      window.addEventListener('unhandledrejection', function(e) {
+        var root = document.getElementById('root')
+        if (root && !root.childElementCount) {
+          root.innerHTML = '<div style="padding:2rem;font-family:monospace;background:#080C18;color:#F1F5F9;min-height:100vh"><h2 style="color:#E8323C;margin-bottom:1rem">Module Load Error</h2><pre style="white-space:pre-wrap;word-break:break-word;font-size:12px;color:#94A3B8">' + ((e.reason && (e.reason.message || e.reason)) || 'Unknown rejection') + '\n\n' + ((e.reason && e.reason.stack) || '') + '</pre></div>'
+        }
+      })
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
