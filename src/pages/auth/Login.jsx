@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageTransition from '../../components/shared/PageTransition'
 import { AnalytixMark } from '../../components/shared/AnalytixLogo'
-import ThemeToggle from '../../components/shared/ThemeToggle'
 import { useTheme } from '../../context/ThemeContext'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
 
@@ -199,10 +198,6 @@ export default function Login() {
               ← Back
             </button>
           )}
-
-          <div className="absolute right-6 top-6 z-10 lg:right-12 lg:top-12">
-            <ThemeToggle variant={isDark ? 'dark' : 'light'} />
-          </div>
 
           <div className="relative z-10 flex flex-1 items-center justify-center p-8 lg:p-12">
             <div className="w-full max-w-[360px]">
