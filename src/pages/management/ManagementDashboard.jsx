@@ -1,13 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
 import {
-  Search, X, TrendingUp, Briefcase, Banknote, AlertTriangle,
-  ChevronRight, ExternalLink, Users, CheckCircle2, Clock,
-  AlertCircle, Building2, Phone, Mail, BarChart2,
+  Search, X, TrendingUp, Briefcase, Banknote,
+  ChevronRight, ExternalLink, AlertCircle,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
-import { useToast } from '../../components/shared/Toast'
 import {
   mgmtUser,
   mgmtFOFiles,
@@ -21,26 +18,9 @@ import {
 } from '../../data/sampleData'
 
 /* ─── helpers ─── */
-function useCountUp(target, duration = 900) {
-  const [value, setValue] = useState(0)
-  useEffect(() => {
-    const numeric = typeof target === 'number' ? target : parseInt(String(target).replace(/[^\d]/g, ''), 10) || 0
-    let frame
-    const start = performance.now()
-    const step = (t) => {
-      const progress = Math.min((t - start) / duration, 1)
-      setValue(Math.round(numeric * progress))
-      if (progress < 1) frame = requestAnimationFrame(step)
-    }
-    frame = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(frame)
-  }, [target, duration])
-  return value
-}
-
 const STATUS_STYLE = {
-  ok:   { bg: 'rgba(5,150,105,0.12)', color: '#059669', label: 'On Track' },
-  warn: { bg: 'rgba(217,119,6,0.12)', color: '#D97706', label: 'Needs Attention' },
+  ok:   { bg: 'rgba(5,150,105,0.12)',  color: '#059669', label: 'On Track' },
+  warn: { bg: 'rgba(217,119,6,0.12)',  color: '#D97706', label: 'Needs Attention' },
   crit: { bg: 'rgba(220,38,38,0.12)', color: '#DC2626', label: 'Critical' },
 }
 const ESC_STATUS = {
@@ -50,7 +30,7 @@ const ESC_STATUS = {
 }
 const TIER_COLOR = { 3: '#DC2626', 2: '#D97706', 1: '#2563EB' }
 
-/* ─── Client Quick-Summary modal ─── */
+/* ─── Client Quick-Summary card ─── */
 function ClientQuickSummary({ client, onClose }) {
   if (!client) return null
   const ss = STATUS_STYLE[client.status] || STATUS_STYLE.warn
@@ -60,28 +40,27 @@ function ClientQuickSummary({ client, onClose }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -8, scale: 0.97 }}
       transition={{ duration: 0.18 }}
-      className="absolute right-0 top-full z-[200] mt-2 w-[380px] overflow-hidden rounded-2xl bg-white shadow-2xl"
+      className="absolute right-0 top-full z-50 mt-1 w-[360px] overflow-hidden rounded-2xl bg-white shadow-2xl"
       style={{ border: '1px solid #E5E7EB' }}
       onMouseDown={e => e.stopPropagation()}
     >
-      <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
         <div>
           <p className="text-sm font-bold text-navy">{client.name}</p>
-          <p className="text-[11px] text-slate-400">{client.code} · {client.dept} · {client.city}</p>
+          <p className="text-[10px] text-slate-400">{client.code} · {client.dept} · {client.city}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ background: ss.bg, color: ss.color }}>
             {ss.label}
           </span>
-          <button onClick={onClose} className="text-slate-300 hover:text-slate-600"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} className="text-slate-300 hover:text-slate-600"><X className="h-3.5 w-3.5" /></button>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="px-5 py-3">
+      <div className="px-4 py-3">
         <div className="mb-1 flex items-center justify-between">
-          <p className="text-[11px] font-semibold text-slate-500">Audit Progress — {client.phase}</p>
-          <p className="text-[11px] font-bold text-navy">{client.progress}%</p>
+          <p className="text-[10px] font-semibold text-slate-500">Audit Progress — {client.phase}</p>
+          <p className="text-[10px] font-bold text-navy">{client.progress}%</p>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
           <motion.div initial={{ width: 0 }} animate={{ width: `${client.progress}%` }} transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -95,30 +74,28 @@ function ClientQuickSummary({ client, onClose }) {
           { label: 'Audit Fee', value: client.fee },
           { label: 'Fee Paid', value: client.feePaid },
           { label: 'Balance', value: client.balance },
-          { label: 'Exceptions', value: client.exceptions },
-          { label: 'Due Date', value: client.dueDate },
         ].map((f, i) => (
-          <div key={f.label} className={`px-5 py-2.5 ${i % 2 === 0 ? 'border-r border-slate-100' : ''} ${i < 4 ? 'border-b border-slate-100' : ''}`}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{f.label}</p>
+          <div key={f.label} className={`px-4 py-2.5 ${i % 2 === 0 ? 'border-r border-slate-100' : ''} border-b border-slate-100`}>
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">{f.label}</p>
             <p className="mt-0.5 text-xs font-bold text-navy">{f.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="border-t border-slate-100 px-5 py-3">
-        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Engagement Team</p>
+      <div className="px-4 py-3">
         <div className="flex flex-wrap gap-1.5">
-          <span className="rounded-full bg-navy/10 px-2.5 py-0.5 text-[10px] font-semibold text-navy">Lead: {client.lead}</span>
-          <span className="rounded-full bg-amber/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber">FO: {client.fo}</span>
-          <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-semibold text-blue-700">Sector: {client.sector}</span>
+          <span className="rounded-full bg-navy/10 px-2.5 py-0.5 text-[9px] font-semibold text-navy">Lead: {client.lead}</span>
+          <span className="rounded-full bg-amber/10 px-2.5 py-0.5 text-[9px] font-semibold text-amber">FO: {client.fo}</span>
+          <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[9px] font-semibold text-blue-700">{client.sector}</span>
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[9px] font-semibold text-slate-500">{client.exceptions} exceptions</span>
         </div>
       </div>
     </motion.div>
   )
 }
 
-/* ─── Global Client Search (top-right) ─── */
-function ClientSearch() {
+/* ─── Client Search (lives in the header) ─── */
+export function ClientSearch() {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(null)
   const [open, setOpen] = useState(false)
@@ -132,18 +109,15 @@ function ClientSearch() {
       ).slice(0, 6)
     : []
 
-  useEffect(() => {
-    const handle = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpen(false); setActive(null)
-      }
+  const handleBlur = (e) => {
+    if (containerRef.current && !containerRef.current.contains(e.relatedTarget)) {
+      setOpen(false)
+      setActive(null)
     }
-    document.addEventListener('mousedown', handle)
-    return () => document.removeEventListener('mousedown', handle)
-  }, [])
+  }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative" onBlur={handleBlur}>
       <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-1.5" style={{ border: '1px solid rgba(255,255,255,0.15)' }}>
         <Search className="h-3.5 w-3.5 shrink-0 text-white/50" />
         <input
@@ -151,7 +125,7 @@ function ClientSearch() {
           onChange={e => { setQuery(e.target.value); setOpen(true); setActive(null) }}
           onFocus={() => setOpen(true)}
           placeholder="Search clients..."
-          className="w-40 bg-transparent text-xs text-white placeholder-white/40 outline-none lg:w-52"
+          className="w-36 bg-transparent text-xs text-white placeholder-white/40 outline-none lg:w-48"
         />
         {query && (
           <button onClick={() => { setQuery(''); setActive(null); setOpen(false) }} className="text-white/40 hover:text-white/80">
@@ -167,21 +141,21 @@ function ClientSearch() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full z-[200] mt-2 w-[420px] rounded-2xl bg-white shadow-2xl overflow-hidden"
+            className="absolute right-0 top-full z-50 mt-2 w-[400px] rounded-2xl bg-white shadow-2xl overflow-hidden"
             style={{ border: '1px solid #E5E7EB' }}
           >
             {!active ? (
               <>
-                <div className="px-4 py-2.5 border-b border-slate-100">
+                <div className="px-4 py-2 border-b border-slate-100">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{results.length} result{results.length !== 1 ? 's' : ''}</p>
                 </div>
                 {results.map(c => {
                   const ss = STATUS_STYLE[c.status] || STATUS_STYLE.warn
                   return (
-                    <button key={c.code} onClick={() => setActive(c)}
+                    <button key={c.code} onClick={() => setActive(c)} tabIndex={0}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-navy/10 text-[10px] font-bold text-navy">
-                        {c.name.split(' ').map(w => w[0]).slice(0,2).join('')}
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy/10 text-[9px] font-bold text-navy">
+                        {c.name.split(' ').map(w => w[0]).slice(0, 2).join('')}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-navy truncate">{c.name}</p>
@@ -206,7 +180,7 @@ function ClientSearch() {
 function FilesModal({ onClose }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div initial={{ scale: 0.95, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 16 }}
@@ -255,10 +229,9 @@ function FilesModal({ onClose }) {
 /* ─── AR Pending modal ─── */
 function ARModal({ onClose }) {
   const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
-  const overdueCount = mgmtARPending.filter(c => c.daysOverdue > 0).length
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div initial={{ scale: 0.95, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 16 }}
@@ -268,9 +241,7 @@ function ARModal({ onClose }) {
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
           <div>
             <h3 className="text-base font-bold text-navy">Accounts Receivable — Pending Payments</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              SAR {totalBalance.toLocaleString()} outstanding · {overdueCount} overdue
-            </p>
+            <p className="text-xs text-slate-400 mt-0.5">SAR {totalBalance.toLocaleString()} outstanding</p>
           </div>
           <button onClick={onClose} className="text-slate-300 hover:text-slate-600"><X className="h-5 w-5" /></button>
         </div>
@@ -314,7 +285,6 @@ function ARModal({ onClose }) {
         </div>
         <div className="border-t border-slate-100 px-6 py-3 shrink-0 flex items-center justify-between bg-slate-50">
           <p className="text-xs text-slate-500">Total outstanding: <span className="font-bold text-navy">SAR {totalBalance.toLocaleString()}</span></p>
-          <p className="text-xs text-slate-400">SAR 84K marked overdue &gt;30 days</p>
         </div>
       </motion.div>
     </motion.div>
@@ -327,7 +297,7 @@ function EscalationsModal({ onClose }) {
   const filtered = filter === 'All' ? mgmtAllEscalations : mgmtAllEscalations.filter(e => e.status === filter)
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div initial={{ scale: 0.95, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 16 }}
@@ -337,7 +307,7 @@ function EscalationsModal({ onClose }) {
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
           <div>
             <h3 className="text-base font-bold text-navy">Full Escalation Centre</h3>
-            <p className="text-xs text-slate-400 mt-0.5">{mgmtAllEscalations.length} escalations on record — current period</p>
+            <p className="text-xs text-slate-400 mt-0.5">{mgmtAllEscalations.length} escalations on record</p>
           </div>
           <button onClick={onClose} className="text-slate-300 hover:text-slate-600"><X className="h-5 w-5" /></button>
         </div>
@@ -352,7 +322,7 @@ function EscalationsModal({ onClose }) {
             </button>
           ))}
           <span className="ml-auto text-[10px] font-semibold text-slate-400 self-center">
-            {mgmtAllEscalations.filter(e => e.status === 'Open').length} open · {mgmtAllEscalations.filter(e => e.status === 'Under Review').length} under review
+            {mgmtAllEscalations.filter(e => e.status === 'Open').length} open
           </span>
         </div>
 
@@ -363,7 +333,7 @@ function EscalationsModal({ onClose }) {
               <motion.div key={e.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                 className="rounded-xl border border-slate-100 p-4 hover:border-slate-200 transition-colors">
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: `${TIER_COLOR[e.tier]}15`, color: TIER_COLOR[e.tier] }}>
                       Tier {e.tier}
                     </span>
@@ -378,8 +348,6 @@ function EscalationsModal({ onClose }) {
                 <p className="text-xs text-slate-500 leading-relaxed">{e.reason}</p>
                 <div className="mt-2 flex items-center gap-3 text-[10px] text-slate-400">
                   <span>Lead: <span className="font-semibold text-navy">{e.lead}</span></span>
-                  <span>·</span>
-                  <span>Raised by: <span className="font-semibold text-navy">{e.raisedBy}</span></span>
                   <span>·</span>
                   <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{e.daysOverdue}d overdue</span>
                 </div>
@@ -396,10 +364,12 @@ function EscalationsModal({ onClose }) {
 function StatCard({ icon: Icon, iconColor, label, value, sub, onClick, delay = 0 }) {
   const [hov, setHov] = useState(false)
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.3 }}
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.3 }}
       onHoverStart={() => setHov(true)} onHoverEnd={() => setHov(false)}
       onClick={onClick}
-      className={`rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all ${onClick ? 'cursor-pointer' : ''}`}
+      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-left w-full transition-all"
       style={{ transform: hov && onClick ? 'translateY(-2px)' : 'none', boxShadow: hov && onClick ? '0 8px 24px rgba(0,0,0,0.1)' : undefined }}
     >
       <div className="flex items-start justify-between gap-2">
@@ -413,70 +383,51 @@ function StatCard({ icon: Icon, iconColor, label, value, sub, onClick, delay = 0
       <p className="mt-3 text-xl font-black text-navy">{value}</p>
       <p className="text-xs font-semibold text-slate-500">{label}</p>
       {sub && <p className="mt-0.5 text-[10px] text-slate-400">{sub}</p>}
-    </motion.div>
+    </motion.button>
   )
 }
 
+/* ─── Main Dashboard ─── */
 export default function ManagementDashboard() {
-  const showToast = useToast()
-  const navigate = useNavigate()
-  const [modal, setModal] = useState(null) // 'files' | 'ar' | 'escalations'
+  const [modal, setModal] = useState(null)
 
   const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
   const openEscalations = mgmtAllEscalations.filter(e => e.status === 'Open').length
   const recent5 = mgmtAllEscalations.slice(0, 5)
 
   return (
-    <ManagementLayout title="Dashboard" fullHeight>
-      {/* ─── Client Search (injected into header zone) ─── */}
-      <div className="pointer-events-none fixed right-[72px] top-0 z-[100] flex h-[52px] items-center pointer-events-auto">
-        <ClientSearch />
-      </div>
-
+    <ManagementLayout title="Dashboard" fullHeight headerSearch={<ClientSearch />}>
       <div className="flex h-full flex-col gap-4 overflow-hidden">
 
-        {/* ── Row 1: Greeting + 4 stat cards ── */}
-        <div className="flex shrink-0 items-end justify-between gap-4">
-          <div>
-            <h1 className="text-lg font-bold text-navy">Good morning, {mgmtUser.name.split(' ')[0]}.</h1>
-            <p className="text-xs text-slate-400">Firm-Wide View — ABCPA + MISCPA · 25 Sep 2026</p>
-          </div>
+        {/* ── Greeting ── */}
+        <div className="shrink-0">
+          <h1 className="text-lg font-bold text-navy">Good morning, {mgmtUser.name.split(' ')[0]}.</h1>
+          <p className="text-xs text-slate-400">Firm-Wide View — ABCPA + MISCPA · 25 Sep 2026</p>
         </div>
 
+        {/* ── 4 Stat Cards ── */}
         <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard
-            icon={Briefcase} iconColor="#0D1B2A"
+          <StatCard icon={Briefcase} iconColor="#0D1B2A"
             label="Total Files Engaged" value="148"
             sub="ABCPA: 89 · MISCPA: 59"
-            onClick={() => setModal('files')}
-            delay={0}
-          />
-          <StatCard
-            icon={TrendingUp} iconColor="#059669"
+            onClick={() => setModal('files')} delay={0} />
+          <StatCard icon={TrendingUp} iconColor="#059669"
             label="Total Client Turnover" value={mgmtTotalTurnover.value}
-            sub={mgmtTotalTurnover.note}
-            delay={0.06}
-          />
-          <StatCard
-            icon={Banknote} iconColor="#DC2626"
+            sub={mgmtTotalTurnover.note} delay={0.06} />
+          <StatCard icon={Banknote} iconColor="#DC2626"
             label="AR — Pending Payments" value={`SAR ${(totalBalance / 1000).toFixed(0)}K`}
             sub={`${mgmtARPending.filter(c => c.daysOverdue > 0).length} clients overdue`}
-            onClick={() => setModal('ar')}
-            delay={0.12}
-          />
-          <StatCard
-            icon={AlertTriangle} iconColor="#D97706"
+            onClick={() => setModal('ar')} delay={0.12} />
+          <StatCard icon={AlertCircle} iconColor="#D97706"
             label="Open Escalations" value={`${openEscalations} Open`}
             sub={`${mgmtAllEscalations.length} total on record`}
-            onClick={() => setModal('escalations')}
-            delay={0.18}
-          />
+            onClick={() => setModal('escalations')} delay={0.18} />
         </div>
 
-        {/* ── Row 2: main content (left + right) ── */}
+        {/* ── Main content row ── */}
         <div className="flex min-h-0 flex-1 gap-4">
 
-          {/* ── LEFT: Escalation Centre ── */}
+          {/* LEFT — Escalation Centre */}
           <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3.5">
               <div className="flex items-center gap-2">
@@ -507,7 +458,7 @@ export default function ManagementDashboard() {
                         <p className="text-sm font-semibold text-navy truncate">{e.client}</p>
                         <span className="text-[10px] text-slate-400">{e.dept}</span>
                       </div>
-                      <p className="mt-0.5 text-xs text-slate-500 leading-relaxed line-clamp-1">{e.reason}</p>
+                      <p className="mt-0.5 text-xs text-slate-500 line-clamp-1">{e.reason}</p>
                       <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
                         <span>Lead: {e.lead}</span>
                         <span>·</span>
@@ -525,7 +476,7 @@ export default function ManagementDashboard() {
             </div>
 
             <div className="shrink-0 border-t border-slate-100 px-5 py-3 flex items-center justify-between">
-              <p className="text-[11px] text-slate-400">Showing latest 5 of {mgmtAllEscalations.length} escalations</p>
+              <p className="text-[11px] text-slate-400">Showing latest 5 of {mgmtAllEscalations.length}</p>
               <button onClick={() => setModal('escalations')}
                 className="flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline">
                 View all <ChevronRight className="h-3 w-3" />
@@ -533,10 +484,9 @@ export default function ManagementDashboard() {
             </div>
           </div>
 
-          {/* ── RIGHT: Revenue + FO summary + Lead Funnel ── */}
-          <div className="flex w-[280px] shrink-0 flex-col gap-3 min-h-0 overflow-y-auto">
+          {/* RIGHT — Revenue + FO + Lead funnel */}
+          <div className="flex w-[272px] shrink-0 flex-col gap-3 min-h-0 overflow-y-auto">
 
-            {/* Revenue tiles */}
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
               <h2 className="mb-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Revenue & Billing</h2>
               <div className="space-y-2">
@@ -552,7 +502,6 @@ export default function ManagementDashboard() {
               </div>
             </div>
 
-            {/* FO quick summary */}
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">FO Managers</h2>
@@ -574,7 +523,6 @@ export default function ManagementDashboard() {
               </div>
             </div>
 
-            {/* Lead funnel */}
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Lead Funnel</h2>
@@ -603,7 +551,6 @@ export default function ManagementDashboard() {
         </div>
       </div>
 
-      {/* ─── Modals ─── */}
       <AnimatePresence>
         {modal === 'files' && <FilesModal onClose={() => setModal(null)} />}
         {modal === 'ar' && <ARModal onClose={() => setModal(null)} />}

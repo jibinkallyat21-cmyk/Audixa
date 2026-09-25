@@ -144,7 +144,7 @@ function NotificationsDropdown() {
   )
 }
 
-function ManagementHeader({ title }) {
+function ManagementHeader({ title, headerSearch }) {
   return (
     <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
       <div className="flex items-center gap-2">
@@ -153,11 +153,15 @@ function ManagementHeader({ title }) {
         <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIXA</span>
       </div>
 
-      <h1 className="absolute left-1/2 max-w-[150px] -translate-x-1/2 truncate text-center text-sm font-semibold text-white lg:max-w-none lg:text-base">{title}</h1>
+      {!headerSearch && (
+        <h1 className="absolute left-1/2 max-w-[150px] -translate-x-1/2 truncate text-center text-sm font-semibold text-white lg:max-w-none lg:text-base">{title}</h1>
+      )}
 
-      <div className="flex items-center gap-4">
-        <span className="hidden md:inline-flex rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80">
-          Firm Wide — ABCPA + MISCPA
+      <div className="flex items-center gap-3">
+        {headerSearch && <div className="hidden sm:block">{headerSearch}</div>}
+
+        <span className="hidden lg:inline-flex rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80">
+          Firm Wide
         </span>
 
         <NotificationsDropdown />
@@ -174,7 +178,7 @@ function ManagementHeader({ title }) {
   )
 }
 
-export default function ManagementLayout({ title, children, fullHeight = false }) {
+export default function ManagementLayout({ title, children, fullHeight = false, headerSearch }) {
   return (
     <SidebarDrawerProvider>
       <div className={`flex w-full bg-background ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
@@ -182,7 +186,7 @@ export default function ManagementLayout({ title, children, fullHeight = false }
           <ManagementSidebar />
         </MobileSidebarWrap>
         <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
-          <ManagementHeader title={title} />
+          <ManagementHeader title={title} headerSearch={headerSearch} />
           <main className={`min-w-0 flex-1 ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'} px-4 py-5 sm:px-6 sm:py-6`}>{children}</main>
           {!fullHeight && <Footer />}
         </div>

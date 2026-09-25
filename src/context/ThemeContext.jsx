@@ -4,7 +4,7 @@ const ThemeContext = createContext({ isDark: false, toggle: () => {} })
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
-    try { return localStorage.getItem('audixa_theme') === 'dark' } catch { return false }
+    try { return localStorage.getItem('audixa_theme') !== 'light' } catch { return true }
   })
 
   useEffect(() => {
