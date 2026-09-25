@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutDashboard, BarChart3, Users2, ScrollText, Bell } from 'lucide-react'
+import { LayoutDashboard, BarChart3, ScrollText, Bell } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
@@ -12,7 +12,6 @@ import { mgmtUser, mgmtNotifications } from '../../data/sampleData'
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/management/dashboard', icon: LayoutDashboard },
   { id: 'analytics', label: 'Firm Analytics', href: '/management/analytics', icon: BarChart3 },
-  { id: 'staff', label: 'Staff Assignments', href: '/management/staff', icon: Users2 },
   { id: 'log', label: 'Audit Log', href: '/management/log', icon: ScrollText },
   { id: 'notifications', label: 'Notifications', href: '/management/notifications', icon: Bell },
 ]

@@ -13,10 +13,17 @@ import {
   mgmtStageBreakdown,
   mgmtAuditTypeBreakdown,
   mgmtHealthBreakdown,
-  mgmtParkingReasons,
   mgmtThroughput,
-  mgmtAtRiskFiles,
 } from '../../data/sampleData'
+
+/* ── dark palette ── */
+const D = {
+  card: '#0F1629',
+  cardBorder: 'rgba(255,255,255,0.07)',
+  heading: '#F1F5F9',
+  muted: '#94A3B8',
+  subtle: '#475569',
+}
 
 function useCountUp(target, duration = 900) {
   const [value, setValue] = useState(0)
@@ -39,7 +46,11 @@ function StatTile({ stat, idx }) {
   const isNumeric = typeof stat.value === 'number'
   const count = useCountUp(isNumeric ? stat.value : 0)
   const TrendIcon = stat.sub?.startsWith('-') ? TrendingDown : TrendingUp
-  const valueTone = stat.tone === 'alert-red' ? 'text-alert-red' : stat.tone === 'emerald' ? 'text-emerald' : 'text-navy'
+
+  const accentColor =
+    stat.tone === 'alert-red' ? '#E8323C'
+    : stat.tone === 'emerald' ? '#059669'
+    : '#F1F5F9'
 
   return (
     <motion.div
@@ -47,12 +58,15 @@ function StatTile({ stat, idx }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.08, duration: 0.3 }}
       whileHover={{ y: -2 }}
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-lg"
+      className="rounded-xl p-5"
+      style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}
     >
-      <p className={`text-2xl font-bold ${valueTone}`}>{isNumeric ? count.toLocaleString() : stat.value}</p>
-      <p className="mt-1 text-xs text-slate-500">{stat.label}</p>
+      <p className="text-2xl font-bold" style={{ color: accentColor }}>
+        {isNumeric ? count.toLocaleString() : stat.value}
+      </p>
+      <p className="mt-1 text-xs" style={{ color: D.muted }}>{stat.label}</p>
       {stat.sub && (
-        <p className={`mt-2 flex items-center gap-1 text-[11px] font-semibold ${stat.subTone === 'emerald' ? 'text-emerald' : 'text-alert-red'}`}>
+        <p className="mt-2 flex items-center gap-1 text-[11px] font-semibold" style={{ color: stat.subTone === 'emerald' ? '#059669' : '#E8323C' }}>
           <TrendIcon className="h-3 w-3" /> {stat.sub}
         </p>
       )}
@@ -69,8 +83,8 @@ export default function ManagementAnalytics() {
     openModal({
       title: 'Download Board Pack',
       body: (
-        <p className="text-sm text-slate-600">
-          Board Pack will include all firm analytics for the selected period. Format: <span className="font-semibold text-navy">PDF</span>.
+        <p className="text-sm" style={{ color: D.muted }}>
+          Board Pack will include all firm analytics for the selected period. Format: <span className="font-semibold" style={{ color: D.heading }}>PDF</span>.
         </p>
       ),
       confirmLabel: 'Download',
@@ -81,46 +95,31 @@ export default function ManagementAnalytics() {
     })
   }
 
-  const handleEscalate = (client) => {
-    openModal({
-      title: 'Escalate to Management',
-      body: (
-        <p className="text-sm text-slate-600">
-          Notify Management team of <span className="font-semibold text-navy">{client}</span> escalation?
-        </p>
-      ),
-      confirmLabel: 'Confirm',
-      onConfirm: () => {
-        showToast(`Management notified — ${client}`)
-        closeModal()
-      },
-    })
-  }
-
   const totalStage = mgmtStageBreakdown.reduce((s, x) => s + x.value, 0)
   const totalHealth = mgmtHealthBreakdown.reduce((s, x) => s + x.value, 0)
-  const totalParked = mgmtParkingReasons.reduce((s, x) => s + x.value, 0)
-  const maxThroughput = Math.max(...mgmtThroughput.map((t) => t.value))
 
   return (
     <ManagementLayout title="Firm Analytics">
       <PageTransition>
         <div className="space-y-6">
+
+          {/* ── Header ── */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-bold text-navy">Firm Analytics — ABCPA + MISCPA Combined</h1>
-              <span className="mt-1 inline-block rounded-full bg-navy/10 px-2.5 py-0.5 text-[11px] font-semibold text-navy">Firm-Wide View</span>
+              <h1 className="text-xl font-bold" style={{ color: D.heading }}>Firm Analytics — ABCPA + MISCPA Combined</h1>
+              <span className="mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: 'rgba(255,255,255,0.08)', color: D.muted }}>
+                Firm-Wide View
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <select
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-navy outline-none focus:border-navy"
+                className="rounded-lg px-3 py-2 text-sm outline-none"
+                style={{ background: D.card, border: `1px solid ${D.cardBorder}`, color: D.heading }}
               >
                 {mgmtReportingPeriods.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
+                  <option key={p} value={p} style={{ background: '#0F1629' }}>{p}</option>
                 ))}
               </select>
               <button onClick={handleDownload} className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">
@@ -129,15 +128,21 @@ export default function ManagementAnalytics() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {mgmtAnalyticsStats.map((s, idx) => (
-              <StatTile key={s.label} stat={s} idx={idx} />
-            ))}
+          {/* ── Engagement Summary — Stat Tiles ── */}
+          <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Engagement Summary</p>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {mgmtAnalyticsStats.map((s, idx) => (
+                <StatTile key={s.label} stat={s} idx={idx} />
+              ))}
+            </div>
           </div>
 
+          {/* ── Files by Department + Stage ── */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold text-navy">Files by Auditor Department</h3>
+            {/* Dept split */}
+            <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
+              <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Files by Auditor Department</h3>
               <div className="relative mx-auto h-52 w-52">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -146,36 +151,35 @@ export default function ManagementAnalytics() {
                         <Cell key={seg.label} fill={seg.color} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ background: '#0F1629', border: '1px solid rgba(255,255,255,0.1)', color: '#F1F5F9', fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <p className="text-lg font-bold text-navy">148</p>
-                  <p className="text-[10px] text-slate-400">Active</p>
+                  <p className="text-lg font-bold" style={{ color: D.heading }}>148</p>
+                  <p className="text-[10px]" style={{ color: D.muted }}>Active</p>
                 </div>
               </div>
               <div className="mt-4 flex justify-center gap-6">
                 {mgmtDeptSplit.map((seg) => (
                   <div key={seg.label} className="flex items-center gap-1.5 text-xs">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: seg.color }} />
-                    <span className="text-slate-500">
-                      {seg.label} {seg.value} ({seg.pct}%)
-                    </span>
+                    <span style={{ color: D.muted }}>{seg.label} {seg.value} ({seg.pct}%)</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold text-navy">Files by Stage</h3>
+            {/* Files by stage */}
+            <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
+              <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Files by Stage</h3>
               <div className="space-y-3">
                 {mgmtStageBreakdown.map((s, idx) => (
                   <div key={s.label}>
                     <div className="mb-1 flex items-center justify-between text-xs">
-                      <span className="text-slate-500">{s.label}</span>
-                      <span className="font-semibold text-navy">{s.value}</span>
+                      <span style={{ color: D.muted }}>{s.label}</span>
+                      <span className="font-semibold" style={{ color: D.heading }}>{s.value}</span>
                     </div>
-                    <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-3 w-full overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${(s.value / totalStage) * 100}%` }}
@@ -190,144 +194,83 @@ export default function ManagementAnalytics() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold text-navy">Files by Audit Type</h3>
-              <div className="mx-auto h-52 w-52">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={mgmtAuditTypeBreakdown} dataKey="value" nameKey="label" innerRadius={0} outerRadius={90} startAngle={90} endAngle={450} animationDuration={900}>
-                      {mgmtAuditTypeBreakdown.map((seg) => (
-                        <Cell key={seg.label} fill={seg.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-4 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                {mgmtAuditTypeBreakdown.map((seg) => (
-                  <div key={seg.label} className="flex items-center gap-1.5 text-xs">
-                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
-                    <span className="text-slate-500">
-                      {seg.label} — {seg.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-navy">On Track vs At Risk vs Critical</h3>
-                <span className="text-xs font-semibold text-slate-400">Total {totalHealth}</span>
-              </div>
-              <div className="flex h-8 w-full overflow-hidden rounded-lg bg-slate-100">
-                {mgmtHealthBreakdown.map((seg, idx) => (
-                  <motion.div
-                    key={seg.label}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(seg.value / totalHealth) * 100}%` }}
-                    transition={{ duration: 0.8, ease: 'easeOut', delay: idx * 0.06 }}
-                    className="flex h-full items-center justify-center text-[10px] font-bold text-white"
-                    style={{ backgroundColor: seg.color }}
-                  >
-                    {Math.round((seg.value / totalHealth) * 100)}%
-                  </motion.div>
-                ))}
-              </div>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {mgmtHealthBreakdown.map((seg) => (
-                  <div key={seg.label} className="flex items-center gap-1.5 text-xs">
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: seg.color }} />
-                    <span className="text-slate-500">
-                      {seg.label} {seg.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-navy">Parking Reason Analysis</h3>
-              <span className="text-xs font-semibold text-slate-400">Total {totalParked} parked</span>
-            </div>
-            <div className="space-y-3">
-              {mgmtParkingReasons.map((r, idx) => (
-                <div key={r.label}>
-                  <div className="mb-1 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">{r.label}</span>
-                    <span className="font-semibold text-navy">{r.value} files</span>
-                  </div>
-                  <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(r.value / totalParked) * 100}%` }}
-                      transition={{ duration: 0.8, ease: 'easeOut', delay: idx * 0.06 }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: r.color }}
-                    />
-                  </div>
+          {/* ── Execution Summary ── */}
+          <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Execution Level Summary</p>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* Audit type */}
+              <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
+                <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Files by Audit Type</h3>
+                <div className="mx-auto h-52 w-52">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={mgmtAuditTypeBreakdown} dataKey="value" nameKey="label" innerRadius={0} outerRadius={90} startAngle={90} endAngle={450} animationDuration={900}>
+                        {mgmtAuditTypeBreakdown.map((seg) => (
+                          <Cell key={seg.label} fill={seg.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ background: '#0F1629', border: '1px solid rgba(255,255,255,0.1)', color: '#F1F5F9', fontSize: 12 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
+                <div className="mt-4 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                  {mgmtAuditTypeBreakdown.map((seg) => (
+                    <div key={seg.label} className="flex items-center gap-1.5 text-xs">
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
+                      <span style={{ color: D.muted }}>{seg.label} — {seg.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Health breakdown */}
+              <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-sm font-bold" style={{ color: D.heading }}>On Track vs At Risk vs Critical</h3>
+                  <span className="text-xs font-semibold" style={{ color: D.subtle }}>Total {totalHealth}</span>
+                </div>
+                <div className="flex h-8 w-full overflow-hidden rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  {mgmtHealthBreakdown.map((seg, idx) => (
+                    <motion.div
+                      key={seg.label}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(seg.value / totalHealth) * 100}%` }}
+                      transition={{ duration: 0.8, ease: 'easeOut', delay: idx * 0.06 }}
+                      className="flex h-full items-center justify-center text-[10px] font-bold text-white"
+                      style={{ backgroundColor: seg.color }}
+                    >
+                      {Math.round((seg.value / totalHealth) * 100)}%
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {mgmtHealthBreakdown.map((seg) => (
+                    <div key={seg.label} className="flex items-center gap-1.5 text-xs">
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: seg.color }} />
+                      <span style={{ color: D.muted }}>{seg.label} {seg.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="mb-4 text-sm font-bold text-navy">Throughput — Files Completed</h3>
+          {/* Throughput */}
+          <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
+            <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Throughput — Files Completed</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={mgmtThroughput}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#059669" radius={[6, 6, 0, 0]} animationDuration={800} label={{ position: 'top', fontSize: 12, fill: '#0D1B2A', fontWeight: 700 }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: '#0F1629', border: '1px solid rgba(255,255,255,0.1)', color: '#F1F5F9', fontSize: 12 }} />
+                  <Bar dataKey="value" fill="#059669" radius={[6, 6, 0, 0]} animationDuration={800} label={{ position: 'top', fontSize: 12, fill: '#94A3B8', fontWeight: 700 }} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div>
-            <h3 className="mb-3 text-sm font-bold text-navy">At-Risk Files — Requiring Partner Review</h3>
-            <div className="space-y-3">
-              {mgmtAtRiskFiles.map((f, idx) => (
-                <motion.div
-                  key={f.client}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.06, duration: 0.25 }}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-navy">{f.client}</p>
-                      <span
-                        className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-                          f.dept === 'ABCPA' ? 'border-navy/30 bg-navy/10 text-navy' : 'border-amber/30 bg-amber/10 text-amber'
-                        }`}
-                      >
-                        {f.dept}
-                      </span>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${f.status.startsWith('OVERDUE') ? 'bg-alert-red/10 text-alert-red' : 'bg-amber/10 text-amber'}`}>
-                        {f.status}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-500">{f.blocker}</p>
-                  </div>
-                  {f.action === 'escalate' ? (
-                    <button onClick={() => handleEscalate(f.client)} className="shrink-0 rounded-md bg-alert-red px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-red-700">
-                      Escalate
-                    </button>
-                  ) : (
-                    <button className="shrink-0 rounded-md border border-navy px-3.5 py-1.5 text-xs font-semibold text-navy hover:bg-navy/5">Review</button>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </div>
         </div>
       </PageTransition>
     </ManagementLayout>
