@@ -15,15 +15,15 @@ import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 import { getActivityEvents } from '../../data/activityLog'
 import { useToast } from '../../components/shared/Toast'
 
-/* dark palette */
+/* palette tokens (CSS vars from ThemeContext) */
 const D = {
-  card: '#0F1629',
-  cardHov: '#162040',
-  border: 'rgba(255,255,255,0.07)',
-  border2: 'rgba(255,255,255,0.12)',
-  text: '#F1F5F9',
-  muted: '#94A3B8',
-  subtle: '#475569',
+  card: 'var(--c-card)',
+  cardHov: 'var(--c-cardhov)',
+  border: 'var(--c-border)',
+  border2: 'var(--c-border2)',
+  text: 'var(--c-text)',
+  muted: 'var(--c-muted)',
+  subtle: 'var(--c-subtle)',
 }
 
 function useCountUp(target, duration = 700) {
@@ -130,7 +130,7 @@ function PBCRing({ total, accepted, fy }) {
     >
       <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
         <svg viewBox="0 0 96 96" className="h-24 w-24 -rotate-90">
-          <circle cx="48" cy="48" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+          <circle cx="48" cy="48" r={r} fill="none" style={{ stroke: 'var(--c-track)' }} strokeWidth="8" />
           <motion.circle
             key={fy} cx="48" cy="48" r={r} fill="none"
             stroke="#10B981" strokeWidth="8" strokeLinecap="round"

@@ -18,19 +18,20 @@ import {
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
+import { useTheme } from '../../context/ThemeContext'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import ClientNotificationsPanel from './ClientNotificationsPanel'
 import { clientPortal } from '../../data/sampleData'
 import { useClientFY } from '../../context/ClientFYContext'
 
-/* ─── dark palette tokens ─── */
+/* ─── palette tokens (CSS vars set by ThemeContext) ─── */
 const D = {
-  pageBg: '#080C18',
-  sidebarBg: '#060914',
-  headerBg: '#0A0E1C',
-  cardBg: '#0F1629',
-  border: 'rgba(255,255,255,0.07)',
-  borderHover: 'rgba(255,255,255,0.14)',
+  pageBg: 'var(--c-page)',
+  sidebarBg: '#060914',       // sidebar always dark navy
+  headerBg: 'var(--c-head)',
+  cardBg: 'var(--c-card)',
+  border: 'var(--c-border)',
+  borderHover: 'var(--c-border2)',
 }
 
 const NAV_ITEMS = [
@@ -49,7 +50,7 @@ const QUICK_CHAT_MESSAGES = [
 ]
 
 /* ─── live clock ─── */
-function LiveClock() {
+function LiveClock({ isDark = true }) {
   const [now, setNow] = useState(new Date())
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
@@ -57,19 +58,24 @@ function LiveClock() {
   }, [])
   const date = now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
   const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  const timeCls = isDark ? 'text-white/90' : 'text-slate-800'
+  const dateCls = isDark ? 'text-white/35' : 'text-slate-400'
   return (
     <div className="hidden lg:flex flex-col items-end gap-0.5 select-none">
-      <span className="text-sm font-bold tabular-nums text-white/90 tracking-wider">{time}</span>
-      <span className="text-[10px] text-white/35 tracking-wide">{date}</span>
+      <span className={`text-sm font-bold tabular-nums tracking-wider ${timeCls}`}>{time}</span>
+      <span className={`text-[10px] tracking-wide ${dateCls}`}>{date}</span>
     </div>
   )
 }
 
 /* ─── FY dropdown ─── */
-function FYDropdown() {
+function FYDropdown({ isDark = true }) {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
+  const btnTx = isDark ? 'text-white/80' : 'text-slate-700'
+  const btnHov = isDark ? 'hover:bg-white/10' : 'hover:bg-slate-100'
+  const chevTx = isDark ? 'text-white/40' : 'text-slate-400'
 
   useEffect(() => {
     const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
@@ -81,11 +87,11 @@ function FYDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white/80 transition-colors hover:bg-white/10"
+        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${btnTx} ${btnHov}`}
         style={{ border: `1px solid ${D.border}` }}
       >
         {selectedFY}
-        <ChevronDown className="h-3 w-3 text-white/40" />
+        <ChevronDown className={`h-3 w-3 ${chevTx}`} />
       </button>
       <AnimatePresence>
         {open && (
@@ -281,30 +287,37 @@ function ClientSidebar() {
 
 /* ─── Header ─── */
 function ClientHeader({ title }) {
+  const { isDark } = useTheme()
+  const tx = isDark ? 'text-white' : 'text-[#0D1B2A]'
+  const txMuted = isDark ? 'text-white/50' : 'text-slate-500'
+  const txTitle = isDark ? 'text-white/80' : 'text-slate-700'
+  const sep = isDark ? 'text-white/20' : 'text-slate-300'
+  const avatarBg = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(13,27,42,0.08)'
+  const avatarTx = isDark ? 'text-white' : 'text-[#0D1B2A]'
   return (
     <header
-      className="relative flex h-[54px] w-full shrink-0 items-center justify-between px-6"
+      className="client-header relative flex h-[54px] w-full shrink-0 items-center justify-between px-6"
       style={{ background: D.headerBg, borderBottom: `1px solid ${D.border}` }}
     >
       <div className="flex items-center gap-3">
         <HamburgerButton />
         <AnalytixMark size={22} className="shrink-0" />
-        <span className="hidden font-black tracking-[0.1em] text-white sm:inline text-sm">
+        <span className={`hidden font-black tracking-[0.1em] sm:inline text-sm ${tx}`}>
           AUDIT <span className="text-brand">360</span>
         </span>
-        <span className="hidden text-white/20 sm:inline">·</span>
-        <span className="hidden truncate text-sm font-medium text-white/50 sm:inline max-w-[160px]">{clientPortal.clientName}</span>
+        <span className={`hidden sm:inline ${sep}`}>·</span>
+        <span className={`hidden truncate text-sm font-medium sm:inline max-w-[160px] ${txMuted}`}>{clientPortal.clientName}</span>
       </div>
 
-      <h1 className="absolute left-1/2 max-w-[140px] -translate-x-1/2 truncate text-center text-sm font-semibold text-white/80 lg:max-w-none">{title}</h1>
+      <h1 className={`absolute left-1/2 max-w-[140px] -translate-x-1/2 truncate text-center text-sm font-semibold lg:max-w-none ${txTitle}`}>{title}</h1>
 
       <div className="flex items-center gap-4">
-        <LiveClock />
-        <FYDropdown />
+        <LiveClock isDark={isDark} />
+        <FYDropdown isDark={isDark} />
         <ClientNotificationsPanel />
-        <ThemeToggle variant="dark" />
+        <ThemeToggle variant={isDark ? 'dark' : 'light'} />
         <ExitDemoButton />
-        <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid ${D.border}` }}>
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${avatarTx}`} style={{ background: avatarBg, border: `1px solid ${D.border}` }}>
           KR
         </div>
       </div>
@@ -316,11 +329,11 @@ function ClientHeader({ title }) {
 function ClientLayoutInner({ title, children, fullHeight }) {
   return (
     <SidebarDrawerProvider>
-      <div className="flex min-h-screen w-full" style={{ background: D.pageBg }}>
+      <div className="flex h-screen w-full overflow-hidden" style={{ background: D.pageBg }}>
         <MobileSidebarWrap><ClientSidebar /></MobileSidebarWrap>
-        <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
+        <div className={`flex min-w-0 flex-1 flex-col h-full ${fullHeight ? 'overflow-hidden' : ''}`}>
           <ClientHeader title={title} />
-          <main className={`min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'}`} style={{ background: D.pageBg }}>
+          <main className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'}`} style={{ background: D.pageBg }}>
             {children}
           </main>
         </div>

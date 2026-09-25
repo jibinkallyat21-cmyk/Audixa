@@ -7,12 +7,22 @@
 }
 
 :root {
-  /* Emil Kowalski motion primitives: strong custom curves, not the weak
-     CSS built-ins. Entrances/exits use ease-out; on-screen movement uses
-     ease-in-out; never ease-in on UI. */
+  /* Emil Kowalski motion primitives */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Client portal palette — defaults (dark). ThemeContext overrides these on toggle. */
+  --c-page: #080C18;
+  --c-head: #0A0E1C;
+  --c-card: #0F1629;
+  --c-card2: #111c35;
+  --c-cardhov: #162040;
+  --c-border: rgba(255,255,255,0.07);
+  --c-border2: rgba(255,255,255,0.12);
+  --c-text: #F1F5F9;
+  --c-muted: #94A3B8;
+  --c-subtle: #475569;
+  --c-track: rgba(255,255,255,0.06);
 }
 
 body {
@@ -347,6 +357,45 @@ html[data-theme='light'] aside.bg-navy {
 }
 html[data-theme='light'] .bg-slate-50,
 html[data-theme='light'] .bg-gray-50 { background-color: #F8FAFC !important; }
+
+/* ============================================================
+   Light mode — client portal text overrides
+   The sidebar stays dark in light mode (intentional); these rules
+   only apply inside .client-main (the scrollable content area)
+   and .client-header, so sidebar white text is never overridden.
+   ============================================================ */
+
+html[data-theme='light'] .client-main,
+html[data-theme='light'] .client-header {
+  color: #0D1B2A;
+}
+html[data-theme='light'] .client-main .text-white,
+html[data-theme='light'] .client-header .text-white { color: #0D1B2A !important; }
+html[data-theme='light'] .client-main .text-white\/90 { color: rgba(13,27,42,0.9) !important; }
+html[data-theme='light'] .client-main .text-white\/80 { color: rgba(13,27,42,0.8) !important; }
+html[data-theme='light'] .client-main .text-white\/70 { color: rgba(13,27,42,0.7) !important; }
+html[data-theme='light'] .client-main .text-white\/60 { color: rgba(13,27,42,0.6) !important; }
+html[data-theme='light'] .client-main .text-white\/50 { color: rgba(13,27,42,0.5) !important; }
+html[data-theme='light'] .client-main .text-white\/45 { color: rgba(13,27,42,0.45) !important; }
+html[data-theme='light'] .client-main .text-white\/40 { color: rgba(13,27,42,0.4) !important; }
+html[data-theme='light'] .client-main .text-white\/30 { color: rgba(13,27,42,0.3) !important; }
+html[data-theme='light'] .client-main .text-white\/25 { color: rgba(13,27,42,0.25) !important; }
+/* Card backgrounds and borders that still reference old opacity utilities */
+html[data-theme='light'] .client-main .bg-white\/\[0\.08\],
+html[data-theme='light'] .client-main .bg-white\/\[0\.05\],
+html[data-theme='light'] .client-main .bg-white\/10 { background-color: rgba(13,27,42,0.05) !important; }
+html[data-theme='light'] .client-main .border-white\/10 { border-color: rgba(13,27,42,0.1) !important; }
+html[data-theme='light'] .client-main .bg-emerald { color: #059669; }
+/* Badge pill overrides */
+html[data-theme='light'] .client-main .bg-brand\/20 { background-color: rgba(232,50,60,0.12) !important; }
+/* Inputs in light mode */
+html[data-theme='light'] .client-main input,
+html[data-theme='light'] .client-main textarea,
+html[data-theme='light'] .client-main select {
+  color: #0D1B2A !important;
+  background-color: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
 
 /* ============================================================
    Premium redesign pass — depth, glass, and 3D surface treatment.

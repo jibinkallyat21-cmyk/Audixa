@@ -12,15 +12,15 @@ import { clientPortal } from '../../data/sampleData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 import { getClientUpload, setClientUpload, onUploadsChange } from '../../data/clientUploads'
 
-/* dark palette */
+/* palette tokens (CSS vars from ThemeContext) */
 const D = {
-  card: '#0F1629',
-  card2: '#111c35',
-  border: 'rgba(255,255,255,0.07)',
-  border2: 'rgba(255,255,255,0.12)',
-  text: '#F1F5F9',
-  muted: '#94A3B8',
-  subtle: '#475569',
+  card: 'var(--c-card)',
+  card2: 'var(--c-card2)',
+  border: 'var(--c-border)',
+  border2: 'var(--c-border2)',
+  text: 'var(--c-text)',
+  muted: 'var(--c-muted)',
+  subtle: 'var(--c-subtle)',
 }
 
 /* ─── Upload zone ─── */
