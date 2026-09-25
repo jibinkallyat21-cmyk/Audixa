@@ -6,7 +6,7 @@ import {
   ListChecks,
   MessageSquare,
   FolderOpen,
-  Activity,
+  LineChart,
   Table2,
   ChevronDown,
   MessageCircle,
@@ -39,7 +39,7 @@ const NAV_ITEMS = [
   { id: 'queries',    label: 'Audit Queries',        href: '/client/queries',    icon: MessageSquare },
   { id: 'working-tb', label: 'Working Trial Balance',href: '/client/working-tb', icon: Table2 },
   { id: 'reports',    label: 'Reports & Documents', href: '/client/reports',    icon: FolderOpen },
-  { id: 'activity',   label: 'Activity Log',         href: '/client/activity',   icon: Activity },
+  { id: 'activity',   label: 'Activity Log',         href: '/client/activity',   icon: LineChart },
 ]
 
 const QUICK_CHAT_MESSAGES = [
