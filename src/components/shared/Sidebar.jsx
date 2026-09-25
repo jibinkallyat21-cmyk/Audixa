@@ -9,7 +9,7 @@ export default function Sidebar({ navItems = [], activeItem, userName = 'Guest U
           <BarChart3 className="h-5 w-5 text-white" />
         </div>
         <div className="leading-tight">
-          <p className="text-sm font-bold tracking-wide text-white">AUDIXA</p>
+          <p className="text-sm font-bold tracking-wide text-white">AUDIT 360</p>
           <p className="text-[10px] text-white/50">by Analytix</p>
         </div>
       </div>

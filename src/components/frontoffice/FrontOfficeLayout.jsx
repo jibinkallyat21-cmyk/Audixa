@@ -40,7 +40,7 @@ function FOSidebar() {
       <div className="flex items-center gap-2 px-5 py-6">
         <AnalytixMark size={26} className="shrink-0" />
         <div className="leading-tight">
-          <p className="text-sm font-bold tracking-wide text-white">AUDIXA</p>
+          <p className="text-sm font-bold tracking-wide text-white">AUDIT <span className="text-brand">360</span></p>
           <p className="text-[10px] text-white/50">Sales & Front Office</p>
         </div>
       </div>
@@ -160,7 +160,7 @@ function FOHeader({ title }) {
       <div className="flex items-center gap-2">
         <HamburgerButton />
         <AnalytixMark size={22} className="shrink-0" />
-        <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIXA</span>
+        <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIT 360</span>
       </div>
 
       <h1 className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-white">{title}</h1>

@@ -4,14 +4,19 @@ const ThemeContext = createContext({ isDark: false, toggle: () => {} })
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
-    try { return localStorage.getItem('audixa_theme') !== 'light' } catch { return true }
+    try { return localStorage.getItem('audit360_theme') !== 'light' } catch { return true }
   })
 
   useEffect(() => {
     const root = document.documentElement
-    if (isDark) root.classList.add('dark')
-    else root.classList.remove('dark')
-    try { localStorage.setItem('audixa_theme', isDark ? 'dark' : 'light') } catch {}
+    if (isDark) {
+      root.classList.add('dark')
+      root.setAttribute('data-theme', 'dark')
+    } else {
+      root.classList.remove('dark')
+      root.setAttribute('data-theme', 'light')
+    }
+    try { localStorage.setItem('audit360_theme', isDark ? 'dark' : 'light') } catch {}
   }, [isDark])
 
   return (

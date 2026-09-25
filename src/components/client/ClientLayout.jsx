@@ -227,7 +227,9 @@ function ClientSidebar() {
       <div className="flex items-center gap-3 px-5 py-6">
         <AnalytixMark size={30} className="shrink-0" />
         <div className="leading-tight">
-          <p className="text-lg font-black tracking-[0.2em] text-white">AUDIXA</p>
+          <p className="text-base font-black tracking-[0.12em] text-white">
+            AUDIT <span className="text-brand">360</span>
+          </p>
           <p className="text-[9px] text-white/30 tracking-widest uppercase">Client Portal</p>
         </div>
       </div>
@@ -287,7 +289,9 @@ function ClientHeader({ title }) {
       <div className="flex items-center gap-3">
         <HamburgerButton />
         <AnalytixMark size={22} className="shrink-0" />
-        <span className="hidden font-black tracking-[0.2em] text-white sm:inline text-sm">AUDIXA</span>
+        <span className="hidden font-black tracking-[0.1em] text-white sm:inline text-sm">
+          AUDIT <span className="text-brand">360</span>
+        </span>
         <span className="hidden text-white/20 sm:inline">·</span>
         <span className="hidden truncate text-sm font-medium text-white/50 sm:inline max-w-[160px]">{clientPortal.clientName}</span>
       </div>

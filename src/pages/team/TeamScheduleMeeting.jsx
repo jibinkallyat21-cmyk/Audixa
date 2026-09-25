@@ -89,7 +89,7 @@ export default function TeamScheduleMeeting() {
       <PageTransition>
         <div className="mx-auto max-w-3xl space-y-6">
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <span>AUDIXA</span>
+            <span>AUDIT 360</span>
             <ChevronRight className="h-3 w-3" />
             <span>Meetings</span>
             <ChevronRight className="h-3 w-3" />

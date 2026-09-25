@@ -15,7 +15,7 @@ export default function Header({ title, hasNotifications = false, userName = 'Gu
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand">
           <BarChart3 className="h-4 w-4 text-white" />
         </div>
-        <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIXA</span>
+        <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIT 360</span>
       </div>
 
       <h1 className="absolute left-1/2 max-w-[150px] -translate-x-1/2 truncate text-center text-sm font-semibold text-white lg:max-w-none lg:text-base">

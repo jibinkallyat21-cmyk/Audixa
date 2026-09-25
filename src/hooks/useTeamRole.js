@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-const KEY = 'audixa-team-view-role'
-const EVENT = 'audixa-team-role-change'
+const KEY = 'audit360-team-view-role'
+const EVENT = 'audit360-team-role-change'
 
 // Demo-only role toggle (Audit Lead / Associate) for the team portal. Backed
 // by sessionStorage + a same-tab custom event so every mounted instance of

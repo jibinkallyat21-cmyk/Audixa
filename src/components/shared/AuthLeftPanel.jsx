@@ -56,7 +56,9 @@ export default function AuthLeftPanel() {
       >
         <div className="animate-fade-in-up flex flex-col items-start opacity-0">
           <AnalytixMark size={32} />
-          <h1 className="mt-3 text-[42px] font-black leading-none tracking-[-0.03em] text-white">AUDIXA</h1>
+          <h1 className="mt-3 text-[38px] font-black leading-none tracking-[-0.02em] text-white">
+            AUDIT <span className="text-brand">360</span>
+          </h1>
           <p className="mt-1.5 text-[13px] font-normal tracking-[0.08em] text-white/35">by Analytix</p>
         </div>
 

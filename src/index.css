@@ -97,13 +97,13 @@ body {
 .delay-500 { animation-delay: 500ms; }
 .delay-600 { animation-delay: 600ms; }
 
-@keyframes audixaGlow {
+@keyframes audit360Glow {
   0%   { background-position: 0% 50%;   filter: drop-shadow(0 0 16px rgba(232, 50, 60,0.35)); }
   50%  { background-position: 100% 50%; filter: drop-shadow(0 0 28px rgba(232, 50, 60,0.65)); }
   100% { background-position: 0% 50%;   filter: drop-shadow(0 0 16px rgba(232, 50, 60,0.35)); }
 }
-.animate-audixa-glow {
-  animation: audixaGlow 5s ease-in-out infinite alternate;
+.animate-audixa-glow, .animate-audit360-glow {
+  animation: audit360Glow 5s ease-in-out infinite alternate;
 }
 
 @keyframes audixaDataDrift {
@@ -277,6 +277,76 @@ html.dark .text-\[\#525f71\] { color: #94A3B8 !important; }
 html.dark .text-\[\#9CA3AF\] { color: #475569 !important; }
 html.dark .border-\[\#E2E8F0\] { border-color: rgba(255,255,255,0.08) !important; }
 html.dark .border-b.border-\[\#E2E8F0\] { border-color: rgba(255,255,255,0.08) !important; }
+
+/* ============================================================
+   3D card hover effects — perspective lift on interactive cards
+   ============================================================ */
+
+.card-3d {
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+}
+.card-3d:hover {
+  transform: perspective(800px) rotateX(2deg) rotateY(-1deg) translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+}
+html.dark .card-3d:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 4px 16px rgba(232,50,60,0.08);
+}
+
+/* Stat tile 3D tilt */
+.stat-tile {
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease;
+}
+.stat-tile:hover {
+  transform: perspective(600px) rotateX(3deg) translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+}
+
+/* Sidebar nav item entrance */
+@keyframes navSlideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+aside nav li {
+  animation: navSlideIn 0.3s var(--ease-out) both;
+}
+aside nav li:nth-child(1) { animation-delay: 30ms; }
+aside nav li:nth-child(2) { animation-delay: 60ms; }
+aside nav li:nth-child(3) { animation-delay: 90ms; }
+aside nav li:nth-child(4) { animation-delay: 120ms; }
+aside nav li:nth-child(5) { animation-delay: 150ms; }
+aside nav li:nth-child(6) { animation-delay: 180ms; }
+aside nav li:nth-child(7) { animation-delay: 210ms; }
+aside nav li:nth-child(8) { animation-delay: 240ms; }
+
+/* Page entrance fade-up */
+.page-enter {
+  animation: pageEnter 0.4s var(--ease-out) both;
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Button 3D press */
+button:not(:disabled):active {
+  transform: scale(0.97) translateY(1px);
+}
+
+/* ============================================================
+   Light mode explicit support — html[data-theme=light]
+   ============================================================ */
+
+html[data-theme='light'] body {
+  background-color: #F0F4F8;
+  color: #0D1B2A;
+}
+html[data-theme='light'] aside.bg-navy {
+  background: linear-gradient(180deg, #0D1B2A 0%, #0a1520 100%) !important;
+}
+html[data-theme='light'] .bg-slate-50,
+html[data-theme='light'] .bg-gray-50 { background-color: #F8FAFC !important; }
 
 /* ============================================================
    Premium redesign pass — depth, glass, and 3D surface treatment.

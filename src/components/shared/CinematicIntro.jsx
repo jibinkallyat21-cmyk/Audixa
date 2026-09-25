@@ -4,9 +4,9 @@ import gsap from 'gsap'
 import { AnalytixMark } from './AnalytixLogo'
 import FinancialDataBackground from './FinancialDataBackground'
 
-const SESSION_KEY = 'audixa-intro-played'
+const SESSION_KEY = 'audit360-intro-played'
 const SPRING_EASE = [0.16, 1, 0.3, 1]
-const LETTERS = 'AUDIXA'.split('')
+const LETTERS = 'AUDIT 360'.split('')
 const AUDIXA_START = 1.8 // seconds — when the GSAP letter reveal begins
 
 export default function CinematicIntro() {
@@ -154,7 +154,7 @@ export default function CinematicIntro() {
               ANALYTIX
             </motion.p>
 
-            {/* Beat 4 — AUDIXA: GSAP letter reveal + sweeping light, metallic gradient fill */}
+            {/* Beat 4 — AUDIT 360: GSAP letter reveal + sweeping light, metallic gradient fill */}
             <div ref={wordRef} className="relative mt-4 flex overflow-hidden" style={{ perspective: 600 }}>
               {LETTERS.map((letter, i) => (
                 <span

@@ -110,7 +110,7 @@ export default function LandingPage() {
               className="font-black text-white"
               style={{ fontSize: '72px', letterSpacing: '-0.04em', lineHeight: 1 }}
             >
-              AUDIXA
+              AUDIT <span style={{ color: '#E8323C' }}>360</span>
             </motion.h1>
 
             <motion.p variants={heroItem} className="mt-5 font-light" style={{ fontSize: '20px', color: 'rgba(255,255,255,0.55)' }}>
@@ -170,7 +170,7 @@ export default function LandingPage() {
 
         {/* Section 4 — CTA footer strip */}
         <section className="w-full px-6 py-24 text-center" style={{ backgroundColor: '#0A0F1E' }}>
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">Ready to see AUDIXA in action?</h2>
+          <h2 className="text-2xl font-bold text-white sm:text-3xl">Ready to see AUDIT 360 in action?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
             Enter the platform and explore all 6 role portals with sample KSA audit data.
           </p>

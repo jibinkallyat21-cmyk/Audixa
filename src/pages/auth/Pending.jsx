@@ -100,7 +100,7 @@ export default function Pending() {
         </div>
 
         <p className="mt-6 text-xs text-[#525f71]">
-          AUDIXA by Analytix — © 2026 Analytix. All rights reserved.
+          AUDIT 360 by Analytix — © 2026 Analytix. All rights reserved.
         </p>
       </div>
     </PageTransition>
