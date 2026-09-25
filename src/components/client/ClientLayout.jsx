@@ -329,11 +329,11 @@ function ClientHeader({ title }) {
 function ClientLayoutInner({ title, children, fullHeight }) {
   return (
     <SidebarDrawerProvider>
-      <div className="flex h-screen w-full overflow-hidden" style={{ background: D.pageBg }}>
+      <div className="flex min-h-screen w-full" style={{ background: D.pageBg }}>
         <MobileSidebarWrap><ClientSidebar /></MobileSidebarWrap>
-        <div className={`flex min-w-0 flex-1 flex-col h-full ${fullHeight ? 'overflow-hidden' : ''}`}>
+        <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
           <ClientHeader title={title} />
-          <main className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'}`} style={{ background: D.pageBg }}>
+          <main className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden' : ''}`} style={{ background: D.pageBg }}>
             {children}
           </main>
         </div>
