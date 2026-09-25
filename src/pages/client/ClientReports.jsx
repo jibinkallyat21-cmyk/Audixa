@@ -1,28 +1,30 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FileText, FileCheck2, Eye, Download, CheckCircle2, Lock, Info, FileSignature, Upload, X, Paperclip } from 'lucide-react'
+import {
+  FileText, FileCheck2, Eye, Download, CheckCircle2, Lock,
+  FileSignature, Upload, X, Paperclip, Calculator, AlertTriangle,
+  ChevronRight, ExternalLink,
+} from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
 import { clientPortal } from '../../data/sampleData'
-import { useClientFY } from '../../context/ClientFYContext'
+import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 import { getClientUpload, setClientUpload, onUploadsChange } from '../../data/clientUploads'
 
-function StatusChip({ label, tone }) {
-  const styles = {
-    emerald: 'bg-emerald/10 text-emerald border-emerald/30',
-    amber: 'bg-amber/10 text-amber border-amber/30',
-    grey: 'bg-slate-100 text-slate-500 border-slate-300',
-    red: 'bg-red-50 text-alert-red border-alert-red/30',
-  }
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${styles[tone] || styles.grey}`}>
-      {label}
-    </span>
-  )
+/* dark palette */
+const D = {
+  card: '#0F1629',
+  card2: '#111c35',
+  border: 'rgba(255,255,255,0.07)',
+  border2: 'rgba(255,255,255,0.12)',
+  text: '#F1F5F9',
+  muted: '#94A3B8',
+  subtle: '#475569',
 }
 
-function UploadZone({ uploadKey, label, description, accept = '.pdf,.docx,.doc,.png,.jpg' }) {
+/* ─── Upload zone ─── */
+function UploadZone({ uploadKey, label, description }) {
   const showToast = useToast()
   const fileRef = useRef(null)
   const [current, setCurrent] = useState(() => getClientUpload(uploadKey))
@@ -40,26 +42,18 @@ function UploadZone({ uploadKey, label, description, accept = '.pdf,.docx,.doc,.
     showToast(`${label} uploaded — your engagement team has been notified`)
   }
 
-  const handleDrop = (e) => {
-    e.preventDefault()
-    setDragging(false)
-    handleFile(e.dataTransfer.files?.[0])
-  }
-
   if (current) {
     return (
-      <div className="mt-4 flex items-center gap-3 rounded-xl border border-emerald/30 bg-emerald/5 px-4 py-3">
-        <Paperclip className="h-5 w-5 shrink-0 text-emerald" />
+      <div className="mt-3 flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+        <Paperclip className="h-4 w-4 shrink-0 text-emerald" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-navy">{current.name}</p>
-          <p className="text-xs text-slate-400">{current.size} · Uploaded {current.uploadedAt}</p>
+          <p className="truncate text-sm font-semibold text-white/90">{current.name}</p>
+          <p className="text-xs" style={{ color: D.muted }}>{current.size} · Uploaded {current.uploadedAt}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <StatusChip label="Submitted" tone="emerald" />
-          <button onClick={() => { setClientUpload(uploadKey, null); showToast('Upload removed') }} className="text-slate-400 hover:text-alert-red">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+        <span className="shrink-0 rounded-full bg-emerald/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald">Submitted</span>
+        <button onClick={() => { setClientUpload(uploadKey, null); showToast('Upload removed') }} className="text-white/20 hover:text-red-400">
+          <X className="h-4 w-4" />
+        </button>
       </div>
     )
   }
@@ -68,350 +62,432 @@ function UploadZone({ uploadKey, label, description, accept = '.pdf,.docx,.doc,.
     <div
       onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
       onDragLeave={() => setDragging(false)}
-      onDrop={handleDrop}
-      className={`mt-4 cursor-pointer rounded-xl border-2 border-dashed px-6 py-5 text-center transition-colors ${dragging ? 'border-navy bg-navy/5' : 'border-slate-200 bg-slate-50 hover:border-navy/40 hover:bg-slate-100/50'}`}
+      onDrop={(e) => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files?.[0]) }}
       onClick={() => fileRef.current?.click()}
+      className="mt-3 cursor-pointer rounded-xl px-6 py-5 text-center transition-all"
+      style={{
+        background: dragging ? 'rgba(230,57,70,0.06)' : 'rgba(255,255,255,0.03)',
+        border: `2px dashed ${dragging ? 'rgba(230,57,70,0.4)' : D.border}`,
+      }}
+      onMouseEnter={e => { e.currentTarget.style.border = `2px dashed ${D.border2}`; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+      onMouseLeave={e => { if (!dragging) { e.currentTarget.style.border = `2px dashed ${D.border}`; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}}
     >
-      <input ref={fileRef} type="file" accept={accept} className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
-      <Upload className="mx-auto mb-2 h-6 w-6 text-slate-400" />
-      <p className="text-sm font-semibold text-navy">{label}</p>
-      <p className="mt-0.5 text-xs text-slate-400">{description}</p>
-      <p className="mt-2 text-[10px] text-slate-300">Drag & drop or click to browse · PDF, DOCX, PNG accepted</p>
+      <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.png,.jpg" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
+      <Upload className="mx-auto mb-2 h-5 w-5" style={{ color: D.subtle }} />
+      <p className="text-sm font-semibold text-white/70">{label}</p>
+      <p className="mt-0.5 text-xs" style={{ color: D.subtle }}>{description}</p>
+      <p className="mt-1.5 text-[10px]" style={{ color: D.subtle }}>Drag & drop or click · PDF, DOCX, PNG</p>
     </div>
   )
 }
 
+/* ─── Hover document card ─── */
+function DocCard({ icon: Icon, iconColor, filename, meta, status, statusColor, onDownload, onView, delay = 0 }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      onHoverStart={() => setHov(true)}
+      onHoverEnd={() => setHov(false)}
+      className="relative overflow-hidden rounded-xl cursor-pointer transition-all"
+      style={{ background: hov ? D.card2 : 'rgba(255,255,255,0.03)', border: `1px solid ${hov ? D.border2 : D.border}` }}
+    >
+      <div className="flex items-center gap-4 p-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ background: `${iconColor}15` }}>
+          <Icon className="h-6 w-6" style={{ color: iconColor }} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-white/90">{filename}</p>
+          <p className="mt-0.5 text-xs" style={{ color: D.muted }}>{meta}</p>
+        </div>
+        <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}30` }}>
+          {status}
+        </span>
+      </div>
+
+      {/* Hover reveal */}
+      <AnimatePresence>
+        {hov && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.18 }}
+            className="overflow-hidden"
+          >
+            <div className="flex gap-2 px-4 pb-4">
+              {onView && (
+                <button onClick={onView} className="flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white hover:bg-[#D12C35]">
+                  <Eye className="h-3.5 w-3.5" /> View
+                </button>
+              )}
+              {onDownload && (
+                <button onClick={onDownload} className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white/70 hover:bg-white/10 transition-colors" style={{ border: `1px solid ${D.border}` }}>
+                  <Download className="h-3.5 w-3.5" /> Download PDF
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+/* ─── Zakat Calculator summary ─── */
+function ZakatSummary() {
+  const ZAKAT_DATA = {
+    zakatableAssets: 48_720_000,
+    zakatableBase: 31_580_000,
+    zakatRate: 2.5,
+    zakatPayable: 789_500,
+    filedWith: 'ZATCA',
+    filingStatus: 'In Preparation',
+    method: 'Net Worth (Addback) Method',
+  }
+  const fmt = (n) => `SAR ${n.toLocaleString('en-SA')}`
+  return (
+    <div className="mt-4 rounded-2xl overflow-hidden" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)' }}>
+      <div className="flex items-center gap-3 px-5 py-3.5" style={{ borderBottom: '1px solid rgba(16,185,129,0.12)' }}>
+        <Calculator className="h-4 w-4 text-emerald" />
+        <p className="text-sm font-bold text-white/90">ZATCA Zakat Calculator Summary</p>
+        <span className="ml-auto rounded-full px-2.5 py-0.5 text-[10px] font-bold text-amber" style={{ background: 'rgba(245,158,11,0.15)' }}>In Preparation</span>
+      </div>
+      <div className="grid grid-cols-2 gap-0 sm:grid-cols-4">
+        {[
+          { label: 'Zakatable Assets', value: fmt(ZAKAT_DATA.zakatableAssets) },
+          { label: 'Zakatable Base', value: fmt(ZAKAT_DATA.zakatableBase) },
+          { label: 'Zakat Rate', value: `${ZAKAT_DATA.zakatRate}%` },
+          { label: 'Zakat Payable', value: fmt(ZAKAT_DATA.zakatPayable) },
+        ].map((f, i) => (
+          <div key={f.label} className="px-5 py-3.5" style={{ borderRight: i < 3 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>{f.label}</p>
+            <p className="mt-1 text-sm font-bold text-white/90">{f.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <p className="text-xs" style={{ color: D.muted }}>Method: {ZAKAT_DATA.method}</p>
+        <button className="flex items-center gap-1.5 text-xs font-semibold text-emerald hover:text-emerald/80">
+          <ExternalLink className="h-3 w-3" /> View Full Calculation
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ─── FY-aware data ─── */
 function getReportsData(fy) {
   const isComplete = fy === 'FY2023' || fy === 'FY2022'
   const qawaemRef = fy === 'FY2022' ? 'QAW-2022-62018' : fy === 'FY2023' ? 'QAW-2023-77203' : null
   const issuedDate = fy === 'FY2022' ? '18 Oct 2022' : fy === 'FY2023' ? '20 Oct 2023' : null
-  const filedDate = fy === 'FY2022' ? '22 Oct 2022' : fy === 'FY2023' ? '22 Oct 2023' : null
-
+  const filedDate  = fy === 'FY2022' ? '22 Oct 2022' : fy === 'FY2023' ? '22 Oct 2023' : null
   return {
-    engagementLetter: {
-      available: true,
-      filename: `Engagement Letter — ${fy}.pdf`,
-      size: '1.1 MB',
-      issuedDate: fy === 'FY2022' ? '01 Aug 2022' : fy === 'FY2023' ? '01 Aug 2023' : '01 Aug 2024',
-    },
-    zakatReturn: {
-      available: isComplete,
-      qawaemRef: isComplete ? qawaemRef : null,
-      filename: isComplete ? `Zakat Return — Kingdom Retail Holdings — ${fy}.pdf` : null,
-      filedDate: isComplete ? filedDate : null,
-    },
-    draftAFS: {
-      available: isComplete,
-      confirmed: isComplete,
-      filename: isComplete ? `Draft Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null,
-      pages: 24,
-      size: '2.8 MB',
-    },
-    finalAFS: {
-      available: isComplete,
-      filename: isComplete ? `Final Audited Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null,
-      size: '3.2 MB',
-      issuedDate: isComplete ? issuedDate : null,
-      qawaemRef: isComplete ? qawaemRef : null,
-      filedDate: isComplete ? filedDate : null,
-    },
+    engagementLetter: { filename: `Engagement Letter — ${fy}.pdf`, size: '1.1 MB', issuedDate: fy === 'FY2022' ? '01 Aug 2022' : fy === 'FY2023' ? '01 Aug 2023' : '01 Aug 2024' },
+    zakatReturn:  { available: isComplete, qawaemRef, filename: isComplete ? `Zakat Return — Kingdom Retail Holdings — ${fy}.pdf` : null, filedDate },
+    draftAFS:     { available: isComplete, confirmed: isComplete, filename: isComplete ? `Draft Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null, pages: 24, size: '2.8 MB' },
+    finalAFS:     { available: isComplete, filename: isComplete ? `Final Audited Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null, size: '3.2 MB', issuedDate, qawaemRef, filedDate },
   }
 }
+
+/* ─── Tab definitions ─── */
+const TABS = [
+  { id: 'el',    label: 'Engagement Letter',      icon: FileText },
+  { id: 'zakat', label: 'Zakat Returns & Tax',    icon: FileCheck2 },
+  { id: 'draft', label: 'Draft Issued',            icon: FileSignature },
+  { id: 'afs',   label: 'AFS Issued',              icon: CheckCircle2 },
+]
 
 export default function ClientReports() {
   const showToast = useToast()
   const { selectedFY } = useClientFY()
-  const [comments, setComments] = useState([
-    { id: 'c1', author: 'Analytix Audit Team', side: 'team', text: 'Please note the related party disclosure on Note 7 has been updated per your confirmation on 12 Oct.' },
-    { id: 'c2', author: 'You', side: 'client', text: 'Confirmed, the note is accurate. Note 12 (Zakat provision) has also been reviewed.' },
-  ])
-  const [newComment, setNewComment] = useState('')
+  const data = getReportsData(selectedFY)
+  const [activeTab, setActiveTab] = useState('el')
   const [signedOff, setSignedOff] = useState(false)
   const [clientRole, setClientRole] = useState(clientPortal.clientRole)
   const isAuthorisedSignatory = clientRole === 'Authorised Signatory'
-
-  const data = getReportsData(selectedFY)
+  const [comments, setComments] = useState([
+    { id: 'c1', author: 'Analytix Audit Team', side: 'team', text: 'Related party disclosure on Note 7 updated per your confirmation on 12 Oct.' },
+    { id: 'c2', author: 'You', side: 'client', text: 'Confirmed, the note is accurate. Note 12 (Zakat provision) also reviewed.' },
+  ])
+  const [newComment, setNewComment] = useState('')
 
   const handleAddComment = (e) => {
     e.preventDefault()
     if (!newComment.trim()) return
-    setComments((prev) => [...prev, { id: `c${prev.length + 1}`, author: 'You', side: 'client', text: newComment.trim() }])
+    setComments(prev => [...prev, { id: `c${prev.length + 1}`, author: 'You', side: 'client', text: newComment.trim() }])
     setNewComment('')
   }
+
+  const inputStyle = { background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}`, color: 'rgba(255,255,255,0.8)' }
 
   return (
     <ClientLayout title="Reports &amp; Documents">
       <PageTransition>
         <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedFY}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-6"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h1 className="text-2xl font-bold text-navy">Reports &amp; Documents</h1>
-            </div>
+          <motion.div key={selectedFY} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="space-y-5">
+
+            <h1 className="text-2xl font-bold text-white">Reports &amp; Documents</h1>
 
             {/* Info banner */}
-            <div className="flex items-start gap-3 rounded-xl border border-amber/30 bg-amber/5 px-5 py-4">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber" />
-              <p className="text-sm text-amber">
-                Documents in this section are issued by your Analytix engagement team. Where indicated, your signed copies are required to proceed. Contact your auditor for any queries.
+            <div className="flex items-start gap-3 rounded-xl px-5 py-4" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)' }}>
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber" />
+              <p className="text-sm text-amber/90">
+                Documents are issued by your Analytix engagement team. Upload signed copies where indicated — they are immediately visible to the engagement team.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            {/* ─── TAB BAR ─── */}
+            <div className="flex gap-1 rounded-2xl p-1.5" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}` }}>
+              {TABS.map((tab) => {
+                const Icon = tab.icon
+                const active = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs font-semibold transition-all"
+                    style={{
+                      background: active ? '#E63946' : 'transparent',
+                      color: active ? '#fff' : D.muted,
+                      boxShadow: active ? '0 4px 16px rgba(230,57,70,0.25)' : 'none',
+                    }}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                )
+              })}
+            </div>
 
-              {/* Card 1 — Engagement Letter + signed upload */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy/5">
-                    <FileText className="h-5 w-5 text-navy" />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-bold text-navy">Engagement Letter</h2>
-                    <p className="text-xs text-slate-500">Formal engagement terms issued by Analytix</p>
-                  </div>
-                </div>
-                {data.engagementLetter.available ? (
-                  <>
-                    <StatusChip label="Issued by Analytix" tone="emerald" />
-                    <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
-                      <FileText className="h-8 w-8 text-navy/40" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-navy truncate">{data.engagementLetter.filename}</p>
-                        <p className="text-xs text-slate-400">{data.engagementLetter.size} · Issued {data.engagementLetter.issuedDate}</p>
+            {/* ─── TAB CONTENT ─── */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18 }}
+              >
+
+                {/* ── Engagement Letter ── */}
+                {activeTab === 'el' && (
+                  <div className="rounded-2xl p-6 space-y-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-base font-bold text-white">Engagement Letter</h2>
+                        <p className="text-sm mt-0.5" style={{ color: D.muted }}>Formal audit engagement terms issued by Analytix Audit & Assurance</p>
                       </div>
+                      <span className="rounded-full px-3 py-1 text-xs font-bold text-emerald" style={{ background: 'rgba(16,185,129,0.15)' }}>Issued</span>
                     </div>
-                    <button onClick={() => showToast('Downloading engagement letter...')} className="mt-3 w-full rounded-lg border border-navy px-4 py-2.5 text-sm font-semibold text-navy hover:bg-navy/5">
-                      <Download className="mr-2 inline h-4 w-4" /> Download
-                    </button>
 
-                    {/* Signed EL upload */}
-                    <div className="mt-5 border-t border-slate-100 pt-5">
-                      <p className="text-xs font-semibold text-navy">Upload Signed Engagement Letter</p>
-                      <p className="mt-0.5 text-xs text-slate-400">Please sign and return the engagement letter to your auditor. Your submission will be visible to the engagement team.</p>
-                      <UploadZone
-                        uploadKey="signedEngagementLetter"
-                        label="Signed Engagement Letter"
-                        description="Upload the countersigned copy received from Analytix"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <StatusChip label="Not yet issued" tone="grey" />
-                )}
-              </motion.div>
+                    <DocCard
+                      icon={FileText} iconColor="#6366F1"
+                      filename={data.engagementLetter.filename}
+                      meta={`${data.engagementLetter.size} · Issued ${data.engagementLetter.issuedDate}`}
+                      status="Issued by Analytix" statusColor="#6366F1"
+                      onDownload={() => showToast('Downloading engagement letter...')}
+                      onView={() => showToast('Opening engagement letter...')}
+                    />
 
-              {/* Card 2 — Zakat Return + supporting docs upload */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10">
-                    <FileCheck2 className="h-5 w-5 text-emerald" />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-bold text-navy">Zakat Return &amp; Tax Reports</h2>
-                    <p className="text-xs text-slate-500">Zakat and tax filings prepared by Analytix</p>
-                  </div>
-                </div>
-                {data.zakatReturn.available ? (
-                  <>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <StatusChip label="Filed with ZATCA" tone="emerald" />
-                      {data.zakatReturn.qawaemRef && (
-                        <span className="rounded-full bg-navy/5 px-3 py-0.5 text-xs font-mono font-semibold text-navy">{data.zakatReturn.qawaemRef}</span>
-                      )}
+                    <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
+                      <p className="text-sm font-bold text-white mb-0.5">Upload Signed Engagement Letter</p>
+                      <p className="text-xs" style={{ color: D.muted }}>Sign and return the engagement letter. Your submission is immediately visible to the engagement team.</p>
+                      <UploadZone uploadKey="signedEngagementLetter" label="Signed Engagement Letter" description="Upload the countersigned copy" />
                     </div>
-                    <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
-                      <FileCheck2 className="h-8 w-8 text-emerald/40" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-navy truncate">{data.zakatReturn.filename}</p>
-                        <p className="text-xs text-slate-400">Filed {data.zakatReturn.filedDate}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => showToast('Downloading Zakat return...')} className="mt-3 w-full rounded-lg border border-navy px-4 py-2.5 text-sm font-semibold text-navy hover:bg-navy/5">
-                      <Download className="mr-2 inline h-4 w-4" /> Download
-                    </button>
-                  </>
-                ) : (
-                  <StatusChip label="In Preparation" tone="amber" />
+                  </div>
                 )}
 
-                {/* Zakat supporting docs upload */}
-                <div className={`${data.zakatReturn.available ? 'mt-5 border-t border-slate-100 pt-5' : 'mt-4'}`}>
-                  <p className="text-xs font-semibold text-navy">Upload Zakat Supporting Documents</p>
-                  <p className="mt-0.5 text-xs text-slate-400">Submit signed declarations, ownership certificates, or other Zakat-related documents required by the engagement team.</p>
-                  <UploadZone
-                    uploadKey="zakatSupportingDocs"
-                    label="Zakat Supporting Documentation"
-                    description="Signed Zakat declarations, ZATCA correspondence, ownership schedule"
-                  />
-                </div>
-              </motion.div>
-
-              {/* Card 3 — Draft AFS + signed upload (full width) */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber/10">
-                      <Eye className="h-5 w-5 text-amber" />
+                {/* ── Zakat Returns & Tax ── */}
+                {activeTab === 'zakat' && (
+                  <div className="rounded-2xl p-6 space-y-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-base font-bold text-white">Zakat Returns &amp; Tax Reports</h2>
+                        <p className="text-sm mt-0.5" style={{ color: D.muted }}>ZATCA Zakat filings and tax reports prepared by Analytix</p>
+                      </div>
+                      <span className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: data.zakatReturn.available ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: data.zakatReturn.available ? '#10B981' : '#F59E0B' }}>
+                        {data.zakatReturn.available ? 'Filed with ZATCA' : 'In Preparation'}
+                      </span>
                     </div>
-                    <div>
-                      <h2 className="text-sm font-bold text-navy">Draft Financial Statements</h2>
-                      <p className="text-xs text-slate-500">Review and confirm accuracy — your authorisation is required before the final report is issued</p>
+
+                    {data.zakatReturn.available ? (
+                      <>
+                        {data.zakatReturn.qawaemRef && (
+                          <p className="text-xs font-mono" style={{ color: D.muted }}>Qawaem Ref: <span className="text-white/70">{data.zakatReturn.qawaemRef}</span></p>
+                        )}
+                        <DocCard
+                          icon={FileCheck2} iconColor="#10B981"
+                          filename={data.zakatReturn.filename}
+                          meta={`Filed ${data.zakatReturn.filedDate}`}
+                          status="Filed" statusColor="#10B981"
+                          onDownload={() => showToast('Downloading Zakat return...')}
+                          onView={() => showToast('Opening Zakat return...')}
+                        />
+                      </>
+                    ) : (
+                      <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.15)', color: '#F59E0B' }}>
+                        Zakat return is currently being prepared by the engagement team.
+                      </div>
+                    )}
+
+                    {/* Zakat calculator */}
+                    <ZakatSummary />
+
+                    <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
+                      <p className="text-sm font-bold text-white mb-0.5">Upload Zakat Supporting Documents</p>
+                      <p className="text-xs" style={{ color: D.muted }}>Submit signed Zakat declarations, ZATCA correspondence, or ownership schedules.</p>
+                      <UploadZone uploadKey="zakatSupportingDocs" label="Zakat Supporting Documentation" description="Signed declarations, ZATCA correspondence, ownership schedule" />
                     </div>
                   </div>
-                  {/* Demo role toggle */}
-                  <div className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-0.5 text-xs">
-                    <span className="pl-2 text-slate-400 text-[10px]">Viewing as:</span>
-                    {['Authorised Signatory', 'Standard User'].map((r) => (
-                      <button key={r} onClick={() => setClientRole(r)} className={`rounded-full px-2 py-1 text-[10px] font-semibold transition-colors ${clientRole === r ? 'bg-navy text-white' : 'text-slate-500 hover:bg-slate-50'}`}>
-                        {r === 'Authorised Signatory' ? 'Account Owner' : 'Team Member'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                )}
 
-                {data.draftAFS.available ? (
-                  <>
-                    <motion.div animate={!data.draftAFS.confirmed && !signedOff ? { opacity: [1, 0.7, 1] } : {}} transition={{ duration: 2, repeat: Infinity }}>
-                      <StatusChip
-                        label={signedOff || data.draftAFS.confirmed ? 'Confirmed by Management' : 'Awaiting Management Review'}
-                        tone={signedOff || data.draftAFS.confirmed ? 'emerald' : 'amber'}
-                      />
-                    </motion.div>
-                    <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                      <FileSignature className="h-10 w-10 text-amber/40" />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-navy">{data.draftAFS.filename}</p>
-                        <p className="text-xs text-slate-400">{data.draftAFS.pages} pages · {data.draftAFS.size}</p>
+                {/* ── Draft Issued ── */}
+                {activeTab === 'draft' && (
+                  <div className="rounded-2xl p-6 space-y-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-base font-bold text-white">Draft Financial Statements</h2>
+                        <p className="text-sm mt-0.5" style={{ color: D.muted }}>Review carefully — management authorisation required before the final report is issued</p>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => showToast('Opening draft document...')} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">
-                          View Document
-                        </button>
-                        <button onClick={() => showToast('Downloading draft...')} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">
-                          <Download className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Comment thread */}
-                    <div className="mt-5">
-                      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Review Comments</h3>
-                      <div className="space-y-3 mb-3">
-                        {comments.map((c) => (
-                          <div key={c.id} className={`flex ${c.side === 'client' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] rounded-lg px-3 py-2.5 text-sm ${c.side === 'client' ? 'bg-navy text-white' : 'bg-slate-100 text-navy'}`}>
-                              <p className="text-[10px] font-semibold opacity-70 mb-0.5">{c.author}</p>
-                              {c.text}
-                            </div>
-                          </div>
+                      {/* Role toggle (demo) */}
+                      <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${D.border}` }}>
+                        <span className="pl-2 text-[10px]" style={{ color: D.subtle }}>As:</span>
+                        {['Authorised Signatory', 'Standard User'].map((r) => (
+                          <button key={r} onClick={() => setClientRole(r)} className="rounded-lg px-2.5 py-1 text-[10px] font-semibold transition-colors" style={{ background: clientRole === r ? '#E63946' : 'transparent', color: clientRole === r ? '#fff' : D.muted }}>
+                            {r === 'Authorised Signatory' ? 'Account Owner' : 'Team Member'}
+                          </button>
                         ))}
                       </div>
-                      <form onSubmit={handleAddComment} className="flex gap-2">
-                        <input value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Add a review comment..." className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy" />
-                        <button type="submit" className="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">Post</button>
-                      </form>
                     </div>
 
-                    {/* Management sign-off */}
-                    <div className={`mt-5 rounded-xl p-5 ${isAuthorisedSignatory ? 'border border-emerald/30 bg-emerald/5' : 'border border-slate-200 bg-slate-50'}`}>
-                      <div className="flex items-start gap-3">
-                        {isAuthorisedSignatory ? (
-                          <>
-                            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald" />
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold text-navy">Management Representation — Account Owner</p>
-                              <p className="mt-0.5 text-xs text-slate-500">By confirming, management represents that the draft financial statements fairly present the company's financial position and authorises Analytix to issue the final signed audit report.</p>
-                              {signedOff || data.draftAFS.confirmed ? (
-                                <p className="mt-3 text-sm font-semibold text-emerald">✓ Management representation received — final report will be issued shortly</p>
-                              ) : (
-                                <button onClick={() => setSignedOff(true)} className="mt-3 rounded-lg bg-emerald px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald/90">
-                                  Confirm Draft Financial Statements
-                                </button>
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
-                            <div>
-                              <p className="text-sm font-semibold text-slate-600">Management Representation — Account Owner Required</p>
-                              <p className="mt-0.5 text-xs text-slate-400">Confirmation of the draft financial statements must be provided by the designated Account Owner.</p>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                    {data.draftAFS.available ? (
+                      <>
+                        <DocCard
+                          icon={FileSignature} iconColor="#F59E0B"
+                          filename={data.draftAFS.filename}
+                          meta={`${data.draftAFS.pages} pages · ${data.draftAFS.size}`}
+                          status={signedOff || data.draftAFS.confirmed ? 'Confirmed' : 'Awaiting Review'}
+                          statusColor={signedOff || data.draftAFS.confirmed ? '#10B981' : '#F59E0B'}
+                          onView={() => showToast('Opening draft document...')}
+                          onDownload={() => showToast('Downloading draft...')}
+                          delay={0.05}
+                        />
 
-                    {/* Signed Draft AFS upload */}
-                    <div className="mt-5 border-t border-slate-100 pt-5">
-                      <p className="text-xs font-semibold text-navy">Upload Signed Draft Financial Statements</p>
-                      <p className="mt-0.5 text-xs text-slate-400">Once reviewed and approved internally, upload the management-signed copy. This will be made available to your engagement team immediately.</p>
-                      <UploadZone
-                        uploadKey="signedDraftAFS"
-                        label="Signed Draft Financial Statements"
-                        description="Management-signed copy of the draft AFS as reviewed"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <StatusChip label="Not yet issued" tone="grey" />
-                )}
-              </motion.div>
-
-              {/* Card 4 — Final AFS (full width) */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10">
-                    <CheckCircle2 className="h-5 w-5 text-brand" />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-bold text-navy">Final Audited Financial Statements</h2>
-                    <p className="text-xs text-slate-500">Signed audit report — available upon completion of all review procedures</p>
-                  </div>
-                </div>
-
-                {data.finalAFS.available ? (
-                  <>
-                    <StatusChip label="Available" tone="emerald" />
-                    <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                      <FileText className="h-10 w-10 text-brand/30" />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-navy">{data.finalAFS.filename}</p>
-                        <p className="text-xs text-slate-400">Issued {data.finalAFS.issuedDate} · {data.finalAFS.size}</p>
-                      </div>
-                      <button onClick={() => showToast('Downloading final AFS...')} className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]">
-                        <Download className="mr-2 inline h-4 w-4" /> Download PDF
-                      </button>
-                    </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                      {[
-                        { label: 'Qawaem Reference', value: data.finalAFS.qawaemRef },
-                        { label: 'Filing Date', value: data.finalAFS.filedDate },
-                        { label: 'Engagement Partner', value: 'Tariq Al-Harbi' },
-                        { label: 'Status', value: 'Filed & Complete' },
-                      ].map((f) => (
-                        <div key={f.label} className="rounded-lg bg-slate-50 px-3 py-2.5">
-                          <p className="text-[10px] font-medium text-slate-400">{f.label}</p>
-                          <p className="mt-0.5 text-sm font-semibold text-navy">{f.value}</p>
+                        {/* Comment thread */}
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: D.subtle }}>Review Comments</p>
+                          <div className="space-y-2 mb-3">
+                            {comments.map((c) => (
+                              <div key={c.id} className={`flex ${c.side === 'client' ? 'justify-end' : 'justify-start'}`}>
+                                <div className="max-w-[80%] rounded-xl px-3.5 py-2.5 text-sm" style={{ background: c.side === 'client' ? '#E63946' : 'rgba(255,255,255,0.07)', color: '#fff' }}>
+                                  <p className="text-[10px] font-semibold opacity-60 mb-0.5">{c.author}</p>
+                                  {c.text}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <form onSubmit={handleAddComment} className="flex gap-2">
+                            <input value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Add a review comment..." className="flex-1 rounded-xl px-3 py-2 text-sm outline-none" style={inputStyle} />
+                            <button type="submit" className="rounded-xl bg-brand px-3 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">Post</button>
+                          </form>
                         </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <StatusChip label="Pending — Management confirmation required" tone="grey" />
-                    <p className="mt-3 text-xs text-slate-400">The final audited report will be issued once the draft financial statements have been confirmed by management above.</p>
-                  </>
-                )}
-              </motion.div>
 
-            </div>
+                        {/* Management sign-off */}
+                        <div className="rounded-xl p-5" style={{ background: isAuthorisedSignatory ? 'rgba(16,185,129,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${isAuthorisedSignatory ? 'rgba(16,185,129,0.2)' : D.border}` }}>
+                          {isAuthorisedSignatory ? (
+                            <div className="flex items-start gap-3">
+                              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald" />
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-white">Management Representation — Account Owner</p>
+                                <p className="mt-0.5 text-xs" style={{ color: D.muted }}>By confirming, management represents that the draft fairly presents the company's financial position and authorises Analytix to issue the final report.</p>
+                                {signedOff || data.draftAFS.confirmed ? (
+                                  <p className="mt-3 text-sm font-semibold text-emerald">✓ Management representation received — final report will be issued shortly</p>
+                                ) : (
+                                  <button onClick={() => setSignedOff(true)} className="mt-3 rounded-xl bg-emerald px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald/90">
+                                    Confirm Draft Financial Statements
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-start gap-3">
+                              <Lock className="mt-0.5 h-5 w-5 shrink-0" style={{ color: D.subtle }} />
+                              <div>
+                                <p className="text-sm font-semibold text-white/70">Management Representation — Account Owner Required</p>
+                                <p className="mt-0.5 text-xs" style={{ color: D.subtle }}>Confirmation must be provided by the designated Account Owner.</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Upload signed draft */}
+                        <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
+                          <p className="text-sm font-bold text-white mb-0.5">Upload Management-Signed Draft</p>
+                          <p className="text-xs" style={{ color: D.muted }}>Upload the management-signed copy. Visible to the engagement team immediately.</p>
+                          <UploadZone uploadKey="signedDraftAFS" label="Signed Draft Financial Statements" description="Management-signed copy of the draft AFS" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="rounded-xl px-4 py-4 text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.muted }}>
+                        Draft financial statements have not yet been issued for {selectedFY}. They will appear here once prepared by the engagement team.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── AFS Issued ── */}
+                {activeTab === 'afs' && (
+                  <div className="rounded-2xl p-6 space-y-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-base font-bold text-white">Final Audited Financial Statements</h2>
+                        <p className="text-sm mt-0.5" style={{ color: D.muted }}>Signed audit report — available upon completion of all review procedures</p>
+                      </div>
+                      <span className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: data.finalAFS.available ? 'rgba(16,185,129,0.15)' : 'rgba(100,116,139,0.15)', color: data.finalAFS.available ? '#10B981' : D.muted }}>
+                        {data.finalAFS.available ? 'Available' : 'Pending'}
+                      </span>
+                    </div>
+
+                    {data.finalAFS.available ? (
+                      <>
+                        <DocCard
+                          icon={CheckCircle2} iconColor="#E63946"
+                          filename={data.finalAFS.filename}
+                          meta={`Issued ${data.finalAFS.issuedDate} · ${data.finalAFS.size}`}
+                          status="Final" statusColor="#10B981"
+                          onDownload={() => showToast('Downloading final AFS...')}
+                          onView={() => showToast('Opening final AFS...')}
+                        />
+
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { label: 'Qawaem Reference', value: data.finalAFS.qawaemRef },
+                            { label: 'Filing Date', value: data.finalAFS.filedDate },
+                            { label: 'Engagement Partner', value: 'Tariq Al-Harbi' },
+                            { label: 'Status', value: 'Filed & Complete' },
+                          ].map((f) => (
+                            <div key={f.label} className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}` }}>
+                              <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>{f.label}</p>
+                              <p className="mt-1 text-sm font-bold text-white/90">{f.value}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="rounded-xl px-4 py-4 space-y-1" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}` }}>
+                        <p className="text-sm font-semibold text-white/60">Not yet available</p>
+                        <p className="text-xs" style={{ color: D.subtle }}>The final audited report will be issued once management confirms the draft financial statements in the <strong className="text-white/40">Draft Issued</strong> tab above.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </motion.div>
+            </AnimatePresence>
+
           </motion.div>
         </AnimatePresence>
       </PageTransition>
