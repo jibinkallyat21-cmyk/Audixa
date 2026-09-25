@@ -148,9 +148,20 @@ export default function CinematicIntro() {
                 filter: { delay: 1.3, duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
               }}
             >
-              <div style={{ filter: 'brightness(3) contrast(0.85)' }}>
-                <AnalytixMark size={72} />
+              <div style={{ overflow: 'hidden', height: 38 }}>
+                <AnalytixMark size={72} className="object-top" />
               </div>
+              <span
+                style={{
+                  color: 'rgba(255,255,255,0.82)',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.24em',
+                  marginTop: '5px',
+                }}
+              >
+                ANALYTIX
+              </span>
             </motion.div>
 
             {/* Beat 4 — AUDIT 360: GSAP letter reveal + sweeping light, metallic gradient fill */}
