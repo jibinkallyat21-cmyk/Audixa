@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <title>AUDIXA</title>
+    <script type="module" crossorigin src="/app.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Catch errors that happen before/outside React (module-level crashes)
+      window.__initErrors = []
+      window.addEventListener('error', function(e) {
+        window.__initErrors.push(e)
+        var root = document.getElementById('root')
+        if (root && !root.childElementCount) {
+          root.innerHTML = '<div style="padding:2rem;font-family:monospace;background:#080C18;color:#F1F5F9;min-height:100vh"><h2 style="color:#E8323C;margin-bottom:1rem">Init Error</h2><pre style="white-space:pre-wrap;word-break:break-word;font-size:12px;color:#94A3B8">' + (e.message || '') + '\n' + (e.filename || '') + ':' + (e.lineno || '') + '\n\n' + ((e.error && e.error.stack) || '') + '</pre></div>'
+        }
+      })
+      window.addEventListener('unhandledrejection', function(e) {
+        var root = document.getElementById('root')
+        if (root && !root.childElementCount) {
+          root.innerHTML = '<div style="padding:2rem;font-family:monospace;background:#080C18;color:#F1F5F9;min-height:100vh"><h2 style="color:#E8323C;margin-bottom:1rem">Module Load Error</h2><pre style="white-space:pre-wrap;word-break:break-word;font-size:12px;color:#94A3B8">' + ((e.reason && (e.reason.message || e.reason)) || 'Unknown rejection') + '\n\n' + ((e.reason && e.reason.stack) || '') + '</pre></div>'
+        }
+      })
+    </script>
+  </body>
+</html>
