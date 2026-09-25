@@ -30,7 +30,6 @@ class ErrorBoundary extends Component {
 import { ToastProvider } from './components/shared/Toast'
 import { ModalProvider } from './components/shared/Modal'
 import CinematicIntro from './components/shared/CinematicIntro'
-import LandingPage from './pages/LandingPage'
 
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
@@ -93,7 +92,7 @@ function AnimatedRoutes() {
       {location.pathname === '/' && <CinematicIntro />}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<div />} />
 
           {/* Auth */}
           <Route path="/login" element={<Login />} />

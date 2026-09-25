@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import gsap from 'gsap'
 import { AnalytixMark } from './AnalytixLogo'
@@ -10,6 +11,7 @@ const LETTERS = 'AUDIT 360'.split('')
 const AUDIXA_START = 1.8 // seconds — when the GSAP letter reveal begins
 
 export default function CinematicIntro() {
+  const navigate = useNavigate()
   const [alreadyPlayed] = useState(() => {
     try {
       return sessionStorage.getItem(SESSION_KEY) === '1'
@@ -19,10 +21,15 @@ export default function CinematicIntro() {
   })
   const [showSkip, setShowSkip] = useState(false)
   const [exiting, setExiting] = useState(false)
-  const [done, setDone] = useState(alreadyPlayed)
+  const [done, setDone] = useState(false)
 
   const wordRef = useRef(null)
   const sweepRef = useRef(null)
+
+  // If intro already played this session, skip straight to login
+  useEffect(() => {
+    if (alreadyPlayed) navigate('/login', { replace: true })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // GSAP timeline: letters emerge from shadow (fade + scale-up + 3D tilt),
   // then a light sweeps across the settled wordmark once. Kept separate
@@ -92,6 +99,7 @@ export default function CinematicIntro() {
       // sessionStorage unavailable (private mode etc) — degrade to playing once per tab lifetime only
     }
     setDone(true)
+    navigate('/login', { replace: true })
   }
 
   function handleSkip() {
@@ -140,7 +148,9 @@ export default function CinematicIntro() {
                 filter: { delay: 1.3, duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
               }}
             >
-              <AnalytixMark size={72} />
+              <div style={{ filter: 'brightness(3) contrast(0.85)' }}>
+                <AnalytixMark size={72} />
+              </div>
             </motion.div>
 
             {/* Beat 4 — AUDIT 360: GSAP letter reveal + sweeping light, metallic gradient fill */}
