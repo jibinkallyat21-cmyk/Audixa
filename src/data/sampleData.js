@@ -1900,7 +1900,14 @@ export const managerNotifications = [
 ]
 
 // ── Module 5 — Front Office Portal ──────────────────────────────────────────
-export const foUser = { name: 'Layla Al-Khatib', role: 'Front Office', initials: 'LK' }
+export const foUser = { name: 'Layla Al-Khatib', role: 'Front Office', initials: 'LK', id: 'layla' }
+
+export const foNotifications = [
+  { title: '4 Proposals Awaiting Approval', message: 'Al-Bashir, Madinah Contracting and 2 others need your review.', timestamp: '25 mins ago' },
+  { title: '3 Proposals Expiring Soon', message: 'Gulf Star Logistics expires in 2 days.', timestamp: '1 hour ago' },
+  { title: 'New Lead Added', message: 'Eastern Tech Solutions submitted via CRM.', timestamp: '2 hours ago' },
+  { title: 'Payment Received', message: 'SAR 24,000 received from Riyadh Food Industries.', timestamp: '3 hours ago' },
+]
 
 export const foStatChips = [
   { label: '12 New Leads Today', tone: 'bg-navy/10 text-navy' },

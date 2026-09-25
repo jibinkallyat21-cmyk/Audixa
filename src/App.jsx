@@ -69,11 +69,10 @@ import ManagerMeetings from './pages/manager/ManagerMeetings'
 import ManagerNotifications from './pages/manager/ManagerNotifications'
 
 import FODashboard from './pages/frontoffice/FODashboard'
-import FORegistration from './pages/frontoffice/FORegistration'
 import FOLeads from './pages/frontoffice/FOLeads'
 import FOProposals from './pages/frontoffice/FOProposals'
 import FOProposalDetail from './pages/frontoffice/FOProposalDetail'
-import FOMeetings from './pages/frontoffice/FOMeetings'
+import FOChat from './pages/frontoffice/FOChat'
 import FONotifications from './pages/frontoffice/FONotifications'
 import FOClientDocuments from './pages/frontoffice/FOClientDocuments'
 
@@ -142,11 +141,10 @@ function AnimatedRoutes() {
 
         {/* Front Office */}
         <Route path="/fo/dashboard" element={<FODashboard />} />
-        <Route path="/fo/registration" element={<FORegistration />} />
         <Route path="/fo/leads" element={<FOLeads />} />
         <Route path="/fo/proposals" element={<FOProposals />} />
         <Route path="/fo/proposal/:id" element={<FOProposalDetail />} />
-        <Route path="/fo/meetings" element={<FOMeetings />} />
+        <Route path="/fo/chat" element={<FOChat />} />
         <Route path="/fo/client-documents" element={<FOClientDocuments />} />
         <Route path="/fo/notifications" element={<FONotifications />} />
 

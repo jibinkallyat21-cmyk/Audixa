@@ -194,17 +194,18 @@ function getReportsData(fy) {
 
 /* ─── Tab definitions ─── */
 const TABS = [
-  { id: 'el',    label: 'Engagement Letter',      icon: FileText },
-  { id: 'zakat', label: 'Zakat Returns & Tax',    icon: FileCheck2 },
-  { id: 'draft', label: 'Draft Issued',            icon: FileSignature },
-  { id: 'afs',   label: 'AFS Issued',              icon: CheckCircle2 },
+  { id: 'proposal', label: 'Signed Proposal',       icon: FileSignature },
+  { id: 'el',       label: 'Engagement Letter',     icon: FileText },
+  { id: 'zakat',    label: 'Zakat Returns & Tax',   icon: FileCheck2 },
+  { id: 'draft',    label: 'Draft Issued',           icon: FileSignature },
+  { id: 'afs',      label: 'AFS Issued',             icon: CheckCircle2 },
 ]
 
 export default function ClientReports() {
   const showToast = useToast()
   const { selectedFY } = useClientFY()
   const data = getReportsData(selectedFY)
-  const [activeTab, setActiveTab] = useState('el')
+  const [activeTab, setActiveTab] = useState('proposal')
   const [signedOff, setSignedOff] = useState(false)
   const [clientRole, setClientRole] = useState(clientPortal.clientRole)
   const isAuthorisedSignatory = clientRole === 'Authorised Signatory'
@@ -271,6 +272,28 @@ export default function ClientReports() {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18 }}
               >
+
+                {/* ── Signed Proposal ── */}
+                {activeTab === 'proposal' && (
+                  <div className="rounded-2xl p-6 space-y-5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                    <div>
+                      <h2 className="text-base font-bold text-white">Signed Proposal</h2>
+                      <p className="text-sm mt-0.5" style={{ color: D.muted }}>
+                        Upload your signed copy of the engagement proposal here. Once uploaded, the audit team will be notified immediately.
+                      </p>
+                    </div>
+                    <div className="rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                      <p className="text-sm text-amber/90">
+                        A proposal was sent to you by the Analytix team. Please sign it and upload the signed copy below to proceed with onboarding.
+                      </p>
+                    </div>
+                    <UploadZone
+                      uploadKey="signed-proposal"
+                      label="Upload Signed Proposal"
+                      description="Accepted formats: PDF · Max 10MB"
+                    />
+                  </div>
+                )}
 
                 {/* ── Engagement Letter ── */}
                 {activeTab === 'el' && (
