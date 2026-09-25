@@ -20,6 +20,16 @@ export default defineConfig({
           .replace(/import\.meta/g, '({})')
       },
     },
+    {
+      // Swap BrowserRouter → HashRouter so file:// history API errors don't occur
+      name: 'use-hash-router',
+      transform(code, id) {
+        if (id.includes('App.jsx') || id.includes('App.tsx')) {
+          return code.replace(/BrowserRouter/g, 'HashRouter')
+        }
+        return code
+      },
+    },
   ],
   define: {
     'process.env.NODE_ENV': '"production"',
