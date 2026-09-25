@@ -4,6 +4,7 @@ import { Search, Paperclip, Send, Check, CheckCheck, X } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
+import { useTheme } from '../../context/ThemeContext'
 import { clientPortal, clientQueries, queryThreadMessages } from '../../data/sampleData'
 
 const FILTERS = [
@@ -14,6 +15,7 @@ const FILTERS = [
 ]
 
 export default function ClientQueries() {
+  const { isDark } = useTheme()
   const [selectedId, setSelectedId] = useState('QRY-01')
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -85,7 +87,7 @@ export default function ClientQueries() {
                       onClick={() => setFilter(f.id)}
                       className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                         filter === f.id
-                          ? 'border-navy bg-navy text-white'
+                          ? isDark ? 'border-navy bg-navy text-white' : 'border-brand bg-brand text-white'
                           : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                       }`}
                     >
@@ -175,7 +177,9 @@ export default function ClientQueries() {
                       )}
                       <div
                         className={`inline-block rounded-lg px-3.5 py-2.5 text-sm leading-relaxed ${
-                          msg.side === 'right' ? 'bg-navy text-white' : 'bg-slate-100 text-navy'
+                          msg.side === 'right'
+                            ? isDark ? 'bg-navy text-white' : 'bg-slate-700 text-white'
+                            : 'bg-slate-100 text-navy'
                         }`}
                       >
                         {msg.text && <p>{msg.text}</p>}

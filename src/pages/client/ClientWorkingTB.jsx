@@ -7,6 +7,7 @@ import { useToast } from '../../components/shared/Toast'
 import { useTB } from '../../context/TBContext'
 import { calculateZakat } from '../../utils/zakatCalculator'
 import { useClientFY } from '../../context/ClientFYContext'
+import { useTheme } from '../../context/ThemeContext'
 
 function fmt(n) {
   if (n === 0 || n === undefined) return '—'
@@ -27,6 +28,7 @@ function getClosingBalance(line) {
 
 function TBTable({ lines }) {
   const [showHint, setShowHint] = useState(true)
+  const { isDark } = useTheme()
 
   const categories = [...new Set(lines.map((l) => l.category))]
 
@@ -65,9 +67,9 @@ function TBTable({ lines }) {
               )
 
               return [
-                <tr key={`cat-${cat}`} className="bg-slate-800">
-                  <td colSpan={7} className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white">{cat}</td>
-                  <td className="px-3 py-2 text-right font-bold text-white font-mono text-[10px]">{fmt(subtotals.cl)}</td>
+                <tr key={`cat-${cat}`} className={isDark ? 'bg-slate-800' : 'bg-slate-200'}>
+                  <td colSpan={7} className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-white' : 'text-slate-700'}`}>{cat}</td>
+                  <td className={`px-3 py-2 text-right font-bold font-mono text-[10px] ${isDark ? 'text-white' : 'text-slate-700'}`}>{fmt(subtotals.cl)}</td>
                 </tr>,
                 ...catLines.map((line) => {
                   const cb = getClosingBalance(line)
@@ -93,7 +95,7 @@ function TBTable({ lines }) {
               ]
             })}
             {/* Grand total */}
-            <tr className="bg-navy text-white">
+            <tr className={isDark ? 'bg-navy text-white' : 'bg-slate-600 text-white'}>
               <td colSpan={7} className="px-4 py-3 text-xs font-bold uppercase tracking-wider">TOTAL</td>
               <td className="px-3 py-3 text-right font-mono font-bold">
                 {fmt(lines.reduce((s, l) => s + getClosingBalance(l), 0))}

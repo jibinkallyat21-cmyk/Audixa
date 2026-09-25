@@ -5,6 +5,7 @@ import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
+import { useTheme } from '../../context/ThemeContext'
 import { requirementCategories } from '../../data/sampleData'
 
 // Flatten categories into a table-ready list with plain-language descriptions
@@ -298,6 +299,7 @@ function BulkUploadModal({ onClose }) {
 export default function ClientDocuments() {
   const { selectedFY } = { selectedFY: 'FY2024' } // will use context via layout
   const showToast = useToast()
+  const { isDark } = useTheme()
   const [bulkOpen, setBulkOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -381,9 +383,9 @@ export default function ClientDocuments() {
             {filteredRows.map((row, idx) => {
               if (row.type === 'category') {
                 return (
-                  <div key={row.id} className="flex items-center justify-between bg-slate-800 px-5 py-2.5">
-                    <span className="text-xs font-bold uppercase tracking-wide text-white">{row.title}</span>
-                    <span className="text-xs text-white/60">{row.completed} of {row.total} complete</span>
+                  <div key={row.id} className={`flex items-center justify-between px-5 py-2.5 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
+                    <span className={`text-xs font-bold uppercase tracking-wide ${isDark ? 'text-white' : 'text-slate-700'}`}>{row.title}</span>
+                    <span className={`text-xs ${isDark ? 'text-white/60' : 'text-slate-500'}`}>{row.completed} of {row.total} complete</span>
                   </div>
                 )
               }
