@@ -148,16 +148,16 @@ export default function CinematicIntro() {
                 filter: { delay: 1.3, duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
               }}
             >
-              <div style={{ overflow: 'hidden', height: 38 }}>
-                <AnalytixMark size={72} className="object-top" />
+              <div style={{ overflow: 'hidden', height: 52 }}>
+                <AnalytixMark size={96} className="[object-position:top]" />
               </div>
               <span
                 style={{
-                  color: 'rgba(255,255,255,0.82)',
-                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.85)',
+                  fontSize: '12px',
                   fontWeight: 700,
-                  letterSpacing: '0.24em',
-                  marginTop: '5px',
+                  letterSpacing: '0.26em',
+                  marginTop: '6px',
                 }}
               >
                 ANALYTIX
