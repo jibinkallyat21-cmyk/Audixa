@@ -17,8 +17,17 @@ import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
+import QuickChatWidget from '../shared/QuickChatWidget'
 import { useTeamRole } from '../../hooks/useTeamRole'
 import { teamUser, teamNotifications } from '../../data/sampleData'
+
+const TEAM_CHAT_MEMBERS = [
+  { id: 'nora', name: 'Nora Hassan', role: 'Audit Lead', initials: 'NH', color: '#7C3AED' },
+  { id: 'faisal', name: 'Faisal Al-Qahtani', role: 'Audit Lead', initials: 'FQ', color: '#0891B2' },
+  { id: 'tariq', name: 'Tariq Al-Harbi', role: 'Audit Manager', initials: 'TH', color: '#2563EB' },
+  { id: 'ahmed', name: 'Ahmed Al-Rashid', role: 'Associate', initials: 'AR', color: '#059669' },
+  { id: 'reem', name: 'Reem Al-Zahrani', role: 'Associate', initials: 'RZ', color: '#D97706' },
+]
 
 const NAV_BADGES = { notifications: { count: 8, tone: 'red' }, messages: { count: 3, tone: 'red' }, meetings: { count: 3, tone: 'amber' } }
 const BADGE_TONE = { red: 'bg-brand text-white', amber: 'bg-amber text-white' }
@@ -239,6 +248,7 @@ export default function AuditTeamLayout({ title, children }) {
           <Footer />
         </div>
       </div>
+      <QuickChatWidget members={TEAM_CHAT_MEMBERS} meId="nora" label="Team Chat" />
     </SidebarDrawerProvider>
   )
 }

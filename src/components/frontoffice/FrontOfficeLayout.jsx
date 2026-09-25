@@ -6,21 +6,28 @@ import {
   Filter,
   FileText,
   Bell,
-  MessageSquare,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
+import QuickChatWidget from '../shared/QuickChatWidget'
 import { foUser, foNotifications } from '../../data/sampleData'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/fo/dashboard', icon: LayoutDashboard },
   { id: 'leads', label: 'Lead Pipeline', href: '/fo/leads', icon: Filter },
   { id: 'proposals', label: 'Proposals', href: '/fo/proposals', icon: FileText },
-  { id: 'chat', label: 'Team Chat', href: '/fo/chat', icon: MessageSquare },
   { id: 'notifications', label: 'Notifications', href: '/fo/notifications', icon: Bell },
+]
+
+const FO_CHAT_MEMBERS = [
+  { id: 'layla', name: 'Layla Al-Khatib', role: 'FO Manager', initials: 'LK', color: '#E8323C' },
+  { id: 'tariq', name: 'Tariq Al-Harbi', role: 'Audit Manager', initials: 'TH', color: '#2563EB' },
+  { id: 'sara', name: 'Sara Abdulaziz', role: 'Back Office', initials: 'SA', color: '#059669' },
+  { id: 'omar', name: 'Omar Faisal', role: 'Front Office', initials: 'OF', color: '#D97706' },
+  { id: 'nora', name: 'Nora Hassan', role: 'Back Office', initials: 'NH', color: '#7C3AED' },
 ]
 
 const NAV_BADGES = { notifications: { count: 4, tone: 'bg-brand text-white' } }
@@ -183,6 +190,7 @@ export default function FrontOfficeLayout({ title, children, fullHeight = false 
           {!fullHeight && <Footer />}
         </div>
       </div>
+      <QuickChatWidget members={FO_CHAT_MEMBERS} meId="layla" label="Team Chat" />
     </SidebarDrawerProvider>
   )
 }

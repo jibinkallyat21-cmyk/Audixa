@@ -3,9 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
-  KanbanSquare,
   Users2,
-  ClipboardList,
   AlertTriangle,
   LineChart,
   CalendarDays,
@@ -16,6 +14,7 @@ import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
+import QuickChatWidget from '../shared/QuickChatWidget'
 import { managerUser, managerNotifications } from '../../data/sampleData'
 
 const NAV_BADGES = { notifications: { count: 12, tone: 'red' }, escalation: { count: 3, tone: 'red' } }
@@ -23,13 +22,19 @@ const BADGE_TONE = { red: 'bg-brand text-white', amber: 'bg-amber text-white' }
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/manager/dashboard', icon: LayoutDashboard },
-  { id: 'status-board', label: 'File Status Board', href: '/manager/status-board', icon: KanbanSquare },
-  { id: 'workload', label: 'Workload', href: '/manager/workload', icon: Users2 },
-  { id: 'team-plan', label: 'Team Plan', href: '/manager/team-plan', icon: ClipboardList },
+  { id: 'workload', label: 'Team & Workload', href: '/manager/workload', icon: Users2 },
   { id: 'escalation', label: 'Escalation', href: '/manager/escalation', icon: AlertTriangle },
   { id: 'performance', label: 'Performance', href: '/manager/performance', icon: LineChart },
   { id: 'meetings', label: 'Meetings', href: '/manager/meetings', icon: CalendarDays },
   { id: 'notifications', label: 'Notifications', href: '/manager/notifications', icon: Bell },
+]
+
+const MANAGER_CHAT_MEMBERS = [
+  { id: 'tariq', name: 'Tariq Al-Harbi', role: 'Audit Manager', initials: 'TH', color: '#2563EB' },
+  { id: 'layla', name: 'Layla Al-Khatib', role: 'FO Manager', initials: 'LK', color: '#E8323C' },
+  { id: 'nora', name: 'Nora Hassan', role: 'Audit Lead', initials: 'NH', color: '#7C3AED' },
+  { id: 'faisal', name: 'Faisal Al-Qahtani', role: 'Audit Lead', initials: 'FQ', color: '#0891B2' },
+  { id: 'sara', name: 'Sara Abdulaziz', role: 'Back Office', initials: 'SA', color: '#059669' },
 ]
 
 function ManagerSidebar() {
@@ -209,6 +214,7 @@ export default function ManagerLayout({ title, children }) {
           <Footer />
         </div>
       </div>
+      <QuickChatWidget members={MANAGER_CHAT_MEMBERS} meId="tariq" label="Quick Chat" />
     </SidebarDrawerProvider>
   )
 }

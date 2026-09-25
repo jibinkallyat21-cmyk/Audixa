@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Lock, CheckCircle2, AlertCircle, FileText, ChevronRight,
   Calendar, ChevronDown, X, Send, TrendingUp, Search, LineChart,
+  AlertTriangle, ChevronUp, Clock,
 } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import ClientGreeting from '../../components/client/ClientGreeting'
@@ -240,12 +241,145 @@ function RequestMeetingModal({ onClose }) {
   )
 }
 
+/* ─── Escalation Modal (4-level) ─── */
+const ESCALATION_LEVELS = [
+  { level: 1, label: 'Team Lead', description: 'Direct escalation to your assigned audit team lead. Available immediately.', locked: false, waitHours: 0 },
+  { level: 2, label: 'Assistant Manager', description: 'Escalate to Assistant Manager if no response from Team Lead within 24 hours.', locked: false, waitHours: 24 },
+  { level: 3, label: 'Audit Manager', description: 'Critical escalation to Audit Manager. Also reflected in the management portal. Available after 48 hours of no resolution.', locked: true, waitHours: 48, managementVisible: true },
+  { level: 4, label: 'FO Manager', description: 'Executive escalation. Notifies both FO Manager and management portal immediately. Available after 72 hours.', locked: true, waitHours: 72, managementVisible: true },
+]
+
+function EscalationModal({ onClose }) {
+  const showToast = useToast()
+  const [selectedLevel, setSelectedLevel] = useState(null)
+  const [issue, setIssue] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = () => {
+    if (!selectedLevel || !issue.trim()) return showToast('Please select a level and describe the issue')
+    setSubmitted(true)
+    setTimeout(() => {
+      showToast(`Escalation submitted to ${selectedLevel.label} — your team has been notified`)
+      onClose()
+    }, 1200)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 16 }}
+        className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
+        style={{ background: '#0F1629', border: '1px solid rgba(255,255,255,0.1)' }}
+      >
+        <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="h-5 w-5 text-amber" />
+            <h3 className="text-base font-bold text-white">Escalate an Issue</h3>
+          </div>
+          <button onClick={onClose}><X className="h-4 w-4 text-white/40" /></button>
+        </div>
+
+        <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+          <p className="text-sm text-white/60 leading-relaxed">
+            Select the appropriate escalation level. Higher levels are available only after the specified waiting period with no resolution.
+          </p>
+
+          {/* Level selector */}
+          <div className="space-y-2">
+            {ESCALATION_LEVELS.map((lvl) => (
+              <motion.button
+                key={lvl.level}
+                whileHover={!lvl.locked ? { scale: 1.01 } : {}}
+                onClick={() => !lvl.locked && setSelectedLevel(lvl)}
+                disabled={lvl.locked}
+                className={`w-full rounded-xl px-4 py-3.5 text-left transition-all ${
+                  lvl.locked
+                    ? 'opacity-40 cursor-not-allowed'
+                    : selectedLevel?.level === lvl.level
+                    ? 'bg-brand/20 border-brand/40'
+                    : 'border-white/10 hover:border-white/20'
+                }`}
+                style={{
+                  border: selectedLevel?.level === lvl.level ? '1px solid rgba(230,57,70,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                  background: selectedLevel?.level === lvl.level ? 'rgba(230,57,70,0.12)' : 'rgba(255,255,255,0.03)',
+                }}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                      lvl.locked ? 'bg-white/10 text-white/30' : selectedLevel?.level === lvl.level ? 'bg-brand text-white' : 'bg-white/10 text-white/70'
+                    }`}>
+                      L{lvl.level}
+                    </span>
+                    <div>
+                      <p className={`text-sm font-semibold ${lvl.locked ? 'text-white/40' : 'text-white'}`}>{lvl.label}</p>
+                      {lvl.managementVisible && !lvl.locked && (
+                        <span className="text-[10px] text-amber font-semibold">Visible in management portal</span>
+                      )}
+                    </div>
+                  </div>
+                  {lvl.locked ? (
+                    <div className="flex items-center gap-1 text-[10px] text-white/30">
+                      <Clock className="h-3 w-3" />
+                      After {lvl.waitHours}h
+                    </div>
+                  ) : (
+                    selectedLevel?.level === lvl.level && (
+                      <CheckCircle2 className="h-4 w-4 text-brand" />
+                    )
+                  )}
+                </div>
+                {selectedLevel?.level === lvl.level && (
+                  <p className="mt-2 text-xs text-white/60 leading-relaxed">{lvl.description}</p>
+                )}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Issue description */}
+          {selectedLevel && (
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+              <label className="block text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Describe the issue <span className="text-brand">*</span>
+              </label>
+              <textarea
+                value={issue}
+                onChange={(e) => setIssue(e.target.value)}
+                rows={3}
+                placeholder="What needs to be resolved? Include any relevant context..."
+                className="w-full resize-none rounded-xl px-4 py-3 text-sm text-white/80 outline-none placeholder:text-white/20"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              />
+            </motion.div>
+          )}
+
+          <div className="flex gap-3 pt-1">
+            <button onClick={onClose} className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white/50 hover:bg-white/5 transition-colors" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedLevel || !issue.trim() || submitted}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-amber py-2.5 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-40 transition-all"
+            >
+              {submitted ? <><Clock className="h-4 w-4 animate-spin" /> Submitting...</> : <><AlertTriangle className="h-4 w-4" /> Submit Escalation</>}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 /* ─── Main Dashboard ─── */
 export default function ClientDashboard() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const fyData = getFYData(selectedFY)
   const recentEvents = getActivityEvents().slice(0, 10)
   const [meetingModal, setMeetingModal] = useState(false)
+  const [escalationModal, setEscalationModal] = useState(false)
 
   return (
     <ClientLayout title="Engagement Dashboard" fullHeight>
@@ -332,6 +466,19 @@ export default function ClientDashboard() {
                   Request a Meeting with Your Engagement Team
                 </motion.button>
 
+                {/* Escalate Issue */}
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  onClick={() => setEscalationModal(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold transition-colors"
+                  style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#F59E0B' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.14)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  Escalate an Issue
+                </motion.button>
+
               </motion.div>
             </AnimatePresence>
           </div>
@@ -415,6 +562,7 @@ export default function ClientDashboard() {
 
       <AnimatePresence>
         {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} />}
+        {escalationModal && <EscalationModal onClose={() => setEscalationModal(false)} />}
       </AnimatePresence>
     </ClientLayout>
   )

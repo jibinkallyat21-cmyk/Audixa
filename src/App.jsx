@@ -72,7 +72,6 @@ import FODashboard from './pages/frontoffice/FODashboard'
 import FOLeads from './pages/frontoffice/FOLeads'
 import FOProposals from './pages/frontoffice/FOProposals'
 import FOProposalDetail from './pages/frontoffice/FOProposalDetail'
-import FOChat from './pages/frontoffice/FOChat'
 import FONotifications from './pages/frontoffice/FONotifications'
 import FOClientDocuments from './pages/frontoffice/FOClientDocuments'
 
@@ -133,7 +132,7 @@ function AnimatedRoutes() {
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
         <Route path="/manager/status-board" element={<ManagerStatusBoard />} />
         <Route path="/manager/workload" element={<ManagerWorkload />} />
-        <Route path="/manager/team-plan" element={<ManagerTeamPlan />} />
+        <Route path="/manager/team-plan" element={<Navigate to="/manager/workload" replace />} />
         <Route path="/manager/escalation" element={<ManagerEscalation />} />
         <Route path="/manager/performance" element={<ManagerPerformance />} />
         <Route path="/manager/meetings" element={<ManagerMeetings />} />
@@ -144,7 +143,7 @@ function AnimatedRoutes() {
         <Route path="/fo/leads" element={<FOLeads />} />
         <Route path="/fo/proposals" element={<FOProposals />} />
         <Route path="/fo/proposal/:id" element={<FOProposalDetail />} />
-        <Route path="/fo/chat" element={<FOChat />} />
+        <Route path="/fo/chat" element={<Navigate to="/fo/dashboard" replace />} />
         <Route path="/fo/client-documents" element={<FOClientDocuments />} />
         <Route path="/fo/notifications" element={<FONotifications />} />
 
