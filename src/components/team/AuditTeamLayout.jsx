@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
-  FolderKanban,
   FileStack,
   ListChecks,
   MessageSquare,
@@ -34,8 +33,7 @@ const BADGE_TONE = { red: 'bg-brand text-white', amber: 'bg-amber text-white' }
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/team/dashboard', icon: LayoutDashboard },
-  { id: 'files', label: 'My Files', href: '/team/files', icon: FolderKanban },
-  { id: 'workspace', label: 'File Workspace', href: '/team/workspace/requirements', icon: FileStack },
+  { id: 'workspace', label: 'My Workspace', href: '/team/workspace', icon: FileStack },
   { id: 'tasks', label: 'My Tasks', href: '/team/tasks', icon: ListChecks },
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries', icon: MessageSquare },
   { id: 'deliverables', label: 'Deliverables', href: '/team/workspace/deliverables', icon: PackageCheck },
@@ -45,7 +43,7 @@ const NAV_ITEMS = [
 ]
 
 function isActive(pathname, href) {
-  if (href === '/team/workspace/requirements') return pathname.startsWith('/team/workspace')
+  if (href === '/team/workspace') return pathname.startsWith('/team/workspace') || pathname.startsWith('/team/files')
   return pathname === href
 }
 

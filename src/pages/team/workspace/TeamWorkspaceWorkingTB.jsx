@@ -141,9 +141,63 @@ function TBStaffTable({ lines, onAddAdj, filter, search, reclassifyLine }) {
   )
 }
 
+function LedgerSearch({ value, ledgerName, onSelect, tbLines }) {
+  const [query, setQuery] = useState(ledgerName || '')
+  const [open, setOpen] = useState(false)
+
+  const filtered = query.length >= 1
+    ? tbLines.filter(
+        (l) =>
+          l.ledgerName.toLowerCase().includes(query.toLowerCase()) ||
+          l.ledgerCode.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 7)
+    : []
+
+  const handleSelect = (l) => {
+    setQuery(l.ledgerName)
+    setOpen(false)
+    onSelect(l.ledgerCode, l.ledgerName)
+  }
+
+  return (
+    <div className="relative col-span-6">
+      <input
+        value={query}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        placeholder="Search ledger name..."
+        className="w-full rounded border border-slate-200 px-2 py-1.5 text-xs outline-none focus:border-navy"
+      />
+      <AnimatePresence>
+        {open && filtered.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute left-0 top-full z-20 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
+          >
+            {filtered.map((l) => (
+              <button
+                key={l.ledgerCode}
+                onMouseDown={() => handleSelect(l)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-slate-50"
+              >
+                <span className="w-16 shrink-0 font-mono text-slate-400">{l.ledgerCode}</span>
+                <span className="truncate text-navy">{l.ledgerName}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 function PostAdjModal({ prefillLine, onPost, onClose, tbLines }) {
   const showToast = useToast()
   const [description, setDescription] = useState('')
+  const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0])
   const [entries, setEntries] = useState([
     { ledgerCode: prefillLine?.ledgerCode || '', ledgerName: prefillLine?.ledgerName || '', debit: '', credit: '' },
     { ledgerCode: '', ledgerName: '', debit: '', credit: '' },
@@ -153,15 +207,13 @@ function PostAdjModal({ prefillLine, onPost, onClose, tbLines }) {
 
   function updateEntry(idx, field, value) {
     setEntries((prev) =>
-      prev.map((e, i) => {
-        if (i !== idx) return e
-        let updated = { ...e, [field]: value }
-        if (field === 'ledgerCode') {
-          const match = tbLines.find((l) => l.ledgerCode === value)
-          if (match) updated.ledgerName = match.ledgerName
-        }
-        return updated
-      })
+      prev.map((e, i) => (i !== idx ? e : { ...e, [field]: value }))
+    )
+  }
+
+  function setLedger(idx, code, name) {
+    setEntries((prev) =>
+      prev.map((e, i) => (i !== idx ? e : { ...e, ledgerCode: code, ledgerName: name }))
     )
   }
 
@@ -174,7 +226,7 @@ function PostAdjModal({ prefillLine, onPost, onClose, tbLines }) {
     const newAdj = {
       id: `adj-${Date.now()}`,
       adjustmentRef: adjRef,
-      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      date: new Date(entryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       description,
       postedBy: 'Fahad Al-Otaibi',
       entries: entries
@@ -210,70 +262,87 @@ function PostAdjModal({ prefillLine, onPost, onClose, tbLines }) {
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
             <h2 className="text-lg font-bold text-navy">Post Adjustment Entry</h2>
-            <p className="text-xs text-slate-400 mt-0.5">This adjustment will be sent to the client for approval.</p>
+            <p className="mt-0.5 text-xs text-slate-400">Posted entry will be sent to client for approval before reflecting in WTB.</p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-navy"><Minus className="h-5 w-5" /></button>
         </div>
-        <div className="p-6 space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1">Adjustment Reference</label>
-            <input value={adjRef} readOnly className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-500" />
+        <div className="space-y-4 p-6">
+          {/* Ref + Date row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">Adjustment Reference</label>
+              <input value={adjRef} readOnly className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-500" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">Date of Entry</label>
+              <input
+                type="date"
+                value={entryDate}
+                onChange={(e) => setEntryDate(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy"
+              />
+            </div>
           </div>
+
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1">Description (plain language for client)</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-500">Narration (plain language for client)</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="Describe this adjustment in plain language for the client..."
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy resize-none"
+              placeholder="Describe this adjustment in plain language..."
+              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy"
             />
           </div>
 
           {/* Journal lines */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-2">Journal Lines</label>
+            <div className="mb-2 grid grid-cols-12 gap-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <span className="col-span-6">Ledger Name</span>
+              <span className="col-span-2 text-emerald">Debit</span>
+              <span className="col-span-2 text-alert-red">Credit</span>
+              <span className="col-span-2" />
+            </div>
             <div className="space-y-2">
               {entries.map((e, i) => (
-                <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                  <input
+                <div key={i} className="grid grid-cols-12 items-center gap-2">
+                  <LedgerSearch
                     value={e.ledgerCode}
-                    onChange={(ev) => updateEntry(i, 'ledgerCode', ev.target.value)}
-                    placeholder="Code"
-                    className="col-span-2 rounded border border-slate-200 px-2 py-1.5 font-mono text-xs outline-none"
-                  />
-                  <input
-                    value={e.ledgerName}
-                    onChange={(ev) => updateEntry(i, 'ledgerName', ev.target.value)}
-                    placeholder="Ledger name"
-                    className="col-span-4 rounded border border-slate-200 px-2 py-1.5 text-xs outline-none"
+                    ledgerName={e.ledgerName}
+                    onSelect={(code, name) => setLedger(i, code, name)}
+                    tbLines={tbLines}
                   />
                   <input
                     value={e.debit}
                     onChange={(ev) => updateEntry(i, 'debit', ev.target.value)}
-                    placeholder="Debit"
+                    placeholder="0.00"
                     type="number"
                     className="col-span-2 rounded border border-emerald/40 px-2 py-1.5 text-xs text-emerald outline-none"
                   />
                   <input
                     value={e.credit}
                     onChange={(ev) => updateEntry(i, 'credit', ev.target.value)}
-                    placeholder="Credit"
+                    placeholder="0.00"
                     type="number"
                     className="col-span-2 rounded border border-alert-red/40 px-2 py-1.5 text-xs text-alert-red outline-none"
                   />
-                  <button onClick={() => setEntries((prev) => prev.filter((_, j) => j !== i))} className="col-span-1 text-slate-300 hover:text-red-400 text-center">
-                    <Minus className="h-3.5 w-3.5 mx-auto" />
+                  <button
+                    onClick={() => setEntries((prev) => prev.filter((_, j) => j !== i))}
+                    className="col-span-2 text-center text-slate-300 hover:text-red-400"
+                  >
+                    <Minus className="mx-auto h-3.5 w-3.5" />
                   </button>
-                  <div className="col-span-1" />
                 </div>
               ))}
             </div>
-            <button onClick={() => setEntries((prev) => [...prev, { ledgerCode: '', ledgerName: '', debit: '', credit: '' }])} className="mt-2 flex items-center gap-1 text-xs font-semibold text-navy hover:text-brand">
+            <button
+              onClick={() => setEntries((prev) => [...prev, { ledgerCode: '', ledgerName: '', debit: '', credit: '' }])}
+              className="mt-2 flex items-center gap-1 text-xs font-semibold text-navy hover:text-brand"
+            >
               <Plus className="h-3 w-3" /> Add Line
             </button>
             <div className={`mt-2 text-xs font-semibold ${balanced ? 'text-emerald' : 'text-alert-red'}`}>
-              {balanced ? '✓ Entry is balanced' : `Entry does not balance — Dr: ${drTotal.toLocaleString()}, Cr: ${crTotal.toLocaleString()}`}
+              {balanced ? '✓ Entry is balanced' : `Does not balance — Dr: ${drTotal.toLocaleString()}, Cr: ${crTotal.toLocaleString()}`}
             </div>
           </div>
         </div>
@@ -282,7 +351,7 @@ function PostAdjModal({ prefillLine, onPost, onClose, tbLines }) {
           <button
             onClick={handlePost}
             disabled={!description || !balanced}
-            className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white disabled:opacity-50 hover:bg-[#D12C35]"
+            className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35] disabled:opacity-50"
           >
             Post Adjustment
           </button>

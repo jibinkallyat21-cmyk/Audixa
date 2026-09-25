@@ -158,6 +158,87 @@ const PRIORITY_STYLE = {
   NORMAL: 'bg-slate-100 text-slate-600 border-slate-300',
 }
 
+function HoverFileRow({ f, navigate, idx }) {
+  const [hovered, setHovered] = useState(false)
+  const pbcPercent = Math.round((f.pbcDone / f.pbcTotal) * 100)
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="border-b border-slate-50 last:border-0"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: idx * 0.05, duration: 0.25 }}
+        className={`flex flex-wrap items-center gap-3 py-3 transition-colors ${hovered ? '-mx-2 rounded-lg bg-slate-50 px-2' : ''}`}
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-navy">{f.client}</p>
+          <p className="font-mono text-[10px] text-slate-400">{f.code}</p>
+        </div>
+        <AuditorChip auditor={f.auditor} />
+        <AuditTypeChip type={AUDIT_TYPE_LABEL[f.auditType] || f.auditType} />
+        <span className="hidden text-xs text-slate-500 sm:inline">{f.stage}</span>
+        <span
+          className={`text-xs font-medium ${
+            f.attentionLevel === 'URGENT'
+              ? 'text-alert-red'
+              : f.attentionLevel === 'FINAL'
+              ? 'text-emerald'
+              : 'text-amber'
+          }`}
+        >
+          {f.shortAttention}
+        </span>
+        <button
+          onClick={() => navigate('/team/workspace')}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
+        >
+          Open <ArrowRight className="h-3 w-3" />
+        </button>
+      </motion.div>
+
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <div className="flex flex-wrap gap-5 pb-3 pt-1 text-xs">
+              <div>
+                <p className="text-[10px] text-slate-400">PBC Items</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-full rounded-full bg-emerald" style={{ width: `${pbcPercent}%` }} />
+                  </div>
+                  <span className="font-medium text-navy">{f.pbcDone}/{f.pbcTotal}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400">Days Open</p>
+                <p className="mt-0.5 font-medium text-navy">{f.daysOpen}d</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400">Statutory Due</p>
+                <p className="mt-0.5 font-medium text-navy">{f.statutoryDue}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400">Lead</p>
+                <p className="mt-0.5 font-medium text-navy">{f.lead}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export default function TeamDashboard() {
   const navigate = useNavigate()
   const [escalationOpen, setEscalationOpen] = useState(false)
@@ -300,66 +381,25 @@ export default function TeamDashboard() {
             ))}
           </div>
 
-          {/* File table (col-span 8) + Today's Tasks (col-span 4) */}
+          {/* File list (col-span 8) + Today's Tasks (col-span 4) */}
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-8">
-            <h2 className="text-sm font-semibold text-navy">My Active Files — Portfolio Overview</h2>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-navy">My Files — Portfolio Overview</h2>
+              <span className="text-[11px] text-slate-400">Hover a row for details</span>
+            </div>
 
-            <div className="mt-5 overflow-x-auto">
-              <table className="w-full min-w-[720px] text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
-                    <th className="py-2 font-medium">Client</th>
-                    <th className="py-2 font-medium">Auditor</th>
-                    <th className="py-2 font-medium">Type</th>
-                    <th className="py-2 font-medium">Stage</th>
-                    <th className="py-2 font-medium">Attention</th>
-                    <th className="py-2 font-medium" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {urgentFiles.map((f, idx) => (
-                    <motion.tr
-                      key={f.code}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05, duration: 0.25 }}
-                      className="border-b border-slate-50 last:border-0"
-                    >
-                      <td className="py-3 font-medium text-navy">{f.client}</td>
-                      <td className="py-3">
-                        <AuditorChip auditor={f.auditor} />
-                      </td>
-                      <td className="py-3">
-                        <AuditTypeChip type={AUDIT_TYPE_LABEL[f.auditType] || f.auditType} />
-                      </td>
-                      <td className="py-3 text-slate-500">{f.stage}</td>
-                      <td className="py-3">
-                        <span
-                          className={`text-xs font-medium ${f.attentionLevel === 'URGENT' ? 'text-alert-red' : f.attentionLevel === 'FINAL' ? 'text-emerald' : 'text-amber'}`}
-                        >
-                          {f.shortAttention}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right">
-                        <button
-                          onClick={() => navigate('/team/workspace/requirements')}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
-                        >
-                          Open Workspace <ArrowRight className="h-3 w-3" />
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-0">
+              {urgentFiles.map((f, idx) => (
+                <HoverFileRow key={f.code} f={f} navigate={navigate} idx={idx} />
+              ))}
             </div>
 
             <button
-              onClick={() => navigate('/team/files')}
+              onClick={() => navigate('/team/workspace')}
               className="mt-4 w-full rounded-lg border border-navy/30 py-2.5 text-sm font-semibold text-navy hover:bg-navy/5"
             >
-              View All 28 Files
+              View All Files in My Workspace
             </button>
           </div>
 

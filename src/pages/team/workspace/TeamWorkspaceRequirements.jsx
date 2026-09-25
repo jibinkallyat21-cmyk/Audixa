@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Download, AlertCircle, Check, X, Info, Upload as UploadIcon } from 'lucide-react'
+import { ChevronDown, Download, AlertCircle, Check, X, Info, Upload as UploadIcon, Plus, Sparkles, TableProperties } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
@@ -558,6 +558,167 @@ function CategorySection({ category, onUpdateItem, statusFilter, searchQuery }) 
   )
 }
 
+/* ── TB Status & AI Analysis (simulated) ── */
+const TB_STATUS = {
+  uploaded: true,
+  filename: 'AlMarai_TB_FY2024.xlsx',
+  uploadedAt: '04 Nov 2024, 09:15',
+  aiAnalysisComplete: true,
+  relevantCount: 38,
+  totalPreFilled: 47,
+  autoSent: true,
+}
+
+const AI_RELEVANT_CATEGORIES = [
+  { ref: '01', name: 'Corporate Governance & Entity Information', relevant: true, reason: 'Required for all engagements' },
+  { ref: '02', name: 'Financial Statements & Management Accounts', relevant: true, reason: 'TB contains revenue > SAR 10M — full FS required' },
+  { ref: '03', name: 'Revenue & Receivables', relevant: true, reason: 'Trade receivables SAR 8.4M identified in TB' },
+  { ref: '04', name: 'Inventory & Cost of Sales', relevant: true, reason: 'Inventory SAR 5.2M — substantive requirements applicable' },
+  { ref: '05', name: 'Fixed Assets', relevant: true, reason: 'Non-current assets SAR 14.1M in TB' },
+  { ref: '06', name: 'Payroll & HR', relevant: false, reason: 'Payroll below materiality threshold in TB' },
+  { ref: '07', name: 'Tax & Zakat', relevant: true, reason: 'Saudi LLC — Zakat requirements apply' },
+]
+
+function TBStatusBanner({ isLead }) {
+  const [showAnalysis, setShowAnalysis] = useState(false)
+  const [manualEntry, setManualEntry] = useState(false)
+  const [manualItems, setManualItems] = useState([])
+  const [newItem, setNewItem] = useState({ name: '', category: '' })
+  const showToast = useToast()
+
+  const addManual = () => {
+    if (!newItem.name.trim()) return
+    setManualItems((prev) => [...prev, { ...newItem, id: `manual-${Date.now()}`, status: 'Pending Client' }])
+    setNewItem({ name: '', category: '' })
+    showToast('Manual requirement added')
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* TB Upload status */}
+      <div className={`flex flex-wrap items-center gap-4 rounded-xl border p-4 ${TB_STATUS.uploaded ? 'border-emerald/30 bg-emerald/5' : 'border-amber/30 bg-amber/5'}`}>
+        <div className="flex items-center gap-2">
+          <TableProperties className={`h-4 w-4 shrink-0 ${TB_STATUS.uploaded ? 'text-emerald' : 'text-amber'}`} />
+          <div>
+            <p className="text-sm font-semibold text-navy">Trial Balance</p>
+            {TB_STATUS.uploaded ? (
+              <p className="text-[11px] text-slate-500">{TB_STATUS.filename} · uploaded {TB_STATUS.uploadedAt}</p>
+            ) : (
+              <p className="text-[11px] text-amber">Awaiting client TB upload</p>
+            )}
+          </div>
+        </div>
+
+        {TB_STATUS.uploaded && TB_STATUS.autoSent && (
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald/30 bg-emerald/10 px-3 py-1 text-[11px] font-semibold text-emerald">
+            <Check className="h-3 w-3" /> Requirements auto-sent to client on TB upload
+          </div>
+        )}
+
+        {TB_STATUS.aiAnalysisComplete && (
+          <button
+            onClick={() => setShowAnalysis((v) => !v)}
+            className="flex items-center gap-1.5 rounded-full border border-navy/20 bg-navy/5 px-3 py-1 text-[11px] font-semibold text-navy hover:bg-navy/10"
+          >
+            <Sparkles className="h-3 w-3" />
+            AI Analysis — {TB_STATUS.relevantCount}/{TB_STATUS.totalPreFilled} relevant
+          </button>
+        )}
+
+        {isLead && (
+          <button
+            onClick={() => setManualEntry((v) => !v)}
+            className="ml-auto flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-navy hover:bg-slate-50"
+          >
+            <Plus className="h-3 w-3" /> Add Manual Requirement
+          </button>
+        )}
+      </div>
+
+      {/* AI Analysis breakdown */}
+      <AnimatePresence>
+        {showAnalysis && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+          >
+            <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
+              <Sparkles className="h-4 w-4 text-navy" />
+              <p className="text-sm font-semibold text-navy">AI Requirement Analysis — Based on Uploaded TB</p>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {AI_RELEVANT_CATEGORIES.map((cat) => (
+                <div key={cat.ref} className="flex items-start gap-3 px-5 py-3">
+                  <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${cat.relevant ? 'bg-emerald text-white' : 'bg-slate-200 text-slate-500'}`}>
+                    {cat.relevant ? '✓' : '–'}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-navy">{cat.ref} — {cat.name}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">{cat.reason}</p>
+                  </div>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${cat.relevant ? 'bg-emerald/10 text-emerald' : 'bg-slate-100 text-slate-400'}`}>
+                    {cat.relevant ? 'Included' : 'Excluded'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Manual requirement entry */}
+      <AnimatePresence>
+        {manualEntry && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <p className="mb-3 text-xs font-semibold text-navy">Add Requirement Not in Pre-filled List</p>
+            <div className="flex flex-wrap gap-2">
+              <input
+                value={newItem.name}
+                onChange={(e) => setNewItem((p) => ({ ...p, name: e.target.value }))}
+                placeholder="Requirement name..."
+                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy min-w-[200px]"
+              />
+              <input
+                value={newItem.category}
+                onChange={(e) => setNewItem((p) => ({ ...p, category: e.target.value }))}
+                placeholder="Category (optional)"
+                className="w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy"
+              />
+              <button
+                onClick={addManual}
+                disabled={!newItem.name.trim()}
+                className="rounded-lg bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-[#0a1628] disabled:opacity-40"
+              >
+                Add
+              </button>
+            </div>
+            {manualItems.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                {manualItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                    <p className="text-xs text-navy">{item.name}</p>
+                    {item.category && <span className="text-[10px] text-slate-400">{item.category}</span>}
+                    <span className="rounded-full bg-amber/10 px-2 py-0.5 text-[10px] font-semibold text-amber">Manual</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 const STATUS_OPTIONS = ['all', 'Accepted', 'Under Review', 'Rejected', 'Pending Client', 'Uploaded Processing']
 
 const INITIAL_REVIEW_POINTS = [
@@ -741,6 +902,9 @@ export default function TeamWorkspaceRequirements() {
               />
             </div>
           </div>
+
+          {/* TB Status + AI Analysis + Manual Entry */}
+          <TBStatusBanner isLead={isLead} />
 
           {/* Filter row */}
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

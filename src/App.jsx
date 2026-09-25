@@ -114,7 +114,8 @@ function AnimatedRoutes() {
 
         {/* Audit Team (Module 3) */}
         <Route path="/team/dashboard" element={<TeamDashboard />} />
-        <Route path="/team/files" element={<TeamFiles />} />
+        <Route path="/team/workspace" element={<TeamFiles />} />
+        <Route path="/team/files" element={<Navigate to="/team/workspace" replace />} />
         <Route path="/team/workspace/requirements" element={<TeamWorkspaceRequirements />} />
         <Route path="/team/workspace/queries" element={<TeamWorkspaceQueries />} />
         <Route path="/team/workspace/procedures" element={<TeamWorkspaceProcedures />} />
