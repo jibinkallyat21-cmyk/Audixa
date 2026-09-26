@@ -501,7 +501,7 @@ export default function Login() {
                   New to Analytix Team?
                 </span>
                 <Link
-                  to="/register"
+                  to="/signup"
                   style={{
                     fontSize: 'clamp(9px,0.85vw,12px)',
                     color: '#e8192c',
