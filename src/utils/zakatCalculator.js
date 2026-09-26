@@ -69,6 +69,37 @@ export function calculateZakat(tbLines, ownershipStructure) {
   }
 }
 
+// CIT Calculation Engine — Saudi Arabia CIT rules (20% of taxable income)
+// Applies to foreign-owned portions of Saudi entities.
+export function calculateCIT(tbLines, foreignOwnershipPercentage) {
+  const rawNetProfit = sumByClassification(tbLines, 'NetProfit')
+  const taxableIncome = Math.max(0, Math.abs(rawNetProfit))
+  const citRate = 0.20
+  const foreignPortion = (foreignOwnershipPercentage || 0) / 100
+  const citPayable = taxableIncome * foreignPortion * citRate
+
+  // Revenue — used for context
+  const totalRevenue = tbLines
+    .filter((l) => l.category === 'Revenue')
+    .reduce((s, l) => s + Math.abs(getClosingBalance(l)), 0)
+
+  return {
+    taxableIncome,
+    citRate,
+    foreignOwnershipPercentage: foreignOwnershipPercentage || 0,
+    foreignPortion,
+    citPayable,
+    totalRevenue,
+  }
+}
+
+// Company ownership type constants
+export const OWNERSHIP_TYPES = {
+  GCC: 'gcc',       // 100% Saudi / GCC nationals → Zakat only
+  FOREIGN: 'foreign', // 100% Foreign nationals  → CIT only
+  MIXED: 'mixed',   // Mixed ownership           → Both proportional
+}
+
 export function autoClassify(ledgerName) {
   const n = ledgerName.toLowerCase()
   if (n.includes('share capital') || n.includes('paid-up capital')) return 'ShareCapital'
