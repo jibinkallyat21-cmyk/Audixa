@@ -706,7 +706,8 @@ export default function ClientReports() {
 
                 {/* ── Zakat Returns & Tax ── */}
                 {activeTab === 'zakat' && (
-                  <div className="rounded-2xl p-6 space-y-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                  <div className="rounded-2xl p-6 space-y-5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                    {/* Header */}
                     <div className="flex items-center justify-between">
                       <div>
                         <h2 className="text-base font-bold text-white">Zakat Returns &amp; Tax Reports</h2>
@@ -717,35 +718,91 @@ export default function ClientReports() {
                       </span>
                     </div>
 
-                    {data.zakatReturn.available ? (
-                      <>
-                        {data.zakatReturn.qawaemRef && (
-                          <p className="text-xs font-mono" style={{ color: D.muted }}>Qawaem Ref: <span className="text-white/70">{data.zakatReturn.qawaemRef}</span></p>
-                        )}
-                        <DocCard
-                          icon={FileCheck2} iconColor="#10B981"
-                          filename={data.zakatReturn.filename}
-                          meta={`Filed ${data.zakatReturn.filedDate}`}
-                          status="Filed" statusColor="#10B981"
-                          onDownload={() => showToast('Downloading Zakat return...')}
-                          onView={() => showToast('Opening Zakat return...')}
-                        />
-                      </>
-                    ) : (
-                      <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.15)', color: '#F59E0B' }}>
-                        Zakat return is currently being prepared by the engagement team.
+                    {/* ── Documents from Analytix (always visible) ── */}
+                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${D.border}` }}>
+                      {/* Section label */}
+                      <div className="flex items-center gap-2 px-4 py-3" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${D.border}` }}>
+                        <Download className="h-4 w-4" style={{ color: D.muted }} />
+                        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.muted }}>Documents from Analytix</p>
                       </div>
-                    )}
-
-                    {/* Zakat & CIT calculator */}
-                    <div className="mt-2">
-                      <TaxCalculatorSection tbLines={tbLines} selectedFY={selectedFY} />
+                      <div className="p-4 space-y-3">
+                        {data.zakatReturn.available ? (
+                          <>
+                            {data.zakatReturn.qawaemRef && (
+                              <p className="text-xs font-mono" style={{ color: D.muted }}>
+                                Qawaem Ref: <span style={{ color: 'rgba(255,255,255,0.7)' }}>{data.zakatReturn.qawaemRef}</span>
+                              </p>
+                            )}
+                            <DocCard
+                              icon={FileCheck2} iconColor="#10B981"
+                              filename={data.zakatReturn.filename}
+                              meta={`Filed ${data.zakatReturn.filedDate}`}
+                              status="Filed" statusColor="#10B981"
+                              onDownload={() => showToast('Downloading Zakat return...')}
+                              onView={() => showToast('Opening Zakat return...')}
+                            />
+                            <DocCard
+                              icon={FileText} iconColor="#6366F1"
+                              filename={`CIT / Tax Computation Report — ${selectedFY}.pdf`}
+                              meta={`Issued ${data.zakatReturn.filedDate} · 1.4 MB`}
+                              status="Issued" statusColor="#6366F1"
+                              onDownload={() => showToast('Downloading tax computation report...')}
+                              onView={() => showToast('Opening tax computation report...')}
+                            />
+                          </>
+                        ) : (
+                          <>
+                            {/* Pending placeholder cards */}
+                            {[
+                              { label: `Zakat Return — ${selectedFY}.pdf`, note: 'Will be available once filed with ZATCA' },
+                              { label: `CIT / Tax Computation Report — ${selectedFY}.pdf`, note: 'Will be issued upon completion of tax filing' },
+                            ].map((item) => (
+                              <div
+                                key={item.label}
+                                className="flex items-center gap-4 rounded-xl px-4 py-3.5"
+                                style={{ background: 'rgba(255,255,255,0.02)', border: `1px dashed ${D.border}` }}
+                              >
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'rgba(245,158,11,0.08)' }}>
+                                  <Lock className="h-5 w-5 text-amber/60" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>{item.label}</p>
+                                  <p className="mt-0.5 text-xs" style={{ color: D.subtle }}>{item.note}</p>
+                                </div>
+                                <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
+                                  Pending
+                                </span>
+                              </div>
+                            ))}
+                            <p className="text-xs pt-1" style={{ color: D.subtle }}>
+                              Documents will be available to download here once prepared and filed by the engagement team.
+                            </p>
+                          </>
+                        )}
+                      </div>
                     </div>
 
-                    <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
-                      <p className="text-sm font-bold text-white mb-0.5">Upload Zakat Supporting Documents</p>
-                      <p className="text-xs" style={{ color: D.muted }}>Submit signed Zakat declarations, ZATCA correspondence, or ownership schedules.</p>
-                      <UploadZone uploadKey="zakatSupportingDocs" label="Zakat Supporting Documentation" description="Signed declarations, ZATCA correspondence, ownership schedule" />
+                    {/* ── Zakat & CIT Estimator ── */}
+                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${D.border}` }}>
+                      <div className="flex items-center gap-2 px-4 py-3" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${D.border}` }}>
+                        <Calculator className="h-4 w-4 text-emerald" />
+                        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.muted }}>Self-Service Estimator</p>
+                      </div>
+                      <div className="p-4">
+                        <TaxCalculatorSection tbLines={tbLines} selectedFY={selectedFY} />
+                      </div>
+                    </div>
+
+                    {/* ── Upload your supporting documents ── */}
+                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${D.border}` }}>
+                      <div className="flex items-center gap-2 px-4 py-3" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${D.border}` }}>
+                        <Upload className="h-4 w-4" style={{ color: D.muted }} />
+                        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.muted }}>Upload Supporting Documents</p>
+                      </div>
+                      <div className="px-4 pb-4">
+                        <p className="text-xs pt-3 pb-1" style={{ color: D.muted }}>Submit signed Zakat declarations, ZATCA correspondence, or ownership schedules.</p>
+                        <UploadZone uploadKey="zakatSupportingDocs" label="Zakat Supporting Documentation" description="Signed declarations, ZATCA correspondence, ownership schedule" />
+                      </div>
                     </div>
                   </div>
                 )}
