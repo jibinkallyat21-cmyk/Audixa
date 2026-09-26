@@ -112,13 +112,26 @@ function TBTable({ lines }) {
               ]
             })}
             {/* Grand total */}
-            <tr className="bg-navy text-white">
-              <td colSpan={7} className="px-4 py-3 text-xs font-bold uppercase tracking-wider">TOTAL</td>
-              <td className="px-3 py-3 text-right font-mono font-bold">
-                {fmt(lines.reduce((s, l) => s + getClosingBalance(l), 0))}
-                <span className="ml-2 rounded-sm bg-emerald/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald">Balanced ✓</span>
-              </td>
-            </tr>
+            {(() => {
+              const totalCB = lines.reduce((s, l) => s + getClosingBalance(l), 0)
+              const isBalanced = Math.abs(totalCB) < 0.01
+              return (
+                <tr className="bg-navy text-white">
+                  <td colSpan={2} className="px-4 py-3 text-xs font-bold uppercase tracking-wider">TOTAL</td>
+                  <td colSpan={6} className="px-3 py-3 text-center">
+                    {isBalanced ? (
+                      <span className="inline-flex items-center gap-1.5 rounded px-3 py-1 text-[10px] font-bold tracking-wider bg-emerald/20 text-emerald">
+                        Balanced ✓
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded px-3 py-1 text-[10px] font-bold tracking-wider bg-red-500/20 text-red-400">
+                        Imbalanced ✗
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })()}
           </tbody>
         </table>
       </div>
