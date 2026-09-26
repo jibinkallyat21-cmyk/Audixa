@@ -1,83 +1,46 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import PageTransition from '../../components/shared/PageTransition'
-import { AnalytixMark } from '../../components/shared/AnalytixLogo'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
-import WorldMapBackground from '../../components/shared/WorldMapBackground'
 
-const DEMO_ROLES = ROLE_ORDER.map((id) => ({
+const DEMO_ROLES = ROLE_ORDER.map(id => ({
   value: ROLES[id].id,
   label: ROLES[id].label,
   route: ROLES[id].route,
 }))
 
-const EASE = [0.16, 1, 0.3, 1]
+// Country nodes — x/y as % of the 1600×840 stage (equirectangular approximation)
+const NODES = [
+  { id: 'us', label: 'United States', flag: '🇺🇸', x: 18.5, y: 31.5 },
+  { id: 'gb', label: 'United Kingdom', flag: '🇬🇧', x: 49.0, y: 19.8 },
+  { id: 'fr', label: 'France',          flag: '🇫🇷', x: 50.5, y: 23.2 },
+  { id: 'kw', label: 'Kuwait',          flag: '🇰🇼', x: 63.0, y: 33.8 },
+  { id: 'bh', label: 'Bahrain',         flag: '🇧🇭', x: 63.8, y: 35.5 },
+  { id: 'sa', label: 'Saudi Arabia',    flag: '🇸🇦', x: 61.5, y: 36.8 },
+  { id: 'qa', label: 'Qatar',           flag: '🇶🇦', x: 64.2, y: 35.1 },
+  { id: 'ae', label: 'UAE',             flag: '🇦🇪', x: 65.0, y: 37.2 },
+  { id: 'om', label: 'Oman',            flag: '🇴🇲', x: 66.1, y: 39.0 },
+  { id: 'in', label: 'India',           flag: '🇮🇳', x: 71.8, y: 39.8 },
+  { id: 'cn', label: 'China',           flag: '🇨🇳', x: 79.5, y: 28.8 },
+  { id: 'hk', label: 'Hong Kong',       flag: '🇭🇰', x: 81.8, y: 37.5 },
+  { id: 'sg', label: 'Singapore',       flag: '🇸🇬', x: 79.3, y: 49.8 },
+]
 
-/* ── Boxed input with leading icon ── */
-function BoxInput({ id, label, type = 'text', value, onChange, placeholder, icon, trailing }) {
-  const [focused, setFocused] = useState(false)
-  return (
-    <div>
-      <label htmlFor={id} style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 600,
-        color: 'rgba(255,255,255,0.55)', letterSpacing: '0.02em' }}>
-        {label}
-      </label>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        background: 'rgba(255,255,255,0.04)',
-        border: `1px solid ${focused ? '#E8323C' : 'rgba(255,255,255,0.10)'}`,
-        borderRadius: 8, padding: '10px 12px',
-        transition: 'border-color 0.18s',
-      }}>
-        {icon && <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, display: 'flex' }}>{icon}</span>}
-        <input
-          id={id} type={type} value={value} onChange={onChange}
-          placeholder={placeholder}
-          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-          style={{
-            flex: 1, background: 'transparent', border: 'none', outline: 'none',
-            fontSize: 13, color: '#ffffff',
-            caretColor: '#E8323C',
-          }}
-        />
-        {trailing}
-      </div>
-    </div>
+// Connection lines from Saudi Arabia hub to all other nodes
+const LINES = NODES.filter(n => n.id !== 'sa').map(n => ({ from: 'sa', to: n.id }))
+
+function useReducedMotion() {
+  const [rm, setRm] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   )
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const h = e => setRm(e.matches)
+    mq.addEventListener('change', h)
+    return () => mq.removeEventListener('change', h)
+  }, [])
+  return rm
 }
-
-/* ── SVG icons ── */
-const IconMail = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-  </svg>
-)
-const IconLock = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-  </svg>
-)
-const IconArrow = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-  </svg>
-)
-const IconUser = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-  </svg>
-)
-const IconChevron = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m6 9 6 6 6-6"/>
-  </svg>
-)
-const IconDemo = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-  </svg>
-)
 
 export default function Login() {
   const navigate = useNavigate()
@@ -86,269 +49,606 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [demoRole, setDemoRole] = useState(DEMO_ROLES[0].value)
-  const canGoBack = typeof window !== 'undefined' && window.history.length > 2
+  const [error, setError] = useState('')
+  const [entered, setEntered] = useState(false)
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const role = DEMO_ROLES.find((r) => r.value === demoRole) || DEMO_ROLES[0]
+  const canvasRef = useRef(null)
+  const stageRef = useRef(null)
+  const rafRef = useRef(null)
+  const particlesRef = useRef([])
+  const reducedMotion = useReducedMotion()
+
+  // Staged entrance
+  useEffect(() => {
+    const t = setTimeout(() => setEntered(true), 80)
+    return () => clearTimeout(t)
+  }, [])
+
+  // Canvas animation — pulsing nodes + traveling particles
+  useEffect(() => {
+    if (reducedMotion) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    const ro = new ResizeObserver(resize)
+    ro.observe(canvas)
+
+    // Seed particles along each connection line
+    particlesRef.current = []
+    LINES.forEach(({ from, to }) => {
+      const a = NODES.find(n => n.id === from)
+      const b = NODES.find(n => n.id === to)
+      if (!a || !b) return
+      const count = 1 + Math.floor(Math.random() * 2)
+      for (let i = 0; i < count; i++) {
+        particlesRef.current.push({
+          from: a, to: b,
+          t: Math.random(),
+          speed: 0.00025 + Math.random() * 0.0004,
+          alpha: 0.5 + Math.random() * 0.5,
+          size: 1.5 + Math.random() * 2,
+        })
+      }
+    })
+
+    let start = null
+    const draw = ts => {
+      if (!start) start = ts
+      const elapsed = ts - start
+      const W = canvas.width
+      const H = canvas.height
+      ctx.clearRect(0, 0, W, H)
+
+      // Faint connection lines
+      ctx.save()
+      LINES.forEach(({ from, to }) => {
+        const a = NODES.find(n => n.id === from)
+        const b = NODES.find(n => n.id === to)
+        if (!a || !b) return
+        ctx.beginPath()
+        ctx.moveTo(a.x / 100 * W, a.y / 100 * H)
+        ctx.lineTo(b.x / 100 * W, b.y / 100 * H)
+        ctx.strokeStyle = 'rgba(80, 150, 255, 0.10)'
+        ctx.lineWidth = 0.7
+        ctx.stroke()
+      })
+      ctx.restore()
+
+      // Pulsing rings at each node
+      NODES.forEach(node => {
+        const nx = node.x / 100 * W
+        const ny = node.y / 100 * H
+        const phase = elapsed * 0.0008 + node.x * 0.08
+        const pulseScale = 0.5 + 0.5 * Math.sin(phase)
+
+        // Outer expanding ring
+        ctx.beginPath()
+        ctx.arc(nx, ny, 5 + 8 * pulseScale, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(100, 180, 255, ${0.25 * (1 - pulseScale)})`
+        ctx.lineWidth = 1
+        ctx.stroke()
+
+        // Middle ring
+        ctx.beginPath()
+        ctx.arc(nx, ny, 4, 0, Math.PI * 2)
+        ctx.strokeStyle = 'rgba(120, 190, 255, 0.45)'
+        ctx.lineWidth = 0.8
+        ctx.stroke()
+
+        // Core dot
+        ctx.beginPath()
+        ctx.arc(nx, ny, 2.5, 0, Math.PI * 2)
+        ctx.fillStyle = 'rgba(160, 210, 255, 0.9)'
+        ctx.fill()
+      })
+
+      // Traveling particles
+      particlesRef.current.forEach(p => {
+        p.t += p.speed
+        if (p.t > 1) p.t = 0
+        const ax = p.from.x / 100 * W, ay = p.from.y / 100 * H
+        const bx = p.to.x / 100 * W, by = p.to.y / 100 * H
+        const x = ax + (bx - ax) * p.t
+        const y = ay + (by - ay) * p.t
+
+        // Glow halo
+        const grd = ctx.createRadialGradient(x, y, 0, x, y, p.size * 3)
+        grd.addColorStop(0, `rgba(180, 220, 255, ${p.alpha * 0.8})`)
+        grd.addColorStop(1, 'rgba(180, 220, 255, 0)')
+        ctx.beginPath()
+        ctx.arc(x, y, p.size * 3, 0, Math.PI * 2)
+        ctx.fillStyle = grd
+        ctx.fill()
+
+        // Bright core
+        ctx.beginPath()
+        ctx.arc(x, y, p.size * 0.5, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(230, 245, 255, ${p.alpha})`
+        ctx.fill()
+      })
+
+      // Slow atmospheric scan sweep
+      const scanY = (elapsed * 0.03) % (H * 1.6) - H * 0.3
+      const sg = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40)
+      sg.addColorStop(0, 'rgba(80, 140, 255, 0)')
+      sg.addColorStop(0.5, 'rgba(80, 140, 255, 0.025)')
+      sg.addColorStop(1, 'rgba(80, 140, 255, 0)')
+      ctx.fillStyle = sg
+      ctx.fillRect(0, scanY - 40, W, 80)
+
+      rafRef.current = requestAnimationFrame(draw)
+    }
+    rafRef.current = requestAnimationFrame(draw)
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      ro.disconnect()
+    }
+  }, [reducedMotion])
+
+  // Parallax on mouse move within the stage
+  const handleMouseMove = useCallback(e => {
+    if (reducedMotion) return
+    const stage = stageRef.current
+    if (!stage) return
+    const rect = stage.getBoundingClientRect()
+    const cx = (e.clientX - rect.left) / rect.width - 0.5
+    const cy = (e.clientY - rect.top) / rect.height - 0.5
+    stage.style.setProperty('--px', String(cx))
+    stage.style.setProperty('--py', String(cy))
+  }, [reducedMotion])
+
+  const doSignIn = () => {
+    if (!email.trim() || !password) {
+      setError('Please enter your work email and password.')
+      return
+    }
+    setError('')
+    const role = DEMO_ROLES.find(r => r.value === demoRole) || DEMO_ROLES[0]
     navigate(role.route)
   }
 
+  const handleKeyDown = e => {
+    if (e.key === 'Enter') doSignIn()
+  }
+
   const handleEnterDemo = () => {
-    const role = DEMO_ROLES.find((r) => r.value === demoRole) || DEMO_ROLES[0]
+    const role = DEMO_ROLES.find(r => r.value === demoRole) || DEMO_ROLES[0]
     navigate(role.route)
   }
 
   return (
     <PageTransition>
-      <div className="relative min-h-screen w-full overflow-hidden" style={{ background: '#04091e' }}>
-
-        {/* ── Full-screen world map background ── */}
-        <div className="absolute inset-0 z-0">
-          <WorldMapBackground className="w-full h-full" />
-        </div>
-
-        {/* ── Right-side vignette so card is readable ── */}
-        <div className="pointer-events-none absolute inset-0 z-1"
-          style={{ background: 'linear-gradient(to right, transparent 40%, rgba(4,9,30,0.72) 65%, rgba(4,9,30,0.88) 100%)' }} />
-
-        {/* ── Branding — top-left floating over map ── */}
-        <motion.div
-          className="pointer-events-none absolute left-8 top-8 z-10 lg:left-12 lg:top-10"
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE }}
+      {/* ── Viewport ── */}
+      <div
+        style={{
+          width: '100vw',
+          height: '100vh',
+          display: 'grid',
+          placeItems: 'center',
+          overflow: 'hidden',
+          background: '#020817',
+        }}
+        onMouseMove={handleMouseMove}
+      >
+        {/* ── Stage — preserves 1600:840 aspect ratio ── */}
+        <section
+          ref={stageRef}
+          style={{
+            position: 'relative',
+            width: 'min(100vw, calc(100vh * 1600 / 840))',
+            aspectRatio: '1600 / 840',
+            maxHeight: '100vh',
+            overflow: 'hidden',
+            opacity: entered ? 1 : 0,
+            transition: reducedMotion ? 'none' : 'opacity 0.5s ease',
+          }}
         >
-          {/* Logo + ANALYTIX inline */}
-          <div className="flex items-center gap-3 mb-4">
-            <AnalytixMark size={40} />
-            <span style={{
-              fontSize: 13, fontWeight: 800, letterSpacing: '0.20em',
-              color: 'rgba(255,255,255,0.85)',
-            }}>
-              ANALYTIX
-            </span>
-          </div>
+          {/* ── Background JPEG — single source of truth ── */}
+          <img
+            src="/login-bg.jpg"
+            alt="AUDIT 360 login background"
+            draggable={false}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'fill',
+              pointerEvents: 'none',
+              display: 'block',
+              userSelect: 'none',
+              transform: reducedMotion
+                ? 'none'
+                : 'translate(calc(var(--px,0) * -3px), calc(var(--py,0) * -3px))',
+              transition: 'transform 0.12s ease-out',
+            }}
+          />
 
-          {/* AUDIT 360 */}
-          <h1 style={{
-            fontSize: 'clamp(52px, 7vw, 96px)',
-            fontWeight: 900,
-            lineHeight: 1,
-            letterSpacing: '-0.02em',
-            color: '#ffffff',
-            textShadow: '0 4px 32px rgba(0,0,0,0.7)',
-            marginBottom: 14,
-          }}>
-            AUDIT <span style={{ color: '#E8323C' }}>360</span>
-          </h1>
+          {/* ── Animation canvas layer ── */}
+          <canvas
+            ref={canvasRef}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              transform: reducedMotion
+                ? 'none'
+                : 'translate(calc(var(--px,0) * 5px), calc(var(--py,0) * 5px))',
+              transition: 'transform 0.18s ease-out',
+            }}
+          />
 
-          {/* Taglines — single row with separators */}
-          <div className="flex items-center gap-3 flex-wrap">
-            {['Intelligent Audits', 'Seamless Engagements', 'Trusted Outcomes'].map((phrase, i) => (
-              <div key={phrase} className="flex items-center gap-3">
-                {i > 0 && (
-                  <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.25)', display: 'block' }} />
-                )}
-                <motion.span
-                  style={{
-                    fontSize: 'clamp(13px, 1.6vw, 17px)',
-                    fontWeight: 600,
-                    color: 'rgba(255,255,255,0.78)',
-                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                  }}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.12, duration: 0.5, ease: EASE }}
-                >
-                  {phrase}
-                </motion.span>
+          {/* ── Country flag/label overlays — correct labels over image markers ── */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              transform: reducedMotion
+                ? 'none'
+                : 'translate(calc(var(--px,0) * 8px), calc(var(--py,0) * 8px))',
+              transition: 'transform 0.22s ease-out',
+            }}
+          >
+            {NODES.map((node, i) => (
+              <div
+                key={node.id}
+                style={{
+                  position: 'absolute',
+                  left: `${node.x}%`,
+                  top: `${node.y}%`,
+                  transform: 'translate(-50%, -115%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  opacity: entered ? 1 : 0,
+                  transition: reducedMotion ? 'none' : `opacity 0.5s ease ${0.4 + i * 0.06}s`,
+                }}
+              >
+                <div style={{
+                  background: 'rgba(2, 10, 30, 0.72)',
+                  border: '1px solid rgba(80, 150, 255, 0.28)',
+                  borderRadius: 3,
+                  padding: '1px 5px 2px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 3,
+                  backdropFilter: 'blur(4px)',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 1px 6px rgba(0,0,0,0.4)',
+                }}>
+                  <span style={{ fontSize: 9, lineHeight: 1.2 }}>{node.flag}</span>
+                  <span style={{
+                    fontSize: 7,
+                    fontWeight: 700,
+                    color: 'rgba(180, 215, 255, 0.92)',
+                    letterSpacing: '0.04em',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                    textTransform: 'uppercase',
+                  }}>
+                    {node.label}
+                  </span>
+                </div>
+                <div style={{
+                  width: 2,
+                  height: 4,
+                  background: 'rgba(120, 190, 255, 0.6)',
+                }} />
               </div>
             ))}
           </div>
-        </motion.div>
 
-        {/* ── Back button ── */}
-        {canGoBack && (
-          <button type="button" onClick={() => navigate(-1)}
-            className="absolute left-8 bottom-8 z-20 text-xs transition-opacity hover:opacity-100"
-            style={{ color: 'rgba(255,255,255,0.35)' }}>
-            ← Back
-          </button>
-        )}
+          {/* ── LIVE AUDIT NETWORK status indicator ── */}
+          <div style={{
+            position: 'absolute',
+            left: '1.5%',
+            bottom: '2.8%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+            background: 'rgba(2, 10, 30, 0.68)',
+            border: '1px solid rgba(80, 150, 255, 0.18)',
+            borderRadius: 20,
+            padding: '4px 10px 4px 7px',
+            backdropFilter: 'blur(8px)',
+            opacity: entered ? 1 : 0,
+            transition: reducedMotion ? 'none' : 'opacity 0.8s ease 1.3s',
+          }}>
+            <div style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: '#4ade80',
+              boxShadow: '0 0 6px #4ade80',
+              flexShrink: 0,
+              animation: reducedMotion ? 'none' : 'lan-pulse 2.2s ease-in-out infinite',
+            }} />
+            <span style={{
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: '0.10em',
+              color: 'rgba(180, 220, 180, 0.92)',
+              fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+            }}>
+              LIVE AUDIT NETWORK
+            </span>
+            <span style={{
+              fontSize: 8,
+              fontFamily: '"SF Mono", "Fira Code", monospace',
+              color: 'rgba(140, 190, 140, 0.65)',
+              letterSpacing: '0.02em',
+            }}>
+              13 NODES
+            </span>
+          </div>
 
-        {/* ── Login card — right side, vertically centered ── */}
-        <div className="absolute inset-y-0 right-0 z-20 flex items-center justify-end pr-6 lg:pr-10 xl:pr-16 w-full sm:w-auto">
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.65, ease: EASE }}
-            style={{
-              width: '100%',
-              maxWidth: 420,
-              background: 'rgba(7,11,28,0.88)',
-              backdropFilter: 'blur(18px)',
-              WebkitBackdropFilter: 'blur(18px)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 16,
-              padding: '32px 32px 28px',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
-            }}
-          >
-            {/* Heading */}
-            <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#ffffff', lineHeight: 1.2, marginBottom: 6 }}>
-                Welcome back
-              </h2>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.42)' }}>
-                Sign in to your AUDIT 360 workspace
-              </p>
-            </div>
+          {/* ── Controls overlay — all positioned by % matching the background image ── */}
+          <div style={{ position: 'absolute', inset: 0 }}>
 
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: 24, borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 24 }}>
-              {[
-                { value: 'client', label: 'Client Portal' },
-                { value: 'team',   label: 'Analytix Team' },
-              ].map((tab) => (
-                <button key={tab.value} type="button" onClick={() => setAccountType(tab.value)}
-                  style={{
-                    position: 'relative', paddingBottom: 12, background: 'none', border: 'none',
-                    cursor: 'pointer', fontSize: 13,
-                    fontWeight: accountType === tab.value ? 700 : 400,
-                    color: accountType === tab.value ? '#ffffff' : 'rgba(255,255,255,0.38)',
-                    transition: 'color 0.18s',
-                  }}>
-                  {tab.label}
-                  {accountType === tab.value && (
-                    <motion.div layoutId="login-tab-line"
-                      style={{ position: 'absolute', bottom: -1, left: 0, right: 0, height: 2, background: '#E8323C', borderRadius: 2 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
+            {/* Client Portal tab */}
+            <button
+              type="button"
+              onClick={() => setAccountType('client')}
+              aria-label="Client Portal"
+              aria-pressed={accountType === 'client'}
+              title="Client Portal"
+              style={{
+                position: 'absolute',
+                left: '69.85%', top: '28.25%',
+                width: '9.2%', height: '5.3%',
+                background: 'transparent',
+                border: accountType === 'client' ? '1px solid rgba(120,170,230,0.25)' : '1px solid transparent',
+                cursor: 'pointer',
+                borderRadius: 4,
+                outline: 'none',
+              }}
+            />
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <BoxInput
-                id="email" label="Work email" type="email"
-                value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@analytix.com"
-                icon={<IconMail />}
-              />
-              <BoxInput
-                id="password" label="Password"
-                type={showPassword ? 'text' : 'password'}
-                value={password} onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                icon={<IconLock />}
-                trailing={
-                  <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer',
-                      fontSize: 12, fontWeight: 600, color: '#E8323C', padding: 0, flexShrink: 0 }}>
-                    {showPassword ? 'Hide' : 'Show'}
-                  </button>
-                }
-              />
+            {/* Analytix Team tab */}
+            <button
+              type="button"
+              onClick={() => setAccountType('team')}
+              aria-label="Analytix Team"
+              aria-pressed={accountType === 'team'}
+              title="Analytix Team"
+              style={{
+                position: 'absolute',
+                left: '80.1%', top: '28.25%',
+                width: '9.2%', height: '5.3%',
+                background: 'transparent',
+                border: accountType === 'team' ? '1px solid rgba(120,170,230,0.25)' : '1px solid transparent',
+                cursor: 'pointer',
+                borderRadius: 4,
+                outline: 'none',
+              }}
+            />
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Link to="/forgot-password"
-                  style={{ fontSize: 11, fontWeight: 600, color: '#E8323C', textDecoration: 'none' }}>
-                  Forgot password?
-                </Link>
-              </div>
+            {/* Email input */}
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={e => { setEmail(e.target.value); setError('') }}
+              onKeyDown={handleKeyDown}
+              autoComplete="username"
+              aria-label="Work email"
+              style={{
+                position: 'absolute',
+                left: '69.875%', top: '39.05%',
+                width: '24.75%', height: '5.12%',
+                padding: '0 16px 0 58px',
+                background: 'transparent',
+                border: '1px solid transparent',
+                outline: 'none',
+                color: '#dbe7f7',
+                fontSize: 'clamp(10px, 1.05vw, 15px)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                caretColor: 'rgba(140, 200, 255, 0.9)',
+                transition: 'border-color 0.18s, background 0.18s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = 'rgba(120, 170, 230, 0.45)'
+                e.target.style.background = 'rgba(7, 24, 48, 0.12)'
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = 'transparent'
+                e.target.style.background = 'transparent'
+              }}
+            />
 
-              <motion.button type="submit"
-                whileHover={{ backgroundColor: '#c82831', boxShadow: '0 6px 24px rgba(232,50,60,0.45)', y: -1 }}
-                whileTap={{ scale: 0.98, y: 0 }}
-                transition={{ duration: 0.15 }}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  width: '100%', height: 44, borderRadius: 8, border: 'none',
-                  background: '#E8323C', color: '#ffffff',
-                  fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(232,50,60,0.30)',
-                }}>
-                <IconArrow />
-                Sign In
-              </motion.button>
-            </form>
+            {/* Password input */}
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={e => { setPassword(e.target.value); setError('') }}
+              onKeyDown={handleKeyDown}
+              autoComplete="current-password"
+              aria-label="Password"
+              style={{
+                position: 'absolute',
+                left: '69.875%', top: '50.35%',
+                width: '24.75%', height: '5.12%',
+                padding: '0 70px 0 58px',
+                letterSpacing: showPassword ? 'normal' : '2px',
+                background: 'transparent',
+                border: '1px solid transparent',
+                outline: 'none',
+                color: '#dbe7f7',
+                fontSize: 'clamp(10px, 1.05vw, 15px)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                caretColor: 'rgba(140, 200, 255, 0.9)',
+                transition: 'border-color 0.18s, background 0.18s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = 'rgba(120, 170, 230, 0.45)'
+                e.target.style.background = 'rgba(7, 24, 48, 0.12)'
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = 'transparent'
+                e.target.style.background = 'transparent'
+              }}
+            />
 
-            {/* Team only: signup link */}
-            <motion.div
-              initial={false}
-              animate={accountType === 'team' ? { height: 'auto', opacity: 1, marginTop: 16 } : { height: 0, opacity: 0, marginTop: 0 }}
-              transition={{ duration: 0.28, ease: 'easeInOut' }}
-              style={{ overflow: 'hidden' }}
+            {/* Show/hide password toggle */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(v => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              style={{
+                position: 'absolute',
+                left: '90.0%', top: '50.35%',
+                width: '4.6%', height: '5.12%',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+            />
+
+            {/* Forgot password link */}
+            <Link
+              to="/forgot-password"
+              aria-label="Forgot password"
+              style={{
+                position: 'absolute',
+                left: '86.2%', top: '56.5%',
+                width: '8.4%', height: '3.0%',
+                display: 'block',
+                cursor: 'pointer',
+                textDecoration: 'none',
+              }}
+            />
+
+            {/* Sign in button */}
+            <button
+              type="button"
+              onClick={doSignIn}
+              aria-label="Sign in"
+              style={{
+                position: 'absolute',
+                left: '69.85%', top: '61.55%',
+                width: '24.75%', height: '5.95%',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+                borderRadius: 4,
+              }}
+            />
+
+            {/* Role selector (demo) */}
+            <select
+              id="role"
+              value={demoRole}
+              onChange={e => setDemoRole(e.target.value)}
+              aria-label="Preview as role"
+              style={{
+                position: 'absolute',
+                left: '69.85%', top: '77.15%',
+                width: '24.75%', height: '5.15%',
+                padding: '0 45px 0 55px',
+                background: 'transparent',
+                border: '1px solid transparent',
+                outline: 'none',
+                color: 'rgba(0,0,0,0)',
+                fontSize: 'clamp(10px, 1.05vw, 15px)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                cursor: 'pointer',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                transition: 'color 0.15s, background 0.15s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => {
+                e.target.style.color = '#dbe7f7'
+                e.target.style.background = 'rgba(4, 14, 40, 0.88)'
+                e.target.style.borderColor = 'rgba(120, 170, 230, 0.35)'
+              }}
+              onBlur={e => {
+                e.target.style.color = 'rgba(0,0,0,0)'
+                e.target.style.background = 'transparent'
+                e.target.style.borderColor = 'transparent'
+              }}
             >
-              <div style={{ paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-                  Need partner access?{' '}
-                  <Link to="/signup" style={{ fontWeight: 700, color: '#E8323C', textDecoration: 'none' }}>
-                    Create account
-                  </Link>
-                </p>
-                <p style={{ marginTop: 4, fontSize: 11, color: 'rgba(255,255,255,0.22)' }}>
-                  Team accounts require Audit Manager approval.
-                </p>
-              </div>
-            </motion.div>
+              {DEMO_ROLES.map(r => (
+                <option key={r.value} value={r.value} style={{ background: '#071830', color: '#dbe7f7' }}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
 
-            {/* Demo access */}
-            <div style={{ marginTop: 22, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-              <p style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.25)', marginBottom: 12,
-              }}>
-                Demo Access
-              </p>
+            {/* Enter demo button */}
+            <button
+              type="button"
+              onClick={handleEnterDemo}
+              aria-label="Enter demo"
+              style={{
+                position: 'absolute',
+                left: '69.85%', top: '84.45%',
+                width: '24.75%', height: '5.15%',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+                borderRadius: 4,
+              }}
+            />
+          </div>
 
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.50)', marginBottom: 6 }}>
-                Preview as role
-              </p>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.10)',
-                borderRadius: 8, padding: '9px 12px',
-              }}>
-                <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, display: 'flex' }}><IconUser /></span>
-                <select value={demoRole} onChange={(e) => setDemoRole(e.target.value)}
-                  style={{
-                    flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                    fontSize: 13, color: '#ffffff', cursor: 'pointer',
-                    appearance: 'none', WebkitAppearance: 'none',
-                  }}>
-                  {DEMO_ROLES.map((role) => (
-                    <option key={role.value} value={role.value}
-                      style={{ background: '#0b1530', color: '#fff' }}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-                <span style={{ color: 'rgba(255,255,255,0.35)', display: 'flex', pointerEvents: 'none' }}><IconChevron /></span>
-              </div>
-
-              <motion.button type="button" onClick={handleEnterDemo}
-                whileHover={{ borderColor: 'rgba(255,255,255,0.35)', y: -1 }}
-                whileTap={{ scale: 0.98, y: 0 }}
-                transition={{ duration: 0.15 }}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  marginTop: 12, width: '100%', height: 44, borderRadius: 8, cursor: 'pointer',
-                  background: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 600,
-                }}>
-                <IconDemo />
-                Enter Demo
-              </motion.button>
+          {/* ── Error overlay ── */}
+          {error && (
+            <div
+              role="alert"
+              style={{
+                position: 'absolute',
+                left: '69.875%',
+                top: '68%',
+                width: '24.75%',
+                background: 'rgba(160, 20, 30, 0.88)',
+                border: '1px solid rgba(255, 100, 110, 0.4)',
+                borderRadius: 4,
+                padding: '4px 8px',
+                color: '#fff',
+                fontSize: 'clamp(9px, 0.9vw, 12px)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                backdropFilter: 'blur(6px)',
+                pointerEvents: 'none',
+                zIndex: 10,
+              }}
+            >
+              {error}
             </div>
-          </motion.div>
-        </div>
+          )}
+        </section>
+
+        {/* Mobile fallback: if stage is very small, show a minimal vertical layout */}
       </div>
+
+      <style>{`
+        @keyframes lan-pulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 6px #4ade80; }
+          50% { opacity: 0.45; box-shadow: 0 0 12px #4ade80; transform: scale(1.3); }
+        }
+        @media (max-width: 600px) {
+          /* On very small screens let the stage scroll */
+          div[style*="100vw"][style*="100vh"] {
+            overflow: auto !important;
+            align-items: flex-start !important;
+          }
+        }
+      `}</style>
     </PageTransition>
   )
 }
