@@ -250,6 +250,61 @@ export default function Login() {
             }}
           />
 
+          {/* ── Country label corrections — cover wrong JPEG labels with correct ones ── */}
+          {/* "Qatain" → "Qatar" */}
+          <div style={{
+            position: 'absolute',
+            left: '39.63%', top: '51.43%',
+            width: '9.12%', height: '4.76%',
+            background: 'rgba(2, 6, 24, 0.93)',
+            borderRadius: 20,
+            border: '1px solid rgba(70, 110, 180, 0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '0 6px 0 3px',
+            pointerEvents: 'none',
+            zIndex: 2,
+            backdropFilter: 'blur(2px)',
+          }}>
+            <span style={{ fontSize: 'clamp(8px, 0.85vw, 13px)', lineHeight: 1 }}>🇶🇦</span>
+            <span style={{
+              fontSize: 'clamp(7px, 0.72vw, 11px)',
+              fontWeight: 700,
+              color: '#d4e4f2',
+              fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+              letterSpacing: '0.01em',
+              whiteSpace: 'nowrap',
+            }}>Qatar</span>
+          </div>
+
+          {/* "Qatan" → "Qatar" */}
+          <div style={{
+            position: 'absolute',
+            left: '40.50%', top: '58.57%',
+            width: '5.75%', height: '3.81%',
+            background: 'rgba(2, 6, 24, 0.93)',
+            borderRadius: 20,
+            border: '1px solid rgba(70, 110, 180, 0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '0 6px 0 3px',
+            pointerEvents: 'none',
+            zIndex: 2,
+            backdropFilter: 'blur(2px)',
+          }}>
+            <span style={{ fontSize: 'clamp(8px, 0.85vw, 13px)', lineHeight: 1 }}>🇶🇦</span>
+            <span style={{
+              fontSize: 'clamp(7px, 0.72vw, 11px)',
+              fontWeight: 700,
+              color: '#d4e4f2',
+              fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+              letterSpacing: '0.01em',
+              whiteSpace: 'nowrap',
+            }}>Qatar</span>
+          </div>
+
           {/* ── LIVE AUDIT NETWORK status indicator ── */}
           <div style={{
             position: 'absolute',
@@ -449,7 +504,7 @@ export default function Login() {
               }}
             />
 
-            {/* Role selector (demo) */}
+            {/* Role selector (demo) — text always transparent to avoid overlapping JPEG label */}
             <select
               id="role"
               value={demoRole}
@@ -469,16 +524,13 @@ export default function Login() {
                 cursor: 'pointer',
                 appearance: 'none',
                 WebkitAppearance: 'none',
-                transition: 'color 0.15s, background 0.15s',
                 boxSizing: 'border-box',
               }}
               onFocus={e => {
-                e.target.style.color = '#dbe7f7'
-                e.target.style.background = 'rgba(4, 14, 40, 0.88)'
+                e.target.style.background = 'rgba(4, 14, 40, 0.72)'
                 e.target.style.borderColor = 'rgba(120, 170, 230, 0.35)'
               }}
               onBlur={e => {
-                e.target.style.color = 'rgba(0,0,0,0)'
                 e.target.style.background = 'transparent'
                 e.target.style.borderColor = 'transparent'
               }}
@@ -489,6 +541,36 @@ export default function Login() {
                 </option>
               ))}
             </select>
+
+            {/* Selected role indicator — only visible when a non-default role is chosen */}
+            {demoRole !== DEMO_ROLES[0].value && (
+              <div style={{
+                position: 'absolute',
+                left: '69.85%', top: '77.15%',
+                width: '24.75%', height: '5.15%',
+                display: 'flex',
+                alignItems: 'center',
+                paddingLeft: '55px',
+                pointerEvents: 'none',
+                boxSizing: 'border-box',
+              }}>
+                <span style={{
+                  fontSize: 'clamp(9px, 0.95vw, 13px)',
+                  color: '#c8dff5',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                  fontWeight: 500,
+                  background: 'rgba(4, 14, 40, 0.82)',
+                  borderRadius: 3,
+                  padding: '1px 6px',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {DEMO_ROLES.find(r => r.value === demoRole)?.label}
+                </span>
+              </div>
+            )}
 
             {/* Enter demo button */}
             <button
