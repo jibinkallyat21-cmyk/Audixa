@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import PageTransition from '../../components/shared/PageTransition'
+import WorldMapBg from '../../components/shared/WorldMapBg'
 
 const ROLE_OPTIONS = [
   'Associate',
@@ -10,36 +11,6 @@ const ROLE_OPTIONS = [
   'Front Office',
   'Management',
 ]
-
-const NODES = [
-  { id: 'us', x: 18.5, y: 44.0 },
-  { id: 'gb', x: 46.5, y: 30.5 },
-  { id: 'fr', x: 47.8, y: 36.0 },
-  { id: 'kw', x: 57.5, y: 38.5 },
-  { id: 'bh', x: 58.5, y: 41.0 },
-  { id: 'sa', x: 56.0, y: 43.0 },
-  { id: 'qa', x: 59.0, y: 42.0 },
-  { id: 'ae', x: 60.0, y: 43.5 },
-  { id: 'om', x: 61.0, y: 47.5 },
-  { id: 'in', x: 67.0, y: 47.5 },
-  { id: 'cn', x: 76.5, y: 33.5 },
-  { id: 'hk', x: 79.0, y: 42.5 },
-  { id: 'sg', x: 75.5, y: 55.5 },
-]
-const LINES = NODES.filter(n => n.id !== 'sa').map(n => ({ from: 'sa', to: n.id }))
-
-function useReducedMotion() {
-  const [rm, setRm] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const h = e => setRm(e.matches)
-    mq.addEventListener('change', h)
-    return () => mq.removeEventListener('change', h)
-  }, [])
-  return rm
-}
 
 const IconUser = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(140,170,220,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -83,70 +54,15 @@ export default function Signup() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
 
-  const canvasRef = useRef(null)
   const stageRef = useRef(null)
-  const rafRef = useRef(null)
-  const particlesRef = useRef([])
-  const reducedMotion = useReducedMotion()
-
-  useEffect(() => {
-    if (reducedMotion) return
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight }
-    resize()
-    const ro = new ResizeObserver(resize)
-    ro.observe(canvas)
-    particlesRef.current = []
-    LINES.forEach(({ from, to }) => {
-      const a = NODES.find(n => n.id === from)
-      const b = NODES.find(n => n.id === to)
-      if (!a || !b) return
-      for (let i = 0; i < 1 + Math.floor(Math.random() * 2); i++) {
-        particlesRef.current.push({ from: a, to: b, t: Math.random(), speed: 0.00022 + Math.random() * 0.00035, alpha: 0.5 + Math.random() * 0.5, size: 1.5 + Math.random() * 2 })
-      }
-    })
-    let start = null
-    const draw = ts => {
-      if (!start) start = ts
-      const elapsed = ts - start
-      const W = canvas.width, H = canvas.height
-      ctx.clearRect(0, 0, W, H)
-      LINES.forEach(({ from, to }) => {
-        const a = NODES.find(n => n.id === from), b = NODES.find(n => n.id === to)
-        if (!a || !b) return
-        ctx.beginPath(); ctx.moveTo(a.x / 100 * W, a.y / 100 * H); ctx.lineTo(b.x / 100 * W, b.y / 100 * H)
-        ctx.strokeStyle = 'rgba(80,150,255,0.08)'; ctx.lineWidth = 0.6; ctx.stroke()
-      })
-      particlesRef.current.forEach(p => {
-        p.t += p.speed; if (p.t > 1) p.t = 0
-        const ax = p.from.x / 100 * W, ay = p.from.y / 100 * H
-        const bx = p.to.x / 100 * W, by = p.to.y / 100 * H
-        const x = ax + (bx - ax) * p.t, y = ay + (by - ay) * p.t
-        const grd = ctx.createRadialGradient(x, y, 0, x, y, p.size * 3)
-        grd.addColorStop(0, `rgba(180,220,255,${p.alpha * 0.8})`); grd.addColorStop(1, 'rgba(180,220,255,0)')
-        ctx.beginPath(); ctx.arc(x, y, p.size * 3, 0, Math.PI * 2); ctx.fillStyle = grd; ctx.fill()
-        ctx.beginPath(); ctx.arc(x, y, p.size * 0.5, 0, Math.PI * 2); ctx.fillStyle = `rgba(230,245,255,${p.alpha})`; ctx.fill()
-      })
-      const scanY = (elapsed * 0.025) % (H * 1.6) - H * 0.3
-      const sg = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40)
-      sg.addColorStop(0, 'rgba(80,140,255,0)'); sg.addColorStop(0.5, 'rgba(80,140,255,0.02)'); sg.addColorStop(1, 'rgba(80,140,255,0)')
-      ctx.fillStyle = sg; ctx.fillRect(0, scanY - 40, W, 80)
-      rafRef.current = requestAnimationFrame(draw)
-    }
-    rafRef.current = requestAnimationFrame(draw)
-    return () => { cancelAnimationFrame(rafRef.current); ro.disconnect() }
-  }, [reducedMotion])
 
   const handleMouseMove = useCallback(e => {
-    if (reducedMotion) return
     const stage = stageRef.current
     if (!stage) return
     const rect = stage.getBoundingClientRect()
     stage.style.setProperty('--px', String((e.clientX - rect.left) / rect.width - 0.5))
     stage.style.setProperty('--py', String((e.clientY - rect.top) / rect.height - 0.5))
-  }, [reducedMotion])
+  }, [])
 
   const handleSubmit = e => {
     e.preventDefault()
@@ -191,36 +107,43 @@ export default function Signup() {
   return (
     <PageTransition>
       <div
-        style={{ width: '100vw', height: '100vh', display: 'grid', placeItems: 'center', overflow: 'hidden', background: '#020817' }}
+        style={{ width: '100vw', height: '100vh', display: 'grid', placeItems: 'center', overflow: 'hidden', background: '#020b16' }}
         onMouseMove={handleMouseMove}
       >
         <section
           ref={stageRef}
           style={{ position: 'relative', width: 'min(100vw, calc(100vh * 1600/840))', aspectRatio: '1600/840', maxHeight: '100vh', overflow: 'hidden' }}
         >
-          {/* Background */}
-          <img
-            src="/login-bg.jpg"
-            alt="AUDIT 360 world network"
-            draggable={false}
-            style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center',
-              pointerEvents: 'none', userSelect: 'none', display: 'block',
-              transform: reducedMotion ? 'none' : 'translate(calc(var(--px,0)*-3px),calc(var(--py,0)*-3px))',
-              transition: 'transform 0.12s ease-out',
-            }}
-          />
+          {/* Background gradient */}
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 85%, rgba(15,60,95,0.28) 0%, transparent 55%), linear-gradient(180deg,#020a14 0%,#071827 48%,#030c17 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse at 50% 40%, rgba(35,91,135,0.11), transparent 55%), radial-gradient(ellipse at 10% 50%, rgba(20,60,95,0.09), transparent 45%)' }} />
 
-          {/* Canvas */}
-          <canvas
-            ref={canvasRef}
-            style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none',
-              transform: reducedMotion ? 'none' : 'translate(calc(var(--px,0)*5px),calc(var(--py,0)*5px))',
-              transition: 'transform 0.18s ease-out',
-            }}
-          />
+          {/* D3 World Map */}
+          <WorldMapBg style={{ transform: 'translate(calc(var(--px,0)*-4px),calc(var(--py,0)*-4px))', transition: 'transform 0.14s ease-out' }} />
+
+          {/* Bottom glow */}
+          <div style={{ position: 'absolute', left: '-5%', right: '-5%', bottom: '-15%', height: '40%', background: 'radial-gradient(ellipse at center, rgba(26,81,122,0.22), transparent 65%)', filter: 'blur(14px)', pointerEvents: 'none' }} />
+
+          {/* Header branding */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: '35%',
+            paddingTop: 'clamp(18px,2.8vh,32px)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            pointerEvents: 'none', zIndex: 10,
+            transform: 'translate(calc(var(--px,0)*2px),calc(var(--py,0)*2px))',
+            transition: 'transform 0.18s ease-out',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 4 }}>
+              <div style={{ width: 30, height: 38, background: '#ef233c', clipPath: 'polygon(50% 0%,100% 22%,82% 100%,50% 83%,18% 100%,0% 22%)', filter: 'drop-shadow(0 0 8px rgba(239,35,60,0.3))', flexShrink: 0 }} />
+              <span style={{ fontSize: 'clamp(15px,1.5vw,22px)', fontWeight: 600, letterSpacing: '0.28em', color: '#f2f5f8', fontFamily: 'Inter, system-ui, sans-serif' }}>ANALYTIX</span>
+            </div>
+            <h1 style={{ margin: 0, fontSize: 'clamp(38px,5.5vw,86px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 0.92, color: '#fff', fontFamily: 'Inter, system-ui, sans-serif', textShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+              AUDIT <span style={{ color: '#ef233c' }}>360</span>
+            </h1>
+            <p style={{ marginTop: 'clamp(10px,1.4vh,18px)', fontSize: 'clamp(10px,1vw,15px)', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(216,224,232,0.85)', fontFamily: 'Inter, system-ui, sans-serif' }}>
+              Intelligent Audits <span style={{ color: '#ef233c', margin: '0 14px', fontWeight: 700 }}>|</span> Seamless Engagements <span style={{ color: '#ef233c', margin: '0 14px', fontWeight: 700 }}>|</span> Trusted Outcomes
+            </p>
+          </div>
 
           {/* ── Create Account Card ── */}
           <div style={{
@@ -370,12 +293,6 @@ export default function Signup() {
           </div>
         </section>
 
-        <style>{`
-          @keyframes lan-pulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 6px #4ade80; }
-            50% { opacity: 0.45; box-shadow: 0 0 12px #4ade80; transform: scale(1.3); }
-          }
-        `}</style>
       </div>
     </PageTransition>
   )
