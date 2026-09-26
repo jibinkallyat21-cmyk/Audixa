@@ -188,7 +188,7 @@ export default function Login() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.85, duration: 0.6 }}
               >
-                Analytix Audit &amp; Assurance delivers end-to-end audit management — from document collection and AI-verified processing to Qawaem filing and final sign-off. We specialise in client portal collaboration, real-time engagement tracking, and compliance reporting for organisations across the GCC.
+                Founded in 2008, Analytix is a global management consulting firm that has empowered 5,000+ businesses across 21+ countries. With offices in India, UAE, KSA, Qatar, Oman, China, the UK and USA, we deliver Audit &amp; Assurance, accounting, tax advisory, legal compliance, and business consultancy — transforming complexity into opportunity for enterprises worldwide.
               </motion.p>
             </motion.div>
           </div>
