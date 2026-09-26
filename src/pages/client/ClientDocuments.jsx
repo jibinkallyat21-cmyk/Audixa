@@ -1,6 +1,7 @@
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, X, CheckCircle2, AlertCircle, Clock, Eye, RefreshCw, Search, ChevronRight } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
@@ -77,7 +78,7 @@ const D = {
   page: 'var(--c-page)',
 }
 
-function TableRow({ row }) {
+function TableRow({ row, highlighted }) {
   const showToast = useToast()
   const { isDark } = useTheme()
   const [hovered, setHovered] = useState(false)
@@ -85,7 +86,9 @@ function TableRow({ row }) {
   const isAccepted = row.status === 'Accepted'
   const canUpload = ['Pending Client', 'Rejected', 'Action Required'].includes(row.status)
 
-  const rowBg = hovered
+  const rowBg = highlighted
+    ? 'rgba(245,158,11,0.10)'
+    : hovered
     ? isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'
     : 'transparent'
 
@@ -94,8 +97,13 @@ function TableRow({ row }) {
 
   return (
     <div
+      id={`row-${row.ref}`}
       className="relative transition-colors"
-      style={{ borderBottom: `1px solid ${D.border}`, background: rowBg }}
+      style={{
+        borderBottom: `1px solid ${D.border}`,
+        background: rowBg,
+        boxShadow: highlighted ? 'inset 3px 0 0 #F59E0B' : 'none',
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -320,14 +328,59 @@ function BulkUploadModal({ onClose }) {
   )
 }
 
+/* Status filter → which item statuses to show */
+const STATUS_FILTER_MAP = {
+  accepted:     ['Accepted'],
+  outstanding:  ['Pending Client', 'Action Required'],
+  'under-review': ['Under Review', 'Uploaded Processing'],
+}
+
 export default function ClientDocuments() {
   const showToast = useToast()
   const { isDark } = useTheme()
   const { selectedFY } = useClientFY()
   const engRef = ENGAGEMENT_REFS[selectedFY]
+  const [searchParams, setSearchParams] = useSearchParams()
   const [bulkOpen, setBulkOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState(new Set())
+  const [highlightRef, setHighlightRef] = useState(null)
+  const highlightTimerRef = useRef(null)
+
+  const paramRef    = searchParams.get('ref')
+  const paramStatus = searchParams.get('status')
+
+  /* When a ?ref= arrives: find the category, expand it, scroll + highlight */
+  useEffect(() => {
+    if (!paramRef) return
+    const targetRow = ALL_ROWS.find((r) => r.type === 'row' && r.ref === paramRef)
+    if (!targetRow) return
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      next.add(targetRow.categoryId)
+      return next
+    })
+    setHighlightRef(paramRef)
+    clearTimeout(highlightTimerRef.current)
+    highlightTimerRef.current = setTimeout(() => {
+      document.getElementById(`row-${paramRef}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 120)
+    highlightTimerRef.current = setTimeout(() => setHighlightRef(null), 3000)
+    /* clear param from URL so back-navigation doesn't re-trigger */
+    setSearchParams((p) => { p.delete('ref'); return p }, { replace: true })
+  }, [paramRef]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* When a ?status= arrives: expand all matching categories */
+  useEffect(() => {
+    if (!paramStatus || !STATUS_FILTER_MAP[paramStatus]) return
+    const targetStatuses = STATUS_FILTER_MAP[paramStatus]
+    const matchCats = new Set()
+    ALL_ROWS.forEach((r) => {
+      if (r.type === 'row' && targetStatuses.includes(r.status)) matchCats.add(r.categoryId)
+    })
+    setExpanded(matchCats)
+    setSearchParams((p) => { p.delete('status'); return p }, { replace: true })
+  }, [paramStatus]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleCategory = (id) => {
     setExpanded((prev) => {
@@ -483,7 +536,7 @@ export default function ClientDocuments() {
                 )
               }
               return (
-                <TableRow key={row.ref} row={row} />
+                <TableRow key={row.ref} row={row} highlighted={row.ref === highlightRef} />
               )
             })}
           </div>

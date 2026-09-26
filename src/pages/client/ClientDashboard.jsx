@@ -149,10 +149,11 @@ const OPEN_QUERIES = [
 ]
 
 /* ─── Expandable stat card ─── */
-function ExpandableStatCard({ label, value, sub, accent, items, linkTo }) {
+function ExpandableStatCard({ label, value, sub, accent, items, linkTo, statusParam }) {
   const count = useCountUp(value)
   const [open, setOpen] = useState(false)
   const hasItems = items?.length > 0
+  const viewAllTo = statusParam ? `${linkTo}?status=${statusParam}` : linkTo
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col" style={{ background: D.card, border: `1px solid ${D.border}` }}>
       <button
@@ -182,7 +183,9 @@ function ExpandableStatCard({ label, value, sub, accent, items, linkTo }) {
           >
             <div style={{ borderTop: `1px solid ${D.border}` }}>
               {items.slice(0, 6).map((item, i) => (
-                <Link key={i} to={linkTo}
+                <Link
+                  key={i}
+                  to={item.ref ? `${linkTo}?ref=${encodeURIComponent(item.ref)}` : linkTo}
                   className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-white/5"
                   style={{ borderBottom: i < Math.min(items.length, 6) - 1 ? `1px solid ${D.border}` : 'none' }}
                 >
@@ -191,8 +194,8 @@ function ExpandableStatCard({ label, value, sub, accent, items, linkTo }) {
                   <ChevronRight className="h-3 w-3 shrink-0" style={{ color: D.muted }} />
                 </Link>
               ))}
-              {items.length > 6 && (
-                <Link to={linkTo} className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-colors hover:opacity-80" style={{ color: accent }}>
+              {items.length > 0 && (
+                <Link to={viewAllTo} className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-colors hover:opacity-80" style={{ color: accent }}>
                   View all {items.length} items <ChevronRight className="h-3 w-3" />
                 </Link>
               )}
@@ -698,6 +701,7 @@ export default function ClientDashboard() {
                     accent="#10B981"
                     items={null}
                     linkTo="/client/documents"
+                    statusParam="accepted"
                   />
                   <ExpandableStatCard
                     label="Outstanding"
@@ -706,6 +710,7 @@ export default function ClientDashboard() {
                     accent="#F59E0B"
                     items={OUTSTANDING_ITEMS.slice(0, fyData.stats.pendingAction)}
                     linkTo="/client/documents"
+                    statusParam="outstanding"
                   />
                   <ExpandableStatCard
                     label="Under Review"
@@ -714,6 +719,7 @@ export default function ClientDashboard() {
                     accent="#818CF8"
                     items={UNDER_REVIEW_DOCS.slice(0, fyData.stats.underVerification).map(d => ({ ref: d.ref, name: d.name }))}
                     linkTo="/client/documents"
+                    statusParam="under-review"
                   />
                   <ExpandableStatCard
                     label="Audit Queries"
