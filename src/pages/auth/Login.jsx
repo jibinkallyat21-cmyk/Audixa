@@ -312,12 +312,12 @@ export default function Login() {
             top: '4.5%',
             bottom: '4.5%',
             width: '33.5%',
-            background: 'rgba(6, 14, 38, 0.90)',
-            border: '1px solid rgba(65, 105, 200, 0.28)',
+            background: 'rgba(6, 14, 38, 0.55)',
+            border: '1px solid rgba(65, 105, 200, 0.35)',
             borderRadius: 'clamp(8px,0.9vw,14px)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 48px rgba(0,0,10,0.7), inset 0 1px 0 rgba(255,255,255,0.05)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            boxShadow: '0 8px 48px rgba(0,0,10,0.4), inset 0 1px 0 rgba(255,255,255,0.07)',
             display: 'flex',
             flexDirection: 'column',
             padding: 'clamp(14px,2vw,26px)',
@@ -483,6 +483,39 @@ export default function Login() {
                 fontFamily: 'system-ui, sans-serif',
               }}>
                 {error}
+              </div>
+            )}
+
+            {/* Create account — Analytix Team only */}
+            {accountType === 'team' && (
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                padding: 'clamp(6px,0.8vw,10px) 0',
+                borderTop: '1px solid rgba(65,105,200,0.18)',
+              }}>
+                <span style={{
+                  fontSize: 'clamp(9px,0.85vw,12px)',
+                  color: 'rgba(175,200,240,0.7)',
+                  fontFamily: 'system-ui, sans-serif',
+                }}>
+                  New to Analytix Team?
+                </span>
+                <Link
+                  to="/register"
+                  style={{
+                    fontSize: 'clamp(9px,0.85vw,12px)',
+                    color: '#e8192c',
+                    fontFamily: 'system-ui, sans-serif',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  Create account
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 6l6 6-6 6"/>
+                  </svg>
+                </Link>
               </div>
             )}
 
