@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, X, CheckCircle2, AlertCircle, Clock, Eye, RefreshCw, Search, Filter } from 'lucide-react'
+import { Upload, X, CheckCircle2, AlertCircle, Clock, Eye, RefreshCw, Search, ChevronRight } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
@@ -22,10 +22,11 @@ function buildRows() {
   requirementCategories.forEach((cat) => {
     rows.push({ type: 'category', id: cat.id, title: cat.title, completed: cat.completed, total: cat.total })
     if (cat.items?.length) {
-      cat.items.forEach((item, idx) => {
+      cat.items.forEach((item) => {
         const filename = item.fileInfo?.split(' · ')[0] || ''
         rows.push({
           type: 'row',
+          categoryId: cat.id,
           ref: item.ref,
           name: item.name,
           plainDesc: PLAIN_DESCRIPTIONS[item.ref] || 'Upload the requested document for your audit.',
@@ -319,11 +320,20 @@ function BulkUploadModal({ onClose }) {
 }
 
 export default function ClientDocuments() {
-  const { selectedFY } = { selectedFY: 'FY2024' } // will use context via layout
   const showToast = useToast()
   const { isDark } = useTheme()
   const [bulkOpen, setBulkOpen] = useState(false)
   const [search, setSearch] = useState('')
+  // Start with all categories collapsed
+  const [expanded, setExpanded] = useState(new Set())
+
+  const toggleCategory = (id) => {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   // Stats
   const total = 84
@@ -332,10 +342,33 @@ export default function ClientDocuments() {
   const stillNeeded = 14
   const needsCorrection = 3
 
+  // When searching: auto-expand categories that have matches; otherwise respect expanded set
+  const matchingCategoryIds = useMemo(() => {
+    if (!search) return new Set()
+    const ids = new Set()
+    ALL_ROWS.forEach((row) => {
+      if (row.type === 'row' && (
+        row.name.toLowerCase().includes(search.toLowerCase()) ||
+        row.ref?.toLowerCase().includes(search.toLowerCase())
+      )) ids.add(row.categoryId)
+    })
+    return ids
+  }, [search])
+
+  const visibleCategoryIds = search
+    ? matchingCategoryIds
+    : expanded
+
   const filteredRows = ALL_ROWS.filter((row) => {
-    if (row.type === 'category') return true
-    if (!search) return true
-    return row.name.toLowerCase().includes(search.toLowerCase()) || row.ref?.toLowerCase().includes(search.toLowerCase())
+    if (row.type === 'category') {
+      // Hide category if searching and it has no matches
+      if (search && !matchingCategoryIds.has(row.id)) return false
+      return true
+    }
+    // Row item: show only if its category is expanded/visible
+    if (!visibleCategoryIds.has(row.categoryId)) return false
+    if (search && !row.name.toLowerCase().includes(search.toLowerCase()) && !row.ref?.toLowerCase().includes(search.toLowerCase())) return false
+    return true
   })
 
   return (
@@ -403,13 +436,43 @@ export default function ClientDocuments() {
               <span className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide" style={{ color: D.subtle }}>Action</span>
             </div>
 
-            {filteredRows.map((row, idx) => {
+            {filteredRows.map((row) => {
               if (row.type === 'category') {
+                const isOpen = search ? matchingCategoryIds.has(row.id) : expanded.has(row.id)
                 return (
-                  <div key={row.id} className="flex items-center justify-between px-5 py-2.5" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#E2E8F0', borderBottom: `1px solid ${D.border}` }}>
-                    <span className="text-xs font-bold uppercase tracking-wide" style={{ color: D.text }}>{row.title}</span>
-                    <span className="text-xs" style={{ color: D.muted }}>{row.completed} of {row.total} complete</span>
-                  </div>
+                  <button
+                    key={row.id}
+                    onClick={() => toggleCategory(row.id)}
+                    className="w-full flex items-center justify-between px-5 py-3 text-left transition-colors"
+                    style={{
+                      background: isDark ? 'rgba(255,255,255,0.05)' : '#E2E8F0',
+                      borderBottom: `1px solid ${D.border}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <motion.span
+                        animate={{ rotate: isOpen ? 90 : 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="shrink-0"
+                      >
+                        <ChevronRight className="h-4 w-4" style={{ color: D.muted }} />
+                      </motion.span>
+                      <span className="text-xs font-bold uppercase tracking-wide" style={{ color: D.text }}>{row.title}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs" style={{ color: D.muted }}>{row.completed} of {row.total} complete</span>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                        style={{
+                          background: isOpen ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)') : 'transparent',
+                          color: D.subtle,
+                          border: `1px solid ${D.border}`,
+                        }}
+                      >
+                        {isOpen ? 'Collapse' : 'Expand'}
+                      </span>
+                    </div>
+                  </button>
                 )
               }
               return (
