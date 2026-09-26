@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText, FileCheck2, Eye, Download, CheckCircle2, Lock,
   FileSignature, Upload, X, Paperclip, Calculator, AlertTriangle,
-  ChevronRight, ExternalLink, FileSearch, XCircle, Pencil, Loader2, Info,
+  ChevronRight, FileSearch, XCircle, Pencil, Loader2, Info, Clock,
 } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
@@ -26,115 +26,89 @@ const D = {
   subtle: 'var(--c-subtle)',
 }
 
-/* ─── Upload zone ─── */
-function UploadZone({ uploadKey, label, description }) {
+/* ─── Compact document list row ─── */
+function DocListRow({ icon: Icon, iconColor, label, meta, status, statusColor, onDownload, onView, uploadKey, delay = 0 }) {
   const showToast = useToast()
   const fileRef = useRef(null)
-  const [current, setCurrent] = useState(() => getClientUpload(uploadKey))
-  const [dragging, setDragging] = useState(false)
+  const [upload, setUpload] = useState(() => uploadKey ? getClientUpload(uploadKey) : null)
 
   useEffect(() => {
-    const unsub = onUploadsChange(() => setCurrent(getClientUpload(uploadKey)))
+    if (!uploadKey) return
+    const unsub = onUploadsChange(() => setUpload(getClientUpload(uploadKey)))
     return unsub
   }, [uploadKey])
 
   const handleFile = (file) => {
-    if (!file) return
+    if (!file || !uploadKey) return
     const info = { name: file.name, size: `${(file.size / 1024).toFixed(0)} KB`, uploadedAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }
     setClientUpload(uploadKey, info)
     showToast(`${label} uploaded — your engagement team has been notified`)
   }
 
-  if (current) {
-    return (
-      <div className="mt-3 flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-        <Paperclip className="h-4 w-4 shrink-0 text-emerald" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-white/90">{current.name}</p>
-          <p className="text-xs" style={{ color: D.muted }}>{current.size} · Uploaded {current.uploadedAt}</p>
-        </div>
-        <span className="shrink-0 rounded-full bg-emerald/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald">Submitted</span>
-        <button onClick={() => { setClientUpload(uploadKey, null); showToast('Upload removed') }} className="text-white/20 hover:text-red-400">
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div
-      onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={(e) => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files?.[0]) }}
-      onClick={() => fileRef.current?.click()}
-      className="mt-3 cursor-pointer rounded-xl px-6 py-5 text-center transition-all"
-      style={{
-        background: dragging ? 'rgba(230,57,70,0.06)' : 'rgba(255,255,255,0.03)',
-        border: `2px dashed ${dragging ? 'rgba(230,57,70,0.4)' : D.border}`,
-      }}
-      onMouseEnter={e => { e.currentTarget.style.border = `2px dashed ${D.border2}`; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-      onMouseLeave={e => { if (!dragging) { e.currentTarget.style.border = `2px dashed ${D.border}`; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}}
-    >
-      <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.png,.jpg" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
-      <Upload className="mx-auto mb-2 h-5 w-5" style={{ color: D.subtle }} />
-      <p className="text-sm font-semibold text-white/70">{label}</p>
-      <p className="mt-0.5 text-xs" style={{ color: D.subtle }}>{description}</p>
-      <p className="mt-1.5 text-[10px]" style={{ color: D.subtle }}>Drag & drop or click · PDF, DOCX, PNG</p>
-    </div>
-  )
-}
-
-/* ─── Hover document card ─── */
-function DocCard({ icon: Icon, iconColor, filename, meta, status, statusColor, onDownload, onView, delay = 0 }) {
-  const [hov, setHov] = useState(false)
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      onHoverStart={() => setHov(true)}
-      onHoverEnd={() => setHov(false)}
-      className="relative overflow-hidden rounded-xl cursor-pointer transition-all"
-      style={{ background: hov ? D.card2 : 'rgba(255,255,255,0.03)', border: `1px solid ${hov ? D.border2 : D.border}` }}
+      className="flex items-center gap-3 px-4 py-3.5"
+      style={{ borderBottom: `1px solid ${D.border}` }}
     >
-      <div className="flex items-center gap-4 p-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ background: `${iconColor}15` }}>
-          <Icon className="h-6 w-6" style={{ color: iconColor }} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-white/90">{filename}</p>
-          <p className="mt-0.5 text-xs" style={{ color: D.muted }}>{meta}</p>
-        </div>
-        <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}30` }}>
-          {status}
-        </span>
+      {/* Icon */}
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `${iconColor}18` }}>
+        <Icon className="h-4 w-4" style={{ color: iconColor }} />
       </div>
 
-      {/* Hover reveal */}
-      <AnimatePresence>
-        {hov && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.18 }}
-            className="overflow-hidden"
-          >
-            <div className="flex gap-2 px-4 pb-4">
-              {onView && (
-                <button onClick={onView} className="flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white hover:bg-[#D12C35]">
-                  <Eye className="h-3.5 w-3.5" /> View
-                </button>
-              )}
-              {onDownload && (
-                <button onClick={onDownload} className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white/70 hover:bg-white/10 transition-colors" style={{ border: `1px solid ${D.border}` }}>
-                  <Download className="h-3.5 w-3.5" /> Download PDF
-                </button>
-              )}
-            </div>
-          </motion.div>
+      {/* Label + meta */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.88)' }}>{label}</p>
+        {meta && <p className="mt-0.5 text-xs" style={{ color: D.muted }}>{meta}</p>}
+        {/* Uploaded file line */}
+        {upload && (
+          <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald">
+            <Paperclip className="h-3 w-3 shrink-0" />
+            <span className="truncate">{upload.name}</span>
+            <span className="opacity-60">· {upload.size} · {upload.uploadedAt}</span>
+            <button onClick={() => { setClientUpload(uploadKey, null); showToast('Upload removed') }} className="ml-1 text-white/25 hover:text-red-400 transition-colors">
+              <X className="h-3 w-3" />
+            </button>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
+
+      {/* Status badge */}
+      {status && (
+        <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold whitespace-nowrap"
+          style={{ background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}28` }}>
+          {status}
+        </span>
+      )}
+
+      {/* Actions */}
+      <div className="flex shrink-0 items-center gap-1.5">
+        {onView && (
+          <button onClick={onView} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-white/70 transition-colors hover:bg-white/10" style={{ border: `1px solid ${D.border}` }}>
+            <Eye className="h-3.5 w-3.5" /> View
+          </button>
+        )}
+        {onDownload && (
+          <button onClick={onDownload} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-white/70 transition-colors hover:bg-white/10" style={{ border: `1px solid ${D.border}` }}>
+            <Download className="h-3.5 w-3.5" /> Download
+          </button>
+        )}
+        {uploadKey && (
+          <>
+            <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.png,.jpg" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-colors"
+              style={{ background: upload ? 'rgba(16,185,129,0.12)' : 'rgba(230,57,70,0.12)', color: upload ? '#10B981' : '#E63946', border: `1px solid ${upload ? 'rgba(16,185,129,0.25)' : 'rgba(230,57,70,0.25)'}` }}
+            >
+              <Upload className="h-3.5 w-3.5" />
+              {upload ? 'Replace' : 'Upload'}
+            </button>
+          </>
+        )}
+      </div>
     </motion.div>
   )
 }
@@ -576,11 +550,10 @@ function getReportsData(fy) {
 
 /* ─── Tab definitions ─── */
 const TABS = [
-  { id: 'proposal', label: 'Signed Proposal',       icon: FileSignature },
-  { id: 'el',       label: 'Engagement Letter',     icon: FileText },
-  { id: 'zakat',    label: 'Zakat Returns & Tax',   icon: FileCheck2 },
-  { id: 'draft',    label: 'Draft Issued',           icon: FileSignature },
-  { id: 'afs',      label: 'AFS Issued',             icon: CheckCircle2 },
+  { id: 'engagement', label: 'Engagement Documents', icon: FileSignature },
+  { id: 'zakat',      label: 'Zakat Returns & Tax',  icon: FileCheck2 },
+  { id: 'draft',      label: 'Draft Issued',          icon: FileText },
+  { id: 'afs',        label: 'AFS Issued',            icon: CheckCircle2 },
 ]
 
 export default function ClientReports() {
@@ -588,7 +561,7 @@ export default function ClientReports() {
   const { selectedFY } = useClientFY()
   const { tbLines } = useTB()
   const data = getReportsData(selectedFY)
-  const [activeTab, setActiveTab] = useState('proposal')
+  const [activeTab, setActiveTab] = useState('engagement')
   const [signedOff, setSignedOff] = useState(false)
   const [comments, setComments] = useState([
     { id: 'c1', author: 'Analytix Audit Team', side: 'team', text: 'Related party disclosure on Note 7 updated per your confirmation on 12 Oct.' },
@@ -654,52 +627,76 @@ export default function ClientReports() {
                 transition={{ duration: 0.18 }}
               >
 
-                {/* ── Signed Proposal ── */}
-                {activeTab === 'proposal' && (
-                  <div className="rounded-2xl p-6 space-y-5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-                    <div>
-                      <h2 className="text-base font-bold text-white">Signed Proposal</h2>
-                      <p className="text-sm mt-0.5" style={{ color: D.muted }}>
-                        Upload your signed copy of the engagement proposal here. Once uploaded, the audit team will be notified immediately.
-                      </p>
-                    </div>
-                    <div className="rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                      <p className="text-sm text-amber/90">
-                        A proposal was sent to you by the Analytix team. Please sign it and upload the signed copy below to proceed with onboarding.
-                      </p>
-                    </div>
-                    <UploadZone
-                      uploadKey="signed-proposal"
-                      label="Upload Signed Proposal"
-                      description="Accepted formats: PDF · Max 10MB"
-                    />
-                  </div>
-                )}
-
-                {/* ── Engagement Letter ── */}
-                {activeTab === 'el' && (
-                  <div className="rounded-2xl p-6 space-y-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-                    <div className="flex items-center justify-between">
+                {/* ── Engagement Documents (merged) ── */}
+                {activeTab === 'engagement' && (
+                  <div className="rounded-2xl overflow-hidden" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${D.border}` }}>
                       <div>
-                        <h2 className="text-base font-bold text-white">Engagement Letter</h2>
-                        <p className="text-sm mt-0.5" style={{ color: D.muted }}>Formal audit engagement terms issued by Analytix Audit & Assurance</p>
+                        <h2 className="text-base font-bold text-white">Engagement Documents</h2>
+                        <p className="text-sm mt-0.5" style={{ color: D.muted }}>Proposal, engagement letter and your signed returns</p>
                       </div>
-                      <span className="rounded-full px-3 py-1 text-xs font-bold text-emerald" style={{ background: 'rgba(16,185,129,0.15)' }}>Issued</span>
+                      <span className="rounded-full px-3 py-1 text-xs font-bold text-indigo-400" style={{ background: 'rgba(99,102,241,0.12)' }}>
+                        {selectedFY}
+                      </span>
                     </div>
 
-                    <DocCard
-                      icon={FileText} iconColor="#6366F1"
-                      filename={data.engagementLetter.filename}
-                      meta={`${data.engagementLetter.size} · Issued ${data.engagementLetter.issuedDate}`}
-                      status="Issued by Analytix" statusColor="#6366F1"
-                      onDownload={() => showToast('Downloading engagement letter...')}
-                      onView={() => showToast('Opening engagement letter...')}
-                    />
+                    {/* Section: From Analytix (download) */}
+                    <div>
+                      <div className="flex items-center gap-2 px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${D.border}` }}>
+                        <Download className="h-3.5 w-3.5" style={{ color: D.subtle }} />
+                        <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>From Analytix — Download</p>
+                      </div>
+                      <DocListRow
+                        icon={FileText} iconColor="#8B5CF6"
+                        label={`Audit Proposal — ${selectedFY}.pdf`}
+                        meta={`Issued ${data.engagementLetter.issuedDate} · 0.8 MB`}
+                        status="Issued" statusColor="#8B5CF6"
+                        onView={() => showToast('Opening audit proposal...')}
+                        onDownload={() => showToast('Downloading audit proposal...')}
+                        delay={0.04}
+                      />
+                      <DocListRow
+                        icon={FileText} iconColor="#6366F1"
+                        label={data.engagementLetter.filename}
+                        meta={`${data.engagementLetter.size} · Issued ${data.engagementLetter.issuedDate}`}
+                        status="Issued" statusColor="#6366F1"
+                        onView={() => showToast('Opening engagement letter...')}
+                        onDownload={() => showToast('Downloading engagement letter...')}
+                        delay={0.08}
+                      />
+                    </div>
 
-                    <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
-                      <p className="text-sm font-bold text-white mb-0.5">Upload Signed Engagement Letter</p>
-                      <p className="text-xs" style={{ color: D.muted }}>Sign and return the engagement letter. Your submission is immediately visible to the engagement team.</p>
-                      <UploadZone uploadKey="signedEngagementLetter" label="Signed Engagement Letter" description="Upload the countersigned copy" />
+                    {/* Section: Your signatures (upload) */}
+                    <div>
+                      <div className="flex items-center gap-2 px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${D.border}` }}>
+                        <Upload className="h-3.5 w-3.5" style={{ color: D.subtle }} />
+                        <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Your Signatures — Upload Signed Copies</p>
+                      </div>
+                      <DocListRow
+                        icon={FileSignature} iconColor="#F59E0B"
+                        label="Signed Proposal (return copy)"
+                        meta="Sign and upload the countersigned proposal to confirm onboarding"
+                        uploadKey="signed-proposal"
+                        delay={0.12}
+                      />
+                      <div style={{ borderBottom: 'none' }}>
+                        <DocListRow
+                          icon={FileSignature} iconColor="#E63946"
+                          label="Signed Engagement Letter"
+                          meta="Sign and return the engagement letter — visible to your engagement team immediately"
+                          uploadKey="signedEngagementLetter"
+                          delay={0.16}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Info note */}
+                    <div className="flex items-start gap-3 px-5 py-4" style={{ borderTop: `1px solid ${D.border}`, background: 'rgba(245,158,11,0.04)' }}>
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber/70" />
+                      <p className="text-xs text-amber/80 leading-relaxed">
+                        Uploaded documents are immediately visible to your Analytix engagement team. Uploading a signed copy does not replace the original — retain the original for your records.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -725,29 +722,33 @@ export default function ClientReports() {
                         <Download className="h-4 w-4" style={{ color: D.muted }} />
                         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.muted }}>Documents from Analytix</p>
                       </div>
-                      <div className="p-4 space-y-3">
+                      <div>
                         {data.zakatReturn.available ? (
                           <>
                             {data.zakatReturn.qawaemRef && (
-                              <p className="text-xs font-mono" style={{ color: D.muted }}>
-                                Qawaem Ref: <span style={{ color: 'rgba(255,255,255,0.7)' }}>{data.zakatReturn.qawaemRef}</span>
-                              </p>
+                              <div className="flex items-center gap-2 px-4 py-2" style={{ borderBottom: `1px solid ${D.border}` }}>
+                                <p className="text-xs font-mono" style={{ color: D.muted }}>
+                                  Qawaem Ref: <span style={{ color: 'rgba(255,255,255,0.7)' }}>{data.zakatReturn.qawaemRef}</span>
+                                </p>
+                              </div>
                             )}
-                            <DocCard
+                            <DocListRow
                               icon={FileCheck2} iconColor="#10B981"
-                              filename={data.zakatReturn.filename}
+                              label={data.zakatReturn.filename}
                               meta={`Filed ${data.zakatReturn.filedDate}`}
                               status="Filed" statusColor="#10B981"
                               onDownload={() => showToast('Downloading Zakat return...')}
                               onView={() => showToast('Opening Zakat return...')}
+                              delay={0.04}
                             />
-                            <DocCard
+                            <DocListRow
                               icon={FileText} iconColor="#6366F1"
-                              filename={`CIT / Tax Computation Report — ${selectedFY}.pdf`}
+                              label={`CIT / Tax Computation Report — ${selectedFY}.pdf`}
                               meta={`Issued ${data.zakatReturn.filedDate} · 1.4 MB`}
                               status="Issued" statusColor="#6366F1"
                               onDownload={() => showToast('Downloading tax computation report...')}
                               onView={() => showToast('Opening tax computation report...')}
+                              delay={0.08}
                             />
                           </>
                         ) : (
@@ -799,9 +800,14 @@ export default function ClientReports() {
                         <Upload className="h-4 w-4" style={{ color: D.muted }} />
                         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.muted }}>Upload Supporting Documents</p>
                       </div>
-                      <div className="px-4 pb-4">
-                        <p className="text-xs pt-3 pb-1" style={{ color: D.muted }}>Submit signed Zakat declarations, ZATCA correspondence, or ownership schedules.</p>
-                        <UploadZone uploadKey="zakatSupportingDocs" label="Zakat Supporting Documentation" description="Signed declarations, ZATCA correspondence, ownership schedule" />
+                      <div>
+                        <DocListRow
+                          icon={Upload} iconColor="#F59E0B"
+                          label="Zakat Supporting Documentation"
+                          meta="Signed declarations, ZATCA correspondence, ownership schedule"
+                          uploadKey="zakatSupportingDocs"
+                          delay={0.04}
+                        />
                       </div>
                     </div>
                   </div>
@@ -817,9 +823,9 @@ export default function ClientReports() {
 
                     {data.draftAFS.available ? (
                       <>
-                        <DocCard
+                        <DocListRow
                           icon={FileSignature} iconColor="#F59E0B"
-                          filename={data.draftAFS.filename}
+                          label={data.draftAFS.filename}
                           meta={`${data.draftAFS.pages} pages · ${data.draftAFS.size}`}
                           status={signedOff || data.draftAFS.confirmed ? 'Confirmed' : 'Awaiting Review'}
                           statusColor={signedOff || data.draftAFS.confirmed ? '#10B981' : '#F59E0B'}
@@ -865,18 +871,26 @@ export default function ClientReports() {
                           </form>
                         </div>
 
-                        {/* Upload signed draft */}
-                        <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
-                          <p className="text-sm font-bold mb-0.5" style={{ color: 'var(--c-text)' }}>Upload Signed Draft</p>
-                          <p className="text-xs" style={{ color: D.muted }}>Upload the management-signed copy. Visible to the engagement team immediately.</p>
-                          <UploadZone uploadKey="signedDraftAFS" label="Signed Draft Financial Statements" description="Management-signed copy of the draft AFS" />
-                        </div>
-
-                        {/* Upload related documents */}
-                        <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
-                          <p className="text-sm font-bold mb-0.5" style={{ color: 'var(--c-text)' }}>Upload Supporting Documents</p>
-                          <p className="text-xs" style={{ color: D.muted }}>Any additional documents related to the draft review (e.g. management representation letter, board resolution).</p>
-                          <UploadZone uploadKey="draftSupportingDocs" label="Related Supporting Documents" description="Management rep letter, board resolution, etc." />
+                        {/* Upload rows */}
+                        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${D.border}` }}>
+                          <div className="flex items-center gap-2 px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${D.border}` }}>
+                            <Upload className="h-3.5 w-3.5" style={{ color: D.subtle }} />
+                            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Upload Signed Copies</p>
+                          </div>
+                          <DocListRow
+                            icon={FileSignature} iconColor="#10B981"
+                            label="Signed Draft Financial Statements"
+                            meta="Management-signed copy of the draft AFS"
+                            uploadKey="signedDraftAFS"
+                            delay={0.06}
+                          />
+                          <DocListRow
+                            icon={FileText} iconColor="#6366F1"
+                            label="Supporting Documents"
+                            meta="Management rep letter, board resolution, etc."
+                            uploadKey="draftSupportingDocs"
+                            delay={0.09}
+                          />
                         </div>
                       </>
                     ) : (
@@ -902,14 +916,17 @@ export default function ClientReports() {
 
                     {data.finalAFS.available ? (
                       <>
-                        <DocCard
-                          icon={CheckCircle2} iconColor="#E63946"
-                          filename={data.finalAFS.filename}
-                          meta={`Issued ${data.finalAFS.issuedDate} · ${data.finalAFS.size}`}
-                          status="Final" statusColor="#10B981"
-                          onDownload={() => showToast('Downloading final AFS...')}
-                          onView={() => showToast('Opening final AFS...')}
-                        />
+                        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${D.border}` }}>
+                          <DocListRow
+                            icon={CheckCircle2} iconColor="#E63946"
+                            label={data.finalAFS.filename}
+                            meta={`Issued ${data.finalAFS.issuedDate} · ${data.finalAFS.size}`}
+                            status="Final" statusColor="#10B981"
+                            onDownload={() => showToast('Downloading final AFS...')}
+                            onView={() => showToast('Opening final AFS...')}
+                            delay={0.04}
+                          />
+                        </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           {[
