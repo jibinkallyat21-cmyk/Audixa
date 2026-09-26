@@ -176,11 +176,25 @@ function QuickChatFloat() {
     if (e.target === e.currentTarget) setOpen(false)
   }
 
-  const panelW = maximised ? 'min(560px, 96vw)' : '380px'
-  const panelH = maximised ? 'min(680px, 88vh)' : '520px'
-  const panelBottom = maximised ? '50%' : '80px'
-  const panelRight  = maximised ? '50%' : '24px'
-  const transform   = maximised ? 'translate(50%, 50%)' : 'none'
+  const panelStyle = maximised
+    ? {
+        top: '50%',
+        left: '50%',
+        bottom: 'auto',
+        right: 'auto',
+        transform: 'translate(-50%, -50%)',
+        width: 'min(560px, 96vw)',
+        height: 'min(680px, 88vh)',
+      }
+    : {
+        bottom: '80px',
+        right: '24px',
+        top: 'auto',
+        left: 'auto',
+        transform: 'none',
+        width: '380px',
+        height: '520px',
+      }
 
   return (
     <>
@@ -205,13 +219,14 @@ function QuickChatFloat() {
       <AnimatePresence>
         {open && (
           <>
-            {/* Invisible backdrop — click outside closes */}
+            {/* Backdrop — dimmed when maximised, invisible when compact */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[48]"
+              style={{ background: maximised ? 'rgba(0,0,0,0.55)' : 'transparent' }}
               onClick={() => setOpen(false)}
             />
 
@@ -224,14 +239,10 @@ function QuickChatFloat() {
               transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
               className="fixed z-[49] flex flex-col overflow-hidden rounded-2xl shadow-2xl"
               style={{
-                width: panelW,
-                height: panelH,
-                bottom: panelBottom,
-                right: panelRight,
-                transform,
+                ...panelStyle,
                 background: '#0F1629',
                 border: `1px solid rgba(255,255,255,0.12)`,
-                transition: 'width 0.25s ease, height 0.25s ease, bottom 0.25s ease, right 0.25s ease, transform 0.25s ease',
+                transition: 'width 0.25s ease, height 0.25s ease, top 0.25s ease, left 0.25s ease, bottom 0.25s ease, right 0.25s ease, transform 0.25s ease',
               }}
               onClick={(e) => e.stopPropagation()}
             >
