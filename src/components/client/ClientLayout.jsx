@@ -61,9 +61,9 @@ function LiveClock({ isDark = true }) {
   const timeCls = isDark ? 'text-white/90' : 'text-slate-800'
   const dateCls = isDark ? 'text-white/35' : 'text-slate-400'
   return (
-    <div className="hidden lg:flex flex-col items-end gap-0.5 select-none">
+    <div className="hidden lg:flex flex-col items-end gap-0.5 select-none shrink-0">
       <span className={`text-sm font-bold tabular-nums tracking-wider ${timeCls}`}>{time}</span>
-      <span className={`text-[10px] tracking-wide ${dateCls}`}>{date}</span>
+      <span className={`text-[10px] tracking-wide whitespace-nowrap ${dateCls}`}>{date}</span>
     </div>
   )
 }
@@ -304,13 +304,13 @@ function ClientNameBadge() {
   const handleLeave = () => { rawX.set(0); rawY.set(0) }
 
   return (
-    <div style={{ perspective: '500px' }} className="hidden sm:block">
+    <div style={{ perspective: '500px' }} className="hidden sm:flex flex-1 min-w-0">
       <motion.div
         ref={ref}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
         style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        className="relative flex items-center gap-3 rounded-xl px-4 py-2 select-none overflow-hidden cursor-default"
+        className="relative flex flex-1 items-center gap-3 rounded-xl px-4 py-2 select-none overflow-hidden cursor-default"
         whileHover={{ scale: 1.03 }}
         transition={{ type: 'spring', stiffness: 300, damping: 22 }}
       >
@@ -418,18 +418,16 @@ function ClientHeader({ title }) {
       className="client-header flex h-[54px] w-full shrink-0 items-center gap-3 px-6"
       style={{ background: D.headerBg, borderBottom: `1px solid ${D.border}` }}
     >
-      {/* Left — hamburger + client name */}
+      {/* Left — hamburger + client name + page title + partner badge */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <HamburgerButton />
         <ClientNameBadge />
+        <h1 className={`hidden xl:block flex-shrink-0 truncate text-sm font-semibold ${txTitle}`}>{title}</h1>
+        <PartnerBadge />
       </div>
 
-      {/* Center — current page title */}
-      <h1 className={`flex-shrink-0 truncate text-center text-sm font-semibold ${txTitle}`}>{title}</h1>
-
       {/* Right — tools */}
-      <div className="flex flex-1 items-center justify-end gap-3">
-        <PartnerBadge />
+      <div className="flex shrink-0 items-center gap-3">
         <LiveClock isDark={isDark} />
         <FYDropdown isDark={isDark} />
         <ClientNotificationsPanel />
@@ -447,11 +445,14 @@ function ClientHeader({ title }) {
 function ClientLayoutInner({ title, children, fullHeight }) {
   return (
     <SidebarDrawerProvider>
-      <div className="flex min-h-screen w-full" style={{ background: D.pageBg }}>
+      <div className="flex h-screen w-full overflow-hidden" style={{ background: D.pageBg }}>
         <MobileSidebarWrap><ClientSidebar /></MobileSidebarWrap>
-        <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
+        <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
           <ClientHeader title={title} />
-          <main className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden flex flex-col' : ''}`} style={{ background: D.pageBg }}>
+          <main
+            className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`}
+            style={{ background: D.pageBg }}
+          >
             {children}
           </main>
         </div>
