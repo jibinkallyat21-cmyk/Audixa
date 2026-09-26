@@ -280,16 +280,6 @@ export default function Login() {
             }}>Qatar</span>
           </div>
 
-          {/* "Qatan" — duplicate error in JPEG, covered with plain dark patch */}
-          <div style={{
-            position: 'absolute',
-            left: '40.50%', top: '58.57%',
-            width: '5.75%', height: '3.81%',
-            background: 'rgba(4, 10, 28, 0.98)',
-            borderRadius: 24,
-            pointerEvents: 'none',
-            zIndex: 2,
-          }} />
 
           {/* ── LIVE AUDIT NETWORK status indicator ── */}
           <div style={{
