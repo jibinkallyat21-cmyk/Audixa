@@ -128,49 +128,140 @@ const UNDER_REVIEW_DOCS = [
 const EVENT_ICON = { emerald: CheckCircle2, red: AlertCircle, amber: AlertCircle, blue: FileText, navy: TrendingUp }
 const EVENT_COLOR = { emerald: '#10B981', red: '#E63946', amber: '#F59E0B', blue: '#3B82F6', navy: '#6366F1' }
 
-/* ─── Stat card ─── */
-function StatCard({ label, value, sub, accent, className = '' }) {
+const OUTSTANDING_ITEMS = [
+  { ref: 'BNK-03', name: 'Bank Statement October 2024' },
+  { ref: 'TAX-07', name: 'ZATCA VAT Return Q3 2024' },
+  { ref: 'PPE-10', name: 'Fixed Asset Register (Updated)' },
+  { ref: 'REV-08', name: 'Revenue Reconciliation Schedule' },
+  { ref: 'PAY-04', name: 'Payroll Summary September 2024' },
+  { ref: 'COG-14', name: 'Inventory Count Sheets (Sep)' },
+  { ref: 'BNK-04', name: 'Bank Statement November 2024' },
+]
+
+const OPEN_QUERIES = [
+  { ref: 'Q-041', name: 'Explain variance in COGS vs prior year' },
+  { ref: 'Q-038', name: 'Confirm related party transaction terms' },
+  { ref: 'Q-035', name: 'Provide aging analysis for receivables' },
+  { ref: 'Q-033', name: 'Clarify depreciation method change' },
+  { ref: 'Q-029', name: 'Upload signed lease agreement' },
+  { ref: 'Q-027', name: 'Reconcile revenue to ZATCA filings' },
+  { ref: 'Q-024', name: 'Confirm write-off approval authority' },
+  { ref: 'Q-021', name: 'Provide board resolution for dividend' },
+]
+
+/* ─── Expandable stat card ─── */
+function ExpandableStatCard({ label, value, sub, accent, items, linkTo }) {
   const count = useCountUp(value)
+  const [open, setOpen] = useState(false)
+  const hasItems = items?.length > 0
   return (
-    <div
-      className={`rounded-2xl p-5 ${className}`}
-      style={{ background: D.card, border: `1px solid ${D.border}` }}
-    >
-      <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>{label}</p>
-      <p className="mt-2 text-4xl font-black" style={{ color: accent }}>{count}</p>
-      {sub && <p className="mt-1 text-sm font-medium" style={{ color: D.muted }}>{sub}</p>}
+    <div className="rounded-2xl overflow-hidden flex flex-col" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+      <button
+        className="w-full text-left px-5 pt-5 pb-4 flex items-start justify-between gap-3 transition-colors"
+        style={{ background: 'transparent' }}
+        onClick={() => hasItems && setOpen(v => !v)}
+        onMouseEnter={e => hasItems && (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+      >
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>{label}</p>
+          <p className="mt-2 text-4xl font-black leading-none" style={{ color: accent }}>{count}</p>
+          {sub && <p className="mt-1.5 text-sm" style={{ color: D.muted }}>{sub}</p>}
+        </div>
+        {hasItems && (
+          <motion.div className="mt-1 shrink-0" animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.18 }}>
+            <ChevronRight className="h-4 w-4" style={{ color: D.muted }} />
+          </motion.div>
+        )}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && hasItems && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div style={{ borderTop: `1px solid ${D.border}` }}>
+              {items.slice(0, 6).map((item, i) => (
+                <Link key={i} to={linkTo}
+                  className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-white/5"
+                  style={{ borderBottom: i < Math.min(items.length, 6) - 1 ? `1px solid ${D.border}` : 'none' }}
+                >
+                  <span className="text-[10px] font-mono font-bold shrink-0 w-12 truncate" style={{ color: accent }}>{item.ref}</span>
+                  <span className="text-xs flex-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{item.name}</span>
+                  <ChevronRight className="h-3 w-3 shrink-0" style={{ color: D.muted }} />
+                </Link>
+              ))}
+              {items.length > 6 && (
+                <Link to={linkTo} className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-colors hover:opacity-80" style={{ color: accent }}>
+                  View all {items.length} items <ChevronRight className="h-3 w-3" />
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-/* ─── Requirements ring ─── */
-function PBCRing({ total, accepted, fy }) {
+/* ─── Requirements ring with optional On Hold slot ─── */
+function PBCRing({ total, accepted, fy, hold }) {
   const count = useCountUp(accepted)
   const pct = total > 0 ? Math.round((accepted / total) * 100) : 0
   const r = 38; const circ = 2 * Math.PI * r
   return (
-    <div
-      className="flex items-center gap-6 rounded-2xl p-5"
-      style={{ background: D.card, border: `1px solid ${D.border}` }}
-    >
-      <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
-        <svg viewBox="0 0 96 96" className="h-24 w-24 -rotate-90">
-          <circle cx="48" cy="48" r={r} fill="none" style={{ stroke: 'var(--c-track)' }} strokeWidth="8" />
-          <motion.circle
-            key={fy} cx="48" cy="48" r={r} fill="none"
-            stroke="#10B981" strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={circ}
-            initial={{ strokeDashoffset: circ }}
-            animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
-            transition={{ duration: 1.1, ease: 'easeOut' }}
-          />
-        </svg>
-        <span className="absolute text-lg font-black text-emerald">{pct}%</span>
-      </div>
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Requirements Completion</p>
-        <p className="mt-1 text-4xl font-black" style={{ color: 'var(--c-text)' }}>{count} <span className="text-xl font-medium" style={{ color: D.muted }}>/ {total}</span></p>
-        <p className="mt-1 text-sm" style={{ color: D.muted }}>requirements accepted</p>
+    <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+      {/* Left slot — On Hold callout */}
+      {hold?.active ? (
+        <div className="flex flex-col justify-center px-5 py-4 flex-1 min-w-0" style={{ borderRight: `1px solid rgba(245,158,11,0.2)`, background: 'rgba(245,158,11,0.05)' }}>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Lock className="h-3.5 w-3.5 text-amber shrink-0" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber">
+              {hold.reason === 'payment' ? 'Payment Pending' : hold.reason === 'no-response' ? 'No Response' : 'Awaiting Documents'}
+            </p>
+          </div>
+          <p className="text-xs leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            {hold.reason === 'payment'
+              ? 'Outstanding payment required to continue the engagement.'
+              : hold.reason === 'no-response'
+              ? 'Please respond to the open audit queries.'
+              : 'The following items are still required:'}
+          </p>
+          {hold.items?.slice(0, 3).map((item, i) => (
+            <div key={i} className="flex items-start gap-2 mb-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber shrink-0 mt-1.5" />
+              <span className="text-xs text-white/65 leading-snug">{item}</span>
+            </div>
+          ))}
+          <Link to="/client/documents" className="flex items-center gap-1 text-[11px] font-semibold text-amber mt-3 hover:opacity-75 transition-opacity">
+            View Requirement List <ChevronRight className="h-3 w-3" />
+          </Link>
+        </div>
+      ) : (
+        <div className="flex-1" />
+      )}
+      {/* Ring + count */}
+      <div className="flex items-center gap-6 px-5 py-5 shrink-0">
+        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
+          <svg viewBox="0 0 96 96" className="h-24 w-24 -rotate-90">
+            <circle cx="48" cy="48" r={r} fill="none" style={{ stroke: 'var(--c-track)' }} strokeWidth="8" />
+            <motion.circle
+              key={fy} cx="48" cy="48" r={r} fill="none"
+              stroke="#10B981" strokeWidth="8" strokeLinecap="round"
+              strokeDasharray={circ}
+              initial={{ strokeDashoffset: circ }}
+              animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
+              transition={{ duration: 1.1, ease: 'easeOut' }}
+            />
+          </svg>
+          <span className="absolute text-lg font-black text-emerald">{pct}%</span>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Requirements</p>
+          <p className="mt-1 text-4xl font-black" style={{ color: 'var(--c-text)' }}>{count} <span className="text-xl font-medium" style={{ color: D.muted }}>/ {total}</span></p>
+          <p className="mt-1 text-sm" style={{ color: D.muted }}>accepted</p>
+        </div>
       </div>
     </div>
   )
@@ -531,48 +622,48 @@ export default function ClientDashboard() {
                   <LifecycleStepper stages={fyData.stages} tooltips={STAGE_TOOLTIPS} />
                 </div>
 
-                {/* Compact stats strip */}
-                <div className="rounded-2xl px-5 py-4 flex items-center gap-5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-                  {/* Completion ring */}
-                  <div className="shrink-0 flex flex-col items-center gap-1">
-                    <div className="relative h-14 w-14">
-                      <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
-                        <circle cx="28" cy="28" r="23" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
-                        <circle cx="28" cy="28" r="23" fill="none" stroke="#10B981" strokeWidth="5"
-                          strokeDasharray={`${2 * Math.PI * 23}`}
-                          strokeDashoffset={`${2 * Math.PI * 23 * (1 - fyData.stats.documentsAccepted / fyData.stats.totalRequirements)}`}
-                          strokeLinecap="round" />
-                      </svg>
-                      <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-white">
-                        {Math.round((fyData.stats.documentsAccepted / fyData.stats.totalRequirements) * 100)}%
-                      </span>
-                    </div>
-                    <p className="text-[9px] uppercase tracking-widest font-semibold" style={{ color: D.subtle }}>Complete</p>
-                  </div>
+                {/* Ring card with optional On Hold slot */}
+                <PBCRing
+                  total={fyData.stats.totalRequirements}
+                  accepted={fyData.stats.documentsAccepted}
+                  fy={selectedFY}
+                  hold={selectedFY === 'FY2024' ? clientPortal.onHold : null}
+                />
 
-                  <div className="h-10 w-px shrink-0" style={{ background: D.border }} />
-
-                  {/* Four stat tiles */}
-                  {[
-                    { label: 'Accepted', value: fyData.stats.documentsAccepted, color: '#10B981', sub: `of ${fyData.stats.totalRequirements}`, onClick: null },
-                    { label: 'Outstanding', value: fyData.stats.pendingAction, color: '#F59E0B', sub: fyData.stats.pendingAction > 0 ? 'Action needed' : 'All clear', onClick: null },
-                    { label: 'Audit Queries', value: fyData.stats.openQueries, color: '#E63946', sub: 'Open', onClick: null },
-                    { label: 'Under Review', value: fyData.stats.underVerification, color: '#818CF8', sub: 'By audit team', onClick: fyData.stats.underVerification > 0 ? () => setUnderReviewModal(true) : null },
-                  ].map((s) => (
-                    <button
-                      key={s.label}
-                      onClick={s.onClick || undefined}
-                      disabled={!s.onClick}
-                      className="flex-1 min-w-0 text-left rounded-xl px-3 py-2.5 transition-colors"
-                      style={{ background: s.onClick ? 'rgba(255,255,255,0.03)' : 'transparent', cursor: s.onClick ? 'pointer' : 'default' }}
-                      onMouseEnter={e => s.onClick && (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-                      onMouseLeave={e => s.onClick && (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                    >
-                      <p className="text-[10px] font-semibold uppercase tracking-widest truncate" style={{ color: D.subtle }}>{s.label}</p>
-                      <p className="text-2xl font-black leading-tight" style={{ color: s.color }}>{s.value}</p>
-                      <p className="text-[10px] mt-0.5 truncate" style={{ color: D.muted }}>{s.sub}{s.onClick && <span style={{ color: s.color }}> · tap</span>}</p>
-                    </button>
-                  ))}
+                {/* 2×2 expandable stat grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <ExpandableStatCard
+                    label="Accepted"
+                    value={fyData.stats.documentsAccepted}
+                    sub={`of ${fyData.stats.totalRequirements} requirements`}
+                    accent="#10B981"
+                    items={null}
+                    linkTo="/client/documents"
+                  />
+                  <ExpandableStatCard
+                    label="Outstanding"
+                    value={fyData.stats.pendingAction}
+                    sub={fyData.stats.pendingAction > 0 ? 'Action needed' : 'All clear'}
+                    accent="#F59E0B"
+                    items={OUTSTANDING_ITEMS.slice(0, fyData.stats.pendingAction)}
+                    linkTo="/client/documents"
+                  />
+                  <ExpandableStatCard
+                    label="Under Review"
+                    value={fyData.stats.underVerification}
+                    sub="By audit team"
+                    accent="#818CF8"
+                    items={UNDER_REVIEW_DOCS.slice(0, fyData.stats.underVerification).map(d => ({ ref: d.ref, name: d.name }))}
+                    linkTo="/client/documents"
+                  />
+                  <ExpandableStatCard
+                    label="Audit Queries"
+                    value={fyData.stats.openQueries}
+                    sub="Open queries"
+                    accent="#E63946"
+                    items={OPEN_QUERIES.slice(0, fyData.stats.openQueries)}
+                    linkTo="/client/queries"
+                  />
                 </div>
 
                 {/* Escalate Issue */}
@@ -594,56 +685,6 @@ export default function ClientDashboard() {
 
           {/* ── RIGHT COLUMN ── */}
           <div className="flex w-72 shrink-0 flex-col gap-4 overflow-y-auto">
-
-            {/* On Hold card — right column, only when active */}
-            {selectedFY === 'FY2024' && clientPortal.onHold?.active && (() => {
-              const hold = clientPortal.onHold
-              const isPayment = hold.reason === 'payment'
-              const isNoResponse = hold.reason === 'no-response'
-              const bg    = isPayment ? 'rgba(230,57,70,0.08)'   : 'rgba(245,158,11,0.08)'
-              const border= isPayment ? 'rgba(230,57,70,0.28)'   : 'rgba(245,158,11,0.28)'
-              const color = isPayment ? '#F87171'                 : '#FCD34D'
-              return (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl p-4 shrink-0"
-                  style={{ background: bg, border: `1px solid ${border}` }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Lock className="h-3.5 w-3.5 shrink-0" style={{ color }} />
-                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color }}>
-                      {isPayment ? 'Payment Pending' : isNoResponse ? 'No Response' : 'Awaiting Documents'}
-                    </p>
-                  </div>
-                  <p className="text-xs mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                    {isPayment
-                      ? 'Your engagement is on hold pending outstanding payment. Please contact your auditor to proceed.'
-                      : isNoResponse
-                      ? 'No response has been received to the outstanding audit queries. Please check and respond.'
-                      : 'The following documents are still required before the engagement can continue:'}
-                  </p>
-                  {!isPayment && hold.items?.length > 0 && (
-                    <ul className="mb-3 space-y-1">
-                      {hold.items.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                          <span className="mt-0.5 shrink-0 h-1.5 w-1.5 rounded-full" style={{ background: color, marginTop: 5 }} />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {!isPayment && (
-                    <Link
-                      to="/client/documents"
-                      className="flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
-                      style={{ color }}
-                    >
-                      View Requirement List <ChevronRight className="h-3 w-3" />
-                    </Link>
-                  )}
-                </motion.div>
-              )
-            })()}
 
             {/* Assigned Audit Team — top of right column */}
             <div className="rounded-2xl p-4 shrink-0" style={{ background: D.card, border: `1px solid ${D.border}` }}>
