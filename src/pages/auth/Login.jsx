@@ -13,7 +13,6 @@ const DEMO_ROLES = ROLE_ORDER.map((id) => ({
 }))
 
 const EASE = [0.16, 1, 0.3, 1]
-const CLIENT_GREETING_KEY = 'audit360_client_greeted_v3'
 
 function FloatingInput({ id, label, type = 'text', value, onChange, trailing, isDark }) {
   const [focused, setFocused] = useState(false)
@@ -108,17 +107,11 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault()
     const role = DEMO_ROLES.find((r) => r.value === demoRole) || DEMO_ROLES[0]
-    if (role.value === 'client') {
-      try { sessionStorage.removeItem(CLIENT_GREETING_KEY) } catch {}
-    }
     navigate(role.route)
   }
 
   const handleEnterDemo = () => {
     const role = DEMO_ROLES.find((r) => r.value === demoRole) || DEMO_ROLES[0]
-    if (role.value === 'client') {
-      try { sessionStorage.removeItem(CLIENT_GREETING_KEY) } catch {}
-    }
     navigate(role.route)
   }
 

@@ -24,7 +24,7 @@ export default function ClientGreeting({ name = 'Karim Rahman', company = 'Kingd
 
   useEffect(() => {
     if (!visible) return
-    const t = setTimeout(dismiss, 4200)
+    const t = setTimeout(dismiss, 2700)
     return () => clearTimeout(t)
   }, [visible])
 
@@ -32,7 +32,7 @@ export default function ClientGreeting({ name = 'Karim Rahman', company = 'Kingd
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.04, filter: 'blur(4px)' }}
           transition={{ duration: 0.55 }}
@@ -132,7 +132,7 @@ export default function ClientGreeting({ name = 'Karim Rahman', company = 'Kingd
               className="h-full rounded-full bg-brand"
               initial={{ width: '0%' }}
               animate={{ width: '100%' }}
-              transition={{ duration: 4.0, ease: 'linear' }}
+              transition={{ duration: 2.5, ease: 'linear' }}
             />
           </div>
 

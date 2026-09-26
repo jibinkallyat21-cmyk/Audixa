@@ -7,7 +7,6 @@ import {
   AlertTriangle, ChevronUp, Clock, Eye,
 } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
-import ClientGreeting from '../../components/client/ClientGreeting'
 import PageTransition from '../../components/shared/PageTransition'
 import LifecycleStepper from '../../components/shared/LifecycleStepper'
 import { clientPortal } from '../../data/sampleData'
@@ -52,7 +51,7 @@ function getFYData(fy) {
     team: AUDIT_TEAM_FY2023,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
+      { id: 'tb-acceptance', label: 'TB Acceptance', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
       { id: 'draft', label: 'Draft FS Review', status: 'completed' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
@@ -66,7 +65,7 @@ function getFYData(fy) {
     team: AUDIT_TEAM_FY2022,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
+      { id: 'tb-acceptance', label: 'TB Acceptance', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
       { id: 'draft', label: 'Draft FS Review', status: 'completed' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
@@ -80,7 +79,7 @@ function getFYData(fy) {
     team: AUDIT_TEAM_FY2024,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'reqs', label: 'Requirements Submission', status: 'active' },
+      { id: 'tb-acceptance', label: 'TB Acceptance', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'active' },
       { id: 'draft', label: 'Draft FS Review', status: 'upcoming' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'upcoming' },
@@ -91,24 +90,24 @@ function getFYData(fy) {
 
 const STAGE_TOOLTIPS = {
   'Engagement Acceptance': 'Engagement letter issued and agreed; audit terms confirmed.',
-  'Requirements Submission': 'Client submits required documents — audit field work may begin in parallel as documents are received.',
-  'Audit Field Work': 'Audit team performs substantive procedures and testing.',
+  'TB Acceptance': 'Trial balance submitted in prescribed format and formally accepted by the audit team as fit for audit procedures.',
+  'Audit Field Work': 'Audit team performs substantive procedures and analytical testing.',
   'Draft FS Review': 'Client reviews draft financial statements for accuracy.',
   'Sign-off & Completion': 'Partner signs off; audit report finalised.',
   'Regulatory Filing': 'Audited financials filed with ZATCA / MISA.',
 }
 
 const AUDIT_TEAM_FY2024 = [
-  { initials: 'SR', name: 'Sana Rashid',   role: 'Audit Lead',       online: true },
-  { initials: 'LK', name: 'Layla Khalid',  role: 'Audit Associate',  online: false },
+  { initials: 'SR', name: 'Sana Rashid',    role: 'Audit Lead',      online: true,  fileHandler: false },
+  { initials: 'LK', name: 'Layla Khalid',   role: 'Audit Associate', online: false, fileHandler: true  },
 ]
 const AUDIT_TEAM_FY2023 = [
-  { initials: 'AH', name: 'Ali Hussain',   role: 'Audit Lead',       online: false },
-  { initials: 'FO', name: 'Fatima Omar',   role: 'Audit Associate',  online: false },
+  { initials: 'AH', name: 'Ali Hussain',    role: 'Audit Lead',      online: false, fileHandler: false },
+  { initials: 'FO', name: 'Fatima Omar',    role: 'Audit Associate', online: false, fileHandler: true  },
 ]
 const AUDIT_TEAM_FY2022 = [
-  { initials: 'KM', name: 'Khalid Mansour', role: 'Audit Lead',       online: false },
-  { initials: 'NB', name: 'Noura Bilal',    role: 'Audit Associate',  online: false },
+  { initials: 'KM', name: 'Khalid Mansour', role: 'Audit Lead',      online: false, fileHandler: false },
+  { initials: 'NB', name: 'Noura Bilal',    role: 'Audit Associate', online: false, fileHandler: true  },
 ]
 
 const UNDER_REVIEW_DOCS = [
@@ -128,49 +127,136 @@ const UNDER_REVIEW_DOCS = [
 const EVENT_ICON = { emerald: CheckCircle2, red: AlertCircle, amber: AlertCircle, blue: FileText, navy: TrendingUp }
 const EVENT_COLOR = { emerald: '#10B981', red: '#E63946', amber: '#F59E0B', blue: '#3B82F6', navy: '#6366F1' }
 
-/* ─── Stat card ─── */
-function StatCard({ label, value, sub, accent, className = '' }) {
+const OUTSTANDING_ITEMS = [
+  { ref: 'BNK-03', name: 'Bank Statement October 2024' },
+  { ref: 'TAX-07', name: 'ZATCA VAT Return Q3 2024' },
+  { ref: 'PPE-10', name: 'Fixed Asset Register (Updated)' },
+  { ref: 'REV-08', name: 'Revenue Reconciliation Schedule' },
+  { ref: 'PAY-04', name: 'Payroll Summary September 2024' },
+  { ref: 'COG-14', name: 'Inventory Count Sheets (Sep)' },
+  { ref: 'BNK-04', name: 'Bank Statement November 2024' },
+]
+
+const OPEN_QUERIES = [
+  { ref: 'Q-041', name: 'Explain variance in COGS vs prior year' },
+  { ref: 'Q-038', name: 'Confirm related party transaction terms' },
+  { ref: 'Q-035', name: 'Provide aging analysis for receivables' },
+  { ref: 'Q-033', name: 'Clarify depreciation method change' },
+  { ref: 'Q-029', name: 'Upload signed lease agreement' },
+  { ref: 'Q-027', name: 'Reconcile revenue to ZATCA filings' },
+  { ref: 'Q-024', name: 'Confirm write-off approval authority' },
+  { ref: 'Q-021', name: 'Provide board resolution for dividend' },
+]
+
+/* ─── Expandable stat card ─── */
+function ExpandableStatCard({ label, value, sub, accent, items, linkTo }) {
   const count = useCountUp(value)
+  const [open, setOpen] = useState(false)
+  const hasItems = items?.length > 0
   return (
-    <div
-      className={`rounded-2xl p-5 ${className}`}
-      style={{ background: D.card, border: `1px solid ${D.border}` }}
-    >
-      <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>{label}</p>
-      <p className="mt-2 text-4xl font-black" style={{ color: accent }}>{count}</p>
-      {sub && <p className="mt-1 text-sm font-medium" style={{ color: D.muted }}>{sub}</p>}
+    <div className="rounded-2xl overflow-hidden flex flex-col" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+      <button
+        className="w-full text-left px-5 pt-5 pb-4 flex items-start justify-between gap-3 transition-colors"
+        style={{ background: 'transparent' }}
+        onClick={() => hasItems && setOpen(v => !v)}
+        onMouseEnter={e => hasItems && (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+      >
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>{label}</p>
+          <p className="mt-2 text-4xl font-black leading-none" style={{ color: accent }}>{count}</p>
+          {sub && <p className="mt-1.5 text-sm" style={{ color: D.muted }}>{sub}</p>}
+        </div>
+        {hasItems && (
+          <motion.div className="mt-1 shrink-0" animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.18 }}>
+            <ChevronRight className="h-4 w-4" style={{ color: D.muted }} />
+          </motion.div>
+        )}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && hasItems && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div style={{ borderTop: `1px solid ${D.border}` }}>
+              {items.slice(0, 6).map((item, i) => (
+                <Link key={i} to={linkTo}
+                  className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-white/5"
+                  style={{ borderBottom: i < Math.min(items.length, 6) - 1 ? `1px solid ${D.border}` : 'none' }}
+                >
+                  <span className="text-[10px] font-mono font-bold shrink-0 w-12 truncate" style={{ color: accent }}>{item.ref}</span>
+                  <span className="text-xs flex-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{item.name}</span>
+                  <ChevronRight className="h-3 w-3 shrink-0" style={{ color: D.muted }} />
+                </Link>
+              ))}
+              {items.length > 6 && (
+                <Link to={linkTo} className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-colors hover:opacity-80" style={{ color: accent }}>
+                  View all {items.length} items <ChevronRight className="h-3 w-3" />
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-/* ─── Requirements ring ─── */
-function PBCRing({ total, accepted, fy }) {
+/* ─── Requirements ring with optional On Hold slot ─── */
+function PBCRing({ total, accepted, fy, hold }) {
   const count = useCountUp(accepted)
   const pct = total > 0 ? Math.round((accepted / total) * 100) : 0
   const r = 38; const circ = 2 * Math.PI * r
   return (
-    <div
-      className="flex items-center gap-6 rounded-2xl p-5"
-      style={{ background: D.card, border: `1px solid ${D.border}` }}
-    >
-      <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
-        <svg viewBox="0 0 96 96" className="h-24 w-24 -rotate-90">
-          <circle cx="48" cy="48" r={r} fill="none" style={{ stroke: 'var(--c-track)' }} strokeWidth="8" />
-          <motion.circle
-            key={fy} cx="48" cy="48" r={r} fill="none"
-            stroke="#10B981" strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={circ}
-            initial={{ strokeDashoffset: circ }}
-            animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
-            transition={{ duration: 1.1, ease: 'easeOut' }}
-          />
-        </svg>
-        <span className="absolute text-lg font-black text-emerald">{pct}%</span>
-      </div>
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Requirements Completion</p>
-        <p className="mt-1 text-4xl font-black" style={{ color: 'var(--c-text)' }}>{count} <span className="text-xl font-medium" style={{ color: D.muted }}>/ {total}</span></p>
-        <p className="mt-1 text-sm" style={{ color: D.muted }}>requirements accepted</p>
+    <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+      {/* Left slot — On Hold callout */}
+      {hold?.active ? (
+        <div className="flex flex-col justify-center px-5 py-4 flex-1 min-w-0" style={{ borderRight: `1px solid ${hold.reason === 'payment' ? 'rgba(230,57,70,0.2)' : 'rgba(245,158,11,0.2)'}`, background: hold.reason === 'payment' ? 'rgba(230,57,70,0.06)' : 'rgba(245,158,11,0.05)' }}>
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <Lock className="h-3.5 w-3.5 shrink-0" style={{ color: hold.reason === 'payment' ? '#F87171' : '#FCD34D' }} />
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: hold.reason === 'payment' ? '#F87171' : '#FCD34D' }}>On Hold</p>
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            {hold.reason === 'payment'
+              ? 'Your file is on hold due to payment.'
+              : hold.reason === 'no-response'
+              ? 'Your file is on hold — no response & documents are pending.'
+              : 'Your file is on hold — documents are pending.'}
+          </p>
+          <Link
+            to={hold.reason === 'no-response' ? '/client/queries' : '/client/documents'}
+            className="flex items-center gap-1 text-[11px] font-semibold mt-3 hover:opacity-75 transition-opacity"
+            style={{ color: hold.reason === 'payment' ? '#F87171' : '#FCD34D' }}
+          >
+            View full pending list <ChevronRight className="h-3 w-3" />
+          </Link>
+        </div>
+      ) : (
+        <div className="flex-1" />
+      )}
+      {/* Ring + count */}
+      <div className="flex items-center gap-6 px-5 py-5 shrink-0">
+        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
+          <svg viewBox="0 0 96 96" className="h-24 w-24 -rotate-90">
+            <circle cx="48" cy="48" r={r} fill="none" style={{ stroke: 'var(--c-track)' }} strokeWidth="8" />
+            <motion.circle
+              key={fy} cx="48" cy="48" r={r} fill="none"
+              stroke="#10B981" strokeWidth="8" strokeLinecap="round"
+              strokeDasharray={circ}
+              initial={{ strokeDashoffset: circ }}
+              animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
+              transition={{ duration: 1.1, ease: 'easeOut' }}
+            />
+          </svg>
+          <span className="absolute text-lg font-black text-emerald">{pct}%</span>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Requirements</p>
+          <p className="mt-1 text-4xl font-black" style={{ color: 'var(--c-text)' }}>{count} <span className="text-xl font-medium" style={{ color: D.muted }}>/ {total}</span></p>
+          <p className="mt-1 text-sm" style={{ color: D.muted }}>accepted</p>
+        </div>
       </div>
     </div>
   )
@@ -225,7 +311,7 @@ function UnderReviewModal({ docs, onClose }) {
 }
 
 /* ─── Request Meeting modal ─── */
-function RequestMeetingModal({ onClose }) {
+function RequestMeetingModal({ onClose, onRecord }) {
   const showToast = useToast()
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
@@ -243,6 +329,7 @@ function RequestMeetingModal({ onClose }) {
     e.preventDefault()
     if (!date || !topic) return
     showToast('Meeting request submitted — your engagement team will confirm shortly')
+    onRecord?.(`Meeting requested: "${topic}" on ${date}${time ? ' at ' + time : ''}`, 'blue')
     onClose()
   }
 
@@ -322,7 +409,7 @@ const ESCALATION_LEVELS = [
   { level: 4, label: 'FO Manager', description: 'Executive escalation. Notifies both FO Manager and management portal immediately. Available after 72 hours.', locked: true, waitHours: 72, managementVisible: true },
 ]
 
-function EscalationModal({ onClose }) {
+function EscalationModal({ onClose, onRecord }) {
   const showToast = useToast()
   const [selectedLevel, setSelectedLevel] = useState(null)
   const [issue, setIssue] = useState('')
@@ -333,6 +420,7 @@ function EscalationModal({ onClose }) {
     setSubmitted(true)
     setTimeout(() => {
       showToast(`Escalation submitted to ${selectedLevel.label} — your team has been notified`)
+      onRecord?.(`Issue escalated to ${selectedLevel.label}: "${issue.trim().slice(0, 60)}${issue.length > 60 ? '…' : ''}"`, 'amber')
       onClose()
     }, 1200)
   }
@@ -446,6 +534,55 @@ function EscalationModal({ onClose }) {
   )
 }
 
+/* ─── Auto-scrolling activity ticker ─── */
+function ActivityTicker({ events }) {
+  const trackRef = useRef(null)
+  const posRef   = useRef(0)
+  const rafRef   = useRef(null)
+
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    const SPEED = 0.4 // px per frame
+    const step = () => {
+      posRef.current += SPEED
+      const half = track.scrollHeight / 2
+      if (posRef.current >= half) posRef.current = 0
+      track.style.transform = `translateY(-${posRef.current}px)`
+      rafRef.current = requestAnimationFrame(step)
+    }
+    rafRef.current = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [events])
+
+  const rows = [...events, ...events] // duplicate for seamless loop
+
+  return (
+    <div className="relative flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+      {/* fade edges */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6" style={{ background: 'linear-gradient(to bottom, var(--c-card), transparent)' }} />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6" style={{ background: 'linear-gradient(to top, var(--c-card), transparent)' }} />
+      <div ref={trackRef} className="will-change-transform">
+        {rows.map((event, i) => {
+          const Icon = EVENT_ICON[event.icon] || FileText
+          const color = EVENT_COLOR[event.icon] || '#6366F1'
+          return (
+            <div key={`${event.id}-${i}`} className="flex items-start gap-3 px-4 py-2.5" style={{ borderBottom: 'rgba(255,255,255,0.04) 1px solid' }}>
+              <span className="mt-0.5 shrink-0" style={{ color }}>
+                <Icon className="h-3.5 w-3.5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-white/80 leading-snug">{event.description}</p>
+                <p className="mt-0.5 text-[10px]" style={{ color: 'var(--c-subtle)' }}>{event.timestamp}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /* ─── Main Dashboard ─── */
 export default function ClientDashboard() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
@@ -457,9 +594,14 @@ export default function ClientDashboard() {
   const [escalationModal, setEscalationModal] = useState(false)
   const [underReviewModal, setUnderReviewModal] = useState(false)
 
+  const recordEvent = (description, icon = 'blue') => {
+    const now = new Date()
+    const timestamp = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ' · Just now'
+    setLiveEvents(prev => [{ id: `live-${Date.now()}`, description, icon, timestamp, section: 'Milestones' }, ...prev])
+  }
+
   return (
     <ClientLayout title="Engagement Dashboard" fullHeight>
-      <ClientGreeting name="Karim Rahman" company="Kingdom Retail Holdings LLC" />
       <PageTransition className="flex-1 min-h-0 h-full">
         <div className="flex h-full gap-5">
 
@@ -468,87 +610,55 @@ export default function ClientDashboard() {
             <AnimatePresence mode="wait">
               <motion.div key={selectedFY} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="flex flex-col gap-4">
 
-                {/* Header strip */}
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-3.5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Engagement Dashboard</p>
-                    <p className="mt-0.5 text-lg font-bold text-white">{clientPortal.clientName}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="rounded-full px-3 py-1 text-xs font-mono font-semibold text-white/50" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${D.border}` }}>
-                      {fyData.engagementRef}
-                    </span>
-                    <div className="relative">
-                      <select
-                        value={selectedFY}
-                        onChange={(e) => setSelectedFY(e.target.value)}
-                        className="appearance-none cursor-pointer rounded-lg py-1.5 pl-3 pr-7 text-xs font-bold text-white outline-none"
-                        style={{ background: 'rgba(230,57,70,0.15)', border: '1px solid rgba(230,57,70,0.3)' }}
-                      >
-                        {availableFYs.map((fy) => (
-                          <option key={fy} value={fy} style={{ background: '#0F1629' }}>{fy}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* On Hold banner */}
-                {selectedFY === 'FY2024' && clientPortal.onHold?.active && (
-                  <div className="flex items-center gap-4 rounded-2xl px-4 py-3" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
-                    <p className="text-sm font-medium text-amber">{clientPortal.onHold.message}</p>
-                    <Lock className="ml-auto h-4 w-4 shrink-0 text-amber/60" />
-                  </div>
-                )}
-
                 {/* Lifecycle stepper */}
                 <div className="rounded-2xl px-5 py-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Engagement Phase</p>
                   <LifecycleStepper stages={fyData.stages} tooltips={STAGE_TOOLTIPS} />
                 </div>
 
-                {/* Stats */}
-                <PBCRing total={fyData.stats.totalRequirements} accepted={fyData.stats.documentsAccepted} fy={selectedFY} />
+                {/* Ring card with optional On Hold slot */}
+                <PBCRing
+                  total={fyData.stats.totalRequirements}
+                  accepted={fyData.stats.documentsAccepted}
+                  fy={selectedFY}
+                  hold={selectedFY === 'FY2024' ? clientPortal.onHold : null}
+                />
 
-                <div className="grid grid-cols-3 gap-3">
-                  <StatCard label="Accepted Requirements" value={fyData.stats.documentsAccepted} accent="#10B981" sub="Received & verified" />
-                  <StatCard label="Outstanding Items" value={fyData.stats.pendingAction} accent="#F59E0B" sub={fyData.stats.pendingAction > 0 ? 'Action required' : 'None outstanding'} />
-                  <StatCard label="Open Audit Queries" value={fyData.stats.openQueries} accent="#E63946" sub="Pending your response" />
+                {/* 2×2 expandable stat grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <ExpandableStatCard
+                    label="Accepted"
+                    value={fyData.stats.documentsAccepted}
+                    sub={`of ${fyData.stats.totalRequirements} requirements`}
+                    accent="#10B981"
+                    items={null}
+                    linkTo="/client/documents"
+                  />
+                  <ExpandableStatCard
+                    label="Outstanding"
+                    value={fyData.stats.pendingAction}
+                    sub={fyData.stats.pendingAction > 0 ? 'Action needed' : 'All clear'}
+                    accent="#F59E0B"
+                    items={OUTSTANDING_ITEMS.slice(0, fyData.stats.pendingAction)}
+                    linkTo="/client/documents"
+                  />
+                  <ExpandableStatCard
+                    label="Under Review"
+                    value={fyData.stats.underVerification}
+                    sub="By audit team"
+                    accent="#818CF8"
+                    items={UNDER_REVIEW_DOCS.slice(0, fyData.stats.underVerification).map(d => ({ ref: d.ref, name: d.name }))}
+                    linkTo="/client/documents"
+                  />
+                  <ExpandableStatCard
+                    label="Audit Queries"
+                    value={fyData.stats.openQueries}
+                    sub="Open queries"
+                    accent="#E63946"
+                    items={OPEN_QUERIES.slice(0, fyData.stats.openQueries)}
+                    linkTo="/client/queries"
+                  />
                 </div>
-
-                {/* Documents Under Review — clickable */}
-                <motion.button
-                  whileHover={{ scale: 1.005 }}
-                  onClick={() => fyData.stats.underVerification > 0 && setUnderReviewModal(true)}
-                  className="flex w-full items-center justify-between rounded-2xl px-5 py-4 text-left"
-                  style={{ background: D.card, border: `1px solid ${D.border}`, cursor: fyData.stats.underVerification > 0 ? 'pointer' : 'default' }}
-                >
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Documents Under Review</p>
-                    <p className="mt-1 text-4xl font-black text-indigo-400">{fyData.stats.underVerification}</p>
-                    <p className="mt-1 text-sm" style={{ color: D.muted }}>
-                      Being verified by the audit team
-                      {fyData.stats.underVerification > 0 && <span className="ml-2 text-indigo-400 text-xs font-semibold">· Click to view list</span>}
-                    </p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                    <Eye className="h-6 w-6 text-indigo-400" />
-                  </div>
-                </motion.button>
-
-                {/* Request Meeting */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  onClick={() => setMeetingModal(true)}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold text-white transition-colors"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${D.border}` }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.09)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                >
-                  <Calendar className="h-4 w-4 text-brand" />
-                  Request a Meeting with Your Engagement Team
-                </motion.button>
 
                 {/* Escalate Issue */}
                 <motion.button
@@ -570,23 +680,7 @@ export default function ClientDashboard() {
           {/* ── RIGHT COLUMN ── */}
           <div className="flex w-72 shrink-0 flex-col gap-4 overflow-y-auto">
 
-            {/* Engagement Partner — top of right column */}
-            <div className="rounded-2xl p-4 shrink-0" style={{ background: 'rgba(230,57,70,0.07)', border: '1px solid rgba(230,57,70,0.18)' }}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-brand/70 mb-2">Engagement Partner</p>
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white bg-brand/20 shrink-0">{fyData.partner.initials}</div>
-                <div>
-                  <p className="text-sm font-bold text-white">{fyData.partner.firm}</p>
-                  <p className="text-xs" style={{ color: D.muted }}>{fyData.partner.name}</p>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-white/40" style={{ background: 'rgba(255,255,255,0.06)' }}>Statutory Audit</span>
-                    <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-emerald" style={{ background: 'rgba(16,185,129,0.12)' }}>Active</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Assigned Engagement Team */}
+            {/* Assigned Audit Team — top of right column */}
             <div className="rounded-2xl p-4 shrink-0" style={{ background: D.card, border: `1px solid ${D.border}` }}>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Assigned Audit Team</p>
@@ -594,16 +688,21 @@ export default function ClientDashboard() {
               </div>
               <div className="space-y-2">
                 {fyData.team.map((m) => (
-                  <div key={m.initials} className="flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  <div key={m.initials} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors" style={{ background: 'rgba(255,255,255,0.03)', border: m.fileHandler ? '1px solid rgba(99,102,241,0.2)' : '1px solid transparent' }}>
                     <div className="relative shrink-0">
-                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: 'rgba(255,255,255,0.1)' }}>{m.initials}</div>
+                      <div className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: m.fileHandler ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.1)' }}>{m.initials}</div>
                       <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2" style={{ background: m.online ? '#10B981' : '#475569', borderColor: D.card }} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-white/90">{m.name}</p>
                       <p className="truncate text-[10px]" style={{ color: D.subtle }}>{m.role}</p>
+                      {m.fileHandler && (
+                        <span className="mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold" style={{ background: 'rgba(99,102,241,0.15)', color: '#818CF8' }}>
+                          Assigned to your file
+                        </span>
+                      )}
                     </div>
-                    <span className="text-[9px] font-semibold" style={{ color: m.online ? '#10B981' : D.subtle }}>
+                    <span className="text-[9px] font-semibold shrink-0" style={{ color: m.online ? '#10B981' : D.subtle }}>
                       {m.online ? 'Online' : 'Offline'}
                     </span>
                   </div>
@@ -611,29 +710,32 @@ export default function ClientDashboard() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Request a Meeting — between team and activity */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setMeetingModal(true)}
+              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white transition-colors"
+              style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}
+            >
+              <Calendar className="h-4 w-4 text-indigo-400" />
+              Request a Meeting
+            </motion.button>
+
+            {/* Recent Activity — auto-scrolling ticker */}
             <div className="flex min-h-0 flex-1 flex-col rounded-2xl overflow-hidden" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-              <div className="px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${D.border}` }}>
+              <div className="px-4 py-3 shrink-0 flex items-center justify-between" style={{ borderBottom: `1px solid ${D.border}` }}>
                 <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Recent Activity</p>
+                {liveEvents.length > 0 && (
+                  <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold text-emerald" style={{ background: 'rgba(16,185,129,0.12)' }}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald animate-pulse inline-block" />
+                    Live
+                  </span>
+                )}
               </div>
-              <div className="flex-1 overflow-y-auto px-4 py-2">
-                {recentEvents.map((event) => {
-                  const Icon = EVENT_ICON[event.icon] || FileText
-                  const color = EVENT_COLOR[event.icon] || '#6366F1'
-                  return (
-                    <div key={event.id} className="flex items-start gap-3 py-2.5" style={{ borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
-                      <span className="mt-0.5 shrink-0" style={{ color }}>
-                        <Icon className="h-3.5 w-3.5" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-white/80 leading-snug">{event.description}</p>
-                        <p className="mt-0.5 text-[10px]" style={{ color: D.subtle }}>{event.timestamp}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-              {/* Activity log link — always visible at bottom */}
+              <ActivityTicker events={recentEvents} />
               <div className="shrink-0 px-4 py-3" style={{ borderTop: `1px solid ${D.border}` }}>
                 <Link to="/client/activity" className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand/80 transition-colors">
                   <LineChart className="h-3.5 w-3.5" />
@@ -648,8 +750,8 @@ export default function ClientDashboard() {
       </PageTransition>
 
       <AnimatePresence>
-        {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} />}
-        {escalationModal && <EscalationModal onClose={() => setEscalationModal(false)} />}
+        {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} onRecord={recordEvent} />}
+        {escalationModal && <EscalationModal onClose={() => setEscalationModal(false)} onRecord={recordEvent} />}
         {underReviewModal && <UnderReviewModal docs={UNDER_REVIEW_DOCS} onClose={() => setUnderReviewModal(false)} />}
       </AnimatePresence>
     </ClientLayout>

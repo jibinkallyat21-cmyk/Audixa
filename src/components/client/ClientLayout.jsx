@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import {
   LayoutDashboard,
   ListChecks,
@@ -61,9 +61,9 @@ function LiveClock({ isDark = true }) {
   const timeCls = isDark ? 'text-white/90' : 'text-slate-800'
   const dateCls = isDark ? 'text-white/35' : 'text-slate-400'
   return (
-    <div className="hidden lg:flex flex-col items-end gap-0.5 select-none">
+    <div className="hidden lg:flex flex-col items-end gap-0.5 select-none shrink-0">
       <span className={`text-sm font-bold tabular-nums tracking-wider ${timeCls}`}>{time}</span>
-      <span className={`text-[10px] tracking-wide ${dateCls}`}>{date}</span>
+      <span className={`text-[10px] tracking-wide whitespace-nowrap ${dateCls}`}>{date}</span>
     </div>
   )
 }
@@ -286,6 +286,125 @@ function ClientSidebar() {
   )
 }
 
+/* ─── 3D Client name badge ─── */
+function ClientNameBadge() {
+  const ref = useRef(null)
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
+  const rotateX = useSpring(useTransform(rawY, [-0.5, 0.5], [8, -8]),  { stiffness: 260, damping: 24 })
+  const rotateY = useSpring(useTransform(rawX, [-0.5, 0.5], [-10, 10]), { stiffness: 260, damping: 24 })
+  const glowX   = useSpring(useTransform(rawX, [-0.5, 0.5], [0, 100]),  { stiffness: 200, damping: 20 })
+  const glowY   = useSpring(useTransform(rawY, [-0.5, 0.5], [0, 100]),  { stiffness: 200, damping: 20 })
+
+  const handleMove = (e) => {
+    const r = ref.current?.getBoundingClientRect()
+    if (!r) return
+    rawX.set((e.clientX - r.left) / r.width - 0.5)
+    rawY.set((e.clientY - r.top)  / r.height - 0.5)
+  }
+  const handleLeave = () => { rawX.set(0); rawY.set(0) }
+
+  return (
+    <div style={{ perspective: '500px' }} className="hidden sm:flex flex-1 min-w-0">
+      <motion.div
+        ref={ref}
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
+        style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        className="relative flex flex-1 items-center gap-3 rounded-xl px-4 py-2 select-none overflow-hidden cursor-default"
+        whileHover={{ scale: 1.03 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      >
+        {/* Gradient background */}
+        <div className="pointer-events-none absolute inset-0 rounded-xl" style={{
+          background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(99,102,241,0.12) 60%, rgba(16,185,129,0.07) 100%)',
+          border: '1px solid rgba(16,185,129,0.25)',
+        }} />
+        {/* Moving radial highlight */}
+        <motion.div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 hover:opacity-100" style={{
+          background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(255,255,255,0.10) 0%, transparent 60%)`,
+        }} />
+        {/* Icon */}
+        <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-black text-white"
+          style={{ background: 'rgba(16,185,129,0.45)', boxShadow: '0 0 10px rgba(16,185,129,0.45)' }}>
+          KR
+        </div>
+        {/* Name */}
+        <span className="relative z-10 text-sm font-bold text-white/90 whitespace-nowrap">Kingdom Retail Holdings LLC</span>
+      </motion.div>
+    </div>
+  )
+}
+
+/* ─── 3D Engagement Partner badge ─── */
+function PartnerBadge() {
+  const { partner } = useClientFY()
+  const ref = useRef(null)
+
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
+  const rotateX = useSpring(useTransform(rawY, [-0.5, 0.5], [10, -10]), { stiffness: 260, damping: 24 })
+  const rotateY = useSpring(useTransform(rawX, [-0.5, 0.5], [-12, 12]), { stiffness: 260, damping: 24 })
+  const glowX  = useSpring(useTransform(rawX, [-0.5, 0.5], [0, 100]), { stiffness: 200, damping: 20 })
+  const glowY  = useSpring(useTransform(rawY, [-0.5, 0.5], [0, 100]), { stiffness: 200, damping: 20 })
+
+  const handleMove = (e) => {
+    const r = ref.current?.getBoundingClientRect()
+    if (!r) return
+    rawX.set((e.clientX - r.left) / r.width - 0.5)
+    rawY.set((e.clientY - r.top)  / r.height - 0.5)
+  }
+  const handleLeave = () => {
+    rawX.set(0)
+    rawY.set(0)
+  }
+
+  return (
+    <div style={{ perspective: '500px' }} className="hidden md:block">
+      <motion.div
+        ref={ref}
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
+        style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        className="relative flex items-center gap-2 rounded-xl px-3 py-1.5 select-none overflow-hidden cursor-default"
+        whileHover={{ scale: 1.04 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+        title={partner?.name}
+      >
+        {/* Gradient shimmer background */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 rounded-xl"
+          style={{
+            background: 'linear-gradient(135deg, rgba(230,57,70,0.18) 0%, rgba(99,102,241,0.14) 50%, rgba(230,57,70,0.08) 100%)',
+            border: '1px solid rgba(230,57,70,0.28)',
+          }}
+        />
+        {/* Moving highlight */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 rounded-xl opacity-0 hover:opacity-100"
+          style={{
+            background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(255,255,255,0.12) 0%, transparent 60%)`,
+          }}
+        />
+        {/* Avatar */}
+        <div
+          className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white"
+          style={{ background: 'rgba(230,57,70,0.55)', boxShadow: '0 0 8px rgba(230,57,70,0.5)' }}
+        >
+          {partner?.initials}
+        </div>
+        {/* Text */}
+        <div className="relative z-10 flex flex-col leading-tight">
+          <span className="text-[8px] uppercase tracking-widest font-semibold" style={{ color: 'rgba(230,57,70,0.75)' }}>
+            Engagement Partner
+          </span>
+          <span className="text-[11px] font-bold text-white/90 whitespace-nowrap">{partner?.firm}</span>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 /* ─── Header ─── */
 function ClientHeader({ title }) {
   const { isDark } = useTheme()
@@ -300,20 +419,16 @@ function ClientHeader({ title }) {
       className="client-header flex h-[54px] w-full shrink-0 items-center gap-3 px-6"
       style={{ background: D.headerBg, borderBottom: `1px solid ${D.border}` }}
     >
-      {/* Left — brand */}
+      {/* Left — hamburger + client name + page title + partner badge */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <HamburgerButton />
-        <AnalytixMark size={22} className="shrink-0" />
-        <span className={`hidden font-black tracking-[0.1em] sm:inline text-sm ${tx}`}>
-          AUDIT <span className="text-brand">360</span>
-        </span>
+        <ClientNameBadge />
+        <h1 className={`hidden xl:block flex-shrink-0 truncate text-sm font-semibold ${txTitle}`}>{title}</h1>
+        <PartnerBadge />
       </div>
 
-      {/* Center — current page title */}
-      <h1 className={`flex-shrink-0 truncate text-center text-sm font-semibold ${txTitle}`}>{title}</h1>
-
       {/* Right — tools */}
-      <div className="flex flex-1 items-center justify-end gap-3">
+      <div className="flex shrink-0 items-center gap-3">
         <LiveClock isDark={isDark} />
         <FYDropdown isDark={isDark} />
         <ClientNotificationsPanel />
@@ -331,11 +446,14 @@ function ClientHeader({ title }) {
 function ClientLayoutInner({ title, children, fullHeight }) {
   return (
     <SidebarDrawerProvider>
-      <div className="flex min-h-screen w-full" style={{ background: D.pageBg }}>
+      <div className="flex h-screen w-full overflow-hidden" style={{ background: D.pageBg }}>
         <MobileSidebarWrap><ClientSidebar /></MobileSidebarWrap>
-        <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
+        <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
           <ClientHeader title={title} />
-          <main className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden flex flex-col' : ''}`} style={{ background: D.pageBg }}>
+          <main
+            className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`}
+            style={{ background: D.pageBg }}
+          >
             {children}
           </main>
         </div>

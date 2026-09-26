@@ -80,6 +80,7 @@ import ManagementStaff from './pages/management/ManagementStaff'
 import ManagementLog from './pages/management/ManagementLog'
 import ManagementNotifications from './pages/management/ManagementNotifications'
 
+import ClientGreeting from './components/client/ClientGreeting'
 import { ClientFYProvider } from './context/ClientFYContext'
 import { TBProvider } from './context/TBContext'
 import { ThemeProvider } from './context/ThemeContext'
@@ -90,6 +91,9 @@ function AnimatedRoutes() {
   return (
     <>
       {location.pathname === '/' && <CinematicIntro />}
+      {location.pathname.startsWith('/client') && (
+        <ClientGreeting name="Karim Rahman" company="Kingdom Retail Holdings LLC" />
+      )}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<div />} />

@@ -62,7 +62,7 @@ export default function StatusPill({ status, type }) {
       <span
         data-type={type}
         style={{ backgroundColor: b.bg, color: b.text }}
-        className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap"
+        className="inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-bold whitespace-nowrap min-w-[9rem]"
       >
         {status}
       </span>
@@ -83,7 +83,7 @@ export default function StatusPill({ status, type }) {
         color: style.text,
         border: style.border ? `1px solid ${style.border}` : undefined,
       }}
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap"
+      className="inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap min-w-[9rem]"
     >
       {Icon ? <Icon className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
       {status}
