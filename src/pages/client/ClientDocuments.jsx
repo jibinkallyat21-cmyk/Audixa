@@ -6,7 +6,8 @@ import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
-import { requirementCategories } from '../../data/sampleData'
+import { requirementCategories, getDocStatsForFY } from '../../data/sampleData'
+import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
 // Flatten categories into a table-ready list with plain-language descriptions
 const PLAIN_DESCRIPTIONS = {
@@ -322,9 +323,10 @@ function BulkUploadModal({ onClose }) {
 export default function ClientDocuments() {
   const showToast = useToast()
   const { isDark } = useTheme()
+  const { selectedFY } = useClientFY()
+  const engRef = ENGAGEMENT_REFS[selectedFY]
   const [bulkOpen, setBulkOpen] = useState(false)
   const [search, setSearch] = useState('')
-  // Start with all categories collapsed
   const [expanded, setExpanded] = useState(new Set())
 
   const toggleCategory = (id) => {
@@ -335,12 +337,7 @@ export default function ClientDocuments() {
     })
   }
 
-  // Stats
-  const total = 84
-  const submitted = 20
-  const approved = 62
-  const stillNeeded = 14
-  const needsCorrection = 3
+  const { total, submitted, approved, stillNeeded, needsCorrection, isComplete } = getDocStatsForFY(selectedFY)
 
   // When searching: auto-expand categories that have matches; otherwise respect expanded set
   const matchingCategoryIds = useMemo(() => {
@@ -376,18 +373,28 @@ export default function ClientDocuments() {
       <PageTransition>
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold" style={{ color: D.text }}>PBC Requirement List</h1>
-            <span className="rounded-md px-3 py-1 text-xs font-semibold" style={{ border: `1px solid ${D.border}`, color: D.muted, background: D.card }}>KSA-2024-8841</span>
+            <div>
+              <h1 className="text-2xl font-bold" style={{ color: D.text }}>PBC Requirement List</h1>
+              <p className="mt-0.5 text-xs" style={{ color: D.muted }}>{selectedFY}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {isComplete && (
+                <span className="flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold text-emerald" style={{ border: '1px solid rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.08)' }}>
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Audit Completed
+                </span>
+              )}
+              <span className="rounded-md px-3 py-1 text-xs font-semibold" style={{ border: `1px solid ${D.border}`, color: D.muted, background: D.card }}>{engRef}</span>
+            </div>
           </div>
 
           {/* Bento stat cards */}
-          <div className="grid grid-cols-12 gap-3">
+          <motion.div key={selectedFY} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="grid grid-cols-12 gap-3">
             {[
               { label: 'Total PBC Items', value: total, color: 'text-navy', bg: 'bg-navy/5', span: 'col-span-12 sm:col-span-3', sub: null },
               { label: 'Submitted', value: submitted, color: 'text-blue-600', bg: 'bg-blue-50', span: 'col-span-6 sm:col-span-2', sub: null },
               { label: 'Accepted', value: approved, color: 'text-emerald', bg: 'bg-emerald/5', span: 'col-span-6 sm:col-span-2', sub: null },
-              { label: 'Outstanding Items', value: stillNeeded, color: 'text-amber', bg: 'bg-amber/5', span: 'col-span-12 sm:col-span-3', sub: 'Submission required' },
-              { label: 'Requires Resubmission', value: needsCorrection, color: 'text-alert-red', bg: 'bg-red-50', span: 'col-span-12 sm:col-span-2', sub: 'Refer to rejection notes' },
+              { label: 'Outstanding Items', value: stillNeeded, color: isComplete ? 'text-emerald' : 'text-amber', bg: isComplete ? 'bg-emerald/5' : 'bg-amber/5', span: 'col-span-12 sm:col-span-3', sub: isComplete ? 'All fulfilled' : 'Submission required' },
+              { label: 'Requires Resubmission', value: needsCorrection, color: isComplete ? 'text-emerald' : 'text-alert-red', bg: isComplete ? 'bg-emerald/5' : 'bg-red-50', span: 'col-span-12 sm:col-span-2', sub: isComplete ? null : 'Refer to rejection notes' },
             ].map((card, i) => (
               <motion.div
                 key={card.label}
@@ -402,7 +409,7 @@ export default function ClientDocuments() {
                 {card.sub && <p className="text-[10px] mt-0.5" style={{ color: D.muted }}>{card.sub}</p>}
               </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-3">

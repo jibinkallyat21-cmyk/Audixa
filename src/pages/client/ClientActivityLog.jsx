@@ -36,7 +36,7 @@ export default function ClientActivityLog() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
 
-  const allEvents = getActivityEvents()
+  const allEvents = getActivityEvents(selectedFY)
   const filtered = allEvents.filter((e) => {
     if (filter !== 'All' && e.section !== filter) return false
     if (search && !e.description.toLowerCase().includes(search.toLowerCase())) return false

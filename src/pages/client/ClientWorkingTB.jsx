@@ -7,6 +7,7 @@ import { useToast } from '../../components/shared/Toast'
 import { useTB } from '../../context/TBContext'
 import { useClientFY } from '../../context/ClientFYContext'
 import { useTheme } from '../../context/ThemeContext'
+import { getTBLinesForFY } from '../../data/workingTB'
 
 const D = {
   card: 'var(--c-card)',
@@ -312,12 +313,18 @@ function AdjustmentCard({ adj, onApprove, onReject }) {
 
 export default function ClientWorkingTB() {
   const showToast = useToast()
-  const { tbLines, adjustments, pendingAdjustments, approveAdjustment, rejectAdjustment } = useTB()
+  const { tbLines: fy2024Lines, adjustments, pendingAdjustments, approveAdjustment, rejectAdjustment } = useTB()
   const { selectedFY } = useClientFY()
   const [reviewedExpanded, setReviewedExpanded] = useState(false)
   const { isDark } = useTheme()
 
-  const reviewedAdjustments = adjustments.filter((a) => a.status !== 'Pending Client Approval')
+  const isCurrentFY = selectedFY === 'FY2024'
+  // For historical FYs show static finalised data; no pending adjustments
+  const tbLines = isCurrentFY ? fy2024Lines : getTBLinesForFY(selectedFY)
+  const displayPending = isCurrentFY ? pendingAdjustments : []
+  const displayAdjustments = isCurrentFY ? adjustments : []
+
+  const reviewedAdjustments = displayAdjustments.filter((a) => a.status !== 'Pending Client Approval')
 
   const handleApprove = (id, note) => {
     approveAdjustment(id, note)
@@ -338,17 +345,23 @@ export default function ClientWorkingTB() {
             <h1 className="text-2xl font-bold" style={{ color: D.text }}>Working Trial Balance</h1>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium" style={{ color: D.muted }}>Al-Marai Logistics JSC — {selectedFY}</span>
-              <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: D.subtle }}>Last updated: Today 09:15 AM</span>
+              {isCurrentFY ? (
+                <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: D.subtle }}>Last updated: Today 09:15 AM</span>
+              ) : (
+                <span className="flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-semibold text-emerald" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                  <CheckCircle2 className="h-3 w-3" /> Finalised — {selectedFY}
+                </span>
+              )}
             </div>
           </div>
 
           {/* ── Pending Adjustments — TOP of page ── */}
-          {pendingAdjustments.length > 0 && (
+          {displayPending.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold" style={{ color: D.text }}>
                   Proposed Adjustments — Awaiting Your Approval
-                  <span className="ml-2 rounded-full bg-amber/20 px-2 py-0.5 text-sm text-amber">{pendingAdjustments.length}</span>
+                  <span className="ml-2 rounded-full bg-amber/20 px-2 py-0.5 text-sm text-amber">{displayPending.length}</span>
                 </h2>
                 <p className="text-xs" style={{ color: D.subtle }}>Hover each entry to see details</p>
               </div>
@@ -359,12 +372,12 @@ export default function ClientWorkingTB() {
               >
                 <AlertTriangle className="h-4 w-4 text-amber shrink-0" />
                 <p className="text-sm font-medium text-amber">
-                  Your auditor has proposed {pendingAdjustments.length} adjustment {pendingAdjustments.length === 1 ? 'entry' : 'entries'} for your review.
+                  Your auditor has proposed {displayPending.length} adjustment {displayPending.length === 1 ? 'entry' : 'entries'} for your review.
                   Hover each entry below to view the journal details before approving or rejecting.
                 </p>
               </motion.div>
               <div className="space-y-2" id="adjustments">
-                {pendingAdjustments.map((adj) => (
+                {displayPending.map((adj) => (
                   <AdjustmentCard key={adj.id} adj={adj} onApprove={handleApprove} onReject={handleReject} />
                 ))}
               </div>

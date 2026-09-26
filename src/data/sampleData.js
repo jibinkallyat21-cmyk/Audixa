@@ -725,6 +725,56 @@ export const queryThreadMessages = {
   ],
 }
 
+// FY-keyed queries — FY2024 reuses the live clientQueries above
+const QUERIES_FY2023 = [
+  { id: 'QRY-01', subject: 'Revenue Recognition — Long-term Contracts Policy (IFRS 15)', status: 'Closed', date: '12 Nov', linkedRef: 'REV-01' },
+  { id: 'QRY-02', subject: 'Lease Liability Remeasurement — IFRS 16 Modification', status: 'Closed', date: '08 Nov', linkedRef: null },
+  { id: 'QRY-03', subject: 'Impairment Assessment — Non-current Assets Group', status: 'Closed', date: '22 Oct', linkedRef: null },
+  { id: 'QRY-04', subject: 'Related Party Transactions — Board Disclosure FY2023', status: 'Closed', date: '15 Oct', linkedRef: null },
+  { id: 'QRY-05', subject: 'Zakat Base Calculation — Deductible Items', status: 'Closed', date: '05 Oct', linkedRef: null },
+]
+
+const QUERY_THREADS_FY2023 = {
+  'QRY-01': [
+    { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '12 Nov 2023, 09:00', text: 'Please confirm the revenue recognition policy applied to multi-period logistics contracts under IFRS 15 and provide sample contract computations.' },
+    { side: 'right', author: 'You', role: 'Finance Director', timestamp: '12 Nov 2023, 14:20', text: 'Revenue is recognised over the contract term as services are delivered. Policy note attached along with three sample computations.', deliveredRead: true },
+    { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '14 Nov 2023, 10:05', text: 'Policy and samples are satisfactory — this query is now closed.' },
+  ],
+  'QRY-02': [
+    { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '08 Nov 2023, 10:30', text: 'Lease terms for three warehouses were modified in August. Please provide the remeasurement schedules confirming the updated carrying amounts.' },
+    { side: 'right', author: 'You', role: 'Finance Director', timestamp: '08 Nov 2023, 15:45', text: 'Remeasurement schedules prepared by our treasury team are attached.', deliveredRead: true },
+    { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '10 Nov 2023, 09:15', text: 'Reviewed and agreed — query closed.' },
+  ],
+  'QRY-03': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '22 Oct 2023', text: 'Impairment indicators noted for three distribution assets. Management assessment and recoverable amount calculations required.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '25 Oct 2023', text: 'No impairment required — VIU exceeds carrying amount on all three assets. Supporting DCF attached.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '28 Oct 2023', text: 'Agreed with management assessment — closed.' }],
+  'QRY-04': [{ side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '15 Oct 2023', text: 'Please confirm completeness of related-party disclosures including subsidiaries, associates, and key management compensation.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '16 Oct 2023', text: 'Full RPT schedule attached and confirmed complete.', deliveredRead: true }, { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '18 Oct 2023', text: 'Satisfactory — closed.' }],
+  'QRY-05': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '05 Oct 2023', text: 'Please confirm whether the long-term loans are included in the Zakat base and provide basis for any deduction claimed.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '06 Oct 2023', text: 'Loans are non-Zakat items per GAZT guidelines. Deduction schedule attached.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '07 Oct 2023', text: 'Agreed — closed.' }],
+}
+
+const QUERIES_FY2022 = [
+  { id: 'QRY-01', subject: 'Opening Balances Verification — First Year with Analytix', status: 'Closed', date: '18 Nov', linkedRef: null },
+  { id: 'QRY-02', subject: 'Inventory Count Procedures — Dammam & Riyadh Warehouses', status: 'Closed', date: '10 Nov', linkedRef: null },
+  { id: 'QRY-03', subject: 'Bank Confirmation — Al-Rajhi SAB Facilities FY2022', status: 'Closed', date: '28 Oct', linkedRef: null },
+]
+
+const QUERY_THREADS_FY2022 = {
+  'QRY-01': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '18 Nov 2022', text: 'As this is the first year of our engagement, please provide the predecessor auditor\'s signed TB and prior-year AFS for our opening balance procedures.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '19 Nov 2022', text: 'Predecessor AFS and signed TB uploaded.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '22 Nov 2022', text: 'Opening balances agreed — closed.' }],
+  'QRY-02': [{ side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '10 Nov 2022', text: 'Physical inventory count is scheduled for 30 Nov. Please confirm attendance list and count procedures for Dammam and Riyadh warehouses.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '11 Nov 2022', text: 'Procedures confirmed — our warehouse managers will be present. Count sheets sent.', deliveredRead: true }, { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '02 Dec 2022', text: 'Count completed satisfactorily — closed.' }],
+  'QRY-03': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '28 Oct 2022', text: 'Please sign and return the bank confirmation request forms for all Al-Rajhi SAB facilities so we can despatch directly to the bank.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '28 Oct 2022', text: 'Signed forms attached.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '10 Nov 2022', text: 'Bank response received and agreed — closed.' }],
+}
+
+export function getQueriesForFY(fy) {
+  if (fy === 'FY2023') return { queries: QUERIES_FY2023, threads: QUERY_THREADS_FY2023 }
+  if (fy === 'FY2022') return { queries: QUERIES_FY2022, threads: QUERY_THREADS_FY2022 }
+  return { queries: clientQueries, threads: queryThreadMessages }
+}
+
+// Per-FY document stats for the PBC Documents page
+export function getDocStatsForFY(fy) {
+  if (fy === 'FY2023') return { total: 78, submitted: 78, approved: 78, stillNeeded: 0, needsCorrection: 0, isComplete: true }
+  if (fy === 'FY2022') return { total: 71, submitted: 71, approved: 71, stillNeeded: 0, needsCorrection: 0, isComplete: true }
+  return { total: 84, submitted: 20, approved: 62, stillNeeded: 14, needsCorrection: 3, isComplete: false }
+}
+
 export const draftReview = {
   bannerText: 'Draft AFS issued 15 Oct 2024. Please review the full document and confirm below.',
   document: {

@@ -5,7 +5,8 @@ import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useTheme } from '../../context/ThemeContext'
-import { clientPortal, clientQueries, queryThreadMessages } from '../../data/sampleData'
+import { getQueriesForFY } from '../../data/sampleData'
+import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
 const FILTERS = [
   { id: 'all', label: 'All', match: () => true },
@@ -16,6 +17,9 @@ const FILTERS = [
 
 export default function ClientQueries() {
   const { isDark } = useTheme()
+  const { selectedFY } = useClientFY()
+  const { queries: clientQueries, threads: queryThreadMessages } = getQueriesForFY(selectedFY)
+  const engRef = ENGAGEMENT_REFS[selectedFY]
   const [selectedId, setSelectedId] = useState('QRY-01')
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -24,22 +28,26 @@ export default function ClientQueries() {
   const [extraMessages, setExtraMessages] = useState({})
   const fileRef = useRef(null)
 
+  // Reset selected query when FY changes
+  const firstQueryId = clientQueries[0]?.id || 'QRY-01'
+  const resolvedSelectedId = clientQueries.find((q) => q.id === selectedId) ? selectedId : firstQueryId
+
   const activeFilter = FILTERS.find((f) => f.id === filter)
   const visibleQueries = clientQueries.filter(
     (q) => activeFilter.match(q) && q.subject.toLowerCase().includes(search.toLowerCase())
   )
 
-  const selectedQuery = clientQueries.find((q) => q.id === selectedId) || clientQueries[0]
-  const baseMessages = queryThreadMessages[selectedQuery.id] || []
-  const messages = [...baseMessages, ...(extraMessages[selectedQuery.id] || [])]
+  const selectedQuery = clientQueries.find((q) => q.id === resolvedSelectedId) || clientQueries[0]
+  const baseMessages = queryThreadMessages[selectedQuery?.id] || []
+  const messages = [...baseMessages, ...(extraMessages[selectedQuery?.id] || [])]
 
   const handleReply = (e) => {
     e.preventDefault()
     if (!reply.trim() && !attachment) return
     setExtraMessages((prev) => ({
       ...prev,
-      [selectedQuery.id]: [
-        ...(prev[selectedQuery.id] || []),
+      [selectedQuery?.id]: [
+        ...(prev[selectedQuery?.id] || []),
         {
           side: 'right',
           author: 'You',
@@ -59,9 +67,12 @@ export default function ClientQueries() {
     <ClientLayout title="Audit Queries">
       <PageTransition>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-navy">Audit Queries</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-navy">Audit Queries</h1>
+            <p className="mt-0.5 text-xs text-slate-400">{selectedFY}</p>
+          </div>
           <span className="rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-            {clientPortal.engagementRef}
+            {engRef}
           </span>
         </div>
 
@@ -80,7 +91,7 @@ export default function ClientQueries() {
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {FILTERS.map((f) => {
-                  const count = clientQueries.filter(f.match).length
+                  const count = clientQueries.filter((q) => f.match(q)).length
                   return (
                     <button
                       key={f.id}
@@ -110,7 +121,7 @@ export default function ClientQueries() {
                     transition={{ delay: idx * 0.05, duration: 0.25 }}
                     onClick={() => setSelectedId(query.id)}
                     className={`block w-full border-b border-slate-50 px-4 py-3.5 text-left transition-colors last:border-0 ${
-                      isSelected ? 'border-l-4 border-l-brand bg-brand/5' : 'border-l-4 border-l-transparent hover:bg-slate-50'
+                      resolvedSelectedId === query.id ? 'border-l-4 border-l-brand bg-brand/5' : 'border-l-4 border-l-transparent hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -135,7 +146,7 @@ export default function ClientQueries() {
           {/* Right panel — thread */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={selectedQuery.id}
+              key={selectedFY + '_' + selectedQuery?.id}
               initial={{ opacity: 0, x: 24 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 24 }}
@@ -144,10 +155,10 @@ export default function ClientQueries() {
             >
               <div className="border-b border-slate-100 px-5 py-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-sm font-semibold text-navy">{selectedQuery.subject}</h2>
-                  <StatusPill status={selectedQuery.status} />
+                  <h2 className="text-sm font-semibold text-navy">{selectedQuery?.subject}</h2>
+                  <StatusPill status={selectedQuery?.status} />
                 </div>
-                {selectedQuery.linkedRef && (
+                {selectedQuery?.linkedRef && (
                   <span className="mt-2 inline-block rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
                     Linked: {selectedQuery.linkedRef}
                   </span>

@@ -131,4 +131,29 @@ export const initialAdjustments = [
   },
 ]
 
+// Historical TB for FY2023 / FY2022 — scaled from FY2024 figures.
+// Scaling preserves the balance: if Σ(CB) = 0 for FY2024, then Σ(CB × k) = 0 too.
+export function getTBLinesForFY(fy) {
+  if (fy === 'FY2024') return initialTBLines
+  const factor = fy === 'FY2023' ? 0.91 : 0.82
+  return initialTBLines.map((line) => {
+    const scaled = {
+      ...line,
+      id: line.id + '_' + fy,
+      openingBalance: Math.round(line.openingBalance * factor),
+      currentYearDebit: Math.round(line.currentYearDebit * factor),
+      currentYearCredit: Math.round(line.currentYearCredit * factor),
+      adjustmentDebit: 0,
+      adjustmentCredit: 0,
+      ledgerName: line.ledgerName.replace('FY2024', fy),
+    }
+    return Object.defineProperty(scaled, 'closingBalance', {
+      get() {
+        return this.openingBalance + this.currentYearDebit - this.currentYearCredit
+      },
+      enumerable: true,
+    })
+  })
+}
+
 export { classifyByName }
