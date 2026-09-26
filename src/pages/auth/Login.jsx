@@ -3,9 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageTransition from '../../components/shared/PageTransition'
 import { AnalytixMark } from '../../components/shared/AnalytixLogo'
-import { useTheme } from '../../context/ThemeContext'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
-import GlobalOperationsGlobe from '../../components/shared/GlobalOperationsGlobe'
+import WorldMapBackground from '../../components/shared/WorldMapBackground'
 
 const DEMO_ROLES = ROLE_ORDER.map((id) => ({
   value: ROLES[id].id,
@@ -15,106 +14,79 @@ const DEMO_ROLES = ROLE_ORDER.map((id) => ({
 
 const EASE = [0.16, 1, 0.3, 1]
 
-const TRUSTED_COMPANIES = [
-  'Kingdom Retail Holdings',
-  'Al-Rashid Group',
-  'Saudi Infrastructure Corp',
-  'Arabian Gulf Ventures',
-  'Al-Salam Properties',
-  'Gulf Digital Solutions',
-  'Riyadh Capital Partners',
-  'National Trade Alliance',
-]
-
-function FloatingInput({ id, label, type = 'text', value, onChange, trailing, isDark }) {
+/* ── Boxed input with leading icon ── */
+function BoxInput({ id, label, type = 'text', value, onChange, placeholder, icon, trailing }) {
   const [focused, setFocused] = useState(false)
-  const filled = value.length > 0
-  const labelColor = focused
-    ? '#E8323C'
-    : isDark
-      ? (focused || filled ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.35)')
-      : (focused || filled ? '#475569' : '#94A3B8')
-
   return (
-    <div className="relative pt-4">
-      <label
-        htmlFor={id}
-        className="pointer-events-none absolute left-0 origin-left transition-all duration-150"
-        style={
-          focused || filled
-            ? { top: '-2px', fontSize: '11px', color: labelColor }
-            : { top: '16px', fontSize: '14px', color: isDark ? 'rgba(255,255,255,0.35)' : '#94A3B8' }
-        }
-      >
+    <div>
+      <label htmlFor={id} style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 600,
+        color: 'rgba(255,255,255,0.55)', letterSpacing: '0.02em' }}>
         {label}
       </label>
-      <div className="relative">
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        background: 'rgba(255,255,255,0.04)',
+        border: `1px solid ${focused ? '#E8323C' : 'rgba(255,255,255,0.10)'}`,
+        borderRadius: 8, padding: '10px 12px',
+        transition: 'border-color 0.18s',
+      }}>
+        {icon && <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, display: 'flex' }}>{icon}</span>}
         <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className="w-full border-0 border-b bg-transparent pb-2 pt-5 text-sm outline-none"
+          id={id} type={type} value={value} onChange={onChange}
+          placeholder={placeholder}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           style={{
-            borderColor: focused ? '#E8323C' : isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
+            flex: 1, background: 'transparent', border: 'none', outline: 'none',
+            fontSize: 13, color: '#ffffff',
             caretColor: '#E8323C',
-            color: isDark ? '#fff' : '#0D1B2A',
           }}
         />
-        {trailing && (
-          <div className="absolute right-0 top-1/2 flex -translate-y-1/2 items-center">{trailing}</div>
-        )}
-      </div>
-      <div className="relative h-[1px] w-full bg-transparent">
-        <motion.div
-          className="absolute inset-0 origin-left bg-brand"
-          style={{ height: '2px', top: '-0.5px' }}
-          initial={false}
-          animate={{ scaleX: focused ? 1 : 0 }}
-          transition={{ duration: 0.25, ease: EASE }}
-        />
+        {trailing}
       </div>
     </div>
   )
 }
 
-function Background({ isDark }) {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full opacity-[0.07]"
-        style={{ background: 'radial-gradient(circle, #E8323C 0%, transparent 70%)' }} />
-      <div className="absolute -bottom-48 right-0 h-[600px] w-[600px] rounded-full opacity-[0.05]"
-        style={{ background: 'radial-gradient(circle, #2563EB 0%, transparent 70%)' }} />
-      <svg className="absolute inset-0 h-full w-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="grid-lg" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none"
-              stroke={isDark ? 'white' : '#0D1B2A'} strokeWidth="0.5" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid-lg)" />
-      </svg>
-    </div>
-  )
-}
+/* ── SVG icons ── */
+const IconMail = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+  </svg>
+)
+const IconLock = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+)
+const IconArrow = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+  </svg>
+)
+const IconUser = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+  </svg>
+)
+const IconChevron = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+)
+const IconDemo = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+  </svg>
+)
 
 export default function Login() {
   const navigate = useNavigate()
-  const { isDark } = useTheme()
   const [accountType, setAccountType] = useState('client')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [demoRole, setDemoRole] = useState(DEMO_ROLES[0].value)
   const canGoBack = typeof window !== 'undefined' && window.history.length > 2
-
-  const bgPage    = isDark ? '#080C18' : '#F0F4F8'
-  const bgPanel   = isDark ? 'linear-gradient(135deg, #0D1B2A 0%, #080C18 100%)' : 'linear-gradient(135deg, #EEF2F8 0%, #E2E8F0 100%)'
-  const textPrimary   = isDark ? '#FFFFFF' : '#0D1B2A'
-  const textSecondary = isDark ? 'rgba(255,255,255,0.4)' : '#64748B'
-  const border    = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -129,245 +101,252 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div className="relative flex min-h-screen w-full overflow-hidden" style={{ background: '#060914' }}>
-        <style>{`@keyframes lp-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+      <div className="relative min-h-screen w-full overflow-hidden" style={{ background: '#04091e' }}>
 
-        {/* ── 3D Globe — full-screen background ── */}
+        {/* ── Full-screen world map background ── */}
         <div className="absolute inset-0 z-0">
-          <GlobalOperationsGlobe className="w-full h-full" />
+          <WorldMapBackground className="w-full h-full" />
         </div>
 
-        {/* Dark veil so right panel and text stay readable */}
-        <div className="absolute inset-0 z-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, rgba(6,9,20,0.38) 0%, rgba(6,9,20,0.0) 52%, rgba(6,9,20,0.75) 52%)' }} />
+        {/* ── Right-side vignette so card is readable ── */}
+        <div className="pointer-events-none absolute inset-0 z-1"
+          style={{ background: 'linear-gradient(to right, transparent 40%, rgba(4,9,30,0.72) 65%, rgba(4,9,30,0.88) 100%)' }} />
 
-        {/* ── Left brand panel — transparent overlay ── */}
-        <div className="relative z-10 hidden min-h-screen w-[52%] flex-col lg:flex pointer-events-none">
-
-          {/* Main brand content — centered */}
-          <div className="flex flex-1 flex-col items-center justify-center px-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: EASE }}
-              className="flex flex-col items-center text-center"
-            >
-              {/* Logo mark stacked above brand name */}
-              <motion.div
-                style={{ transformStyle: 'preserve-3d' }}
-                className="mb-5"
-              >
-                <AnalytixMark size={80} />
-              </motion.div>
-
-              {/* AUDIT 360 */}
-              <p className="text-[52px] font-black leading-none tracking-tight"
-                style={{ color: '#ffffff', textShadow: '0 2px 24px rgba(0,0,0,0.7)' }}>
-                AUDIT <span className="text-brand">360</span>
-              </p>
-              <p className="mt-2 text-[13px] font-medium tracking-widest"
-                style={{ color: 'rgba(255,255,255,0.5)', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
-                by Analytix
-              </p>
-
-              {/* CinematicIntro taglines */}
-              <div className="mt-10 flex flex-col gap-0.5">
-                {['Intelligent Audits.', 'Seamless Engagements.', 'Trusted Outcomes.'].map((phrase, i) => (
-                  <motion.p
-                    key={phrase}
-                    className="text-[22px] font-bold leading-snug"
-                    style={{
-                      color: i === 2 ? '#E8323C' : '#ffffff',
-                      textShadow: '0 2px 12px rgba(0,0,0,0.65)',
-                    }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.35 + i * 0.13, duration: 0.55, ease: EASE }}
-                  >
-                    {phrase}
-                  </motion.p>
-                ))}
-              </div>
-
-              {/* About Analytix */}
-              <motion.p
-                className="mt-8 max-w-[320px] text-[13px] leading-relaxed"
-                style={{ color: 'rgba(255,255,255,0.42)', textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.85, duration: 0.6 }}
-              >
-                Founded in 2008, Analytix is a global management consulting firm that has empowered 5,000+ businesses across 21+ countries. With offices in India, UAE, KSA, Qatar, Oman, China, the UK and USA, we deliver Audit &amp; Assurance, accounting, tax advisory, legal compliance, and business consultancy — transforming complexity into opportunity for enterprises worldwide.
-              </motion.p>
-            </motion.div>
-          </div>
-
-          {/* Trusted by — animated ticker */}
-          <div className="overflow-hidden pb-3">
-            <p className="mb-2 px-16 text-[10px] font-semibold uppercase tracking-[0.12em]"
-              style={{ color: 'rgba(255,255,255,0.18)' }}>
-              Trusted by
-            </p>
-            <div className="overflow-hidden">
-              <div
-                className="flex gap-12 whitespace-nowrap"
-                style={{ animation: 'lp-ticker 30s linear infinite' }}
-              >
-                {[...TRUSTED_COMPANIES, ...TRUSTED_COMPANIES].map((name, i) => (
-                  <span key={i} className="shrink-0 text-[12px] font-semibold"
-                    style={{ color: 'rgba(255,255,255,0.28)' }}>
-                    {name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <p className="px-16 pb-8 pt-3 text-[11px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
-            © 2026 Analytix. All rights reserved.
-          </p>
-        </div>
-
-        {/* ── Right login panel — dark glass ── */}
-        <div
-          className="relative z-10 flex w-full flex-1 flex-col"
-          style={{ background: 'rgba(6,9,20,0.82)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+        {/* ── Branding — top-left floating over map ── */}
+        <motion.div
+          className="pointer-events-none absolute left-8 top-8 z-10 lg:left-12 lg:top-10"
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: EASE }}
         >
-          <Background isDark={true} />
+          {/* Logo + ANALYTIX inline */}
+          <div className="flex items-center gap-3 mb-4">
+            <AnalytixMark size={40} />
+            <span style={{
+              fontSize: 13, fontWeight: 800, letterSpacing: '0.20em',
+              color: 'rgba(255,255,255,0.85)',
+            }}>
+              ANALYTIX
+            </span>
+          </div>
 
-          {canGoBack && (
-            <button type="button" onClick={() => navigate(-1)}
-              className="absolute left-6 top-6 z-10 text-xs transition-colors hover:opacity-100 lg:left-12 lg:top-12"
-              style={{ color: textSecondary }}>
-              ← Back
-            </button>
-          )}
+          {/* AUDIT 360 */}
+          <h1 style={{
+            fontSize: 'clamp(52px, 7vw, 96px)',
+            fontWeight: 900,
+            lineHeight: 1,
+            letterSpacing: '-0.02em',
+            color: '#ffffff',
+            textShadow: '0 4px 32px rgba(0,0,0,0.7)',
+            marginBottom: 14,
+          }}>
+            AUDIT <span style={{ color: '#E8323C' }}>360</span>
+          </h1>
 
-          <div className="relative z-10 flex flex-1 items-center justify-center p-8 lg:p-12">
-            <div className="w-full max-w-[360px]">
-
-              {/* Mobile logo */}
-              <div className="mb-8 flex items-center gap-2 lg:hidden">
-                <AnalytixMark size={24} />
-                <span className="text-sm font-extrabold tracking-[0.12em]" style={{ color: '#ffffff' }}>
-                  AUDIT <span className="text-brand">360</span>
-                </span>
-              </div>
-
-              <div className="mb-8">
-                <h2 className="text-[22px] font-bold leading-tight tracking-tight" style={{ color: '#ffffff' }}>
-                  Welcome back
-                </h2>
-                <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Sign in to your AUDIT 360 workspace
-                </p>
-              </div>
-
-              {/* Account type tabs */}
-              <div className="relative mb-8 flex gap-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                {[
-                  { value: 'client', label: 'Client Portal' },
-                  { value: 'team', label: 'Analytix Team' },
-                ].map((tab) => (
-                  <button key={tab.value} type="button" onClick={() => setAccountType(tab.value)}
-                    className="relative pb-3 text-sm transition-colors">
-                    <span style={{
-                      color: accountType === tab.value ? '#ffffff' : 'rgba(255,255,255,0.4)',
-                      fontWeight: accountType === tab.value ? 700 : 400,
-                    }}>
-                      {tab.label}
-                    </span>
-                    {accountType === tab.value && (
-                      <motion.div layoutId="login-underline"
-                        className="absolute -bottom-px left-0 right-0 h-[2px] bg-brand"
-                        transition={{ type: 'spring', stiffness: 400, damping: 32 }} />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <FloatingInput isDark={true} id="email" label="Work Email" type="email"
-                  value={email} onChange={(e) => setEmail(e.target.value)} />
-                <FloatingInput isDark={true} id="password" label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password} onChange={(e) => setPassword(e.target.value)}
-                  trailing={
-                    <button type="button" onClick={() => setShowPassword((v) => !v)} tabIndex={-1}
-                      className="cursor-pointer text-[11px] font-semibold text-brand hover:text-brand-hover hover:underline">
-                      {showPassword ? 'Hide' : 'Show'}
-                    </button>
-                  }
-                />
-
-                <div className="flex justify-end">
-                  <Link to="/forgot-password" className="text-[11px] font-semibold text-brand hover:underline">
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <motion.button type="submit"
-                  whileHover={{ y: -1, backgroundColor: '#D12C35', boxShadow: '0 4px 16px rgba(232,50,60,0.35)' }}
-                  whileTap={{ y: 0, scale: 0.99 }}
-                  transition={{ duration: 0.15, ease: EASE }}
-                  className="h-11 w-full rounded-md bg-brand text-[13px] font-semibold text-white">
-                  Sign In
-                </motion.button>
-              </form>
-
-              <motion.div initial={false}
-                animate={accountType === 'team'
-                  ? { height: 'auto', opacity: 1, marginTop: 20 }
-                  : { height: 0, opacity: 0, marginTop: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="overflow-hidden"
-              >
-                <div className="pt-4 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                    Need partner access?{' '}
-                    <Link to="/signup" className="font-semibold text-brand hover:underline">Create account</Link>
-                  </p>
-                  <p className="mt-1 text-[11px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                    Team accounts require Audit Manager approval.
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Demo access */}
-              <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em]"
-                  style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  Demo Access
-                </p>
-                <label htmlFor="demo-role" className="mb-1.5 block text-[11px] font-semibold"
-                  style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Preview as Role
-                </label>
-                <select id="demo-role" value={demoRole} onChange={(e) => setDemoRole(e.target.value)}
-                  className="w-full border-0 py-2 text-sm outline-none"
+          {/* Taglines — single row with separators */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {['Intelligent Audits', 'Seamless Engagements', 'Trusted Outcomes'].map((phrase, i) => (
+              <div key={phrase} className="flex items-center gap-3">
+                {i > 0 && (
+                  <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.25)', display: 'block' }} />
+                )}
+                <motion.span
                   style={{
-                    background: 'transparent',
-                    borderBottom: '1px solid rgba(255,255,255,0.08)',
-                    color: '#ffffff',
+                    fontSize: 'clamp(13px, 1.6vw, 17px)',
+                    fontWeight: 600,
+                    color: 'rgba(255,255,255,0.78)',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                  }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.12, duration: 0.5, ease: EASE }}
+                >
+                  {phrase}
+                </motion.span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ── Back button ── */}
+        {canGoBack && (
+          <button type="button" onClick={() => navigate(-1)}
+            className="absolute left-8 bottom-8 z-20 text-xs transition-opacity hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.35)' }}>
+            ← Back
+          </button>
+        )}
+
+        {/* ── Login card — right side, vertically centered ── */}
+        <div className="absolute inset-y-0 right-0 z-20 flex items-center justify-end pr-6 lg:pr-10 xl:pr-16 w-full sm:w-auto">
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.65, ease: EASE }}
+            style={{
+              width: '100%',
+              maxWidth: 420,
+              background: 'rgba(7,11,28,0.88)',
+              backdropFilter: 'blur(18px)',
+              WebkitBackdropFilter: 'blur(18px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 16,
+              padding: '32px 32px 28px',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
+            }}
+          >
+            {/* Heading */}
+            <div style={{ marginBottom: 24 }}>
+              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#ffffff', lineHeight: 1.2, marginBottom: 6 }}>
+                Welcome back
+              </h2>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.42)' }}>
+                Sign in to your AUDIT 360 workspace
+              </p>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 24, borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 24 }}>
+              {[
+                { value: 'client', label: 'Client Portal' },
+                { value: 'team',   label: 'Analytix Team' },
+              ].map((tab) => (
+                <button key={tab.value} type="button" onClick={() => setAccountType(tab.value)}
+                  style={{
+                    position: 'relative', paddingBottom: 12, background: 'none', border: 'none',
+                    cursor: 'pointer', fontSize: 13,
+                    fontWeight: accountType === tab.value ? 700 : 400,
+                    color: accountType === tab.value ? '#ffffff' : 'rgba(255,255,255,0.38)',
+                    transition: 'color 0.18s',
+                  }}>
+                  {tab.label}
+                  {accountType === tab.value && (
+                    <motion.div layoutId="login-tab-line"
+                      style={{ position: 'absolute', bottom: -1, left: 0, right: 0, height: 2, background: '#E8323C', borderRadius: 2 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <BoxInput
+                id="email" label="Work email" type="email"
+                value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@analytix.com"
+                icon={<IconMail />}
+              />
+              <BoxInput
+                id="password" label="Password"
+                type={showPassword ? 'text' : 'password'}
+                value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                icon={<IconLock />}
+                trailing={
+                  <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer',
+                      fontSize: 12, fontWeight: 600, color: '#E8323C', padding: 0, flexShrink: 0 }}>
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                }
+              />
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Link to="/forgot-password"
+                  style={{ fontSize: 11, fontWeight: 600, color: '#E8323C', textDecoration: 'none' }}>
+                  Forgot password?
+                </Link>
+              </div>
+
+              <motion.button type="submit"
+                whileHover={{ backgroundColor: '#c82831', boxShadow: '0 6px 24px rgba(232,50,60,0.45)', y: -1 }}
+                whileTap={{ scale: 0.98, y: 0 }}
+                transition={{ duration: 0.15 }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  width: '100%', height: 44, borderRadius: 8, border: 'none',
+                  background: '#E8323C', color: '#ffffff',
+                  fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(232,50,60,0.30)',
+                }}>
+                <IconArrow />
+                Sign In
+              </motion.button>
+            </form>
+
+            {/* Team only: signup link */}
+            <motion.div
+              initial={false}
+              animate={accountType === 'team' ? { height: 'auto', opacity: 1, marginTop: 16 } : { height: 0, opacity: 0, marginTop: 0 }}
+              transition={{ duration: 0.28, ease: 'easeInOut' }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div style={{ paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+                  Need partner access?{' '}
+                  <Link to="/signup" style={{ fontWeight: 700, color: '#E8323C', textDecoration: 'none' }}>
+                    Create account
+                  </Link>
+                </p>
+                <p style={{ marginTop: 4, fontSize: 11, color: 'rgba(255,255,255,0.22)' }}>
+                  Team accounts require Audit Manager approval.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Demo access */}
+            <div style={{ marginTop: 22, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <p style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.25)', marginBottom: 12,
+              }}>
+                Demo Access
+              </p>
+
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.50)', marginBottom: 6 }}>
+                Preview as role
+              </p>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                borderRadius: 8, padding: '9px 12px',
+              }}>
+                <span style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, display: 'flex' }}><IconUser /></span>
+                <select value={demoRole} onChange={(e) => setDemoRole(e.target.value)}
+                  style={{
+                    flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                    fontSize: 13, color: '#ffffff', cursor: 'pointer',
+                    appearance: 'none', WebkitAppearance: 'none',
                   }}>
                   {DEMO_ROLES.map((role) => (
                     <option key={role.value} value={role.value}
-                      style={{ background: '#0D1B2A', color: '#fff' }}>
+                      style={{ background: '#0b1530', color: '#fff' }}>
                       {role.label}
                     </option>
                   ))}
                 </select>
-
-                <motion.button type="button" onClick={handleEnterDemo}
-                  whileHover={{ y: -1, boxShadow: '0 4px 20px rgba(232,50,60,0.3)' }}
-                  whileTap={{ scale: 0.98 }}
-                  className="mt-4 h-11 w-full rounded-md bg-brand text-[13px] font-semibold text-white shadow-sm">
-                  Enter Demo
-                </motion.button>
+                <span style={{ color: 'rgba(255,255,255,0.35)', display: 'flex', pointerEvents: 'none' }}><IconChevron /></span>
               </div>
 
+              <motion.button type="button" onClick={handleEnterDemo}
+                whileHover={{ borderColor: 'rgba(255,255,255,0.35)', y: -1 }}
+                whileTap={{ scale: 0.98, y: 0 }}
+                transition={{ duration: 0.15 }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  marginTop: 12, width: '100%', height: 44, borderRadius: 8, cursor: 'pointer',
+                  background: 'transparent',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 600,
+                }}>
+                <IconDemo />
+                Enter Demo
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </PageTransition>
