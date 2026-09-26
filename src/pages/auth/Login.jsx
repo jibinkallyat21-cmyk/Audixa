@@ -141,10 +141,10 @@ export default function Login() {
                   <AnalytixMark size={44} />
                 </motion.div>
                 <div>
-                  <p className="text-2xl font-black tracking-[0.12em]" style={{ color: textPrimary }}>
+                  <p className="text-[26px] font-black leading-tight tracking-tight" style={{ color: textPrimary }}>
                     AUDIT <span className="text-brand">360</span>
                   </p>
-                  <p className="text-[11px] tracking-widest" style={{ color: textSecondary }}>by Analytix</p>
+                  <p className="text-[11px] tracking-tight" style={{ color: textSecondary }}>by Analytix</p>
                 </div>
               </div>
 
