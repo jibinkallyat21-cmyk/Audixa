@@ -5,6 +5,7 @@ import PageTransition from '../../components/shared/PageTransition'
 import { AnalytixMark } from '../../components/shared/AnalytixLogo'
 import { useTheme } from '../../context/ThemeContext'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
+import GlobalOperationsGlobe from '../../components/shared/GlobalOperationsGlobe'
 
 const DEMO_ROLES = ROLE_ORDER.map((id) => ({
   value: ROLES[id].id,
@@ -128,18 +129,23 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div className="flex min-h-screen w-full transition-colors duration-300" style={{ background: bgPage }}>
+      <div className="relative flex min-h-screen w-full overflow-hidden" style={{ background: '#060914' }}>
+        <style>{`@keyframes lp-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
 
-        {/* ── Left brand panel ── */}
-        <div
-          className="relative hidden min-h-screen w-[52%] flex-col overflow-hidden lg:flex"
-          style={{ background: bgPanel }}
-        >
-          <Background isDark={isDark} />
-          <style>{`@keyframes lp-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+        {/* ── 3D Globe — full-screen background ── */}
+        <div className="absolute inset-0 z-0">
+          <GlobalOperationsGlobe className="w-full h-full" />
+        </div>
+
+        {/* Dark veil so right panel and text stay readable */}
+        <div className="absolute inset-0 z-0 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, rgba(6,9,20,0.38) 0%, rgba(6,9,20,0.0) 52%, rgba(6,9,20,0.75) 52%)' }} />
+
+        {/* ── Left brand panel — transparent overlay ── */}
+        <div className="relative z-10 hidden min-h-screen w-[52%] flex-col lg:flex pointer-events-none">
 
           {/* Main brand content — centered */}
-          <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-16">
+          <div className="flex flex-1 flex-col items-center justify-center px-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -148,8 +154,6 @@ export default function Login() {
             >
               {/* Logo mark stacked above brand name */}
               <motion.div
-                whileHover={{ scale: 1.06, rotateY: 8 }}
-                transition={{ duration: 0.3 }}
                 style={{ transformStyle: 'preserve-3d' }}
                 className="mb-5"
               >
@@ -157,10 +161,12 @@ export default function Login() {
               </motion.div>
 
               {/* AUDIT 360 */}
-              <p className="text-[52px] font-black leading-none tracking-tight" style={{ color: textPrimary }}>
+              <p className="text-[52px] font-black leading-none tracking-tight"
+                style={{ color: '#ffffff', textShadow: '0 2px 24px rgba(0,0,0,0.7)' }}>
                 AUDIT <span className="text-brand">360</span>
               </p>
-              <p className="mt-2 text-[13px] font-medium tracking-widest" style={{ color: textSecondary }}>
+              <p className="mt-2 text-[13px] font-medium tracking-widest"
+                style={{ color: 'rgba(255,255,255,0.5)', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
                 by Analytix
               </p>
 
@@ -170,7 +176,10 @@ export default function Login() {
                   <motion.p
                     key={phrase}
                     className="text-[22px] font-bold leading-snug"
-                    style={{ color: i === 2 ? '#E8323C' : textPrimary }}
+                    style={{
+                      color: i === 2 ? '#E8323C' : '#ffffff',
+                      textShadow: '0 2px 12px rgba(0,0,0,0.65)',
+                    }}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.35 + i * 0.13, duration: 0.55, ease: EASE }}
@@ -183,7 +192,7 @@ export default function Login() {
               {/* About Analytix */}
               <motion.p
                 className="mt-8 max-w-[320px] text-[13px] leading-relaxed"
-                style={{ color: textSecondary }}
+                style={{ color: 'rgba(255,255,255,0.42)', textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.85, duration: 0.6 }}
@@ -194,9 +203,9 @@ export default function Login() {
           </div>
 
           {/* Trusted by — animated ticker */}
-          <div className="relative z-10 overflow-hidden pb-3">
+          <div className="overflow-hidden pb-3">
             <p className="mb-2 px-16 text-[10px] font-semibold uppercase tracking-[0.12em]"
-              style={{ color: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.22)' }}>
+              style={{ color: 'rgba(255,255,255,0.18)' }}>
               Trusted by
             </p>
             <div className="overflow-hidden">
@@ -205,11 +214,8 @@ export default function Login() {
                 style={{ animation: 'lp-ticker 30s linear infinite' }}
               >
                 {[...TRUSTED_COMPANIES, ...TRUSTED_COMPANIES].map((name, i) => (
-                  <span
-                    key={i}
-                    className="shrink-0 text-[12px] font-semibold"
-                    style={{ color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.28)' }}
-                  >
+                  <span key={i} className="shrink-0 text-[12px] font-semibold"
+                    style={{ color: 'rgba(255,255,255,0.28)' }}>
                     {name}
                   </span>
                 ))}
@@ -217,14 +223,17 @@ export default function Login() {
             </div>
           </div>
 
-          <p className="relative z-10 px-16 pb-8 pt-3 text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.25)' }}>
+          <p className="px-16 pb-8 pt-3 text-[11px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
             © 2026 Analytix. All rights reserved.
           </p>
         </div>
 
-        {/* ── Right login panel ── */}
-        <div className="relative flex w-full flex-1 flex-col transition-colors duration-300" style={{ background: bgPage }}>
-          <Background isDark={isDark} />
+        {/* ── Right login panel — dark glass ── */}
+        <div
+          className="relative z-10 flex w-full flex-1 flex-col"
+          style={{ background: 'rgba(6,9,20,0.82)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+        >
+          <Background isDark={true} />
 
           {canGoBack && (
             <button type="button" onClick={() => navigate(-1)}
@@ -240,22 +249,22 @@ export default function Login() {
               {/* Mobile logo */}
               <div className="mb-8 flex items-center gap-2 lg:hidden">
                 <AnalytixMark size={24} />
-                <span className="text-sm font-extrabold tracking-[0.12em]" style={{ color: textPrimary }}>
+                <span className="text-sm font-extrabold tracking-[0.12em]" style={{ color: '#ffffff' }}>
                   AUDIT <span className="text-brand">360</span>
                 </span>
               </div>
 
               <div className="mb-8">
-                <h2 className="text-[22px] font-bold leading-tight tracking-tight" style={{ color: textPrimary }}>
+                <h2 className="text-[22px] font-bold leading-tight tracking-tight" style={{ color: '#ffffff' }}>
                   Welcome back
                 </h2>
-                <p className="mt-1 text-sm" style={{ color: textSecondary }}>
+                <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   Sign in to your AUDIT 360 workspace
                 </p>
               </div>
 
               {/* Account type tabs */}
-              <div className="relative mb-8 flex gap-6" style={{ borderBottom: `1px solid ${border}` }}>
+              <div className="relative mb-8 flex gap-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 {[
                   { value: 'client', label: 'Client Portal' },
                   { value: 'team', label: 'Analytix Team' },
@@ -263,7 +272,7 @@ export default function Login() {
                   <button key={tab.value} type="button" onClick={() => setAccountType(tab.value)}
                     className="relative pb-3 text-sm transition-colors">
                     <span style={{
-                      color: accountType === tab.value ? textPrimary : textSecondary,
+                      color: accountType === tab.value ? '#ffffff' : 'rgba(255,255,255,0.4)',
                       fontWeight: accountType === tab.value ? 700 : 400,
                     }}>
                       {tab.label}
@@ -278,9 +287,9 @@ export default function Login() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                <FloatingInput isDark={isDark} id="email" label="Work Email" type="email"
+                <FloatingInput isDark={true} id="email" label="Work Email" type="email"
                   value={email} onChange={(e) => setEmail(e.target.value)} />
-                <FloatingInput isDark={isDark} id="password" label="Password"
+                <FloatingInput isDark={true} id="password" label="Password"
                   type={showPassword ? 'text' : 'password'}
                   value={password} onChange={(e) => setPassword(e.target.value)}
                   trailing={
@@ -313,37 +322,37 @@ export default function Login() {
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="overflow-hidden"
               >
-                <div className="pt-4 text-center" style={{ borderTop: `1px solid ${border}` }}>
-                  <p className="text-sm" style={{ color: textSecondary }}>
+                <div className="pt-4 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
                     Need partner access?{' '}
                     <Link to="/signup" className="font-semibold text-brand hover:underline">Create account</Link>
                   </p>
-                  <p className="mt-1 text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94A3B8' }}>
+                  <p className="mt-1 text-[11px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
                     Team accounts require Audit Manager approval.
                   </p>
                 </div>
               </motion.div>
 
               {/* Demo access */}
-              <div className="mt-8 pt-6" style={{ borderTop: `1px solid ${border}` }}>
+              <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                 <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em]"
-                  style={{ color: isDark ? 'rgba(255,255,255,0.25)' : '#94A3B8' }}>
+                  style={{ color: 'rgba(255,255,255,0.25)' }}>
                   Demo Access
                 </p>
                 <label htmlFor="demo-role" className="mb-1.5 block text-[11px] font-semibold"
-                  style={{ color: textSecondary }}>
+                  style={{ color: 'rgba(255,255,255,0.4)' }}>
                   Preview as Role
                 </label>
                 <select id="demo-role" value={demoRole} onChange={(e) => setDemoRole(e.target.value)}
                   className="w-full border-0 py-2 text-sm outline-none"
                   style={{
                     background: 'transparent',
-                    borderBottom: `1px solid ${border}`,
-                    color: textPrimary,
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    color: '#ffffff',
                   }}>
                   {DEMO_ROLES.map((role) => (
                     <option key={role.value} value={role.value}
-                      style={{ background: isDark ? '#0D1B2A' : '#fff', color: isDark ? '#fff' : '#0D1B2A' }}>
+                      style={{ background: '#0D1B2A', color: '#fff' }}>
                       {role.label}
                     </option>
                   ))}
