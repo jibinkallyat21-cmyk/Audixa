@@ -225,7 +225,7 @@ function UnderReviewModal({ docs, onClose }) {
 }
 
 /* ─── Request Meeting modal ─── */
-function RequestMeetingModal({ onClose }) {
+function RequestMeetingModal({ onClose, onRecord }) {
   const showToast = useToast()
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
@@ -243,6 +243,7 @@ function RequestMeetingModal({ onClose }) {
     e.preventDefault()
     if (!date || !topic) return
     showToast('Meeting request submitted — your engagement team will confirm shortly')
+    onRecord?.(`Meeting requested: "${topic}" on ${date}${time ? ' at ' + time : ''}`, 'blue')
     onClose()
   }
 
@@ -322,7 +323,7 @@ const ESCALATION_LEVELS = [
   { level: 4, label: 'FO Manager', description: 'Executive escalation. Notifies both FO Manager and management portal immediately. Available after 72 hours.', locked: true, waitHours: 72, managementVisible: true },
 ]
 
-function EscalationModal({ onClose }) {
+function EscalationModal({ onClose, onRecord }) {
   const showToast = useToast()
   const [selectedLevel, setSelectedLevel] = useState(null)
   const [issue, setIssue] = useState('')
@@ -333,6 +334,7 @@ function EscalationModal({ onClose }) {
     setSubmitted(true)
     setTimeout(() => {
       showToast(`Escalation submitted to ${selectedLevel.label} — your team has been notified`)
+      onRecord?.(`Issue escalated to ${selectedLevel.label}: "${issue.trim().slice(0, 60)}${issue.length > 60 ? '…' : ''}"`, 'amber')
       onClose()
     }, 1200)
   }
@@ -446,14 +448,71 @@ function EscalationModal({ onClose }) {
   )
 }
 
+/* ─── Auto-scrolling activity ticker ─── */
+function ActivityTicker({ events }) {
+  const trackRef = useRef(null)
+  const posRef   = useRef(0)
+  const rafRef   = useRef(null)
+
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    const SPEED = 0.4 // px per frame
+    const step = () => {
+      posRef.current += SPEED
+      const half = track.scrollHeight / 2
+      if (posRef.current >= half) posRef.current = 0
+      track.style.transform = `translateY(-${posRef.current}px)`
+      rafRef.current = requestAnimationFrame(step)
+    }
+    rafRef.current = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [events])
+
+  const rows = [...events, ...events] // duplicate for seamless loop
+
+  return (
+    <div className="relative flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+      {/* fade edges */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6" style={{ background: 'linear-gradient(to bottom, var(--c-card), transparent)' }} />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6" style={{ background: 'linear-gradient(to top, var(--c-card), transparent)' }} />
+      <div ref={trackRef} className="will-change-transform">
+        {rows.map((event, i) => {
+          const Icon = EVENT_ICON[event.icon] || FileText
+          const color = EVENT_COLOR[event.icon] || '#6366F1'
+          return (
+            <div key={`${event.id}-${i}`} className="flex items-start gap-3 px-4 py-2.5" style={{ borderBottom: 'rgba(255,255,255,0.04) 1px solid' }}>
+              <span className="mt-0.5 shrink-0" style={{ color }}>
+                <Icon className="h-3.5 w-3.5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-white/80 leading-snug">{event.description}</p>
+                <p className="mt-0.5 text-[10px]" style={{ color: 'var(--c-subtle)' }}>{event.timestamp}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /* ─── Main Dashboard ─── */
 export default function ClientDashboard() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const fyData = getFYData(selectedFY)
-  const recentEvents = getActivityEvents().slice(0, Math.max(5, 8))
+  const baseEvents = getActivityEvents().slice(0, 8)
+  const [liveEvents, setLiveEvents] = useState([])
+  const recentEvents = [...liveEvents, ...baseEvents]
   const [meetingModal, setMeetingModal] = useState(false)
   const [escalationModal, setEscalationModal] = useState(false)
   const [underReviewModal, setUnderReviewModal] = useState(false)
+
+  const recordEvent = (description, icon = 'blue') => {
+    const now = new Date()
+    const timestamp = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ' · Just now'
+    setLiveEvents(prev => [{ id: `live-${Date.now()}`, description, icon, timestamp, section: 'Milestones' }, ...prev])
+  }
 
   return (
     <ClientLayout title="Engagement Dashboard" fullHeight>
@@ -568,23 +627,7 @@ export default function ClientDashboard() {
           {/* ── RIGHT COLUMN ── */}
           <div className="flex w-72 shrink-0 flex-col gap-4 overflow-y-auto">
 
-            {/* Engagement Partner — top of right column */}
-            <div className="rounded-2xl p-4 shrink-0" style={{ background: 'rgba(230,57,70,0.07)', border: '1px solid rgba(230,57,70,0.18)' }}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-brand/70 mb-2">Engagement Partner</p>
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white bg-brand/20 shrink-0">{fyData.partner.initials}</div>
-                <div>
-                  <p className="text-sm font-bold text-white">{fyData.partner.firm}</p>
-                  <p className="text-xs" style={{ color: D.muted }}>{fyData.partner.name}</p>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-white/40" style={{ background: 'rgba(255,255,255,0.06)' }}>Statutory Audit</span>
-                    <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-emerald" style={{ background: 'rgba(16,185,129,0.12)' }}>Active</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Assigned Engagement Team */}
+            {/* Assigned Audit Team — top of right column */}
             <div className="rounded-2xl p-4 shrink-0" style={{ background: D.card, border: `1px solid ${D.border}` }}>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Assigned Audit Team</p>
@@ -614,29 +657,32 @@ export default function ClientDashboard() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Request a Meeting — between team and activity */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setMeetingModal(true)}
+              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white transition-colors"
+              style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}
+            >
+              <Calendar className="h-4 w-4 text-indigo-400" />
+              Request a Meeting
+            </motion.button>
+
+            {/* Recent Activity — auto-scrolling ticker */}
             <div className="flex min-h-0 flex-1 flex-col rounded-2xl overflow-hidden" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-              <div className="px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${D.border}` }}>
+              <div className="px-4 py-3 shrink-0 flex items-center justify-between" style={{ borderBottom: `1px solid ${D.border}` }}>
                 <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Recent Activity</p>
+                {liveEvents.length > 0 && (
+                  <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold text-emerald" style={{ background: 'rgba(16,185,129,0.12)' }}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald animate-pulse inline-block" />
+                    Live
+                  </span>
+                )}
               </div>
-              <div className="flex-1 overflow-y-auto px-4 py-2">
-                {recentEvents.map((event) => {
-                  const Icon = EVENT_ICON[event.icon] || FileText
-                  const color = EVENT_COLOR[event.icon] || '#6366F1'
-                  return (
-                    <div key={event.id} className="flex items-start gap-3 py-2.5" style={{ borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
-                      <span className="mt-0.5 shrink-0" style={{ color }}>
-                        <Icon className="h-3.5 w-3.5" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-white/80 leading-snug">{event.description}</p>
-                        <p className="mt-0.5 text-[10px]" style={{ color: D.subtle }}>{event.timestamp}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-              {/* Activity log link — always visible at bottom */}
+              <ActivityTicker events={recentEvents} />
               <div className="shrink-0 px-4 py-3" style={{ borderTop: `1px solid ${D.border}` }}>
                 <Link to="/client/activity" className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand/80 transition-colors">
                   <LineChart className="h-3.5 w-3.5" />
@@ -651,8 +697,8 @@ export default function ClientDashboard() {
       </PageTransition>
 
       <AnimatePresence>
-        {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} />}
-        {escalationModal && <EscalationModal onClose={() => setEscalationModal(false)} />}
+        {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} onRecord={recordEvent} />}
+        {escalationModal && <EscalationModal onClose={() => setEscalationModal(false)} onRecord={recordEvent} />}
         {underReviewModal && <UnderReviewModal docs={UNDER_REVIEW_DOCS} onClose={() => setUnderReviewModal(false)} />}
       </AnimatePresence>
     </ClientLayout>
