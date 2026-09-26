@@ -368,12 +368,12 @@ function ClientHeader({ title }) {
       className="client-header flex h-[54px] w-full shrink-0 items-center gap-3 px-6"
       style={{ background: D.headerBg, borderBottom: `1px solid ${D.border}` }}
     >
-      {/* Left — brand */}
+      {/* Left — client name */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <HamburgerButton />
         <AnalytixMark size={22} className="shrink-0" />
-        <span className={`hidden font-black tracking-[0.1em] sm:inline text-sm ${tx}`}>
-          AUDIT <span className="text-brand">360</span>
+        <span className={`hidden truncate font-bold sm:inline text-sm ${tx}`}>
+          {clientPortal.clientName}
         </span>
       </div>
 

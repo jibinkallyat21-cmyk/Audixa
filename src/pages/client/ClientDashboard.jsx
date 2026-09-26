@@ -526,11 +526,7 @@ export default function ClientDashboard() {
               <motion.div key={selectedFY} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="flex flex-col gap-4">
 
                 {/* Header strip */}
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-3.5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Engagement Dashboard</p>
-                    <p className="mt-0.5 text-lg font-bold text-white">{clientPortal.clientName}</p>
-                  </div>
+                <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl px-5 py-3.5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
                   <div className="flex items-center gap-3">
                     <span className="rounded-full px-3 py-1 text-xs font-mono font-semibold text-white/50" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${D.border}` }}>
                       {fyData.engagementRef}
@@ -592,19 +588,6 @@ export default function ClientDashboard() {
                   <div className="h-12 w-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.15)' }}>
                     <Eye className="h-6 w-6 text-indigo-400" />
                   </div>
-                </motion.button>
-
-                {/* Request Meeting */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  onClick={() => setMeetingModal(true)}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold text-white transition-colors"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${D.border}` }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.09)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                >
-                  <Calendar className="h-4 w-4 text-brand" />
-                  Request a Meeting with Your Engagement Team
                 </motion.button>
 
                 {/* Escalate Issue */}
