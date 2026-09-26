@@ -1,13 +1,20 @@
 import { useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 
+const CLIENT_GREETING_KEY = 'audit360_client_greeted_v3'
+
 export default function ExitDemoButton() {
   const navigate = useNavigate()
+
+  const handleExit = () => {
+    try { sessionStorage.removeItem(CLIENT_GREETING_KEY) } catch {}
+    navigate('/login')
+  }
 
   return (
     <button
       type="button"
-      onClick={() => navigate('/login')}
+      onClick={handleExit}
       className="flex items-center rounded-[20px] border font-medium text-white transition-colors"
       style={{
         borderColor: 'rgba(255,255,255,0.15)',

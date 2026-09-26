@@ -7,7 +7,6 @@ import {
   AlertTriangle, ChevronUp, Clock, Eye,
 } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
-import ClientGreeting from '../../components/client/ClientGreeting'
 import PageTransition from '../../components/shared/PageTransition'
 import LifecycleStepper from '../../components/shared/LifecycleStepper'
 import { clientPortal } from '../../data/sampleData'
@@ -603,7 +602,6 @@ export default function ClientDashboard() {
 
   return (
     <ClientLayout title="Engagement Dashboard" fullHeight>
-      <ClientGreeting name="Karim Rahman" company="Kingdom Retail Holdings LLC" />
       <PageTransition className="flex-1 min-h-0 h-full">
         <div className="flex h-full gap-5">
 
