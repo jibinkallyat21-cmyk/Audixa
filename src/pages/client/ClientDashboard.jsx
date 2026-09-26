@@ -48,6 +48,8 @@ function getFYData(fy) {
   if (fy === 'FY2023') return {
     stats: { totalRequirements: 78, documentsAccepted: 78, pendingAction: 0, openQueries: 0, underVerification: 0 },
     engagementRef: ENGAGEMENT_REFS['FY2023'],
+    partner: { initials: 'MI', name: 'Man Ibrahim Alshinqiti', firm: 'Man Ibrahim Alshinqiti CPA Firm' },
+    team: AUDIT_TEAM_FY2023,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
       { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
@@ -60,6 +62,8 @@ function getFYData(fy) {
   if (fy === 'FY2022') return {
     stats: { totalRequirements: 72, documentsAccepted: 72, pendingAction: 0, openQueries: 0, underVerification: 0 },
     engagementRef: ENGAGEMENT_REFS['FY2022'],
+    partner: { initials: 'AB', name: 'Ashraf Bassas', firm: 'Ashraf Bassas CPA Firm' },
+    team: AUDIT_TEAM_FY2022,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
       { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
@@ -72,6 +76,8 @@ function getFYData(fy) {
   return {
     stats: { totalRequirements: clientPortal.stats.totalRequirements, documentsAccepted: clientPortal.stats.documentsAccepted, pendingAction: clientPortal.stats.pendingAction, openQueries: clientPortal.stats.openQueries, underVerification: 11 },
     engagementRef: ENGAGEMENT_REFS['FY2024'],
+    partner: { initials: 'AB', name: 'Ashraf Bassas', firm: 'Ashraf Bassas CPA Firm' },
+    team: AUDIT_TEAM_FY2024,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
       { id: 'reqs', label: 'Requirements Submission', status: 'active' },
@@ -92,9 +98,17 @@ const STAGE_TOOLTIPS = {
   'Regulatory Filing': 'Audited financials filed with ZATCA / MISA.',
 }
 
-const AUDIT_TEAM = [
+const AUDIT_TEAM_FY2024 = [
   { initials: 'SR', name: 'Sana Rashid',   role: 'Audit Lead',       online: true },
   { initials: 'LK', name: 'Layla Khalid',  role: 'Audit Associate',  online: false },
+]
+const AUDIT_TEAM_FY2023 = [
+  { initials: 'AH', name: 'Ali Hussain',   role: 'Audit Lead',       online: false },
+  { initials: 'FO', name: 'Fatima Omar',   role: 'Audit Associate',  online: false },
+]
+const AUDIT_TEAM_FY2022 = [
+  { initials: 'KM', name: 'Khalid Mansour', role: 'Audit Lead',       online: false },
+  { initials: 'NB', name: 'Noura Bilal',    role: 'Audit Associate',  online: false },
 ]
 
 const UNDER_REVIEW_DOCS = [
@@ -444,7 +458,7 @@ export default function ClientDashboard() {
   return (
     <ClientLayout title="Engagement Dashboard" fullHeight>
       <ClientGreeting name="Karim Rahman" company="Kingdom Retail Holdings LLC" />
-      <PageTransition>
+      <PageTransition className="flex-1 min-h-0 h-full">
         <div className="flex h-full gap-5">
 
           {/* ── LEFT COLUMN ── */}
@@ -554,41 +568,44 @@ export default function ClientDashboard() {
           {/* ── RIGHT COLUMN ── */}
           <div className="flex w-72 shrink-0 flex-col gap-4 overflow-y-auto">
 
-            {/* Assigned Engagement Team — all auditors */}
-            <div className="rounded-2xl p-4 shrink-0" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Assigned Audit Team</p>
-                <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-emerald" style={{ background: 'rgba(16,185,129,0.15)' }}>{AUDIT_TEAM.filter(m => m.online).length} Online</span>
-              </div>
-              <div className="space-y-2">
-                {AUDIT_TEAM.map((m) => (
-                  <div key={m.initials} className="flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <div className="relative shrink-0">
-                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: 'rgba(255,255,255,0.1)' }}>{m.initials}</div>
-                      <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2`} style={{ background: m.online ? '#10B981' : '#475569', borderColor: D.card }} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-semibold text-white/90">{m.name}</p>
-                      <p className="truncate text-[10px]" style={{ color: D.subtle }}>{m.role}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Lead partner highlight */}
+            {/* Engagement Partner — top of right column */}
             <div className="rounded-2xl p-4 shrink-0" style={{ background: 'rgba(230,57,70,0.07)', border: '1px solid rgba(230,57,70,0.18)' }}>
               <p className="text-xs font-semibold uppercase tracking-widest text-brand/70 mb-2">Engagement Partner</p>
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white bg-brand/20 shrink-0">TA</div>
+                <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white bg-brand/20 shrink-0">{fyData.partner.initials}</div>
                 <div>
-                  <p className="text-sm font-bold text-white">Tariq Al-Harbi</p>
-                  <p className="text-xs" style={{ color: D.muted }}>Al Bassam & Co. Chartered Public Accountants</p>
+                  <p className="text-sm font-bold text-white">{fyData.partner.firm}</p>
+                  <p className="text-xs" style={{ color: D.muted }}>{fyData.partner.name}</p>
                   <div className="mt-1 flex flex-wrap gap-1">
                     <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-white/40" style={{ background: 'rgba(255,255,255,0.06)' }}>Statutory Audit</span>
                     <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-emerald" style={{ background: 'rgba(16,185,129,0.12)' }}>Active</span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Assigned Engagement Team */}
+            <div className="rounded-2xl p-4 shrink-0" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Assigned Audit Team</p>
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-emerald" style={{ background: 'rgba(16,185,129,0.15)' }}>{fyData.team.filter(m => m.online).length} Online</span>
+              </div>
+              <div className="space-y-2">
+                {fyData.team.map((m) => (
+                  <div key={m.initials} className="flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <div className="relative shrink-0">
+                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: 'rgba(255,255,255,0.1)' }}>{m.initials}</div>
+                      <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2" style={{ background: m.online ? '#10B981' : '#475569', borderColor: D.card }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-semibold text-white/90">{m.name}</p>
+                      <p className="truncate text-[10px]" style={{ color: D.subtle }}>{m.role}</p>
+                    </div>
+                    <span className="text-[9px] font-semibold" style={{ color: m.online ? '#10B981' : D.subtle }}>
+                      {m.online ? 'Online' : 'Offline'}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 

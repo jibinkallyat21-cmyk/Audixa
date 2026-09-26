@@ -11,8 +11,8 @@ export const currentUser = {
 }
 
 export const auditors = [
-  { code: 'ABCPA', name: 'Al Bassam & Co. Chartered Public Accountants' },
-  { code: 'MISCPA', name: 'Malik Ibrahim Saleh CPA Firm' },
+  { code: 'ABCPA', name: 'Ashraf Bassas CPA Firm' },
+  { code: 'MISCPA', name: 'Man Ibrahim Alshinqiti CPA Firm' },
 ]
 
 export const teamMembers = [

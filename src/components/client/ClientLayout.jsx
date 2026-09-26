@@ -334,7 +334,7 @@ function ClientLayoutInner({ title, children, fullHeight }) {
         <MobileSidebarWrap><ClientSidebar /></MobileSidebarWrap>
         <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
           <ClientHeader title={title} />
-          <main className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden' : ''}`} style={{ background: D.pageBg }}>
+          <main className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden flex flex-col' : ''}`} style={{ background: D.pageBg }}>
             {children}
           </main>
         </div>
