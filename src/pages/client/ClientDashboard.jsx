@@ -99,16 +99,25 @@ const STAGE_TOOLTIPS = {
 }
 
 const AUDIT_TEAM_FY2024 = [
-  { initials: 'SR', name: 'Sana Rashid',   role: 'Audit Lead',       online: true },
-  { initials: 'LK', name: 'Layla Khalid',  role: 'Audit Associate',  online: false },
+  { initials: 'SR', name: 'Sana Rashid',       role: 'Audit Lead',          online: true  },
+  { initials: 'LK', name: 'Layla Khalid',      role: 'Audit Associate',     online: false },
+  { initials: 'MR', name: 'Mohammed Riyad',    role: 'Senior Auditor',      online: true  },
+  { initials: 'HF', name: 'Hana Fadel',        role: 'Audit Associate',     online: false },
+  { initials: 'YA', name: 'Yusuf Al-Amri',    role: 'Tax Specialist',      online: false },
 ]
 const AUDIT_TEAM_FY2023 = [
-  { initials: 'AH', name: 'Ali Hussain',   role: 'Audit Lead',       online: false },
-  { initials: 'FO', name: 'Fatima Omar',   role: 'Audit Associate',  online: false },
+  { initials: 'AH', name: 'Ali Hussain',       role: 'Audit Lead',          online: false },
+  { initials: 'FO', name: 'Fatima Omar',       role: 'Audit Associate',     online: false },
+  { initials: 'ZN', name: 'Zaid Nasser',       role: 'Senior Auditor',      online: false },
+  { initials: 'RA', name: 'Rima Al-Dosari',    role: 'Audit Associate',     online: false },
+  { initials: 'BS', name: 'Badr Saleem',       role: 'Tax Specialist',      online: false },
 ]
 const AUDIT_TEAM_FY2022 = [
-  { initials: 'KM', name: 'Khalid Mansour', role: 'Audit Lead',       online: false },
-  { initials: 'NB', name: 'Noura Bilal',    role: 'Audit Associate',  online: false },
+  { initials: 'KM', name: 'Khalid Mansour',    role: 'Audit Lead',          online: false },
+  { initials: 'NB', name: 'Noura Bilal',       role: 'Audit Associate',     online: false },
+  { initials: 'TH', name: 'Tariq Hamdan',      role: 'Senior Auditor',      online: false },
+  { initials: 'SA', name: 'Sara Al-Otaibi',    role: 'Audit Associate',     online: false },
+  { initials: 'WQ', name: 'Waleed Qassim',     role: 'Tax Specialist',      online: false },
 ]
 
 const UNDER_REVIEW_DOCS = [
@@ -450,7 +459,7 @@ function EscalationModal({ onClose }) {
 export default function ClientDashboard() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const fyData = getFYData(selectedFY)
-  const recentEvents = getActivityEvents().slice(0, 10)
+  const recentEvents = getActivityEvents().slice(0, Math.max(5, 8))
   const [meetingModal, setMeetingModal] = useState(false)
   const [escalationModal, setEscalationModal] = useState(false)
   const [underReviewModal, setUnderReviewModal] = useState(false)

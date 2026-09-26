@@ -66,66 +66,88 @@ function RejectionTooltip({ reason }) {
   )
 }
 
+const D = {
+  card: 'var(--c-card)',
+  border: 'var(--c-border)',
+  text: 'var(--c-text)',
+  muted: 'var(--c-muted)',
+  subtle: 'var(--c-subtle)',
+  page: 'var(--c-page)',
+}
+
 function TableRow({ row }) {
   const showToast = useToast()
+  const { isDark } = useTheme()
   const [hovered, setHovered] = useState(false)
   const isRejected = row.status === 'Rejected'
   const isAccepted = row.status === 'Accepted'
   const canUpload = ['Pending Client', 'Rejected', 'Action Required'].includes(row.status)
 
+  const rowBg = hovered
+    ? isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'
+    : 'transparent'
+
+  // All action buttons share the same fixed width & height so they look uniform
+  const btnBase = 'w-full flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-colors'
+
   return (
     <div
-      className="relative"
+      className="relative transition-colors"
+      style={{ borderBottom: `1px solid ${D.border}`, background: rowBg }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className={`flex items-center gap-3 px-4 py-3.5 text-sm transition-colors min-h-[52px] ${hovered ? 'bg-slate-50/80' : ''}`}>
+      <div className="flex items-center gap-3 px-4 py-3 min-h-[52px]">
         {/* Ref */}
-        <span className="w-20 shrink-0 font-mono text-xs text-slate-400">{row.ref}</span>
+        <span className="w-20 shrink-0 font-mono text-xs" style={{ color: D.subtle }}>{row.ref}</span>
         {/* Name */}
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-navy truncate">{row.name}</p>
+          <p className="text-sm font-semibold truncate" style={{ color: D.text }}>{row.name}</p>
           {row.tag && <span className="mt-0.5 inline-block text-[10px] font-semibold text-amber">{row.tag}</span>}
         </div>
         {/* What We Need */}
-        <p className="hidden w-48 shrink-0 text-xs text-slate-500 lg:block">{row.plainDesc}</p>
-        {/* Status */}
-        <div className="w-28 shrink-0">
+        <p className="hidden w-44 shrink-0 text-xs truncate lg:block" style={{ color: D.muted }}>{row.plainDesc}</p>
+        {/* Status — fixed width so all pills align */}
+        <div className="w-40 shrink-0 flex items-center">
           <StatusPill status={row.status} />
         </div>
         {/* File */}
-        <div className="hidden w-40 shrink-0 md:block">
+        <div className="hidden w-36 shrink-0 md:block">
           {row.filename ? (
-            <span className="truncate text-xs text-slate-600">{row.filename}</span>
+            <span className="block truncate text-xs" style={{ color: D.muted }}>{row.filename}</span>
           ) : (
-            <span className="text-xs text-slate-400">Not yet uploaded</span>
+            <span className="text-xs" style={{ color: D.subtle }}>Not yet uploaded</span>
           )}
         </div>
-        {/* Action */}
+        {/* Action — fixed width, buttons fill it so they all look the same size */}
         <div className="w-28 shrink-0">
           {isAccepted ? (
             <button
-              onClick={() => showToast(`Download starting — ${row.filename}`)}
-              className="flex items-center gap-1 rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-navy hover:bg-slate-50"
+              onClick={() => showToast(`Downloading — ${row.filename}`)}
+              className={btnBase}
+              style={{ border: `1px solid ${D.border}`, color: D.text }}
             >
               <Eye className="h-3 w-3" /> View
             </button>
           ) : canUpload ? (
             <button
               onClick={() => showToast('File picker opened — select your document')}
-              className="flex items-center gap-1 rounded-md bg-brand px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]"
+              className={`${btnBase} bg-brand text-white hover:bg-[#D12C35]`}
             >
               <Upload className="h-3 w-3" />
               {isRejected ? 'Re-upload' : 'Upload'}
             </button>
           ) : (
-            <button className="rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50">
+            <button
+              className={btnBase}
+              style={{ border: `1px solid ${D.border}`, color: D.muted }}
+            >
               Details
             </button>
           )}
         </div>
       </div>
-      {/* Rejection reason tooltip on hover */}
+      {/* Rejection reason on hover */}
       <AnimatePresence>
         {isRejected && hovered && row.alert && (
           <div className="px-4 pb-2">
@@ -321,8 +343,8 @@ export default function ClientDocuments() {
       <PageTransition>
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold text-navy">PBC Requirement List</h1>
-            <span className="rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">KSA-2024-8841</span>
+            <h1 className="text-2xl font-bold" style={{ color: D.text }}>PBC Requirement List</h1>
+            <span className="rounded-md px-3 py-1 text-xs font-semibold" style={{ border: `1px solid ${D.border}`, color: D.muted, background: D.card }}>KSA-2024-8841</span>
           </div>
 
           {/* Bento stat cards */}
@@ -339,12 +361,12 @@ export default function ClientDocuments() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
-                className={`${card.span} rounded-xl border border-slate-200 ${card.bg} p-4 shadow-sm backdrop-blur-sm`}
-                style={{ backdropFilter: 'blur(8px)' }}
+                className={`${card.span} rounded-xl p-4 shadow-sm`}
+                style={{ background: D.card, border: `1px solid ${D.border}` }}
               >
-                <p className="text-xs font-semibold text-slate-500">{card.label}</p>
+                <p className="text-xs font-semibold" style={{ color: D.subtle }}>{card.label}</p>
                 <p className={`mt-1 text-3xl font-black ${card.color}`}>{card.value}</p>
-                {card.sub && <p className="text-[10px] text-slate-400 mt-0.5">{card.sub}</p>}
+                {card.sub && <p className="text-[10px] mt-0.5" style={{ color: D.muted }}>{card.sub}</p>}
               </motion.div>
             ))}
           </div>
@@ -357,7 +379,8 @@ export default function ClientDocuments() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search documents..."
-                className="rounded-lg border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-navy w-64"
+                className="rounded-lg py-2 pl-9 pr-4 text-sm outline-none w-64"
+                style={{ border: `1px solid ${D.border}`, background: D.card, color: D.text }}
               />
             </div>
             <button
@@ -369,30 +392,28 @@ export default function ClientDocuments() {
           </div>
 
           {/* Table */}
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
             {/* Table header */}
-            <div className="hidden items-center gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2.5 md:flex">
-              <span className="w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Ref #</span>
-              <span className="flex-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Document Name</span>
-              <span className="hidden w-48 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 lg:block">Description</span>
-              <span className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Status</span>
-              <span className="hidden w-40 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 md:block">Submitted File</span>
-              <span className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Action</span>
+            <div className="hidden items-center gap-3 px-4 py-2.5 md:flex" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderBottom: `1px solid ${D.border}` }}>
+              <span className="w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide" style={{ color: D.subtle }}>Ref #</span>
+              <span className="flex-1 text-[10px] font-semibold uppercase tracking-wide" style={{ color: D.subtle }}>Document Name</span>
+              <span className="hidden w-44 shrink-0 text-[10px] font-semibold uppercase tracking-wide lg:block" style={{ color: D.subtle }}>Description</span>
+              <span className="w-40 shrink-0 text-[10px] font-semibold uppercase tracking-wide" style={{ color: D.subtle }}>Status</span>
+              <span className="hidden w-36 shrink-0 text-[10px] font-semibold uppercase tracking-wide md:block" style={{ color: D.subtle }}>Submitted File</span>
+              <span className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide" style={{ color: D.subtle }}>Action</span>
             </div>
 
             {filteredRows.map((row, idx) => {
               if (row.type === 'category') {
                 return (
-                  <div key={row.id} className={`flex items-center justify-between px-5 py-2.5 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
-                    <span className={`text-xs font-bold uppercase tracking-wide ${isDark ? 'text-white' : 'text-slate-700'}`}>{row.title}</span>
-                    <span className={`text-xs ${isDark ? 'text-white/60' : 'text-slate-500'}`}>{row.completed} of {row.total} complete</span>
+                  <div key={row.id} className="flex items-center justify-between px-5 py-2.5" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#E2E8F0', borderBottom: `1px solid ${D.border}` }}>
+                    <span className="text-xs font-bold uppercase tracking-wide" style={{ color: D.text }}>{row.title}</span>
+                    <span className="text-xs" style={{ color: D.muted }}>{row.completed} of {row.total} complete</span>
                   </div>
                 )
               }
               return (
-                <div key={row.ref} className={idx % 2 === 0 ? '' : 'bg-slate-50/40'}>
-                  <TableRow row={row} />
-                </div>
+                <TableRow key={row.ref} row={row} />
               )
             })}
           </div>
