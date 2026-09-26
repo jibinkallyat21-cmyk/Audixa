@@ -214,28 +214,24 @@ function PBCRing({ total, accepted, fy, hold }) {
     <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden" style={{ background: D.card, border: `1px solid ${D.border}` }}>
       {/* Left slot — On Hold callout */}
       {hold?.active ? (
-        <div className="flex flex-col justify-center px-5 py-4 flex-1 min-w-0" style={{ borderRight: `1px solid rgba(245,158,11,0.2)`, background: 'rgba(245,158,11,0.05)' }}>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Lock className="h-3.5 w-3.5 text-amber shrink-0" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber">
-              {hold.reason === 'payment' ? 'Payment Pending' : hold.reason === 'no-response' ? 'No Response' : 'Awaiting Documents'}
-            </p>
+        <div className="flex flex-col justify-center px-5 py-4 flex-1 min-w-0" style={{ borderRight: `1px solid ${hold.reason === 'payment' ? 'rgba(230,57,70,0.2)' : 'rgba(245,158,11,0.2)'}`, background: hold.reason === 'payment' ? 'rgba(230,57,70,0.06)' : 'rgba(245,158,11,0.05)' }}>
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <Lock className="h-3.5 w-3.5 shrink-0" style={{ color: hold.reason === 'payment' ? '#F87171' : '#FCD34D' }} />
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: hold.reason === 'payment' ? '#F87171' : '#FCD34D' }}>On Hold</p>
           </div>
-          <p className="text-xs leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
             {hold.reason === 'payment'
-              ? 'Outstanding payment required to continue the engagement.'
+              ? 'Your file is on hold due to payment.'
               : hold.reason === 'no-response'
-              ? 'Please respond to the open audit queries.'
-              : 'The following items are still required:'}
+              ? 'Your file is on hold — no response & documents are pending.'
+              : 'Your file is on hold — documents are pending.'}
           </p>
-          {hold.items?.slice(0, 3).map((item, i) => (
-            <div key={i} className="flex items-start gap-2 mb-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber shrink-0 mt-1.5" />
-              <span className="text-xs text-white/65 leading-snug">{item}</span>
-            </div>
-          ))}
-          <Link to="/client/documents" className="flex items-center gap-1 text-[11px] font-semibold text-amber mt-3 hover:opacity-75 transition-opacity">
-            View Requirement List <ChevronRight className="h-3 w-3" />
+          <Link
+            to={hold.reason === 'no-response' ? '/client/queries' : '/client/documents'}
+            className="flex items-center gap-1 text-[11px] font-semibold mt-3 hover:opacity-75 transition-opacity"
+            style={{ color: hold.reason === 'payment' ? '#F87171' : '#FCD34D' }}
+          >
+            View full pending list <ChevronRight className="h-3 w-3" />
           </Link>
         </div>
       ) : (

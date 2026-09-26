@@ -285,6 +285,59 @@ function ClientSidebar() {
   )
 }
 
+/* ─── 3D Client name badge ─── */
+function ClientNameBadge() {
+  const ref = useRef(null)
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
+  const rotateX = useSpring(useTransform(rawY, [-0.5, 0.5], [8, -8]),  { stiffness: 260, damping: 24 })
+  const rotateY = useSpring(useTransform(rawX, [-0.5, 0.5], [-10, 10]), { stiffness: 260, damping: 24 })
+  const glowX   = useSpring(useTransform(rawX, [-0.5, 0.5], [0, 100]),  { stiffness: 200, damping: 20 })
+  const glowY   = useSpring(useTransform(rawY, [-0.5, 0.5], [0, 100]),  { stiffness: 200, damping: 20 })
+
+  const handleMove = (e) => {
+    const r = ref.current?.getBoundingClientRect()
+    if (!r) return
+    rawX.set((e.clientX - r.left) / r.width - 0.5)
+    rawY.set((e.clientY - r.top)  / r.height - 0.5)
+  }
+  const handleLeave = () => { rawX.set(0); rawY.set(0) }
+
+  return (
+    <div style={{ perspective: '500px' }} className="hidden sm:block">
+      <motion.div
+        ref={ref}
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
+        style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        className="relative flex items-center gap-2.5 rounded-xl px-3.5 py-1.5 select-none overflow-hidden cursor-default"
+        whileHover={{ scale: 1.03 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      >
+        {/* Gradient background */}
+        <div className="pointer-events-none absolute inset-0 rounded-xl" style={{
+          background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(99,102,241,0.12) 60%, rgba(16,185,129,0.07) 100%)',
+          border: '1px solid rgba(16,185,129,0.25)',
+        }} />
+        {/* Moving radial highlight */}
+        <motion.div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 hover:opacity-100" style={{
+          background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(255,255,255,0.10) 0%, transparent 60%)`,
+        }} />
+        {/* Icon */}
+        <div className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white"
+          style={{ background: 'rgba(16,185,129,0.45)', boxShadow: '0 0 8px rgba(16,185,129,0.45)' }}>
+          KR
+        </div>
+        {/* Name */}
+        <div className="relative z-10 flex flex-col leading-tight">
+          <span className="text-[8px] uppercase tracking-widest font-semibold" style={{ color: 'rgba(16,185,129,0.8)' }}>Client</span>
+          <span className="text-[11px] font-bold text-white/90 whitespace-nowrap">Kingdom Retail Holdings LLC</span>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 /* ─── 3D Engagement Partner badge ─── */
 function PartnerBadge() {
   const { partner } = useClientFY()
@@ -368,9 +421,10 @@ function ClientHeader({ title }) {
       className="client-header flex h-[54px] w-full shrink-0 items-center gap-3 px-6"
       style={{ background: D.headerBg, borderBottom: `1px solid ${D.border}` }}
     >
-      {/* Left — hamburger only */}
+      {/* Left — hamburger + client name */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <HamburgerButton />
+        <ClientNameBadge />
       </div>
 
       {/* Center — current page title */}
