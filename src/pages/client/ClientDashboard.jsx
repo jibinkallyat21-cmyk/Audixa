@@ -52,7 +52,7 @@ function getFYData(fy) {
     team: AUDIT_TEAM_FY2023,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
+      { id: 'tb-acceptance', label: 'TB Acceptance', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
       { id: 'draft', label: 'Draft FS Review', status: 'completed' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
@@ -66,7 +66,7 @@ function getFYData(fy) {
     team: AUDIT_TEAM_FY2022,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
+      { id: 'tb-acceptance', label: 'TB Acceptance', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
       { id: 'draft', label: 'Draft FS Review', status: 'completed' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
@@ -80,7 +80,7 @@ function getFYData(fy) {
     team: AUDIT_TEAM_FY2024,
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'reqs', label: 'Requirements Submission', status: 'active' },
+      { id: 'tb-acceptance', label: 'TB Acceptance', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'active' },
       { id: 'draft', label: 'Draft FS Review', status: 'upcoming' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'upcoming' },
@@ -91,8 +91,8 @@ function getFYData(fy) {
 
 const STAGE_TOOLTIPS = {
   'Engagement Acceptance': 'Engagement letter issued and agreed; audit terms confirmed.',
-  'Requirements Submission': 'Client submits required documents — audit field work may begin in parallel as documents are received.',
-  'Audit Field Work': 'Audit team performs substantive procedures and testing.',
+  'TB Acceptance': 'Trial balance submitted in prescribed format and formally accepted by the audit team as fit for audit procedures.',
+  'Audit Field Work': 'Audit team performs substantive procedures and analytical testing.',
   'Draft FS Review': 'Client reviews draft financial statements for accuracy.',
   'Sign-off & Completion': 'Partner signs off; audit report finalised.',
   'Regulatory Filing': 'Audited financials filed with ZATCA / MISA.',
