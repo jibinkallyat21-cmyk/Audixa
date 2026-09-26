@@ -153,11 +153,30 @@ function QuickChatFloat() {
   const bottomRef = useRef(null)
   const unread = 1
 
+  const panelRef = useRef(null)
   const getM = useCallback((id) => CHAT_GROUP.find((m) => m.id === id), [])
 
   useEffect(() => {
     if (open) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
   }, [open, messages])
+
+  /* close + reset maximised so next open is always compact */
+  const handleClose = useCallback(() => {
+    setOpen(false)
+    setMaximised(false)
+  }, [])
+
+  /* In compact mode use a document-level click listener so the backdrop
+     stays pointer-events:none and the dashboard stays fully interactive.
+     In maximised mode the visible backdrop handles its own click. */
+  useEffect(() => {
+    if (!open || maximised) return
+    const onDoc = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) handleClose()
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open, maximised, handleClose])
 
   const handleSend = (e) => {
     e.preventDefault()
@@ -170,17 +189,6 @@ function QuickChatFloat() {
     }])
     setDraft('')
     setAttachment(null)
-  }
-
-  /* close + reset maximised so next open is always compact */
-  const handleClose = useCallback(() => {
-    setOpen(false)
-    setMaximised(false)
-  }, [])
-
-  /* click-outside: close on backdrop click */
-  const handleBackdrop = (e) => {
-    if (e.target === e.currentTarget) handleClose()
   }
 
   const panelStyle = maximised
@@ -226,20 +234,23 @@ function QuickChatFloat() {
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop — dimmed when maximised, invisible when compact */}
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[48]"
-              style={{ background: maximised ? 'rgba(0,0,0,0.55)' : 'transparent' }}
-              onClick={handleClose}
-            />
+            {/* Backdrop — only active (blocks clicks) in maximised mode */}
+            {maximised && (
+              <motion.div
+                key="backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[48]"
+                style={{ background: 'rgba(0,0,0,0.55)' }}
+                onClick={handleClose}
+              />
+            )}
 
             {/* Chat panel */}
             <motion.div
               key="panel"
+              ref={panelRef}
               initial={{ opacity: 0, y: 40, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -251,7 +262,6 @@ function QuickChatFloat() {
                 border: `1px solid rgba(255,255,255,0.12)`,
                 transition: 'width 0.25s ease, height 0.25s ease, top 0.25s ease, left 0.25s ease, bottom 0.25s ease, right 0.25s ease, transform 0.25s ease',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ background: '#0A0E1C', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
