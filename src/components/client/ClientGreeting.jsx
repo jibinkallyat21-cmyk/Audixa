@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import { AnalytixMark } from '../shared/AnalytixLogo'
+import FinancialDataBackground from '../shared/FinancialDataBackground'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -9,13 +11,17 @@ function getGreeting() {
   return 'Good Evening'
 }
 
-// Key cleared by Login page on every client login → always shows fresh
 const SESSION_KEY = 'audit360_client_greeted_v3'
+const SPRING_EASE = [0.16, 1, 0.3, 1]
+const LETTERS = 'AUDIT 360'.split('')
 
 export default function ClientGreeting({ name = 'Karim Rahman', company = 'Kingdom Retail Holdings LLC' }) {
   const [visible, setVisible] = useState(() => {
     try { return !sessionStorage.getItem(SESSION_KEY) } catch { return true }
   })
+
+  const wordRef = useRef(null)
+  const sweepRef = useRef(null)
 
   const dismiss = () => {
     setVisible(false)
@@ -23,9 +29,41 @@ export default function ClientGreeting({ name = 'Karim Rahman', company = 'Kingd
   }
 
   useEffect(() => {
-    if (!visible) return
-    const t = setTimeout(dismiss, 2700)
+    if (!visible) return undefined
+    const t = setTimeout(dismiss, 3800)
     return () => clearTimeout(t)
+  }, [visible]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* GSAP letter reveal + light sweep — same as CinematicIntro */
+  useEffect(() => {
+    if (!visible || !wordRef.current) return undefined
+
+    const letters = wordRef.current.querySelectorAll('.greeting-letter')
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    const ctx = gsap.context(() => {
+      if (reduceMotion) {
+        gsap.set(letters, { opacity: 1, y: 0, scale: 1, rotateX: 0 })
+        gsap.set(sweepRef.current, { opacity: 0 })
+        return
+      }
+
+      gsap.set(wordRef.current, { transformPerspective: 600 })
+      gsap.set(letters, { opacity: 0, y: 26, scale: 0.82, rotateX: -55, transformOrigin: '50% 100%' })
+      gsap.set(sweepRef.current, { xPercent: -160, opacity: 0 })
+
+      const tl = gsap.timeline({ delay: 0.7 })
+      tl.to(letters, {
+        opacity: 1, y: 0, scale: 1, rotateX: 0,
+        duration: 0.9, ease: 'back.out(1.5)', stagger: 0.09,
+      }).to(sweepRef.current, {
+        xPercent: 160, opacity: 1,
+        duration: 1.0, ease: 'power2.inOut',
+        onComplete: () => gsap.set(sweepRef.current, { opacity: 0 }),
+      }, '-=0.2')
+    })
+
+    return () => ctx.revert()
   }, [visible])
 
   return (
@@ -37,108 +75,127 @@ export default function ClientGreeting({ name = 'Karim Rahman', company = 'Kingd
           exit={{ opacity: 0, scale: 1.04, filter: 'blur(4px)' }}
           transition={{ duration: 0.55 }}
           className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden"
-          style={{ background: '#080C18' }}
+          style={{ background: '#060914' }}
           onClick={dismiss}
         >
-          {/* Radial glow */}
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{ background: 'radial-gradient(circle, rgba(230,57,70,0.14) 0%, transparent 70%)' }} />
-            <div className="absolute left-[30%] top-[20%] h-[300px] w-[300px] rounded-full"
-              style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%)' }} />
-          </div>
+          {/* Financial data watermark — same as cinematic intro */}
+          <FinancialDataBackground />
 
-          {/* Grid overlay */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.04]"
-            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-
-          {/* Content */}
+          {/* Main content */}
           <motion.div
-            initial={{ opacity: 0, y: 32, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.18, duration: 0.75, ease: [0.23, 1, 0.32, 1] }}
-            className="relative flex flex-col items-center text-center px-8"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.75, ease: [0.23, 1, 0.32, 1] }}
+            className="relative z-10 flex flex-col items-center text-center px-8"
           >
-            {/* Logo */}
+            {/* Logo mark + ANALYTIX wordmark */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.7, rotateY: -20 }}
-              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-              transition={{ delay: 0.1, duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
-              className="mb-8 flex items-center gap-4"
-              style={{ transformStyle: 'preserve-3d' }}
+              className="relative mb-5 flex flex-col items-center gap-2"
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                filter: [
+                  'drop-shadow(0 0 32px rgba(232,50,60,0.35))',
+                  'drop-shadow(0 0 32px rgba(232,50,60,0.55))',
+                  'drop-shadow(0 0 32px rgba(232,50,60,0.35))',
+                ],
+              }}
+              transition={{
+                opacity: { delay: 0.2, duration: 0.7, ease: SPRING_EASE },
+                scale:   { delay: 0.2, duration: 0.7, ease: SPRING_EASE },
+                filter:  { delay: 0.9, duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
+              }}
             >
-              <AnalytixMark size={56} />
-              <span className="text-4xl font-black tracking-[0.18em] text-white"
-                style={{ textShadow: '0 0 40px rgba(230,57,70,0.4)' }}>
-                AUDIT <span style={{ color: '#E8323C' }}>360</span>
+              <div style={{ overflow: 'hidden', height: 52 }}>
+                <AnalytixMark size={96} className="[object-position:top]" />
+              </div>
+              <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.26em' }}>
+                ANALYTIX
               </span>
             </motion.div>
 
-            {/* Greeting line */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.6 }}
-            >
-              <p className="text-4xl font-bold text-white leading-tight">
-                {getGreeting()},{' '}
-                <span className="text-brand" style={{ textShadow: '0 0 30px rgba(230,57,70,0.5)' }}>
-                  {name}
+            {/* AUDIT 360 — metallic gradient + GSAP letter reveal */}
+            <div ref={wordRef} className="relative mt-2 flex overflow-hidden" style={{ perspective: 600 }}>
+              {LETTERS.map((letter, i) => (
+                <span
+                  key={`${letter}-${i}`}
+                  className="greeting-letter text-[64px] font-black"
+                  style={{
+                    letterSpacing: '-0.03em',
+                    backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #e6e9ef 40%, #aab2c0 60%, #ffffff 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.35)',
+                    display: 'inline-block',
+                  }}
+                >
+                  {letter}
                 </span>
-              </p>
-            </motion.div>
+              ))}
+              {/* Sweeping light */}
+              <span
+                ref={sweepRef}
+                className="pointer-events-none absolute inset-y-0 left-0 w-1/3"
+                style={{
+                  background: 'linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)',
+                  mixBlendMode: 'overlay',
+                }}
+              />
+            </div>
 
-            {/* Welcome line */}
+            {/* Greeting */}
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.75, duration: 0.5 }}
-              className="mt-4 text-xl text-slate-300 font-light"
+              transition={{ delay: 2.1, duration: 0.5, ease: SPRING_EASE }}
+              className="mt-6 text-2xl font-semibold"
+              style={{ color: 'rgba(255,255,255,0.82)' }}
             >
-              Welcome to{' '}
-              <span className="font-semibold text-white">{company}</span>
+              {getGreeting()},{' '}
+              <span style={{ color: '#E8323C', textShadow: '0 0 28px rgba(232,50,60,0.45)' }}>
+                {name}
+              </span>
             </motion.p>
 
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.1, duration: 0.4 }}
-              className="mt-2 text-sm text-slate-500"
+              transition={{ delay: 2.45, duration: 0.45 }}
+              className="mt-2 text-sm"
+              style={{ color: 'rgba(255,255,255,0.32)', letterSpacing: '0.02em' }}
             >
-              AUDIT 360 Client Portal · Analytix Audit &amp; Assurance
+              {company} · Analytix Audit &amp; Assurance
             </motion.p>
 
-            {/* Animated dots */}
+            {/* Separator line */}
             <motion.div
-              initial={{ opacity: 0, scaleX: 0 }}
-              animate={{ opacity: 1, scaleX: 1 }}
-              transition={{ delay: 1.3, duration: 0.5 }}
-              className="mt-8 flex items-center gap-2"
-            >
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  className="h-1 w-1 rounded-full bg-brand"
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-                />
-              ))}
-            </motion.div>
+              className="mt-10 h-px w-[60vw] max-w-xs"
+              style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 2.8, duration: 0.7, ease: SPRING_EASE }}
+            />
           </motion.div>
 
           {/* Progress bar */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-56 h-[2px] rounded-full overflow-hidden bg-white/10">
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-56 h-[2px] rounded-full overflow-hidden"
+            style={{ background: 'rgba(255,255,255,0.08)' }}>
             <motion.div
               className="h-full rounded-full bg-brand"
               initial={{ width: '0%' }}
               animate={{ width: '100%' }}
-              transition={{ duration: 2.5, ease: 'linear' }}
+              transition={{ duration: 3.5, ease: 'linear' }}
             />
           </div>
 
           <button
             onClick={dismiss}
-            className="absolute bottom-8 right-8 text-xs text-slate-600 hover:text-slate-300 transition-colors"
+            className="absolute bottom-8 right-8 text-xs font-medium transition-colors"
+            style={{ color: 'rgba(255,255,255,0.2)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}
           >
             Skip →
           </button>
