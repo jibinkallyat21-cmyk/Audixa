@@ -285,26 +285,6 @@ export default function Login() {
             }}
           />
 
-          {/* LIVE AUDIT NETWORK indicator */}
-          <div style={{
-            position: 'absolute', left: '1.5%', bottom: '2.8%',
-            display: 'flex', alignItems: 'center', gap: 7,
-            background: 'rgba(2,10,30,0.68)', border: '1px solid rgba(80,150,255,0.18)',
-            borderRadius: 20, padding: '4px 10px 4px 7px', backdropFilter: 'blur(8px)',
-          }}>
-            <div style={{
-              width: 7, height: 7, borderRadius: '50%', background: '#4ade80',
-              boxShadow: '0 0 6px #4ade80', flexShrink: 0,
-              animation: reducedMotion ? 'none' : 'lan-pulse 2.2s ease-in-out infinite',
-            }} />
-            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.10em', color: 'rgba(180,220,180,0.92)', fontFamily: 'system-ui, sans-serif' }}>
-              LIVE AUDIT NETWORK
-            </span>
-            <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'rgba(140,190,140,0.65)', letterSpacing: '0.02em' }}>
-              13 NODES
-            </span>
-          </div>
-
           {/* ── Login Card ── */}
           <div style={{
             position: 'absolute',
