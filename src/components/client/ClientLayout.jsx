@@ -264,14 +264,6 @@ function QuickChatFloat() {
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ background: '#0A0E1C', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex -space-x-1.5">
-                    {CHAT_GROUP.slice(0, 3).map((m) => (
-                      <ChatAvatar key={m.id} member={m} size={7} />
-                    ))}
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-[9px] font-bold text-white/50" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                      +{CHAT_GROUP.length - 3}
-                    </div>
-                  </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white leading-tight">Engagement Team</p>
                     <div className="flex items-center gap-1.5">
