@@ -310,7 +310,7 @@ function ClientNameBadge() {
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
         style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        className="relative flex items-center gap-2.5 rounded-xl px-3.5 py-1.5 select-none overflow-hidden cursor-default"
+        className="relative flex items-center gap-3 rounded-xl px-4 py-2 select-none overflow-hidden cursor-default"
         whileHover={{ scale: 1.03 }}
         transition={{ type: 'spring', stiffness: 300, damping: 22 }}
       >
@@ -324,15 +324,12 @@ function ClientNameBadge() {
           background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(255,255,255,0.10) 0%, transparent 60%)`,
         }} />
         {/* Icon */}
-        <div className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white"
-          style={{ background: 'rgba(16,185,129,0.45)', boxShadow: '0 0 8px rgba(16,185,129,0.45)' }}>
+        <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-black text-white"
+          style={{ background: 'rgba(16,185,129,0.45)', boxShadow: '0 0 10px rgba(16,185,129,0.45)' }}>
           KR
         </div>
         {/* Name */}
-        <div className="relative z-10 flex flex-col leading-tight">
-          <span className="text-[8px] uppercase tracking-widest font-semibold" style={{ color: 'rgba(16,185,129,0.8)' }}>Client</span>
-          <span className="text-[11px] font-bold text-white/90 whitespace-nowrap">Kingdom Retail Holdings LLC</span>
-        </div>
+        <span className="relative z-10 text-sm font-bold text-white/90 whitespace-nowrap">Kingdom Retail Holdings LLC</span>
       </motion.div>
     </div>
   )
