@@ -207,8 +207,6 @@ export default function ClientReports() {
   const data = getReportsData(selectedFY)
   const [activeTab, setActiveTab] = useState('proposal')
   const [signedOff, setSignedOff] = useState(false)
-  const [clientRole, setClientRole] = useState(clientPortal.clientRole)
-  const isAuthorisedSignatory = clientRole === 'Authorised Signatory'
   const [comments, setComments] = useState([
     { id: 'c1', author: 'Analytix Audit Team', side: 'team', text: 'Related party disclosure on Note 7 updated per your confirmation on 12 Oct.' },
     { id: 'c2', author: 'You', side: 'client', text: 'Confirmed, the note is accurate. Note 12 (Zakat provision) also reviewed.' },
@@ -370,20 +368,9 @@ export default function ClientReports() {
                 {/* ── Draft Issued ── */}
                 {activeTab === 'draft' && (
                   <div className="rounded-2xl p-6 space-y-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h2 className="text-base font-bold text-white">Draft Financial Statements</h2>
-                        <p className="text-sm mt-0.5" style={{ color: D.muted }}>Review carefully — management authorisation required before the final report is issued</p>
-                      </div>
-                      {/* Role toggle (demo) */}
-                      <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${D.border}` }}>
-                        <span className="pl-2 text-[10px]" style={{ color: D.subtle }}>As:</span>
-                        {['Authorised Signatory', 'Standard User'].map((r) => (
-                          <button key={r} onClick={() => setClientRole(r)} className="rounded-lg px-2.5 py-1 text-[10px] font-semibold transition-colors" style={{ background: clientRole === r ? '#E63946' : 'transparent', color: clientRole === r ? '#fff' : D.muted }}>
-                            {r === 'Authorised Signatory' ? 'Account Owner' : 'Team Member'}
-                          </button>
-                        ))}
-                      </div>
+                    <div>
+                      <h2 className="text-base font-bold" style={{ color: 'var(--c-text)' }}>Draft Financial Statements</h2>
+                      <p className="text-sm mt-0.5" style={{ color: D.muted }}>Review carefully — confirm and upload the signed copy to authorise the final report</p>
                     </div>
 
                     {data.draftAFS.available ? (
@@ -398,6 +385,24 @@ export default function ClientReports() {
                           onDownload={() => showToast('Downloading draft...')}
                           delay={0.05}
                         />
+
+                        {/* Management sign-off */}
+                        <div className="rounded-xl p-5" style={{ background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                          <div className="flex items-start gap-3">
+                            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald" />
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold" style={{ color: 'var(--c-text)' }}>Management Representation</p>
+                              <p className="mt-0.5 text-xs" style={{ color: D.muted }}>By confirming, management represents that the draft fairly presents the company's financial position and authorises Analytix to issue the final report.</p>
+                              {signedOff || data.draftAFS.confirmed ? (
+                                <p className="mt-3 text-sm font-semibold text-emerald">✓ Management representation received — final report will be issued shortly</p>
+                              ) : (
+                                <button onClick={() => setSignedOff(true)} className="mt-3 rounded-xl bg-emerald px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald/90">
+                                  Confirm Draft Financial Statements
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
                         {/* Comment thread */}
                         <div>
@@ -418,39 +423,18 @@ export default function ClientReports() {
                           </form>
                         </div>
 
-                        {/* Management sign-off */}
-                        <div className="rounded-xl p-5" style={{ background: isAuthorisedSignatory ? 'rgba(16,185,129,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${isAuthorisedSignatory ? 'rgba(16,185,129,0.2)' : D.border}` }}>
-                          {isAuthorisedSignatory ? (
-                            <div className="flex items-start gap-3">
-                              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald" />
-                              <div className="flex-1">
-                                <p className="text-sm font-semibold text-white">Management Representation — Account Owner</p>
-                                <p className="mt-0.5 text-xs" style={{ color: D.muted }}>By confirming, management represents that the draft fairly presents the company's financial position and authorises Analytix to issue the final report.</p>
-                                {signedOff || data.draftAFS.confirmed ? (
-                                  <p className="mt-3 text-sm font-semibold text-emerald">✓ Management representation received — final report will be issued shortly</p>
-                                ) : (
-                                  <button onClick={() => setSignedOff(true)} className="mt-3 rounded-xl bg-emerald px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald/90">
-                                    Confirm Draft Financial Statements
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex items-start gap-3">
-                              <Lock className="mt-0.5 h-5 w-5 shrink-0" style={{ color: D.subtle }} />
-                              <div>
-                                <p className="text-sm font-semibold text-white/70">Management Representation — Account Owner Required</p>
-                                <p className="mt-0.5 text-xs" style={{ color: D.subtle }}>Confirmation must be provided by the designated Account Owner.</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
                         {/* Upload signed draft */}
                         <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
-                          <p className="text-sm font-bold text-white mb-0.5">Upload Management-Signed Draft</p>
+                          <p className="text-sm font-bold mb-0.5" style={{ color: 'var(--c-text)' }}>Upload Signed Draft</p>
                           <p className="text-xs" style={{ color: D.muted }}>Upload the management-signed copy. Visible to the engagement team immediately.</p>
                           <UploadZone uploadKey="signedDraftAFS" label="Signed Draft Financial Statements" description="Management-signed copy of the draft AFS" />
+                        </div>
+
+                        {/* Upload related documents */}
+                        <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: '1rem' }}>
+                          <p className="text-sm font-bold mb-0.5" style={{ color: 'var(--c-text)' }}>Upload Supporting Documents</p>
+                          <p className="text-xs" style={{ color: D.muted }}>Any additional documents related to the draft review (e.g. management representation letter, board resolution).</p>
+                          <UploadZone uploadKey="draftSupportingDocs" label="Related Supporting Documents" description="Management rep letter, board resolution, etc." />
                         </div>
                       </>
                     ) : (

@@ -296,28 +296,29 @@ function ClientHeader({ title }) {
   const avatarTx = isDark ? 'text-white' : 'text-[#0D1B2A]'
   return (
     <header
-      className="client-header relative flex h-[54px] w-full shrink-0 items-center justify-between px-6"
+      className="client-header flex h-[54px] w-full shrink-0 items-center gap-3 px-6"
       style={{ background: D.headerBg, borderBottom: `1px solid ${D.border}` }}
     >
-      <div className="flex items-center gap-3">
+      {/* Left — brand */}
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <HamburgerButton />
         <AnalytixMark size={22} className="shrink-0" />
         <span className={`hidden font-black tracking-[0.1em] sm:inline text-sm ${tx}`}>
           AUDIT <span className="text-brand">360</span>
         </span>
-        <span className={`hidden sm:inline ${sep}`}>·</span>
-        <span className={`hidden truncate text-sm font-medium sm:inline max-w-[160px] ${txMuted}`}>{clientPortal.clientName}</span>
       </div>
 
-      <h1 className={`absolute left-1/2 max-w-[140px] -translate-x-1/2 truncate text-center text-sm font-semibold lg:max-w-none ${txTitle}`}>{title}</h1>
+      {/* Center — current page title */}
+      <h1 className={`flex-shrink-0 truncate text-center text-sm font-semibold ${txTitle}`}>{title}</h1>
 
-      <div className="flex items-center gap-4">
+      {/* Right — tools */}
+      <div className="flex flex-1 items-center justify-end gap-3">
         <LiveClock isDark={isDark} />
         <FYDropdown isDark={isDark} />
         <ClientNotificationsPanel />
         <ThemeToggle variant={isDark ? 'dark' : 'light'} />
         <ExitDemoButton />
-        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${avatarTx}`} style={{ background: avatarBg, border: `1px solid ${D.border}` }}>
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${avatarTx}`} style={{ background: avatarBg, border: `1px solid ${D.border}` }}>
           KR
         </div>
       </div>

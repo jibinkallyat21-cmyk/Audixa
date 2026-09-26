@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Lock, CheckCircle2, AlertCircle, FileText, ChevronRight,
   Calendar, ChevronDown, X, Send, TrendingUp, Search, LineChart,
-  AlertTriangle, ChevronUp, Clock,
+  AlertTriangle, ChevronUp, Clock, Eye,
 } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import ClientGreeting from '../../components/client/ClientGreeting'
@@ -50,7 +50,7 @@ function getFYData(fy) {
     engagementRef: ENGAGEMENT_REFS['FY2023'],
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'pbc', label: 'PBC Submission', status: 'completed' },
+      { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
       { id: 'draft', label: 'Draft FS Review', status: 'completed' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
@@ -62,7 +62,7 @@ function getFYData(fy) {
     engagementRef: ENGAGEMENT_REFS['FY2022'],
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'pbc', label: 'PBC Submission', status: 'completed' },
+      { id: 'reqs', label: 'Requirements Submission', status: 'completed' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'completed' },
       { id: 'draft', label: 'Draft FS Review', status: 'completed' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'completed' },
@@ -74,7 +74,7 @@ function getFYData(fy) {
     engagementRef: ENGAGEMENT_REFS['FY2024'],
     stages: [
       { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
-      { id: 'pbc', label: 'PBC Submission', status: 'completed' },
+      { id: 'reqs', label: 'Requirements Submission', status: 'active' },
       { id: 'fieldwork', label: 'Audit Field Work', status: 'active' },
       { id: 'draft', label: 'Draft FS Review', status: 'upcoming' },
       { id: 'signoff', label: 'Sign-off & Completion', status: 'upcoming' },
@@ -85,7 +85,7 @@ function getFYData(fy) {
 
 const STAGE_TOOLTIPS = {
   'Engagement Acceptance': 'Engagement letter issued and agreed; audit terms confirmed.',
-  'PBC Submission': 'Client submits Prepared by Client (PBC) documents.',
+  'Requirements Submission': 'Client submits required documents — audit field work may begin in parallel as documents are received.',
   'Audit Field Work': 'Audit team performs substantive procedures and testing.',
   'Draft FS Review': 'Client reviews draft financial statements for accuracy.',
   'Sign-off & Completion': 'Partner signs off; audit report finalised.',
@@ -93,11 +93,22 @@ const STAGE_TOOLTIPS = {
 }
 
 const AUDIT_TEAM = [
-  { initials: 'TA', name: 'Tariq Al-Harbi',   role: 'Engagement Partner',  online: true },
-  { initials: 'SR', name: 'Sana Rashid',       role: 'Audit Manager',       online: true },
-  { initials: 'FM', name: 'Faisal Mahmoud',    role: 'Senior Auditor',      online: false },
-  { initials: 'LK', name: 'Layla Khalid',      role: 'Audit Associate',     online: false },
-  { initials: 'NJ', name: 'Nour Jabir',        role: 'Tax Specialist',      online: true },
+  { initials: 'SR', name: 'Sana Rashid',   role: 'Audit Lead',       online: true },
+  { initials: 'LK', name: 'Layla Khalid',  role: 'Audit Associate',  online: false },
+]
+
+const UNDER_REVIEW_DOCS = [
+  { ref: 'REV-02', name: 'Top 10 Customer Contracts', uploadedOn: '09 Oct 2024', reviewer: 'S. Rashid' },
+  { ref: 'PPE-05', name: 'Asset Impairment Assessment', uploadedOn: '10 Oct 2024', reviewer: 'L. Khalid' },
+  { ref: 'PPE-09', name: 'Right-of-Use Asset Schedule', uploadedOn: '10 Oct 2024', reviewer: 'S. Rashid' },
+  { ref: 'TAX-06', name: 'Transfer Pricing Documentation', uploadedOn: '07 Oct 2024', reviewer: 'L. Khalid' },
+  { ref: 'REV-05', name: 'ZATCA E-Invoicing Samples', uploadedOn: '06 Oct 2024', reviewer: 'S. Rashid' },
+  { ref: 'COG-11', name: 'Related Party Declaration', uploadedOn: '05 Oct 2024', reviewer: 'L. Khalid' },
+  { ref: 'PPE-03', name: 'Additions List (New Assets FY24)', uploadedOn: '04 Oct 2024', reviewer: 'S. Rashid' },
+  { ref: 'TAX-03', name: 'Zakat Declaration Form', uploadedOn: '03 Oct 2024', reviewer: 'L. Khalid' },
+  { ref: 'COG-09', name: 'Municipal License Renewal', uploadedOn: '02 Oct 2024', reviewer: 'S. Rashid' },
+  { ref: 'REV-04', name: 'Year-end Cutoff Invoices (Partial)', uploadedOn: '01 Oct 2024', reviewer: 'L. Khalid' },
+  { ref: 'PPE-08', name: 'Insurance Certificates (Major Assets)', uploadedOn: '30 Sep 2024', reviewer: 'S. Rashid' },
 ]
 
 const EVENT_ICON = { emerald: CheckCircle2, red: AlertCircle, amber: AlertCircle, blue: FileText, navy: TrendingUp }
@@ -118,7 +129,7 @@ function StatCard({ label, value, sub, accent, className = '' }) {
   )
 }
 
-/* ─── PBC ring ─── */
+/* ─── Requirements ring ─── */
 function PBCRing({ total, accepted, fy }) {
   const count = useCountUp(accepted)
   const pct = total > 0 ? Math.round((accepted / total) * 100) : 0
@@ -143,10 +154,58 @@ function PBCRing({ total, accepted, fy }) {
         <span className="absolute text-lg font-black text-emerald">{pct}%</span>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>PBC Completion</p>
-        <p className="mt-1 text-4xl font-black text-white">{count} <span className="text-xl font-medium" style={{ color: D.muted }}>/ {total}</span></p>
-        <p className="mt-1 text-sm" style={{ color: D.muted }}>PBC items submitted</p>
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Requirements Completion</p>
+        <p className="mt-1 text-4xl font-black" style={{ color: 'var(--c-text)' }}>{count} <span className="text-xl font-medium" style={{ color: D.muted }}>/ {total}</span></p>
+        <p className="mt-1 text-sm" style={{ color: D.muted }}>requirements accepted</p>
       </div>
+    </div>
+  )
+}
+
+/* ─── Under Review modal ─── */
+function UnderReviewModal({ docs, onClose }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [onClose])
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <motion.div
+        ref={ref}
+        initial={{ scale: 0.95, opacity: 0, y: 16 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 16 }}
+        transition={{ duration: 0.22 }}
+        className="w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
+        style={{ background: '#0F1629', border: `1px solid ${D.border}` }}
+      >
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: `1px solid ${D.border}` }}>
+          <div>
+            <h2 className="text-base font-bold text-white">Documents Under Review</h2>
+            <p className="text-xs mt-0.5" style={{ color: D.muted }}>Being verified by the audit team</p>
+          </div>
+          <button onClick={onClose} className="text-white/30 hover:text-white"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="max-h-[420px] overflow-y-auto">
+          {docs.map((doc, i) => (
+            <div key={doc.ref} className="flex items-center gap-4 px-6 py-3.5" style={{ borderBottom: i < docs.length - 1 ? `1px solid ${D.border}` : 'none' }}>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(99,102,241,0.12)' }}>
+                <Eye className="h-4 w-4 text-indigo-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-white/90">{doc.name}</p>
+                <p className="text-[10px]" style={{ color: D.subtle }}>Uploaded {doc.uploadedOn} · Reviewer: {doc.reviewer}</p>
+              </div>
+              <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold font-mono" style={{ background: 'rgba(255,255,255,0.06)', color: D.muted }}>{doc.ref}</span>
+            </div>
+          ))}
+        </div>
+        <div className="px-6 py-4" style={{ borderTop: `1px solid ${D.border}` }}>
+          <p className="text-xs" style={{ color: D.subtle }}>You will be notified once each document is accepted or if a re-upload is required.</p>
+        </div>
+      </motion.div>
     </div>
   )
 }
@@ -380,6 +439,7 @@ export default function ClientDashboard() {
   const recentEvents = getActivityEvents().slice(0, 10)
   const [meetingModal, setMeetingModal] = useState(false)
   const [escalationModal, setEscalationModal] = useState(false)
+  const [underReviewModal, setUnderReviewModal] = useState(false)
 
   return (
     <ClientLayout title="Engagement Dashboard" fullHeight>
@@ -436,22 +496,30 @@ export default function ClientDashboard() {
                 <PBCRing total={fyData.stats.totalRequirements} accepted={fyData.stats.documentsAccepted} fy={selectedFY} />
 
                 <div className="grid grid-cols-3 gap-3">
-                  <StatCard label="Accepted PBC Items" value={fyData.stats.documentsAccepted} accent="#10B981" sub="Received & verified" />
+                  <StatCard label="Accepted Requirements" value={fyData.stats.documentsAccepted} accent="#10B981" sub="Received & verified" />
                   <StatCard label="Outstanding Items" value={fyData.stats.pendingAction} accent="#F59E0B" sub={fyData.stats.pendingAction > 0 ? 'Action required' : 'None outstanding'} />
                   <StatCard label="Open Audit Queries" value={fyData.stats.openQueries} accent="#E63946" sub="Pending your response" />
                 </div>
 
-                {/* Documents Under Verification — replaces old Days to Deadline */}
-                <div className="flex items-center justify-between rounded-2xl px-5 py-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                {/* Documents Under Review — clickable */}
+                <motion.button
+                  whileHover={{ scale: 1.005 }}
+                  onClick={() => fyData.stats.underVerification > 0 && setUnderReviewModal(true)}
+                  className="flex w-full items-center justify-between rounded-2xl px-5 py-4 text-left"
+                  style={{ background: D.card, border: `1px solid ${D.border}`, cursor: fyData.stats.underVerification > 0 ? 'pointer' : 'default' }}
+                >
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Documents Under Verification</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Documents Under Review</p>
                     <p className="mt-1 text-4xl font-black text-indigo-400">{fyData.stats.underVerification}</p>
-                    <p className="mt-1 text-sm" style={{ color: D.muted }}>Currently under review by the audit team</p>
+                    <p className="mt-1 text-sm" style={{ color: D.muted }}>
+                      Being verified by the audit team
+                      {fyData.stats.underVerification > 0 && <span className="ml-2 text-indigo-400 text-xs font-semibold">· Click to view list</span>}
+                    </p>
                   </div>
                   <div className="h-12 w-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                    <Search className="h-6 w-6 text-indigo-400" />
+                    <Eye className="h-6 w-6 text-indigo-400" />
                   </div>
-                </div>
+                </motion.button>
 
                 {/* Request Meeting */}
                 <motion.button
@@ -515,7 +583,7 @@ export default function ClientDashboard() {
                 <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white bg-brand/20 shrink-0">TA</div>
                 <div>
                   <p className="text-sm font-bold text-white">Tariq Al-Harbi</p>
-                  <p className="text-xs" style={{ color: D.muted }}>Analytix Audit & Assurance</p>
+                  <p className="text-xs" style={{ color: D.muted }}>Al Bassam & Co. Chartered Public Accountants</p>
                   <div className="mt-1 flex flex-wrap gap-1">
                     <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-white/40" style={{ background: 'rgba(255,255,255,0.06)' }}>Statutory Audit</span>
                     <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-emerald" style={{ background: 'rgba(16,185,129,0.12)' }}>Active</span>
@@ -563,6 +631,7 @@ export default function ClientDashboard() {
       <AnimatePresence>
         {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} />}
         {escalationModal && <EscalationModal onClose={() => setEscalationModal(false)} />}
+        {underReviewModal && <UnderReviewModal docs={UNDER_REVIEW_DOCS} onClose={() => setUnderReviewModal(false)} />}
       </AnimatePresence>
     </ClientLayout>
   )
