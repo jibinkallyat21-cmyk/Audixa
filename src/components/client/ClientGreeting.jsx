@@ -89,31 +89,39 @@ export default function ClientGreeting({ name = 'Karim Rahman', company = 'Kingd
             className="relative z-10 flex flex-col items-center text-center px-8"
           >
             {/* Logo mark + ANALYTIX wordmark */}
-            <motion.div
-              className="relative mb-5 flex flex-col items-center gap-2"
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                filter: [
-                  'drop-shadow(0 0 32px rgba(232,50,60,0.35))',
-                  'drop-shadow(0 0 32px rgba(232,50,60,0.55))',
-                  'drop-shadow(0 0 32px rgba(232,50,60,0.35))',
-                ],
-              }}
-              transition={{
-                opacity: { delay: 0.2, duration: 0.7, ease: SPRING_EASE },
-                scale:   { delay: 0.2, duration: 0.7, ease: SPRING_EASE },
-                filter:  { delay: 0.9, duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
-              }}
-            >
-              <div style={{ overflow: 'hidden', height: 52 }}>
-                <AnalytixMark size={96} className="[object-position:top]" />
-              </div>
-              <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.26em' }}>
+            <div className="relative mb-5 flex flex-col items-center gap-2">
+              {/* Red glow filter only on the mark, not the text */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  filter: [
+                    'drop-shadow(0 0 32px rgba(232,50,60,0.35))',
+                    'drop-shadow(0 0 32px rgba(232,50,60,0.55))',
+                    'drop-shadow(0 0 32px rgba(232,50,60,0.35))',
+                  ],
+                }}
+                transition={{
+                  opacity: { delay: 0.2, duration: 0.7, ease: SPRING_EASE },
+                  scale:   { delay: 0.2, duration: 0.7, ease: SPRING_EASE },
+                  filter:  { delay: 0.9, duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
+                }}
+              >
+                <div style={{ overflow: 'hidden', height: 52 }}>
+                  <AnalytixMark size={96} className="[object-position:top]" />
+                </div>
+              </motion.div>
+              {/* ANALYTIX label — outside the filter wrapper so it stays pure white */}
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                style={{ color: '#ffffff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.26em' }}
+              >
                 ANALYTIX
-              </span>
-            </motion.div>
+              </motion.span>
+            </div>
 
             {/* AUDIT 360 — metallic gradient + GSAP letter reveal */}
             <div ref={wordRef} className="relative mt-2 flex overflow-hidden" style={{ perspective: 600 }}>
