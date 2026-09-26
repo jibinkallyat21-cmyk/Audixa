@@ -17,6 +17,8 @@ const D = {
   page: 'var(--c-page)',
 }
 
+const NUM_FONT = { fontFamily: "'IBM Plex Mono', 'Courier New', monospace", fontVariantNumeric: 'tabular-nums', letterSpacing: '0.01em' }
+
 function fmt(n) {
   if (n === 0 || n === undefined) return '—'
   const abs = Math.abs(n)
@@ -52,17 +54,17 @@ function TBTable({ lines }) {
         style={{ border: `1px solid ${D.border}` }}
         onScroll={() => setShowHint(false)}
       >
-        <table className="w-full text-xs whitespace-nowrap">
+        <table className="w-full whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif" }}>
           <thead>
-            <tr className="text-[10px] uppercase tracking-wide" style={{ background: headerBg, borderBottom: `1px solid ${D.border}` }}>
-              <th className="px-3 py-2.5 text-left font-medium w-20" style={{ color: D.subtle }}>Code</th>
-              <th className="px-3 py-2.5 text-left font-medium" style={{ color: D.subtle }}>Ledger Name</th>
-              <th className="px-3 py-2.5 text-right font-medium w-32" style={{ color: D.text }}>Opening Balance</th>
-              <th className="px-3 py-2.5 text-right font-medium w-28 text-emerald">Debit</th>
-              <th className="px-3 py-2.5 text-right font-medium w-28 text-alert-red">Credit</th>
-              <th className="px-3 py-2.5 text-right font-medium w-24" style={{ color: '#7C3AED' }}>Adjusted Debit</th>
-              <th className="px-3 py-2.5 text-right font-medium w-24" style={{ color: '#7C3AED' }}>Adjusted Credit</th>
-              <th className="px-3 py-2.5 text-right font-medium w-32" style={{ color: D.text }}>Closing Balance</th>
+            <tr className="text-[11px] uppercase tracking-widest font-semibold" style={{ background: headerBg, borderBottom: `2px solid ${D.border}` }}>
+              <th className="px-4 py-3 text-left w-20" style={{ color: D.subtle }}>Code</th>
+              <th className="px-4 py-3 text-left" style={{ color: D.subtle }}>Ledger Name</th>
+              <th className="px-4 py-3 text-right w-36" style={{ color: D.text, ...NUM_FONT }}>Opening Balance</th>
+              <th className="px-4 py-3 text-right w-32 text-emerald" style={NUM_FONT}>Debit</th>
+              <th className="px-4 py-3 text-right w-32 text-alert-red" style={NUM_FONT}>Credit</th>
+              <th className="px-4 py-3 text-right w-28" style={{ color: '#7C3AED', ...NUM_FONT }}>Adj. Debit</th>
+              <th className="px-4 py-3 text-right w-28" style={{ color: '#7C3AED', ...NUM_FONT }}>Adj. Credit</th>
+              <th className="px-4 py-3 text-right w-36" style={{ color: D.text, ...NUM_FONT }}>Closing Balance</th>
             </tr>
           </thead>
           <tbody>
@@ -82,8 +84,8 @@ function TBTable({ lines }) {
 
               return [
                 <tr key={`cat-${cat}`} style={{ background: catBg }}>
-                  <td colSpan={7} className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: catText }}>{cat}</td>
-                  <td className="px-3 py-2 text-right font-bold font-mono text-[10px]" style={{ color: catText }}>{fmt(subtotals.cl)}</td>
+                  <td colSpan={7} className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: catText }}>{cat}</td>
+                  <td className="px-4 py-2.5 text-right text-[11px] font-bold" style={{ color: catText, ...NUM_FONT }}>{fmt(subtotals.cl)}</td>
                 </tr>,
                 ...catLines.map((line) => {
                   const cb = getClosingBalance(line)
@@ -93,19 +95,19 @@ function TBTable({ lines }) {
                       style={{ borderColor: D.border }}
                       onMouseEnter={e => e.currentTarget.style.background = rowHover}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <td className="px-3 py-3 font-mono" style={{ color: D.subtle }}>{line.ledgerCode}</td>
-                      <td className="px-3 py-3 font-medium" style={{ color: D.text }}>
+                      <td className="px-4 py-3 text-[11px] font-medium" style={{ color: D.subtle, ...NUM_FONT }}>{line.ledgerCode}</td>
+                      <td className="px-4 py-3 text-[12px] font-medium" style={{ color: D.text }}>
                         {line.ledgerName}
                         {hasAdj && (
-                          <span className="ml-2 rounded-sm bg-purple-100 px-1.5 py-0.5 text-[9px] font-bold text-purple-600">ADJ</span>
+                          <span className="ml-2 rounded px-1.5 py-0.5 text-[9px] font-bold" style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>ADJ</span>
                         )}
                       </td>
-                      <td className={`px-3 py-3 text-right font-mono ${line.openingBalance < 0 ? 'text-alert-red' : ''}`} style={{ color: line.openingBalance < 0 ? undefined : D.text }}>{fmt(line.openingBalance)}</td>
-                      <td className="px-3 py-3 text-right font-mono text-emerald">{fmt(line.currentYearDebit)}</td>
-                      <td className="px-3 py-3 text-right font-mono text-alert-red">{fmt(line.currentYearCredit)}</td>
-                      <td className="px-3 py-3 text-right font-mono" style={{ color: '#7C3AED' }}>{fmt(line.adjustmentDebit || 0)}</td>
-                      <td className="px-3 py-3 text-right font-mono italic" style={{ color: '#7C3AED' }}>{fmt(line.adjustmentCredit || 0)}</td>
-                      <td className={`px-3 py-3 text-right font-mono font-bold ${cb < 0 ? 'text-alert-red' : ''}`} style={{ color: cb < 0 ? undefined : D.text }}>{fmt(cb)}</td>
+                      <td className="px-4 py-3 text-right text-[12px]" style={{ color: line.openingBalance < 0 ? '#F87171' : D.text, ...NUM_FONT }}>{fmt(line.openingBalance)}</td>
+                      <td className="px-4 py-3 text-right text-[12px] text-emerald" style={NUM_FONT}>{fmt(line.currentYearDebit)}</td>
+                      <td className="px-4 py-3 text-right text-[12px] text-alert-red" style={NUM_FONT}>{fmt(line.currentYearCredit)}</td>
+                      <td className="px-4 py-3 text-right text-[12px]" style={{ color: '#7C3AED', ...NUM_FONT }}>{fmt(line.adjustmentDebit || 0)}</td>
+                      <td className="px-4 py-3 text-right text-[12px] italic" style={{ color: '#7C3AED', ...NUM_FONT }}>{fmt(line.adjustmentCredit || 0)}</td>
+                      <td className="px-4 py-3 text-right text-[12px] font-semibold" style={{ color: cb < 0 ? '#F87171' : D.text, ...NUM_FONT }}>{fmt(cb)}</td>
                     </tr>
                   )
                 }),
@@ -117,7 +119,7 @@ function TBTable({ lines }) {
               const isBalanced = Math.abs(totalCB) < 0.01
               return (
                 <tr className="bg-navy text-white">
-                  <td colSpan={2} className="px-4 py-3 text-xs font-bold uppercase tracking-wider">TOTAL</td>
+                  <td colSpan={2} className="px-4 py-3 text-xs font-bold uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '0.1em' }}>TOTAL</td>
                   <td colSpan={6} className="px-3 py-3 text-center">
                     {isBalanced ? (
                       <span className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-bold tracking-widest bg-emerald/20 text-emerald" style={{ letterSpacing: '0.12em' }}>
