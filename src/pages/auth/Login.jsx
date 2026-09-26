@@ -10,20 +10,21 @@ const DEMO_ROLES = ROLE_ORDER.map(id => ({
 }))
 
 // Country nodes — x/y as % of the 1600×840 stage (equirectangular approximation)
+// Used only for canvas particle animation lines
 const NODES = [
-  { id: 'us', label: 'United States', flag: '🇺🇸', x: 18.5, y: 31.5 },
-  { id: 'gb', label: 'United Kingdom', flag: '🇬🇧', x: 49.0, y: 19.8 },
-  { id: 'fr', label: 'France',          flag: '🇫🇷', x: 50.5, y: 23.2 },
-  { id: 'kw', label: 'Kuwait',          flag: '🇰🇼', x: 63.0, y: 33.8 },
-  { id: 'bh', label: 'Bahrain',         flag: '🇧🇭', x: 63.8, y: 35.5 },
-  { id: 'sa', label: 'Saudi Arabia',    flag: '🇸🇦', x: 61.5, y: 36.8 },
-  { id: 'qa', label: 'Qatar',           flag: '🇶🇦', x: 64.2, y: 35.1 },
-  { id: 'ae', label: 'UAE',             flag: '🇦🇪', x: 65.0, y: 37.2 },
-  { id: 'om', label: 'Oman',            flag: '🇴🇲', x: 66.1, y: 39.0 },
-  { id: 'in', label: 'India',           flag: '🇮🇳', x: 71.8, y: 39.8 },
-  { id: 'cn', label: 'China',           flag: '🇨🇳', x: 79.5, y: 28.8 },
-  { id: 'hk', label: 'Hong Kong',       flag: '🇭🇰', x: 81.8, y: 37.5 },
-  { id: 'sg', label: 'Singapore',       flag: '🇸🇬', x: 79.3, y: 49.8 },
+  { id: 'us', x: 18.5, y: 31.5 },
+  { id: 'gb', x: 49.0, y: 19.8 },
+  { id: 'fr', x: 50.5, y: 23.2 },
+  { id: 'kw', x: 63.0, y: 33.8 },
+  { id: 'bh', x: 63.8, y: 35.5 },
+  { id: 'sa', x: 61.5, y: 36.8 },
+  { id: 'qa', x: 64.2, y: 35.1 },
+  { id: 'ae', x: 65.0, y: 37.2 },
+  { id: 'om', x: 66.1, y: 39.0 },
+  { id: 'in', x: 71.8, y: 39.8 },
+  { id: 'cn', x: 79.5, y: 28.8 },
+  { id: 'hk', x: 81.8, y: 37.5 },
+  { id: 'sg', x: 79.3, y: 49.8 },
 ]
 
 // Connection lines from Saudi Arabia hub to all other nodes
@@ -50,19 +51,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [demoRole, setDemoRole] = useState(DEMO_ROLES[0].value)
   const [error, setError] = useState('')
-  const [entered, setEntered] = useState(false)
 
   const canvasRef = useRef(null)
   const stageRef = useRef(null)
   const rafRef = useRef(null)
   const particlesRef = useRef([])
   const reducedMotion = useReducedMotion()
-
-  // Staged entrance
-  useEffect(() => {
-    const t = setTimeout(() => setEntered(true), 80)
-    return () => clearTimeout(t)
-  }, [])
 
   // Canvas animation — pulsing nodes + traveling particles
   useEffect(() => {
@@ -119,34 +113,6 @@ export default function Login() {
         ctx.stroke()
       })
       ctx.restore()
-
-      // Pulsing rings at each node
-      NODES.forEach(node => {
-        const nx = node.x / 100 * W
-        const ny = node.y / 100 * H
-        const phase = elapsed * 0.0008 + node.x * 0.08
-        const pulseScale = 0.5 + 0.5 * Math.sin(phase)
-
-        // Outer expanding ring
-        ctx.beginPath()
-        ctx.arc(nx, ny, 5 + 8 * pulseScale, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(100, 180, 255, ${0.25 * (1 - pulseScale)})`
-        ctx.lineWidth = 1
-        ctx.stroke()
-
-        // Middle ring
-        ctx.beginPath()
-        ctx.arc(nx, ny, 4, 0, Math.PI * 2)
-        ctx.strokeStyle = 'rgba(120, 190, 255, 0.45)'
-        ctx.lineWidth = 0.8
-        ctx.stroke()
-
-        // Core dot
-        ctx.beginPath()
-        ctx.arc(nx, ny, 2.5, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(160, 210, 255, 0.9)'
-        ctx.fill()
-      })
 
       // Traveling particles
       particlesRef.current.forEach(p => {
@@ -245,8 +211,6 @@ export default function Login() {
             aspectRatio: '1600 / 840',
             maxHeight: '100vh',
             overflow: 'hidden',
-            opacity: entered ? 1 : 0,
-            transition: reducedMotion ? 'none' : 'opacity 0.5s ease',
           }}
         >
           {/* ── Background JPEG — single source of truth ── */}
@@ -286,67 +250,6 @@ export default function Login() {
             }}
           />
 
-          {/* ── Country flag/label overlays — correct labels over image markers ── */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              pointerEvents: 'none',
-              transform: reducedMotion
-                ? 'none'
-                : 'translate(calc(var(--px,0) * 8px), calc(var(--py,0) * 8px))',
-              transition: 'transform 0.22s ease-out',
-            }}
-          >
-            {NODES.map((node, i) => (
-              <div
-                key={node.id}
-                style={{
-                  position: 'absolute',
-                  left: `${node.x}%`,
-                  top: `${node.y}%`,
-                  transform: 'translate(-50%, -115%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 1,
-                  opacity: entered ? 1 : 0,
-                  transition: reducedMotion ? 'none' : `opacity 0.5s ease ${0.4 + i * 0.06}s`,
-                }}
-              >
-                <div style={{
-                  background: 'rgba(2, 10, 30, 0.72)',
-                  border: '1px solid rgba(80, 150, 255, 0.28)',
-                  borderRadius: 3,
-                  padding: '1px 5px 2px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 3,
-                  backdropFilter: 'blur(4px)',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 1px 6px rgba(0,0,0,0.4)',
-                }}>
-                  <span style={{ fontSize: 9, lineHeight: 1.2 }}>{node.flag}</span>
-                  <span style={{
-                    fontSize: 7,
-                    fontWeight: 700,
-                    color: 'rgba(180, 215, 255, 0.92)',
-                    letterSpacing: '0.04em',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                    textTransform: 'uppercase',
-                  }}>
-                    {node.label}
-                  </span>
-                </div>
-                <div style={{
-                  width: 2,
-                  height: 4,
-                  background: 'rgba(120, 190, 255, 0.6)',
-                }} />
-              </div>
-            ))}
-          </div>
-
           {/* ── LIVE AUDIT NETWORK status indicator ── */}
           <div style={{
             position: 'absolute',
@@ -360,8 +263,6 @@ export default function Login() {
             borderRadius: 20,
             padding: '4px 10px 4px 7px',
             backdropFilter: 'blur(8px)',
-            opacity: entered ? 1 : 0,
-            transition: reducedMotion ? 'none' : 'opacity 0.8s ease 1.3s',
           }}>
             <div style={{
               width: 7,
