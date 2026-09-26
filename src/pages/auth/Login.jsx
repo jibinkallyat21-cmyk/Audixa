@@ -250,36 +250,6 @@ export default function Login() {
             }}
           />
 
-          {/* ── Country label corrections — cover wrong JPEG labels ── */}
-          {/* "Qatain" → "Qatar" (single correct label, no emoji flag) */}
-          <div style={{
-            position: 'absolute',
-            left: '39.63%', top: '51.43%',
-            width: '9.12%', height: '4.76%',
-            background: 'rgba(8, 16, 42, 0.96)',
-            borderRadius: 24,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 5,
-            pointerEvents: 'none',
-            zIndex: 2,
-          }}>
-            {/* Qatar flag: maroon + white serrated stripe */}
-            <svg width="18" height="12" viewBox="0 0 18 12" style={{ flexShrink: 0, borderRadius: 2, overflow: 'hidden' }}>
-              <rect width="18" height="12" fill="#8D1B3D"/>
-              <path d="M0 0 L5 2 L0 4 L5 6 L0 8 L5 10 L0 12 L0 0Z" fill="white"/>
-            </svg>
-            <span style={{
-              fontSize: 'clamp(7px, 0.72vw, 11px)',
-              fontWeight: 700,
-              color: '#dce8f4',
-              fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-              letterSpacing: '0.02em',
-              whiteSpace: 'nowrap',
-            }}>Qatar</span>
-          </div>
-
 
           {/* ── LIVE AUDIT NETWORK status indicator ── */}
           <div style={{
@@ -335,10 +305,10 @@ export default function Login() {
               title="Client Portal"
               style={{
                 position: 'absolute',
-                left: '69.85%', top: '28.25%',
-                width: '9.2%', height: '5.3%',
+                left: '58.75%', top: '26.79%',
+                width: '11.25%', height: '4.17%',
                 background: 'transparent',
-                border: accountType === 'client' ? '1px solid rgba(120,170,230,0.25)' : '1px solid transparent',
+                border: 'none',
                 cursor: 'pointer',
                 borderRadius: 4,
                 outline: 'none',
@@ -354,10 +324,10 @@ export default function Login() {
               title="Analytix Team"
               style={{
                 position: 'absolute',
-                left: '80.1%', top: '28.25%',
-                width: '9.2%', height: '5.3%',
+                left: '73.44%', top: '26.79%',
+                width: '13.13%', height: '4.17%',
                 background: 'transparent',
-                border: accountType === 'team' ? '1px solid rgba(120,170,230,0.25)' : '1px solid transparent',
+                border: 'none',
                 cursor: 'pointer',
                 borderRadius: 4,
                 outline: 'none',
@@ -375,22 +345,22 @@ export default function Login() {
               aria-label="Work email"
               style={{
                 position: 'absolute',
-                left: '69.875%', top: '39.05%',
-                width: '24.75%', height: '5.12%',
-                padding: '0 16px 0 58px',
+                left: '58.63%', top: '36.43%',
+                width: '38.63%', height: '5.0%',
+                padding: '0 16px 0 48px',
                 background: 'transparent',
                 border: '1px solid transparent',
                 outline: 'none',
                 color: '#dbe7f7',
-                fontSize: 'clamp(10px, 1.05vw, 15px)',
+                fontSize: 'clamp(10px, 1.1vw, 15px)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                 caretColor: 'rgba(140, 200, 255, 0.9)',
                 transition: 'border-color 0.18s, background 0.18s',
                 boxSizing: 'border-box',
               }}
               onFocus={e => {
-                e.target.style.borderColor = 'rgba(120, 170, 230, 0.45)'
-                e.target.style.background = 'rgba(7, 24, 48, 0.12)'
+                e.target.style.borderColor = 'rgba(120, 170, 230, 0.35)'
+                e.target.style.background = 'rgba(7, 24, 48, 0.10)'
               }}
               onBlur={e => {
                 e.target.style.borderColor = 'transparent'
@@ -409,23 +379,23 @@ export default function Login() {
               aria-label="Password"
               style={{
                 position: 'absolute',
-                left: '69.875%', top: '50.35%',
-                width: '24.75%', height: '5.12%',
-                padding: '0 70px 0 58px',
+                left: '58.63%', top: '45.60%',
+                width: '38.63%', height: '5.0%',
+                padding: '0 65px 0 48px',
                 letterSpacing: showPassword ? 'normal' : '2px',
                 background: 'transparent',
                 border: '1px solid transparent',
                 outline: 'none',
                 color: '#dbe7f7',
-                fontSize: 'clamp(10px, 1.05vw, 15px)',
+                fontSize: 'clamp(10px, 1.1vw, 15px)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                 caretColor: 'rgba(140, 200, 255, 0.9)',
                 transition: 'border-color 0.18s, background 0.18s',
                 boxSizing: 'border-box',
               }}
               onFocus={e => {
-                e.target.style.borderColor = 'rgba(120, 170, 230, 0.45)'
-                e.target.style.background = 'rgba(7, 24, 48, 0.12)'
+                e.target.style.borderColor = 'rgba(120, 170, 230, 0.35)'
+                e.target.style.background = 'rgba(7, 24, 48, 0.10)'
               }}
               onBlur={e => {
                 e.target.style.borderColor = 'transparent'
@@ -440,8 +410,8 @@ export default function Login() {
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               style={{
                 position: 'absolute',
-                left: '90.0%', top: '50.35%',
-                width: '4.6%', height: '5.12%',
+                left: '93.13%', top: '46.43%',
+                width: '4.06%', height: '3.81%',
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
@@ -455,8 +425,8 @@ export default function Login() {
               aria-label="Forgot password"
               style={{
                 position: 'absolute',
-                left: '86.2%', top: '56.5%',
-                width: '8.4%', height: '3.0%',
+                left: '84.06%', top: '51.90%',
+                width: '13.19%', height: '2.38%',
                 display: 'block',
                 cursor: 'pointer',
                 textDecoration: 'none',
@@ -470,13 +440,13 @@ export default function Login() {
               aria-label="Sign in"
               style={{
                 position: 'absolute',
-                left: '69.85%', top: '61.55%',
-                width: '24.75%', height: '5.95%',
+                left: '58.63%', top: '55.36%',
+                width: '38.63%', height: '7.14%',
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 outline: 'none',
-                borderRadius: 4,
+                borderRadius: 6,
               }}
             />
 
@@ -488,8 +458,8 @@ export default function Login() {
               aria-label="Preview as role"
               style={{
                 position: 'absolute',
-                left: '69.85%', top: '77.15%',
-                width: '24.75%', height: '5.15%',
+                left: '58.63%', top: '69.88%',
+                width: '38.63%', height: '5.36%',
                 padding: '0 45px 0 55px',
                 background: 'transparent',
                 border: '1px solid transparent',
@@ -522,11 +492,11 @@ export default function Login() {
             {demoRole !== DEMO_ROLES[0].value && (
               <div style={{
                 position: 'absolute',
-                left: '69.85%', top: '77.15%',
-                width: '24.75%', height: '5.15%',
+                left: '58.63%', top: '69.88%',
+                width: '38.63%', height: '5.36%',
                 display: 'flex',
                 alignItems: 'center',
-                paddingLeft: '55px',
+                paddingLeft: '48px',
                 pointerEvents: 'none',
                 boxSizing: 'border-box',
               }}>
@@ -555,13 +525,13 @@ export default function Login() {
               aria-label="Enter demo"
               style={{
                 position: 'absolute',
-                left: '69.85%', top: '84.45%',
-                width: '24.75%', height: '5.15%',
+                left: '58.63%', top: '77.14%',
+                width: '38.63%', height: '5.24%',
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 outline: 'none',
-                borderRadius: 4,
+                borderRadius: 6,
               }}
             />
           </div>
@@ -572,9 +542,9 @@ export default function Login() {
               role="alert"
               style={{
                 position: 'absolute',
-                left: '69.875%',
-                top: '68%',
-                width: '24.75%',
+                left: '58.63%',
+                top: '63.5%',
+                width: '38.63%',
                 background: 'rgba(160, 20, 30, 0.88)',
                 border: '1px solid rgba(255, 100, 110, 0.4)',
                 borderRadius: 4,
