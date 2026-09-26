@@ -525,48 +525,55 @@ export default function ClientDashboard() {
             <AnimatePresence mode="wait">
               <motion.div key={selectedFY} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="flex flex-col gap-4">
 
-                {/* On Hold banner */}
-                {selectedFY === 'FY2024' && clientPortal.onHold?.active && (
-                  <div className="flex items-center gap-4 rounded-2xl px-4 py-3" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
-                    <p className="text-sm font-medium text-amber">{clientPortal.onHold.message}</p>
-                    <Lock className="ml-auto h-4 w-4 shrink-0 text-amber/60" />
-                  </div>
-                )}
-
                 {/* Lifecycle stepper */}
                 <div className="rounded-2xl px-5 py-4" style={{ background: D.card, border: `1px solid ${D.border}` }}>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Engagement Phase</p>
                   <LifecycleStepper stages={fyData.stages} tooltips={STAGE_TOOLTIPS} />
                 </div>
 
-                {/* Stats */}
-                <PBCRing total={fyData.stats.totalRequirements} accepted={fyData.stats.documentsAccepted} fy={selectedFY} />
+                {/* Compact stats strip */}
+                <div className="rounded-2xl px-5 py-4 flex items-center gap-5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
+                  {/* Completion ring */}
+                  <div className="shrink-0 flex flex-col items-center gap-1">
+                    <div className="relative h-14 w-14">
+                      <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
+                        <circle cx="28" cy="28" r="23" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+                        <circle cx="28" cy="28" r="23" fill="none" stroke="#10B981" strokeWidth="5"
+                          strokeDasharray={`${2 * Math.PI * 23}`}
+                          strokeDashoffset={`${2 * Math.PI * 23 * (1 - fyData.stats.documentsAccepted / fyData.stats.totalRequirements)}`}
+                          strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-white">
+                        {Math.round((fyData.stats.documentsAccepted / fyData.stats.totalRequirements) * 100)}%
+                      </span>
+                    </div>
+                    <p className="text-[9px] uppercase tracking-widest font-semibold" style={{ color: D.subtle }}>Complete</p>
+                  </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <StatCard label="Accepted Requirements" value={fyData.stats.documentsAccepted} accent="#10B981" sub="Received & verified" />
-                  <StatCard label="Outstanding Items" value={fyData.stats.pendingAction} accent="#F59E0B" sub={fyData.stats.pendingAction > 0 ? 'Action required' : 'None outstanding'} />
-                  <StatCard label="Open Audit Queries" value={fyData.stats.openQueries} accent="#E63946" sub="Pending your response" />
+                  <div className="h-10 w-px shrink-0" style={{ background: D.border }} />
+
+                  {/* Four stat tiles */}
+                  {[
+                    { label: 'Accepted', value: fyData.stats.documentsAccepted, color: '#10B981', sub: `of ${fyData.stats.totalRequirements}`, onClick: null },
+                    { label: 'Outstanding', value: fyData.stats.pendingAction, color: '#F59E0B', sub: fyData.stats.pendingAction > 0 ? 'Action needed' : 'All clear', onClick: null },
+                    { label: 'Audit Queries', value: fyData.stats.openQueries, color: '#E63946', sub: 'Open', onClick: null },
+                    { label: 'Under Review', value: fyData.stats.underVerification, color: '#818CF8', sub: 'By audit team', onClick: fyData.stats.underVerification > 0 ? () => setUnderReviewModal(true) : null },
+                  ].map((s) => (
+                    <button
+                      key={s.label}
+                      onClick={s.onClick || undefined}
+                      disabled={!s.onClick}
+                      className="flex-1 min-w-0 text-left rounded-xl px-3 py-2.5 transition-colors"
+                      style={{ background: s.onClick ? 'rgba(255,255,255,0.03)' : 'transparent', cursor: s.onClick ? 'pointer' : 'default' }}
+                      onMouseEnter={e => s.onClick && (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                      onMouseLeave={e => s.onClick && (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-widest truncate" style={{ color: D.subtle }}>{s.label}</p>
+                      <p className="text-2xl font-black leading-tight" style={{ color: s.color }}>{s.value}</p>
+                      <p className="text-[10px] mt-0.5 truncate" style={{ color: D.muted }}>{s.sub}{s.onClick && <span style={{ color: s.color }}> · tap</span>}</p>
+                    </button>
+                  ))}
                 </div>
-
-                {/* Documents Under Review — clickable */}
-                <motion.button
-                  whileHover={{ scale: 1.005 }}
-                  onClick={() => fyData.stats.underVerification > 0 && setUnderReviewModal(true)}
-                  className="flex w-full items-center justify-between rounded-2xl px-5 py-4 text-left"
-                  style={{ background: D.card, border: `1px solid ${D.border}`, cursor: fyData.stats.underVerification > 0 ? 'pointer' : 'default' }}
-                >
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>Documents Under Review</p>
-                    <p className="mt-1 text-4xl font-black text-indigo-400">{fyData.stats.underVerification}</p>
-                    <p className="mt-1 text-sm" style={{ color: D.muted }}>
-                      Being verified by the audit team
-                      {fyData.stats.underVerification > 0 && <span className="ml-2 text-indigo-400 text-xs font-semibold">· Click to view list</span>}
-                    </p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                    <Eye className="h-6 w-6 text-indigo-400" />
-                  </div>
-                </motion.button>
 
                 {/* Escalate Issue */}
                 <motion.button
@@ -587,6 +594,56 @@ export default function ClientDashboard() {
 
           {/* ── RIGHT COLUMN ── */}
           <div className="flex w-72 shrink-0 flex-col gap-4 overflow-y-auto">
+
+            {/* On Hold card — right column, only when active */}
+            {selectedFY === 'FY2024' && clientPortal.onHold?.active && (() => {
+              const hold = clientPortal.onHold
+              const isPayment = hold.reason === 'payment'
+              const isNoResponse = hold.reason === 'no-response'
+              const bg    = isPayment ? 'rgba(230,57,70,0.08)'   : 'rgba(245,158,11,0.08)'
+              const border= isPayment ? 'rgba(230,57,70,0.28)'   : 'rgba(245,158,11,0.28)'
+              const color = isPayment ? '#F87171'                 : '#FCD34D'
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+                  className="rounded-2xl p-4 shrink-0"
+                  style={{ background: bg, border: `1px solid ${border}` }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Lock className="h-3.5 w-3.5 shrink-0" style={{ color }} />
+                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color }}>
+                      {isPayment ? 'Payment Pending' : isNoResponse ? 'No Response' : 'Awaiting Documents'}
+                    </p>
+                  </div>
+                  <p className="text-xs mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    {isPayment
+                      ? 'Your engagement is on hold pending outstanding payment. Please contact your auditor to proceed.'
+                      : isNoResponse
+                      ? 'No response has been received to the outstanding audit queries. Please check and respond.'
+                      : 'The following documents are still required before the engagement can continue:'}
+                  </p>
+                  {!isPayment && hold.items?.length > 0 && (
+                    <ul className="mb-3 space-y-1">
+                      {hold.items.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                          <span className="mt-0.5 shrink-0 h-1.5 w-1.5 rounded-full" style={{ background: color, marginTop: 5 }} />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {!isPayment && (
+                    <Link
+                      to="/client/documents"
+                      className="flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
+                      style={{ color }}
+                    >
+                      View Requirement List <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  )}
+                </motion.div>
+              )
+            })()}
 
             {/* Assigned Audit Team — top of right column */}
             <div className="rounded-2xl p-4 shrink-0" style={{ background: D.card, border: `1px solid ${D.border}` }}>

@@ -390,8 +390,10 @@ export const clientPortal = {
   ],
   onHold: {
     active: true,
-    message:
-      'On Hold — Awaiting Documents: ZATCA VAT Return Q3, Bank Statement October 2024.',
+    reason: 'documents', // 'documents' | 'payment' | 'no-response'
+    message: 'On Hold — Awaiting Documents: ZATCA VAT Return Q3, Bank Statement October 2024.',
+    items: ['ZATCA VAT Return Q3', 'Bank Statement October 2024'],
+    // For reason='payment': paymentAmount, dueDate
   },
   stats: {
     totalRequirements: 84,
