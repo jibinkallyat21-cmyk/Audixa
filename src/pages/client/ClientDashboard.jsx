@@ -450,7 +450,9 @@ function EscalationModal({ onClose }) {
 export default function ClientDashboard() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const fyData = getFYData(selectedFY)
-  const recentEvents = getActivityEvents().slice(0, 10)
+  const baseEvents = getActivityEvents(selectedFY).slice(0, 8)
+  const [liveEvents, setLiveEvents] = useState([])
+  const recentEvents = [...liveEvents, ...baseEvents]
   const [meetingModal, setMeetingModal] = useState(false)
   const [escalationModal, setEscalationModal] = useState(false)
   const [underReviewModal, setUnderReviewModal] = useState(false)

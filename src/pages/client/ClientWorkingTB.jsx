@@ -322,8 +322,14 @@ export default function ClientWorkingTB() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-2xl font-bold" style={{ color: D.text }}>Working Trial Balance</h1>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium" style={{ color: D.muted }}>Al-Marai Logistics JSC — {selectedFY}</span>
-              <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: D.subtle }}>Last updated: Today 09:15 AM</span>
+              <span className="text-sm font-medium" style={{ color: D.muted }}>Kingdom Retail Holdings LLC — {selectedFY}</span>
+              {isCurrentFY ? (
+                <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: D.subtle }}>Last updated: Today 09:15 AM</span>
+              ) : (
+                <span className="flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-semibold text-emerald" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                  <CheckCircle2 className="h-3 w-3" /> Finalised — {selectedFY}
+                </span>
+              )}
             </div>
           </div>
 

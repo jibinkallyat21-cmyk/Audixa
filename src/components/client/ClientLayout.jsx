@@ -22,7 +22,7 @@ import { useTheme } from '../../context/ThemeContext'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import ClientNotificationsPanel from './ClientNotificationsPanel'
 import { clientPortal } from '../../data/sampleData'
-import { useClientFY } from '../../context/ClientFYContext'
+import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
 /* ─── palette tokens (CSS vars set by ThemeContext) ─── */
 const D = {
@@ -226,6 +226,7 @@ function QuickChatFloat() {
 /* ─── Sidebar ─── */
 function ClientSidebar() {
   const location = useLocation()
+  const { selectedFY } = useClientFY()
 
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto" style={{ background: D.sidebarBg, borderRight: `1px solid ${D.border}` }}>
@@ -243,7 +244,7 @@ function ClientSidebar() {
       {/* Engagement ref */}
       <div className="mx-3 mb-4 rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}` }}>
         <p className="text-[9px] text-white/30 uppercase tracking-widest mb-0.5">Engagement</p>
-        <p className="text-[10px] font-mono font-semibold text-white/60">{clientPortal.engagementRef}</p>
+        <p className="text-[10px] font-mono font-semibold text-white/60">{ENGAGEMENT_REFS[selectedFY]}</p>
       </div>
 
       <nav className="flex-1 px-3 py-2">
