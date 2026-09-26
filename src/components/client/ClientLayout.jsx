@@ -191,23 +191,23 @@ function QuickChatFloat() {
     setAttachment(null)
   }
 
+  /* Centering via calc so framer-motion's own transform (y/scale) never
+     conflicts with a translate(-50%,-50%) centering hack */
   const panelStyle = maximised
     ? {
-        top: '50%',
-        left: '50%',
+        top:    'calc(50vh - min(340px, 44vh))',
+        left:   'calc(50vw - min(280px, 48vw))',
         bottom: 'auto',
-        right: 'auto',
-        transform: 'translate(-50%, -50%)',
-        width: 'min(560px, 96vw)',
+        right:  'auto',
+        width:  'min(560px, 96vw)',
         height: 'min(680px, 88vh)',
       }
     : {
         bottom: '80px',
-        right: '24px',
-        top: 'auto',
-        left: 'auto',
-        transform: 'none',
-        width: '380px',
+        right:  '24px',
+        top:    'auto',
+        left:   'auto',
+        width:  '380px',
         height: '520px',
       }
 
@@ -260,7 +260,6 @@ function QuickChatFloat() {
                 ...panelStyle,
                 background: '#0F1629',
                 border: `1px solid rgba(255,255,255,0.12)`,
-                transition: 'width 0.25s ease, height 0.25s ease, top 0.25s ease, left 0.25s ease, bottom 0.25s ease, right 0.25s ease, transform 0.25s ease',
               }}
             >
               {/* Header */}
