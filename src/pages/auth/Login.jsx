@@ -219,8 +219,8 @@ export default function Login() {
 
   const inp = {
     width: '100%',
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(70,110,180,0.38)',
+    background: 'rgba(255,255,255,0.07)',
+    border: '1px solid rgba(80,120,200,0.30)',
     borderRadius: 8,
     padding: 'clamp(7px,0.85vw,11px) 12px clamp(7px,0.85vw,11px) 42px',
     color: '#e8f0fc',
@@ -312,12 +312,12 @@ export default function Login() {
             top: '4.5%',
             bottom: '4.5%',
             width: '33.5%',
-            background: 'rgba(6, 14, 38, 0.55)',
-            border: '1px solid rgba(65, 105, 200, 0.35)',
+            background: 'rgba(4, 10, 28, 0.42)',
+            border: '1px solid rgba(80, 130, 220, 0.22)',
             borderRadius: 'clamp(8px,0.9vw,14px)',
-            backdropFilter: 'blur(28px)',
-            WebkitBackdropFilter: 'blur(28px)',
-            boxShadow: '0 8px 48px rgba(0,0,10,0.4), inset 0 1px 0 rgba(255,255,255,0.07)',
+            backdropFilter: 'blur(14px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(14px) saturate(1.4)',
+            boxShadow: '0 4px 32px rgba(0,0,20,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
             display: 'flex',
             flexDirection: 'column',
             padding: 'clamp(14px,2vw,26px)',
@@ -398,8 +398,8 @@ export default function Login() {
                   autoComplete="username"
                   aria-label="Work email"
                   style={inp}
-                  onFocus={e => { e.target.style.borderColor = 'rgba(80,130,220,0.65)'; e.target.style.background = 'rgba(255,255,255,0.07)' }}
-                  onBlur={e => { e.target.style.borderColor = 'rgba(70,110,180,0.38)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
+                  onFocus={e => { e.target.style.borderColor = 'rgba(80,130,220,0.6)'; e.target.style.background = 'rgba(255,255,255,0.10)' }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(80,120,200,0.30)'; e.target.style.background = 'rgba(255,255,255,0.07)' }}
                 />
               </div>
             </div>
@@ -419,8 +419,8 @@ export default function Login() {
                   autoComplete="current-password"
                   aria-label="Password"
                   style={{ ...inp, paddingRight: 'clamp(44px,4.5vw,62px)', letterSpacing: showPassword ? 'normal' : '2px' }}
-                  onFocus={e => { e.target.style.borderColor = 'rgba(80,130,220,0.65)'; e.target.style.background = 'rgba(255,255,255,0.07)' }}
-                  onBlur={e => { e.target.style.borderColor = 'rgba(70,110,180,0.38)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
+                  onFocus={e => { e.target.style.borderColor = 'rgba(80,130,220,0.6)'; e.target.style.background = 'rgba(255,255,255,0.10)' }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(80,120,200,0.30)'; e.target.style.background = 'rgba(255,255,255,0.07)' }}
                 />
                 <button
                   type="button"
