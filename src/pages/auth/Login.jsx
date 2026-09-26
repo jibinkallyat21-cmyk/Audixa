@@ -250,60 +250,46 @@ export default function Login() {
             }}
           />
 
-          {/* ── Country label corrections — cover wrong JPEG labels with correct ones ── */}
-          {/* "Qatain" → "Qatar" */}
+          {/* ── Country label corrections — cover wrong JPEG labels ── */}
+          {/* "Qatain" → "Qatar" (single correct label, no emoji flag) */}
           <div style={{
             position: 'absolute',
             left: '39.63%', top: '51.43%',
             width: '9.12%', height: '4.76%',
-            background: 'rgba(2, 6, 24, 0.93)',
-            borderRadius: 20,
-            border: '1px solid rgba(70, 110, 180, 0.18)',
+            background: 'rgba(8, 16, 42, 0.96)',
+            borderRadius: 24,
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
-            padding: '0 6px 0 3px',
+            justifyContent: 'center',
+            gap: 5,
             pointerEvents: 'none',
             zIndex: 2,
-            backdropFilter: 'blur(2px)',
           }}>
-            <span style={{ fontSize: 'clamp(8px, 0.85vw, 13px)', lineHeight: 1 }}>🇶🇦</span>
+            {/* Qatar flag: maroon + white serrated stripe */}
+            <svg width="18" height="12" viewBox="0 0 18 12" style={{ flexShrink: 0, borderRadius: 2, overflow: 'hidden' }}>
+              <rect width="18" height="12" fill="#8D1B3D"/>
+              <path d="M0 0 L5 2 L0 4 L5 6 L0 8 L5 10 L0 12 L0 0Z" fill="white"/>
+            </svg>
             <span style={{
               fontSize: 'clamp(7px, 0.72vw, 11px)',
               fontWeight: 700,
-              color: '#d4e4f2',
+              color: '#dce8f4',
               fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-              letterSpacing: '0.01em',
+              letterSpacing: '0.02em',
               whiteSpace: 'nowrap',
             }}>Qatar</span>
           </div>
 
-          {/* "Qatan" → "Qatar" */}
+          {/* "Qatan" — duplicate error in JPEG, covered with plain dark patch */}
           <div style={{
             position: 'absolute',
             left: '40.50%', top: '58.57%',
             width: '5.75%', height: '3.81%',
-            background: 'rgba(2, 6, 24, 0.93)',
-            borderRadius: 20,
-            border: '1px solid rgba(70, 110, 180, 0.18)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            padding: '0 6px 0 3px',
+            background: 'rgba(4, 10, 28, 0.98)',
+            borderRadius: 24,
             pointerEvents: 'none',
             zIndex: 2,
-            backdropFilter: 'blur(2px)',
-          }}>
-            <span style={{ fontSize: 'clamp(8px, 0.85vw, 13px)', lineHeight: 1 }}>🇶🇦</span>
-            <span style={{
-              fontSize: 'clamp(7px, 0.72vw, 11px)',
-              fontWeight: 700,
-              color: '#d4e4f2',
-              fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-              letterSpacing: '0.01em',
-              whiteSpace: 'nowrap',
-            }}>Qatar</span>
-          </div>
+          }} />
 
           {/* ── LIVE AUDIT NETWORK status indicator ── */}
           <div style={{
