@@ -14,6 +14,17 @@ const DEMO_ROLES = ROLE_ORDER.map((id) => ({
 
 const EASE = [0.16, 1, 0.3, 1]
 
+const TRUSTED_COMPANIES = [
+  'Kingdom Retail Holdings',
+  'Al-Rashid Group',
+  'Saudi Infrastructure Corp',
+  'Arabian Gulf Ventures',
+  'Al-Salam Properties',
+  'Gulf Digital Solutions',
+  'Riyadh Capital Partners',
+  'National Trade Alliance',
+]
+
 function FloatingInput({ id, label, type = 'text', value, onChange, trailing, isDark }) {
   const [focused, setFocused] = useState(false)
   const filled = value.length > 0
@@ -125,57 +136,88 @@ export default function Login() {
           style={{ background: bgPanel }}
         >
           <Background isDark={isDark} />
-          <div className="relative z-10 flex flex-1 flex-col items-start justify-center px-16">
+          <style>{`@keyframes lp-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+
+          {/* Main brand content — centered */}
+          <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: EASE }}
+              className="flex flex-col items-center text-center"
             >
-              {/* Logo mark + brand name */}
-              <div className="flex items-center gap-3 mb-6">
-                <motion.div
-                  whileHover={{ scale: 1.08, rotateY: 8 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ transformStyle: 'preserve-3d' }}
-                >
-                  <AnalytixMark size={44} />
-                </motion.div>
-                <div>
-                  <p className="text-[26px] font-black leading-tight tracking-tight" style={{ color: textPrimary }}>
-                    AUDIT <span className="text-brand">360</span>
-                  </p>
-                  <p className="text-[11px] tracking-tight" style={{ color: textSecondary }}>by Analytix</p>
-                </div>
-              </div>
+              {/* Logo mark stacked above brand name */}
+              <motion.div
+                whileHover={{ scale: 1.06, rotateY: 8 }}
+                transition={{ duration: 0.3 }}
+                style={{ transformStyle: 'preserve-3d' }}
+                className="mb-5"
+              >
+                <AnalytixMark size={80} />
+              </motion.div>
 
-              <h2 className="text-[38px] font-black leading-tight tracking-tight" style={{ color: textPrimary }}>
-                Audit. Manage.<br />
-                <span style={{ color: '#E8323C' }}>Deliver.</span>
-              </h2>
-              <p className="mt-4 max-w-[320px] text-sm leading-relaxed" style={{ color: textSecondary }}>
-                The unified intelligence platform for audit firms — from engagement to sign-off.
+              {/* AUDIT 360 */}
+              <p className="text-[52px] font-black leading-none tracking-tight" style={{ color: textPrimary }}>
+                AUDIT <span className="text-brand">360</span>
+              </p>
+              <p className="mt-2 text-[13px] font-medium tracking-widest" style={{ color: textSecondary }}>
+                by Analytix
               </p>
 
-              <div className="mt-10 space-y-3">
-                {[
-                  'AI-verified document processing',
-                  'Real-time engagement tracking',
-                  'Seamless client collaboration',
-                ].map((item) => (
-                  <motion.div
-                    key={item}
-                    className="flex items-center gap-3"
-                    whileHover={{ x: 4 }}
-                    transition={{ duration: 0.15 }}
+              {/* CinematicIntro taglines */}
+              <div className="mt-10 flex flex-col gap-0.5">
+                {['Intelligent Audits.', 'Seamless Engagements.', 'Trusted Outcomes.'].map((phrase, i) => (
+                  <motion.p
+                    key={phrase}
+                    className="text-[22px] font-bold leading-snug"
+                    style={{ color: i === 2 ? '#E8323C' : textPrimary }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 + i * 0.13, duration: 0.55, ease: EASE }}
                   >
-                    <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
-                    <span className="text-sm" style={{ color: textSecondary }}>{item}</span>
-                  </motion.div>
+                    {phrase}
+                  </motion.p>
                 ))}
               </div>
+
+              {/* About Analytix */}
+              <motion.p
+                className="mt-8 max-w-[320px] text-[13px] leading-relaxed"
+                style={{ color: textSecondary }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.85, duration: 0.6 }}
+              >
+                Analytix Audit &amp; Assurance delivers end-to-end audit management — from document collection and AI-verified processing to Qawaem filing and final sign-off. We specialise in client portal collaboration, real-time engagement tracking, and compliance reporting for organisations across the GCC.
+              </motion.p>
             </motion.div>
           </div>
-          <p className="relative z-10 px-16 pb-8 text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.25)' }}>
+
+          {/* Trusted by — animated ticker */}
+          <div className="relative z-10 overflow-hidden pb-3">
+            <p className="mb-2 px-16 text-[10px] font-semibold uppercase tracking-[0.12em]"
+              style={{ color: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.22)' }}>
+              Trusted by
+            </p>
+            <div className="overflow-hidden">
+              <div
+                className="flex gap-12 whitespace-nowrap"
+                style={{ animation: 'lp-ticker 30s linear infinite' }}
+              >
+                {[...TRUSTED_COMPANIES, ...TRUSTED_COMPANIES].map((name, i) => (
+                  <span
+                    key={i}
+                    className="shrink-0 text-[12px] font-semibold"
+                    style={{ color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.28)' }}
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <p className="relative z-10 px-16 pb-8 pt-3 text-[11px]" style={{ color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.25)' }}>
             © 2026 Analytix. All rights reserved.
           </p>
         </div>
