@@ -120,11 +120,11 @@ function TBTable({ lines }) {
                   <td colSpan={2} className="px-4 py-3 text-xs font-bold uppercase tracking-wider">TOTAL</td>
                   <td colSpan={6} className="px-3 py-3 text-center">
                     {isBalanced ? (
-                      <span className="inline-flex items-center gap-1.5 rounded px-3 py-1 text-[10px] font-bold tracking-wider bg-emerald/20 text-emerald">
+                      <span className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-bold tracking-widest bg-emerald/20 text-emerald" style={{ letterSpacing: '0.12em' }}>
                         Balanced ✓
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded px-3 py-1 text-[10px] font-bold tracking-wider bg-red-500/20 text-red-400">
+                      <span className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-bold tracking-widest bg-red-500/20 text-red-400" style={{ letterSpacing: '0.12em' }}>
                         Imbalanced ✗
                       </span>
                     )}
