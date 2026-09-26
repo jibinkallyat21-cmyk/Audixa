@@ -17,7 +17,6 @@ import {
   Clock,
   Maximize2,
   Minimize2,
-  Users,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import ExitDemoButton from '../shared/ExitDemoButton'
@@ -294,37 +293,6 @@ function QuickChatFloat() {
                   </button>
                 </div>
               </div>
-
-              {/* Group members strip (visible only when maximised) */}
-              <AnimatePresence>
-                {maximised && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.18 }}
-                    className="overflow-hidden shrink-0"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-                  >
-                    <div className="flex items-center gap-2 px-4 py-2.5 overflow-x-auto">
-                      <Users className="h-3.5 w-3.5 shrink-0 text-white/25" />
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 shrink-0">Group</p>
-                      {CHAT_GROUP.map((m) => (
-                        <div key={m.id} className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/4 px-2.5 py-1">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
-                          <span className="text-[10px] font-semibold text-white/70 whitespace-nowrap">{m.name}</span>
-                          <span className="text-[9px] text-white/30">· {m.role}</span>
-                        </div>
-                      ))}
-                      <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/4 px-2.5 py-1">
-                        <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                        <span className="text-[10px] font-semibold text-white/70 whitespace-nowrap">You</span>
-                        <span className="text-[9px] text-white/30">· Client</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Messages */}
               <div className="flex-1 space-y-4 overflow-y-auto p-4" style={{ background: '#080C18' }}>
