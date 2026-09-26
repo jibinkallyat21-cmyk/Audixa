@@ -99,25 +99,16 @@ const STAGE_TOOLTIPS = {
 }
 
 const AUDIT_TEAM_FY2024 = [
-  { initials: 'SR', name: 'Sana Rashid',       role: 'Audit Lead',          online: true  },
-  { initials: 'LK', name: 'Layla Khalid',      role: 'Audit Associate',     online: false },
-  { initials: 'MR', name: 'Mohammed Riyad',    role: 'Senior Auditor',      online: true  },
-  { initials: 'HF', name: 'Hana Fadel',        role: 'Audit Associate',     online: false },
-  { initials: 'YA', name: 'Yusuf Al-Amri',    role: 'Tax Specialist',      online: false },
+  { initials: 'SR', name: 'Sana Rashid',    role: 'Audit Lead',      online: true,  fileHandler: false },
+  { initials: 'LK', name: 'Layla Khalid',   role: 'Audit Associate', online: false, fileHandler: true  },
 ]
 const AUDIT_TEAM_FY2023 = [
-  { initials: 'AH', name: 'Ali Hussain',       role: 'Audit Lead',          online: false },
-  { initials: 'FO', name: 'Fatima Omar',       role: 'Audit Associate',     online: false },
-  { initials: 'ZN', name: 'Zaid Nasser',       role: 'Senior Auditor',      online: false },
-  { initials: 'RA', name: 'Rima Al-Dosari',    role: 'Audit Associate',     online: false },
-  { initials: 'BS', name: 'Badr Saleem',       role: 'Tax Specialist',      online: false },
+  { initials: 'AH', name: 'Ali Hussain',    role: 'Audit Lead',      online: false, fileHandler: false },
+  { initials: 'FO', name: 'Fatima Omar',    role: 'Audit Associate', online: false, fileHandler: true  },
 ]
 const AUDIT_TEAM_FY2022 = [
-  { initials: 'KM', name: 'Khalid Mansour',    role: 'Audit Lead',          online: false },
-  { initials: 'NB', name: 'Noura Bilal',       role: 'Audit Associate',     online: false },
-  { initials: 'TH', name: 'Tariq Hamdan',      role: 'Senior Auditor',      online: false },
-  { initials: 'SA', name: 'Sara Al-Otaibi',    role: 'Audit Associate',     online: false },
-  { initials: 'WQ', name: 'Waleed Qassim',     role: 'Tax Specialist',      online: false },
+  { initials: 'KM', name: 'Khalid Mansour', role: 'Audit Lead',      online: false, fileHandler: false },
+  { initials: 'NB', name: 'Noura Bilal',    role: 'Audit Associate', online: false, fileHandler: true  },
 ]
 
 const UNDER_REVIEW_DOCS = [
@@ -601,16 +592,21 @@ export default function ClientDashboard() {
               </div>
               <div className="space-y-2">
                 {fyData.team.map((m) => (
-                  <div key={m.initials} className="flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  <div key={m.initials} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors" style={{ background: 'rgba(255,255,255,0.03)', border: m.fileHandler ? '1px solid rgba(99,102,241,0.2)' : '1px solid transparent' }}>
                     <div className="relative shrink-0">
-                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: 'rgba(255,255,255,0.1)' }}>{m.initials}</div>
+                      <div className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: m.fileHandler ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.1)' }}>{m.initials}</div>
                       <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2" style={{ background: m.online ? '#10B981' : '#475569', borderColor: D.card }} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-white/90">{m.name}</p>
                       <p className="truncate text-[10px]" style={{ color: D.subtle }}>{m.role}</p>
+                      {m.fileHandler && (
+                        <span className="mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold" style={{ background: 'rgba(99,102,241,0.15)', color: '#818CF8' }}>
+                          Assigned to your file
+                        </span>
+                      )}
                     </div>
-                    <span className="text-[9px] font-semibold" style={{ color: m.online ? '#10B981' : D.subtle }}>
+                    <span className="text-[9px] font-semibold shrink-0" style={{ color: m.online ? '#10B981' : D.subtle }}>
                       {m.online ? 'Online' : 'Offline'}
                     </span>
                   </div>
