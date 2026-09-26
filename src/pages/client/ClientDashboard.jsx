@@ -525,28 +525,6 @@ export default function ClientDashboard() {
             <AnimatePresence mode="wait">
               <motion.div key={selectedFY} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="flex flex-col gap-4">
 
-                {/* Header strip */}
-                <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl px-5 py-3.5" style={{ background: D.card, border: `1px solid ${D.border}` }}>
-                  <div className="flex items-center gap-3">
-                    <span className="rounded-full px-3 py-1 text-xs font-mono font-semibold text-white/50" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${D.border}` }}>
-                      {fyData.engagementRef}
-                    </span>
-                    <div className="relative">
-                      <select
-                        value={selectedFY}
-                        onChange={(e) => setSelectedFY(e.target.value)}
-                        className="appearance-none cursor-pointer rounded-lg py-1.5 pl-3 pr-7 text-xs font-bold text-white outline-none"
-                        style={{ background: 'rgba(230,57,70,0.15)', border: '1px solid rgba(230,57,70,0.3)' }}
-                      >
-                        {availableFYs.map((fy) => (
-                          <option key={fy} value={fy} style={{ background: '#0F1629' }}>{fy}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
-                    </div>
-                  </div>
-                </div>
-
                 {/* On Hold banner */}
                 {selectedFY === 'FY2024' && clientPortal.onHold?.active && (
                   <div className="flex items-center gap-4 rounded-2xl px-4 py-3" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
