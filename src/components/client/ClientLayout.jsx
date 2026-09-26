@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import {
@@ -171,9 +172,15 @@ function QuickChatFloat() {
     setAttachment(null)
   }
 
+  /* close + reset maximised so next open is always compact */
+  const handleClose = useCallback(() => {
+    setOpen(false)
+    setMaximised(false)
+  }, [])
+
   /* click-outside: close on backdrop click */
   const handleBackdrop = (e) => {
-    if (e.target === e.currentTarget) setOpen(false)
+    if (e.target === e.currentTarget) handleClose()
   }
 
   const panelStyle = maximised
@@ -196,7 +203,7 @@ function QuickChatFloat() {
         height: '520px',
       }
 
-  return (
+  return createPortal(
     <>
       {/* FAB */}
       <div className="fixed bottom-6 right-6 z-40">
@@ -227,7 +234,7 @@ function QuickChatFloat() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[48]"
               style={{ background: maximised ? 'rgba(0,0,0,0.55)' : 'transparent' }}
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
             />
 
             {/* Chat panel */}
@@ -273,7 +280,7 @@ function QuickChatFloat() {
                   >
                     {maximised ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
                   </button>
-                  <button onClick={() => setOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/8 hover:text-white transition-colors">
+                  <button onClick={handleClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/8 hover:text-white transition-colors">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -376,7 +383,8 @@ function QuickChatFloat() {
           </>
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body
   )
 }
 
