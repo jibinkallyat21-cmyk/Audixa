@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import {
   LayoutDashboard,
   ListChecks,
@@ -285,6 +285,75 @@ function ClientSidebar() {
   )
 }
 
+/* ─── 3D Engagement Partner badge ─── */
+function PartnerBadge() {
+  const { partner } = useClientFY()
+  const ref = useRef(null)
+
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
+  const rotateX = useSpring(useTransform(rawY, [-0.5, 0.5], [10, -10]), { stiffness: 260, damping: 24 })
+  const rotateY = useSpring(useTransform(rawX, [-0.5, 0.5], [-12, 12]), { stiffness: 260, damping: 24 })
+  const glowX  = useSpring(useTransform(rawX, [-0.5, 0.5], [0, 100]), { stiffness: 200, damping: 20 })
+  const glowY  = useSpring(useTransform(rawY, [-0.5, 0.5], [0, 100]), { stiffness: 200, damping: 20 })
+
+  const handleMove = (e) => {
+    const r = ref.current?.getBoundingClientRect()
+    if (!r) return
+    rawX.set((e.clientX - r.left) / r.width - 0.5)
+    rawY.set((e.clientY - r.top)  / r.height - 0.5)
+  }
+  const handleLeave = () => {
+    rawX.set(0)
+    rawY.set(0)
+  }
+
+  return (
+    <div style={{ perspective: '500px' }} className="hidden md:block">
+      <motion.div
+        ref={ref}
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
+        style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        className="relative flex items-center gap-2 rounded-xl px-3 py-1.5 select-none overflow-hidden cursor-default"
+        whileHover={{ scale: 1.04 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+        title={partner?.name}
+      >
+        {/* Gradient shimmer background */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 rounded-xl"
+          style={{
+            background: 'linear-gradient(135deg, rgba(230,57,70,0.18) 0%, rgba(99,102,241,0.14) 50%, rgba(230,57,70,0.08) 100%)',
+            border: '1px solid rgba(230,57,70,0.28)',
+          }}
+        />
+        {/* Moving highlight */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 rounded-xl opacity-0 hover:opacity-100"
+          style={{
+            background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(255,255,255,0.12) 0%, transparent 60%)`,
+          }}
+        />
+        {/* Avatar */}
+        <div
+          className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white"
+          style={{ background: 'rgba(230,57,70,0.55)', boxShadow: '0 0 8px rgba(230,57,70,0.5)' }}
+        >
+          {partner?.initials}
+        </div>
+        {/* Text */}
+        <div className="relative z-10 flex flex-col leading-tight">
+          <span className="text-[8px] uppercase tracking-widest font-semibold" style={{ color: 'rgba(230,57,70,0.75)' }}>
+            Engagement Partner
+          </span>
+          <span className="text-[11px] font-bold text-white/90 whitespace-nowrap">{partner?.firm}</span>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 /* ─── Header ─── */
 function ClientHeader({ title }) {
   const { isDark } = useTheme()
@@ -313,6 +382,7 @@ function ClientHeader({ title }) {
 
       {/* Right — tools */}
       <div className="flex flex-1 items-center justify-end gap-3">
+        <PartnerBadge />
         <LiveClock isDark={isDark} />
         <FYDropdown isDark={isDark} />
         <ClientNotificationsPanel />

@@ -10,11 +10,18 @@ export const ENGAGEMENT_REFS = {
   FY2022: 'KSA-2022-6305',
 }
 
+export const PARTNER_DATA = {
+  FY2024: { initials: 'AB', name: 'Ashraf Bassas', firm: 'Ashraf Bassas CPA Firm' },
+  FY2023: { initials: 'AB', name: 'Ashraf Bassas', firm: 'Ashraf Bassas CPA Firm' },
+  FY2022: { initials: 'MI', name: 'Man Ibrahim Alshinqiti', firm: 'Man Ibrahim Alshinqiti CPA Firm' },
+}
+
 export function ClientFYProvider({ children }) {
   const [selectedFY, setSelectedFY] = useState('FY2024')
+  const partner = PARTNER_DATA[selectedFY] ?? PARTNER_DATA.FY2024
 
   return (
-    <ClientFYContext.Provider value={{ selectedFY, setSelectedFY, availableFYs: AVAILABLE_FYS }}>
+    <ClientFYContext.Provider value={{ selectedFY, setSelectedFY, availableFYs: AVAILABLE_FYS, partner }}>
       {children}
     </ClientFYContext.Provider>
   )
