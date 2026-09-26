@@ -401,12 +401,35 @@ function RequestMeetingModal({ onClose, onRecord }) {
   )
 }
 
-/* ─── Escalation Modal (4-level) ─── */
+/* ─── Escalation Modal (3-level) ─── */
 const ESCALATION_LEVELS = [
-  { level: 1, label: 'Team Lead', description: 'Direct escalation to your assigned audit team lead. Available immediately.', locked: false, waitHours: 0 },
-  { level: 2, label: 'Assistant Manager', description: 'Escalate to Assistant Manager if no response from Team Lead within 24 hours.', locked: false, waitHours: 24 },
-  { level: 3, label: 'Audit Manager', description: 'Critical escalation to Audit Manager. Also reflected in the management portal. Available after 48 hours of no resolution.', locked: true, waitHours: 48, managementVisible: true },
-  { level: 4, label: 'FO Manager', description: 'Executive escalation. Notifies both FO Manager and management portal immediately. Available after 72 hours.', locked: true, waitHours: 72, managementVisible: true },
+  {
+    level: 1,
+    label: 'Audit Lead',
+    description: 'Direct escalation to your assigned Audit Lead. They will be notified immediately and are expected to respond within 24 hours.',
+    locked: false,
+    waitHours: 0,
+    managementVisible: false,
+    icon: '👤',
+  },
+  {
+    level: 2,
+    label: 'Audit Manager',
+    description: 'Escalate to the Audit Manager if your Audit Lead has not resolved the issue within 24 hours. The Audit Manager will be notified immediately.',
+    locked: true,
+    waitHours: 24,
+    managementVisible: false,
+    icon: '👔',
+  },
+  {
+    level: 3,
+    label: 'Front Office Manager',
+    description: 'Executive-level escalation to the Front Office Manager responsible for your file. This escalation is also visible to management. Available after 48 hours with no resolution.',
+    locked: true,
+    waitHours: 48,
+    managementVisible: true,
+    icon: '🏢',
+  },
 ]
 
 function EscalationModal({ onClose, onRecord }) {
@@ -419,14 +442,15 @@ function EscalationModal({ onClose, onRecord }) {
     if (!selectedLevel || !issue.trim()) return showToast('Please select a level and describe the issue')
     setSubmitted(true)
     setTimeout(() => {
-      showToast(`Escalation submitted to ${selectedLevel.label} — your team has been notified`)
+      const mgmtNote = selectedLevel.managementVisible ? ' This has also been flagged in the management portal.' : ''
+      showToast(`Escalation submitted to ${selectedLevel.label} — your team has been notified.${mgmtNote}`)
       onRecord?.(`Issue escalated to ${selectedLevel.label}: "${issue.trim().slice(0, 60)}${issue.length > 60 ? '…' : ''}"`, 'amber')
       onClose()
     }, 1200)
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -434,6 +458,7 @@ function EscalationModal({ onClose, onRecord }) {
         className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
         style={{ background: '#0F1629', border: '1px solid rgba(255,255,255,0.1)' }}
       >
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="h-5 w-5 text-amber" />
@@ -442,67 +467,101 @@ function EscalationModal({ onClose, onRecord }) {
           <button onClick={onClose}><X className="h-4 w-4 text-white/40" /></button>
         </div>
 
-        <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-          <p className="text-sm text-white/60 leading-relaxed">
-            Select the appropriate escalation level. Higher levels are available only after the specified waiting period with no resolution.
-          </p>
+        <div className="px-6 py-5 space-y-5 max-h-[72vh] overflow-y-auto">
+          {/* Intro */}
+          <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.18)' }}>
+            <p className="text-xs text-amber/90 leading-relaxed">
+              Escalations follow a structured path — <strong>one level at a time</strong>. Higher levels unlock only after the waiting period with no resolution. Front Office Manager escalations are visible to management.
+            </p>
+          </div>
 
-          {/* Level selector */}
-          <div className="space-y-2">
-            {ESCALATION_LEVELS.map((lvl) => (
-              <motion.button
-                key={lvl.level}
-                whileHover={!lvl.locked ? { scale: 1.01 } : {}}
-                onClick={() => !lvl.locked && setSelectedLevel(lvl)}
-                disabled={lvl.locked}
-                className={`w-full rounded-xl px-4 py-3.5 text-left transition-all ${
-                  lvl.locked
-                    ? 'opacity-40 cursor-not-allowed'
-                    : selectedLevel?.level === lvl.level
-                    ? 'bg-brand/20 border-brand/40'
-                    : 'border-white/10 hover:border-white/20'
-                }`}
-                style={{
-                  border: selectedLevel?.level === lvl.level ? '1px solid rgba(230,57,70,0.4)' : '1px solid rgba(255,255,255,0.08)',
-                  background: selectedLevel?.level === lvl.level ? 'rgba(230,57,70,0.12)' : 'rgba(255,255,255,0.03)',
-                }}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                      lvl.locked ? 'bg-white/10 text-white/30' : selectedLevel?.level === lvl.level ? 'bg-brand text-white' : 'bg-white/10 text-white/70'
-                    }`}>
-                      L{lvl.level}
-                    </span>
-                    <div>
-                      <p className={`text-sm font-semibold ${lvl.locked ? 'text-white/40' : 'text-white'}`}>{lvl.label}</p>
-                      {lvl.managementVisible && !lvl.locked && (
-                        <span className="text-[10px] text-amber font-semibold">Visible in management portal</span>
-                      )}
+          {/* Level steps */}
+          <div className="relative">
+            {/* connector line */}
+            <div className="absolute left-[18px] top-6 bottom-6 w-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+
+            <div className="space-y-2">
+              {ESCALATION_LEVELS.map((lvl, idx) => {
+                const isSelected = selectedLevel?.level === lvl.level
+                const prevAvail  = idx === 0 || !ESCALATION_LEVELS[idx - 1]?.locked
+                return (
+                  <motion.button
+                    key={lvl.level}
+                    whileHover={!lvl.locked ? { x: 2 } : {}}
+                    onClick={() => !lvl.locked && setSelectedLevel(lvl)}
+                    disabled={lvl.locked}
+                    className={`relative w-full rounded-xl pl-12 pr-4 py-3.5 text-left transition-all ${
+                      lvl.locked ? 'cursor-not-allowed opacity-45' : 'cursor-pointer'
+                    }`}
+                    style={{
+                      border: isSelected
+                        ? '1px solid rgba(230,57,70,0.45)'
+                        : '1px solid rgba(255,255,255,0.07)',
+                      background: isSelected
+                        ? 'rgba(230,57,70,0.10)'
+                        : lvl.locked
+                        ? 'rgba(255,255,255,0.02)'
+                        : 'rgba(255,255,255,0.04)',
+                    }}
+                  >
+                    {/* Step circle */}
+                    <div
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 flex h-[26px] w-[26px] items-center justify-center rounded-full text-xs font-bold z-10"
+                      style={{
+                        background: isSelected
+                          ? '#E63946'
+                          : lvl.locked
+                          ? 'rgba(255,255,255,0.06)'
+                          : 'rgba(255,255,255,0.12)',
+                        color: lvl.locked ? 'rgba(255,255,255,0.25)' : '#fff',
+                        border: isSelected ? '2px solid rgba(230,57,70,0.6)' : '2px solid rgba(255,255,255,0.1)',
+                      }}
+                    >
+                      {lvl.level}
                     </div>
-                  </div>
-                  {lvl.locked ? (
-                    <div className="flex items-center gap-1 text-[10px] text-white/30">
-                      <Clock className="h-3 w-3" />
-                      After {lvl.waitHours}h
+
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className={`text-sm font-semibold ${lvl.locked ? 'text-white/35' : 'text-white'}`}>{lvl.label}</p>
+                          {lvl.managementVisible && (
+                            <span className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber"
+                              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                              Management Visible
+                            </span>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <motion.p
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="mt-1.5 text-xs text-white/60 leading-relaxed"
+                          >
+                            {lvl.description}
+                          </motion.p>
+                        )}
+                      </div>
+                      <div className="shrink-0 flex items-center gap-2">
+                        {lvl.locked ? (
+                          <div className="flex items-center gap-1 text-[10px] text-white/25">
+                            <Clock className="h-3 w-3" />
+                            After {lvl.waitHours}h
+                          </div>
+                        ) : isSelected ? (
+                          <CheckCircle2 className="h-4 w-4 text-brand" />
+                        ) : null}
+                      </div>
                     </div>
-                  ) : (
-                    selectedLevel?.level === lvl.level && (
-                      <CheckCircle2 className="h-4 w-4 text-brand" />
-                    )
-                  )}
-                </div>
-                {selectedLevel?.level === lvl.level && (
-                  <p className="mt-2 text-xs text-white/60 leading-relaxed">{lvl.description}</p>
-                )}
-              </motion.button>
-            ))}
+                  </motion.button>
+                )
+              })}
+            </div>
           </div>
 
           {/* Issue description */}
           {selectedLevel && (
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-              <label className="block text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+              <label className="block text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.45)' }}>
                 Describe the issue <span className="text-brand">*</span>
               </label>
               <textarea
@@ -513,6 +572,12 @@ function EscalationModal({ onClose, onRecord }) {
                 className="w-full resize-none rounded-xl px-4 py-3 text-sm text-white/80 outline-none placeholder:text-white/20"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
               />
+              {selectedLevel.managementVisible && (
+                <p className="text-[11px] text-amber/80 flex items-center gap-1.5">
+                  <AlertTriangle className="h-3 w-3 shrink-0" />
+                  This escalation will be visible to management and the Front Office Manager.
+                </p>
+              )}
             </motion.div>
           )}
 

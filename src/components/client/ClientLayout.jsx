@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import {
@@ -14,6 +14,9 @@ import {
   Send,
   X,
   Clock,
+  Maximize2,
+  Minimize2,
+  Users,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import ExitDemoButton from '../shared/ExitDemoButton'
@@ -43,10 +46,18 @@ const NAV_ITEMS = [
   { id: 'activity',   label: 'Activity Log',         href: '/client/activity',   icon: LineChart },
 ]
 
+/* Chat group members (Analytix side) */
+const CHAT_GROUP = [
+  { id: 'tariq',  name: 'Tariq Al-Harbi',     initials: 'TH', color: '#2563EB', role: 'Audit Lead'         },
+  { id: 'nora',   name: 'Nora Hassan',          initials: 'NH', color: '#7C3AED', role: 'Audit Team'         },
+  { id: 'omar',   name: 'Omar Faisal',           initials: 'OF', color: '#D97706', role: 'Front Office'       },
+  { id: 'ashraf', name: 'Ashraf Bassas',         initials: 'AB', color: '#059669', role: 'Audit Manager'      },
+]
+
 const QUICK_CHAT_MESSAGES = [
-  { side: 'left',  author: 'Tariq Al-Harbi', timestamp: '10:42 AM', text: 'Please share the October bank statement when ready.' },
-  { side: 'right', author: 'You',            timestamp: '11:15 AM', text: 'Will upload by end of day, thank you.' },
-  { side: 'left',  author: 'Tariq Al-Harbi', timestamp: '11:20 AM', text: 'Great — also please review the draft AFS when it arrives.' },
+  { senderId: 'tariq', timestamp: '10:42 AM', text: 'Please share the October bank statement when ready.' },
+  { senderId: 'me',    timestamp: '11:15 AM', text: 'Will upload by end of day, thank you.' },
+  { senderId: 'tariq', timestamp: '11:20 AM', text: 'Great — also please review the draft AFS when it arrives.' },
 ]
 
 /* ─── live clock ─── */
@@ -120,27 +131,60 @@ function FYDropdown({ isDark = true }) {
 }
 
 /* ─── QuickChat ─── */
+function ChatAvatar({ member, size = 8 }) {
+  return (
+    <div
+      className="flex shrink-0 items-center justify-center rounded-full text-white font-bold"
+      style={{ width: size * 4, height: size * 4, background: member.color, fontSize: size * 1.4 }}
+    >
+      {member.initials}
+    </div>
+  )
+}
+
 function QuickChatFloat() {
   const [open, setOpen] = useState(false)
+  const [maximised, setMaximised] = useState(false)
   const [messages, setMessages] = useState(QUICK_CHAT_MESSAGES)
   const [draft, setDraft] = useState('')
   const [attachment, setAttachment] = useState(null)
   const fileRef = useRef(null)
+  const bottomRef = useRef(null)
   const unread = 1
+
+  const getM = useCallback((id) => CHAT_GROUP.find((m) => m.id === id), [])
+
+  useEffect(() => {
+    if (open) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
+  }, [open, messages])
 
   const handleSend = (e) => {
     e.preventDefault()
     if (!draft.trim() && !attachment) return
     setMessages(prev => [...prev, {
-      side: 'right', author: 'You', timestamp: 'Just now', text: draft.trim(),
+      senderId: 'me',
+      timestamp: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+      text: draft.trim(),
       attachment: attachment ? { name: attachment.name, size: `${(attachment.size / 1024).toFixed(0)} KB` } : null,
     }])
     setDraft('')
     setAttachment(null)
   }
 
+  /* click-outside: close on backdrop click */
+  const handleBackdrop = (e) => {
+    if (e.target === e.currentTarget) setOpen(false)
+  }
+
+  const panelW = maximised ? 'min(560px, 96vw)' : '380px'
+  const panelH = maximised ? 'min(680px, 88vh)' : '520px'
+  const panelBottom = maximised ? '50%' : '80px'
+  const panelRight  = maximised ? '50%' : '24px'
+  const transform   = maximised ? 'translate(50%, 50%)' : 'none'
+
   return (
     <>
+      {/* FAB */}
       <div className="fixed bottom-6 right-6 z-40">
         <div className="group relative">
           <button
@@ -160,63 +204,165 @@ function QuickChatFloat() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.95 }}
-            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed bottom-20 right-6 z-50 flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl shadow-2xl"
-            style={{ maxWidth: 'calc(100vw - 24px)', background: '#0F1629', border: `1px solid ${D.border}` }}
-          >
-            <div className="flex items-center justify-between px-4 py-3" style={{ background: '#0A0E1C', borderBottom: `1px solid ${D.border}` }}>
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: 'rgba(255,255,255,0.1)' }}>TA</div>
-                <div>
-                  <p className="text-sm font-semibold text-white">Tariq Al-Harbi</p>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald" />
-                    <span className="text-[10px] text-white/40">Online — Analytix Audit Team</span>
+          <>
+            {/* Invisible backdrop — click outside closes */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[48]"
+              onClick={() => setOpen(false)}
+            />
+
+            {/* Chat panel */}
+            <motion.div
+              key="panel"
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.95 }}
+              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+              className="fixed z-[49] flex flex-col overflow-hidden rounded-2xl shadow-2xl"
+              style={{
+                width: panelW,
+                height: panelH,
+                bottom: panelBottom,
+                right: panelRight,
+                transform,
+                background: '#0F1629',
+                border: `1px solid rgba(255,255,255,0.12)`,
+                transition: 'width 0.25s ease, height 0.25s ease, bottom 0.25s ease, right 0.25s ease, transform 0.25s ease',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ background: '#0A0E1C', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex -space-x-1.5">
+                    {CHAT_GROUP.slice(0, 3).map((m) => (
+                      <ChatAvatar key={m.id} member={m} size={7} />
+                    ))}
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-[9px] font-bold text-white/50" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      +{CHAT_GROUP.length - 3}
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-white leading-tight">Engagement Team</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
+                      <span className="text-[10px] text-white/40 truncate">Kingdom Retail Holdings LLC · {CHAT_GROUP.length} members</span>
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                  <button
+                    onClick={() => setMaximised((v) => !v)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/8 hover:text-white transition-colors"
+                    title={maximised ? 'Minimise' : 'Expand'}
+                  >
+                    {maximised ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                  </button>
+                  <button onClick={() => setOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/8 hover:text-white transition-colors">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
-              <button onClick={() => setOpen(false)} className="text-white/40 hover:text-white"><X className="h-4 w-4" /></button>
-            </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto p-4" style={{ background: '#080C18' }}>
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.side === 'right' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm ${msg.side === 'right' ? 'rounded-br-sm bg-brand text-white' : 'rounded-bl-sm text-white/90'}`}
-                    style={msg.side !== 'right' ? { background: 'rgba(255,255,255,0.07)' } : {}}>
-                    {msg.text && <p>{msg.text}</p>}
-                    {msg.attachment && (
-                      <div className="mt-1 flex items-center gap-2 rounded-lg bg-white/20 px-2 py-1.5 text-xs">
-                        <Paperclip className="h-3 w-3" /><span>{msg.attachment.name}</span>
-                        <span className="opacity-70">{msg.attachment.size}</span>
+              {/* Group members strip (visible only when maximised) */}
+              <AnimatePresence>
+                {maximised && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="overflow-hidden shrink-0"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    <div className="flex items-center gap-2 px-4 py-2.5 overflow-x-auto">
+                      <Users className="h-3.5 w-3.5 shrink-0 text-white/25" />
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 shrink-0">Group</p>
+                      {CHAT_GROUP.map((m) => (
+                        <div key={m.id} className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/4 px-2.5 py-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
+                          <span className="text-[10px] font-semibold text-white/70 whitespace-nowrap">{m.name}</span>
+                          <span className="text-[9px] text-white/30">· {m.role}</span>
+                        </div>
+                      ))}
+                      <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/4 px-2.5 py-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                        <span className="text-[10px] font-semibold text-white/70 whitespace-nowrap">You</span>
+                        <span className="text-[9px] text-white/30">· Client</span>
                       </div>
-                    )}
-                    <p className={`mt-0.5 text-[10px] ${msg.side === 'right' ? 'text-white/60' : 'text-white/30'}`}>{msg.timestamp}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            {attachment && (
-              <div className="flex items-center gap-2 px-4 py-2 text-xs" style={{ borderTop: `1px solid ${D.border}`, background: D.cardBg }}>
-                <Paperclip className="h-3 w-3 text-white/40" />
-                <span className="truncate text-white/60">{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} className="ml-auto text-white/30 hover:text-red-400"><X className="h-3.5 w-3.5" /></button>
+              {/* Messages */}
+              <div className="flex-1 space-y-4 overflow-y-auto p-4" style={{ background: '#080C18' }}>
+                {messages.map((msg, i) => {
+                  const isMe = msg.senderId === 'me'
+                  const sender = isMe ? null : getM(msg.senderId)
+                  const showAvatar = !isMe && (i === 0 || messages[i - 1]?.senderId !== msg.senderId)
+                  return (
+                    <div key={i} className={`flex gap-2.5 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                      {/* Avatar (team side only, first in run) */}
+                      {!isMe && (
+                        <div className="w-7 shrink-0 flex items-end">
+                          {showAvatar && sender && <ChatAvatar member={sender} size={7} />}
+                        </div>
+                      )}
+                      <div className={`flex max-w-[72%] flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                        {showAvatar && !isMe && sender && (
+                          <span className="mb-0.5 text-[10px] font-semibold" style={{ color: sender.color }}>{sender.name} · {sender.role}</span>
+                        )}
+                        <div
+                          className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${isMe ? 'rounded-br-sm' : 'rounded-bl-sm'}`}
+                          style={isMe ? { background: '#E63946', color: '#fff' } : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.88)' }}
+                        >
+                          {msg.text && <p>{msg.text}</p>}
+                          {msg.attachment && (
+                            <div className="mt-1.5 flex items-center gap-2 rounded-lg bg-white/15 px-2.5 py-1.5 text-xs">
+                              <Paperclip className="h-3 w-3" /><span>{msg.attachment.name}</span>
+                              <span className="opacity-60">{msg.attachment.size}</span>
+                            </div>
+                          )}
+                        </div>
+                        <span className="mt-0.5 text-[9px] text-white/30">{msg.timestamp}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+                <div ref={bottomRef} />
               </div>
-            )}
 
-            <form onSubmit={handleSend} className="flex items-center gap-2 px-3 py-2.5" style={{ borderTop: `1px solid ${D.border}`, background: D.cardBg }}>
-              <button type="button" onClick={() => fileRef.current?.click()} className="shrink-0 text-white/30 hover:text-white/70"><Paperclip className="h-4 w-4" /></button>
-              <input type="file" ref={fileRef} className="hidden" onChange={(e) => setAttachment(e.target.files?.[0] || null)} />
-              <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type a message..." className="min-w-0 flex-1 bg-transparent text-sm text-white/80 outline-none placeholder:text-white/25" />
-              <button type="submit" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-white disabled:opacity-40" disabled={!draft.trim() && !attachment}>
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </form>
-          </motion.div>
+              {/* Attachment preview */}
+              {attachment && (
+                <div className="flex items-center gap-2 px-4 py-2 shrink-0 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', background: '#0A0E1C' }}>
+                  <Paperclip className="h-3 w-3 text-white/40" />
+                  <span className="truncate text-white/60">{attachment.name}</span>
+                  <button onClick={() => setAttachment(null)} className="ml-auto text-white/30 hover:text-red-400"><X className="h-3.5 w-3.5" /></button>
+                </div>
+              )}
+
+              {/* Input */}
+              <form onSubmit={handleSend} className="flex items-center gap-2 px-3 py-2.5 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', background: '#0A0E1C' }}>
+                <button type="button" onClick={() => fileRef.current?.click()} className="shrink-0 text-white/30 hover:text-white/70"><Paperclip className="h-4 w-4" /></button>
+                <input type="file" ref={fileRef} className="hidden" onChange={(e) => setAttachment(e.target.files?.[0] || null)} />
+                <input
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) handleSend(e) }}
+                  placeholder="Message your engagement team..."
+                  className="min-w-0 flex-1 bg-transparent text-sm text-white/80 outline-none placeholder:text-white/25"
+                />
+                <button type="submit" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-white disabled:opacity-40" disabled={!draft.trim() && !attachment}>
+                  <Send className="h-3.5 w-3.5" />
+                </button>
+              </form>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
