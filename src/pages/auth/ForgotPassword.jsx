@@ -183,10 +183,6 @@ export default function ForgotPassword() {
 
           {/* ══ LEFT PANEL ══ */}
           <div className="a360-left" style={{ flex: '0 0 62%', width: '62%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
-            <div ref={geoRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', willChange: 'transform' }}>
-              <div style={{ position: 'absolute', left: '4%', top: '16%', width: '46%', height: '30%', border: '1px solid rgba(175,205,238,0.14)', borderRadius: 3, transform: 'perspective(900px) rotateY(15deg) rotateX(4deg)', transformOrigin: 'left center' }} />
-              <div style={{ position: 'absolute', left: '26%', top: '46%', width: '42%', height: '34%', border: '1px solid rgba(247,25,61,0.12)', borderRadius: 3, transform: 'perspective(900px) rotateY(-9deg) rotateX(-3deg)', transformOrigin: 'right center' }} />
-            </div>
 
             {/* Brand */}
             <div>
