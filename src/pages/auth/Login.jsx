@@ -172,6 +172,35 @@ const CSS = `
     .a360-card   { max-height: none !important; }
     .a360-diag   { display: none !important; }
   }
+
+  /* ── Service Ecosystem ──────────────────────────────────── */
+  @keyframes eco-orb-glow {
+    0%,100% { opacity: 0.52; }
+    50%     { opacity: 0.96; }
+  }
+  @keyframes eco-ring-pulse {
+    0%,100% { opacity: 0.48; }
+    50%     { opacity: 0.92; }
+  }
+  @keyframes eco-orb-scale {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(1.055); }
+  }
+  .eco-orb-halo { animation: eco-orb-glow 12s ease-in-out infinite; }
+  .eco-ring1    { animation: eco-ring-pulse 15s ease-in-out infinite; }
+  .eco-ring2    { animation: eco-ring-pulse 10s -5s ease-in-out infinite; }
+  .eco-orb-core { animation: eco-orb-scale 10s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .eco-node-card {
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  }
+  .eco-node:hover .eco-node-card {
+    transform: translateY(-2px);
+    border-color: rgba(100,152,222,0.48) !important;
+    box-shadow: 0 5px 22px rgba(30,72,185,0.32) !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .eco-orb-halo,.eco-ring1,.eco-ring2,.eco-orb-core { animation: none !important; }
+  }
 `
 
 export default function Login() {
@@ -277,6 +306,8 @@ export default function Login() {
     position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)',
     pointerEvents: 'none', display: 'flex', alignItems: 'center',
   }
+
+  const ecoReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   return (
     <PageTransition>
@@ -494,6 +525,148 @@ export default function Login() {
                     Audit &nbsp;·&nbsp; Assurance &nbsp;·&nbsp; Risk &nbsp;·&nbsp; Compliance
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* ── SERVICE ECOSYSTEM ──────────────────────────── */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              minHeight: 0,
+              overflow: 'visible',
+            }}>
+              <div style={{
+                position: 'relative',
+                width: 'min(100%, clamp(260px,36vw,420px))',
+                aspectRatio: '1',
+                overflow: 'visible',
+              }}>
+                {/* SVG — orbital rings, orb, travelling dot, connector lines */}
+                <svg viewBox="-220 -220 440 440" width="100%" height="100%"
+                  style={{ display: 'block', overflow: 'visible' }} aria-hidden="true">
+                  <defs>
+                    <radialGradient id="eco-orb-grad" cx="38%" cy="32%" r="68%" gradientUnits="objectBoundingBox">
+                      <stop offset="0%" stopColor="rgba(18,44,86,0.98)"/>
+                      <stop offset="55%" stopColor="rgba(6,20,48,0.99)"/>
+                      <stop offset="100%" stopColor="rgba(2,9,20,1)"/>
+                    </radialGradient>
+                    <radialGradient id="eco-halo-grad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="rgba(52,98,205,0.26)"/>
+                      <stop offset="62%" stopColor="rgba(52,98,205,0.05)"/>
+                      <stop offset="100%" stopColor="rgba(52,98,205,0)"/>
+                    </radialGradient>
+                    <filter id="eco-dot-glow" x="-300%" y="-300%" width="700%" height="700%">
+                      <feGaussianBlur stdDeviation="4" result="blur"/>
+                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                  </defs>
+
+                  {/* Ambient halo behind orb */}
+                  <circle className="eco-orb-halo" cx="0" cy="0" r="108" fill="url(#eco-halo-grad)"/>
+
+                  {/* Orbital ring 1 — outer */}
+                  <ellipse className="eco-ring1" cx="0" cy="0" rx="178" ry="50"
+                    fill="none" stroke="rgba(72,114,188,0.24)" strokeWidth="1.2"/>
+                  {/* Orbital ring 2 — mid */}
+                  <ellipse className="eco-ring2" cx="0" cy="0" rx="132" ry="37"
+                    fill="none" stroke="rgba(72,114,188,0.15)" strokeWidth="0.8"/>
+                  {/* Orbital ring 3 — inner accent */}
+                  <ellipse cx="0" cy="0" rx="88" ry="25"
+                    fill="none" stroke="rgba(72,114,188,0.08)" strokeWidth="0.6"/>
+
+                  {/* Travelling red dot on outer ring */}
+                  {!ecoReducedMotion && (<>
+                    <circle r="6.5" fill="rgba(247,25,61,0.18)">
+                      <animateMotion dur="7s" repeatCount="indefinite"
+                        path="M 178,0 A 178,50 0 1,1 -178,0 A 178,50 0 1,1 178,0"/>
+                    </circle>
+                    <circle r="3.2" fill="#F7193D" filter="url(#eco-dot-glow)">
+                      <animateMotion dur="7s" repeatCount="indefinite"
+                        path="M 178,0 A 178,50 0 1,1 -178,0 A 178,50 0 1,1 178,0"/>
+                    </circle>
+                  </>)}
+
+                  {/* Connector lines — orb edge toward each node */}
+                  <line x1="0" y1="-65" x2="0" y2="-168"
+                    stroke="rgba(72,114,188,0.22)" strokeWidth="0.8" strokeDasharray="3,5"/>
+                  <line x1="-58" y1="-25" x2="-175" y2="-38"
+                    stroke="rgba(72,114,188,0.22)" strokeWidth="0.8" strokeDasharray="3,5"/>
+                  <line x1="58" y1="-25" x2="175" y2="-38"
+                    stroke="rgba(72,114,188,0.22)" strokeWidth="0.8" strokeDasharray="3,5"/>
+                  <line x1="-43" y1="46" x2="-148" y2="138"
+                    stroke="rgba(72,114,188,0.22)" strokeWidth="0.8" strokeDasharray="3,5"/>
+                  <line x1="43" y1="46" x2="148" y2="138"
+                    stroke="rgba(72,114,188,0.22)" strokeWidth="0.8" strokeDasharray="3,5"/>
+
+                  {/* Node anchor dots */}
+                  <circle cx="0"    cy="-168" r="2.2" fill="rgba(247,25,61,0.58)"/>
+                  <circle cx="-175" cy="-38"  r="2.2" fill="rgba(247,25,61,0.58)"/>
+                  <circle cx="175"  cy="-38"  r="2.2" fill="rgba(247,25,61,0.58)"/>
+                  <circle cx="-148" cy="138"  r="2.2" fill="rgba(247,25,61,0.58)"/>
+                  <circle cx="148"  cy="138"  r="2.2" fill="rgba(247,25,61,0.58)"/>
+
+                  {/* Core orb */}
+                  <g className="eco-orb-core">
+                    <circle cx="0" cy="0" r="65" fill="url(#eco-orb-grad)"/>
+                    <circle cx="0" cy="0" r="65" fill="none" stroke="rgba(100,150,220,0.32)" strokeWidth="1.2"/>
+                    <circle cx="0" cy="0" r="65" fill="none" stroke="rgba(200,226,255,0.055)" strokeWidth="0.4"/>
+                    <ellipse cx="-14" cy="-20" rx="20" ry="13" fill="rgba(148,188,242,0.055)"/>
+                    <text x="0" y="-12" textAnchor="middle"
+                      fill="rgba(232,242,254,0.92)" fontSize="9.5" fontWeight="700"
+                      letterSpacing="0.24em" fontFamily="Inter,system-ui,sans-serif">ANALYTIX</text>
+                    <text x="0" y="0" textAnchor="middle"
+                      fill="rgba(165,192,230,0.62)" fontSize="5.8" fontWeight="400"
+                      letterSpacing="0.07em" fontFamily="Inter,system-ui,sans-serif">Global Professional</text>
+                    <text x="0" y="10" textAnchor="middle"
+                      fill="rgba(165,192,230,0.62)" fontSize="5.8" fontWeight="400"
+                      letterSpacing="0.07em" fontFamily="Inter,system-ui,sans-serif">Services</text>
+                    <text x="0" y="24" textAnchor="middle"
+                      fill="rgba(118,148,182,0.42)" fontSize="5.2" fontStyle="italic"
+                      fontFamily="Playfair Display,Georgia,serif">for a Stronger Tomorrow</text>
+                  </g>
+                </svg>
+
+                {/* Service nodes — glass cards positioned around the orb */}
+                {[
+                  { key:'top', title:'AUDIT &\nASSURANCE',        sub:'Independent insight. Greater confidence.',   l:'50%',    t:'11.8%' },
+                  { key:'lft', title:'ADVISORY &\nSTRATEGY',      sub:'Practical guidance. Lasting value.',         l:'10.2%',  t:'41.4%' },
+                  { key:'rgt', title:'ACCOUNTING\n& TAX',         sub:'Financial clarity. Regulatory confidence.', l:'89.8%',  t:'41.4%' },
+                  { key:'btl', title:'BUSINESS &\nCOMPLIANCE',    sub:'Stay compliant. Move forward.',              l:'16.4%',  t:'81.4%' },
+                  { key:'btr', title:'GLOBAL BUSINESS\nSERVICES', sub:'Expand. Establish. Thrive.',                 l:'83.6%',  t:'81.4%' },
+                ].map(n => (
+                  <div key={n.key} className="eco-node" style={{
+                    position: 'absolute', left: n.l, top: n.t,
+                    transform: 'translateX(-50%) translateY(-50%)',
+                  }}>
+                    <div className="eco-node-card" style={{
+                      background: 'rgba(5,18,44,0.82)',
+                      border: '1px solid rgba(72,114,188,0.28)',
+                      borderTop: '1px solid rgba(118,160,222,0.38)',
+                      borderRadius: 7,
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      padding: 'clamp(5px,0.55vw,8px) clamp(7px,0.8vw,11px)',
+                      width: 'clamp(82px,8.5vw,116px)',
+                      boxShadow: '0 3px 16px rgba(0,5,20,0.5)',
+                      textAlign: 'center',
+                    }}>
+                      <div style={{
+                        fontSize: 'clamp(6.5px,0.62vw,9px)', fontWeight: 700,
+                        letterSpacing: '0.1em', color: 'rgba(218,234,252,0.92)',
+                        fontFamily: 'Inter,system-ui,sans-serif', lineHeight: 1.3,
+                        marginBottom: 3, whiteSpace: 'pre-line',
+                      }}>{n.title}</div>
+                      <div style={{
+                        fontSize: 'clamp(5.5px,0.5vw,7px)', fontWeight: 400,
+                        color: 'rgba(138,162,190,0.7)',
+                        fontFamily: 'Inter,system-ui,sans-serif', lineHeight: 1.45,
+                      }}>{n.sub}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
