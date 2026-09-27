@@ -78,6 +78,14 @@ const CSS = `
   }
   .a360-ambient { animation: a360-ambient 28s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) { .a360-ambient { animation: none !important; } }
+
+  @media (max-width: 900px) {
+    .a360-root   { overflow-y: auto !important; height: auto !important; min-height: 100vh !important; }
+    .a360-layout { flex-direction: column !important; height: auto !important;
+                   padding: clamp(20px,5vw,32px) !important; align-items: center !important; }
+    .a360-left   { display: none !important; }
+    .a360-right  { flex: none !important; width: 100% !important; max-width: 420px !important; }
+  }
 `
 
 export default function ForgotPassword() {
@@ -139,6 +147,7 @@ export default function ForgotPassword() {
     <PageTransition>
       <style>{CSS}</style>
       <div
+        className="a360-root"
         style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: '#020914', fontFamily: 'Inter, system-ui, sans-serif' }}
         onMouseMove={handleMouseMove}
       >
@@ -164,16 +173,18 @@ export default function ForgotPassword() {
         <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '38%', pointerEvents: 'none', background: 'linear-gradient(90deg, transparent 0%, rgba(6,20,38,0.65) 40%, rgba(6,20,38,0.88) 100%)' }} />
 
         {/* Page content */}
-        <div style={{
-          position: 'relative', zIndex: 10,
-          width: '100%', height: '100%',
-          display: 'flex', alignItems: 'stretch',
-          padding: 'clamp(24px,3vh,44px) clamp(20px,2.5vw,52px)',
-          boxSizing: 'border-box', gap: '3%',
-        }}>
+        <div
+          className="a360-layout"
+          style={{
+            position: 'relative', zIndex: 10,
+            width: '100%', height: '100%',
+            display: 'flex', alignItems: 'stretch',
+            padding: 'clamp(24px,3vh,44px) clamp(20px,2.5vw,52px)',
+            boxSizing: 'border-box', gap: '3%',
+          }}>
 
           {/* ══ LEFT PANEL ══ */}
-          <div style={{ flex: '0 0 62%', width: '62%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="a360-left" style={{ flex: '0 0 62%', width: '62%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
 
             {/* Brand */}
             <div>
@@ -240,7 +251,7 @@ export default function ForgotPassword() {
           </div>
 
           {/* ══ RIGHT PANEL — FORGOT PASSWORD CARD ══ */}
-          <div style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
+          <div className="a360-right" style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
             <div ref={cardTiltRef} style={{ width: '100%', willChange: 'transform', transformOrigin: 'center center' }}>
             <div style={{
               width: '100%',

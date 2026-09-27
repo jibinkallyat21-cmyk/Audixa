@@ -103,8 +103,8 @@ const CSS = `
     100% { stroke-dashoffset: 0;    opacity: 0.55; }
   }
   @keyframes a360-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(120,80,220,0.35), 0 4px 20px rgba(0,0,30,0.6); }
-    50%       { box-shadow: 0 0 0 7px rgba(120,80,220,0), 0 4px 20px rgba(0,0,30,0.6); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(247,25,61,0.18), 0 4px 20px rgba(0,0,18,0.6); }
+    50%       { box-shadow: 0 0 0 6px rgba(247,25,61,0), 0 4px 20px rgba(0,0,18,0.6); }
   }
 
   .a360-brand  { animation: a360-fadein 0.7s ease both; }
@@ -171,10 +171,21 @@ const CSS = `
     50%       { transform: translateX(-18px); }
   }
   .a360-env1 { animation: a360-env1 14s ease-in-out infinite; }
-  .a360-env2 { animation: a360-env2 11s -3.5s ease-in-out infinite; }
+  .a360-env2 { animation: a360-env2 18s -3.5s ease-in-out infinite; }
   .a360-env3 { animation: a360-env3 15s -6.2s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) {
     .a360-env1, .a360-env2, .a360-env3 { animation: none !important; }
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .a360-root   { overflow-y: auto !important; height: auto !important; min-height: 100vh !important; }
+    .a360-layout { flex-direction: column !important; height: auto !important;
+                   padding: clamp(20px,5vw,32px) !important; align-items: center !important; }
+    .a360-left   { display: none !important; }
+    .a360-right  { flex: none !important; width: 100% !important; max-width: 420px !important; }
+    .a360-card   { max-height: none !important; }
+    .a360-diag   { display: none !important; }
   }
 `
 
@@ -373,18 +384,35 @@ export default function Login() {
           background: 'linear-gradient(90deg, transparent 0%, rgba(6,20,38,0.65) 40%, rgba(6,20,38,0.88) 100%)',
         }} />
 
+        {/* ── Red diagonal accent line ───────────────────────────── */}
+        <svg
+          className="a360-diag"
+          viewBox="0 0 1 1"
+          preserveAspectRatio="none"
+          style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', pointerEvents: 'none', overflow: 'hidden' }}
+          aria-hidden="true"
+        >
+          <line x1="0.02" y1="0.98" x2="0.98" y2="0.02"
+            stroke="#F7193D" strokeWidth="0.8"
+            strokeDasharray="2400" strokeDashoffset="2400"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+
         {/* ── LAYER 5: Page content ─────────────────────────────── */}
-        <div style={{
-          position: 'relative', zIndex: 10,
-          width: '100%', height: '100%',
-          display: 'flex', alignItems: 'stretch',
-          padding: 'clamp(24px,3vh,44px) clamp(20px,2.5vw,52px)',
-          boxSizing: 'border-box',
-          gap: '3%',
-        }}>
+        <div
+          className="a360-layout"
+          style={{
+            position: 'relative', zIndex: 10,
+            width: '100%', height: '100%',
+            display: 'flex', alignItems: 'stretch',
+            padding: 'clamp(24px,3vh,44px) clamp(20px,2.5vw,52px)',
+            boxSizing: 'border-box',
+            gap: '3%',
+          }}>
 
           {/* ══ LEFT PANEL ══════════════════════════════════════════ */}
-          <div style={{
+          <div className="a360-left" style={{
             flex: '0 0 62%', width: '62%',
             display: 'flex', flexDirection: 'column',
             justifyContent: 'space-between',
@@ -503,7 +531,7 @@ export default function Login() {
           </div>
 
           {/* ══ RIGHT PANEL — LOGIN CARD ═════════════════════════════ */}
-          <div style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
+          <div className="a360-right" style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
             {/* 3D tilt wrapper — perspective container, never affects layout */}
             <div
               ref={cardTiltRef}
@@ -750,18 +778,18 @@ export default function Login() {
           style={{
             position: 'absolute', bottom: 24, right: 24, zIndex: 50,
             width: 44, height: 44, borderRadius: '50%',
-            background: 'rgba(14,18,42,0.88)',
-            border: '1px solid rgba(110,80,200,0.35)',
-            boxShadow: '0 0 0 0 rgba(120,80,220,0.35), 0 4px 20px rgba(0,0,30,0.6)',
+            background: 'rgba(5,16,34,0.88)',
+            border: '1px solid rgba(247,25,61,0.22)',
+            boxShadow: '0 0 0 0 rgba(247,25,61,0.18), 0 4px 20px rgba(0,0,18,0.6)',
             cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             backdropFilter: 'blur(12px)',
           }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="rgba(140,110,240,0.6)" strokeWidth="1.2"/>
-            <path d="M8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4" stroke="rgba(160,130,250,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
-            <circle cx="12" cy="12" r="2" fill="rgba(160,130,250,0.7)"/>
+            <circle cx="12" cy="12" r="10" stroke="rgba(180,205,235,0.35)" strokeWidth="1.2"/>
+            <path d="M8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4" stroke="rgba(200,218,242,0.55)" strokeWidth="1.5" strokeLinecap="round"/>
+            <circle cx="12" cy="12" r="2" fill="rgba(185,210,240,0.5)"/>
           </svg>
         </button>
       </div>
