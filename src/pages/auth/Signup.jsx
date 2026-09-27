@@ -166,31 +166,32 @@ export default function Signup() {
             overflowX: 'hidden',
           }}>
 
-            {/* Header */}
+            {/* Back button + Header */}
             <div>
-              <h1 style={{ margin: 0, fontSize: 'clamp(15px,1.9vw,28px)', fontWeight: 800, color: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', lineHeight: 1.2 }}>
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 clamp(6px,0.7vw,10px)',
+                  fontSize: 'clamp(9px,0.82vw,11.5px)', fontWeight: 500,
+                  color: 'rgba(160,190,235,0.72)', fontFamily: 'Inter, system-ui, sans-serif',
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#e8192c' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(160,190,235,0.72)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M11 6l-6 6 6 6"/>
+                </svg>
+                Back to Sign In
+              </button>
+              <h1 style={{ margin: 0, fontSize: 'clamp(15px,1.9vw,27px)', fontWeight: 800, color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1.15 }}>
                 Request Team Access
               </h1>
-              <p style={{ margin: 'clamp(3px,0.4vw,5px) 0 0', fontSize: 'clamp(9px,0.85vw,12px)', color: 'rgba(175,200,240,0.72)', fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', lineHeight: 1.4 }}>
+              <p style={{ margin: 'clamp(2px,0.35vw,5px) 0 0', fontSize: 'clamp(9px,0.82vw,12px)', color: 'rgba(175,200,240,0.70)', fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1.4 }}>
                 Your account will be activated after Audit Manager approval.
               </p>
-            </div>
-
-            {/* Org badge */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(80,120,200,0.22)',
-              borderRadius: 8, padding: 'clamp(6px,0.7vw,10px) clamp(8px,1vw,14px)',
-            }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 'clamp(9px,0.85vw,12px)', fontWeight: 700, color: '#e8f0fc', fontFamily: 'system-ui, sans-serif' }}>Analytix Fintech International</div>
-                <div style={{ fontSize: 'clamp(8px,0.72vw,10px)', color: 'rgba(150,180,230,0.65)', fontFamily: 'system-ui, sans-serif', marginTop: 2 }}>Certified audit network · 13 global offices</div>
-              </div>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {['ABCPA','MISCPA'].map(t => (
-                  <span key={t} style={{ fontSize: 'clamp(7px,0.68vw,9px)', fontWeight: 700, color: 'rgba(180,210,255,0.8)', background: 'rgba(80,130,220,0.15)', border: '1px solid rgba(80,130,220,0.25)', borderRadius: 4, padding: '2px 5px', fontFamily: 'monospace' }}>{t}</span>
-                ))}
-              </div>
             </div>
 
             {/* Separator */}
