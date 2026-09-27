@@ -227,32 +227,6 @@ export default function Login() {
           background: 'linear-gradient(90deg, transparent 0%, rgba(6,20,38,0.65) 40%, rgba(6,20,38,0.88) 100%)',
         }} />
 
-        {/* ── LAYER 4: Red diagonal accent line ─────────────────── */}
-        <svg
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 3 }}
-          viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"
-        >
-          <defs>
-            <filter id="redglow">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          {/* Main diagonal */}
-          <line
-            className="a360-diag"
-            x1="-50" y1="860" x2="1100" y2="260"
-            stroke="#F7193D" strokeWidth="1.5" opacity="0.6"
-            strokeDasharray="2400" strokeDashoffset="2400"
-            filter="url(#redglow)"
-          />
-          {/* Softer parallel shadow */}
-          <line
-            x1="-50" y1="875" x2="1100" y2="275"
-            stroke="#F7193D" strokeWidth="4" opacity="0.08"
-          />
-        </svg>
-
         {/* ── LAYER 5: Page content ─────────────────────────────── */}
         <div style={{
           position: 'relative', zIndex: 10,
