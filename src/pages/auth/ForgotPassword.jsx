@@ -2,32 +2,6 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PageTransition from '../../components/shared/PageTransition'
 
-const IconShield = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-  </svg>
-)
-const IconBook = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-  </svg>
-)
-const IconCompass = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-  </svg>
-)
-const IconTrend = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-  </svg>
-)
-const IconCheckCircle = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-    <path d="M9 12l2 2 4-4"/>
-  </svg>
-)
 const IconEnvelope = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(140,170,220,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/>
@@ -44,21 +18,10 @@ const IconSentCheck = () => (
   </svg>
 )
 
-const SERVICES = [
-  { icon: IconShield,       name: 'Audit',      desc: 'Independent. Objective. Reliable.' },
-  { icon: IconBook,         name: 'Accounting', desc: 'Accurate books. Better decisions.' },
-  { icon: IconCompass,      name: 'Advisory',   desc: 'Strategic guidance. Lasting value.' },
-  { icon: IconTrend,        name: 'Tax',        desc: 'Optimise today. Grow tomorrow.' },
-  { icon: IconCheckCircle,  name: 'Assurance',  desc: 'Build trust. Ensure confidence.' },
-]
-
 const COUNTRY_CODES = ['United States', 'United Kingdom', 'France', 'Kuwait', 'Bahrain', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Oman', 'China', 'Hong Kong', 'India', 'Singapore']
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap');
-  .fp-svc-item { transition: background 0.18s; border-radius: 8px; padding: 7px 10px; cursor: default; }
-  .fp-svc-item:hover { background: rgba(255,255,255,0.04); }
-  .fp-svc-item:hover .fp-svc-icon { color: #f7193d; }
   .fp-inp { transition: border-color 0.18s, background 0.18s; }
   .fp-inp:focus { border-color: rgba(80,130,220,0.55) !important; background: rgba(255,255,255,0.09) !important; outline: none; }
   .fp-btn:hover { opacity: 0.88; box-shadow: 0 8px 28px rgba(247,25,61,0.5) !important; }
@@ -219,18 +182,6 @@ export default function ForgotPassword() {
                 <span style={{ fontSize: 'clamp(9px,0.82vw,12px)', color: 'rgba(200,215,235,0.65)', letterSpacing: '0.12em', fontWeight: 500, fontFamily: 'Inter, system-ui, sans-serif' }}>
                   Audit &nbsp;·&nbsp; Assurance &nbsp;·&nbsp; Risk &nbsp;·&nbsp; Compliance
                 </span>
-              </div>
-            </div>
-
-            {/* Service list */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: 'clamp(16px,2vh,28px)' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2px,0.5vh,6px)' }}>
-                {SERVICES.map(({ name, desc }) => (
-                  <div key={name} className="fp-svc-item" style={{ padding: '7px 10px' }}>
-                    <div style={{ fontSize: 'clamp(11px,1vw,14px)', fontWeight: 600, color: '#F5F7FA', fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1.3 }}>{name}</div>
-                    <div style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: 'rgba(160,185,215,0.62)', fontFamily: 'Inter, system-ui, sans-serif', marginTop: 1 }}>{desc}</div>
-                  </div>
-                ))}
               </div>
             </div>
 

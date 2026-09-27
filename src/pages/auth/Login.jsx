@@ -41,45 +41,11 @@ const IconChevron = () => (
     <polyline points="6 9 12 15 18 9"/>
   </svg>
 )
-const IconShield = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-  </svg>
-)
-const IconBook = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-  </svg>
-)
-const IconCompass = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-  </svg>
-)
-const IconTrend = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-  </svg>
-)
-const IconCheck = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-    <path d="M9 12l2 2 4-4"/>
-  </svg>
-)
 const IconLockSecure = () => (
   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(110,160,210,0.55)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="5" y="11" width="14" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
   </svg>
 )
-
-const SERVICES = [
-  { icon: IconShield, name: 'Audit', desc: 'Independent. Objective. Reliable.' },
-  { icon: IconBook,   name: 'Accounting', desc: 'Accurate books. Better decisions.' },
-  { icon: IconCompass, name: 'Advisory', desc: 'Strategic guidance. Lasting value.' },
-  { icon: IconTrend,  name: 'Tax', desc: 'Optimise today. Grow tomorrow.' },
-  { icon: IconCheck,  name: 'Assurance', desc: 'Build trust. Ensure confidence.' },
-]
 
 const COUNTRY_CODES = ['United States', 'United Kingdom', 'France', 'Kuwait', 'Bahrain', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Oman', 'China', 'Hong Kong', 'India', 'Singapore']
 
@@ -110,15 +76,10 @@ const CSS = `
   .a360-brand  { animation: a360-fadein 0.7s ease both; }
   .a360-hl     { animation: a360-fadein 0.75s 0.12s ease both; }
   .a360-sep    { animation: a360-fadein 0.6s 0.22s ease both; }
-  .a360-svc    { animation: a360-fadein 0.65s 0.32s ease both; }
-  .a360-gp     { animation: a360-fadein 0.6s 0.42s ease both; }
+  .a360-gp     { animation: a360-fadein 0.6s 0.32s ease both; }
   .a360-card   { animation: a360-cardslide 0.75s 0.1s ease both; }
   .a360-diag   { animation: a360-diag 2.4s 0.5s ease-out forwards, a360-diag 5s 2.9s ease-in-out infinite; }
   .a360-ai     { animation: a360-pulse 2.8s 1s ease-in-out infinite; }
-
-  .a360-svc-item { transition: background 0.18s; border-radius: 8px; padding: 7px 10px; cursor: default; }
-  .a360-svc-item:hover { background: rgba(255,255,255,0.04); }
-  .a360-svc-item:hover .a360-svc-icon { color: #f7193d; }
 
   .a360-inp { transition: border-color 0.18s, background 0.18s; }
   .a360-inp:focus { border-color: rgba(80,130,220,0.55) !important; background: rgba(255,255,255,0.09) !important; outline: none; }
@@ -481,24 +442,6 @@ export default function Login() {
                     Audit &nbsp;·&nbsp; Assurance &nbsp;·&nbsp; Risk &nbsp;·&nbsp; Compliance
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Service list */}
-            <div className="a360-svc" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: 'clamp(16px,2vh,28px)' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2px,0.5vh,6px)' }}>
-                {SERVICES.map(({ name, desc }) => (
-                  <div key={name} className="a360-svc-item" style={{ padding: '7px 10px' }}>
-                    <div style={{
-                      fontSize: 'clamp(11px,1vw,14px)', fontWeight: 600, color: '#F5F7FA',
-                      fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1.3,
-                    }}>{name}</div>
-                    <div style={{
-                      fontSize: 'clamp(9px,0.78vw,11px)', color: 'rgba(160,185,215,0.62)',
-                      fontFamily: 'Inter, system-ui, sans-serif', marginTop: 1,
-                    }}>{desc}</div>
-                  </div>
-                ))}
               </div>
             </div>
 
