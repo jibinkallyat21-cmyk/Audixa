@@ -76,7 +76,7 @@ const SERVICES = [
   { icon: IconCheck,   name: 'Assurance',  desc: 'Build trust. Ensure confidence.' },
 ]
 
-const COUNTRY_CODES = ['US', 'UK', 'FR', 'KW', 'BH', 'KSA', 'UAE', 'QA', 'OM', 'CN', 'HK', 'IN', 'SG']
+const COUNTRY_CODES = ['United States', 'United Kingdom', 'France', 'Kuwait', 'Bahrain', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Oman', 'China', 'Hong Kong', 'India', 'Singapore']
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -101,6 +101,13 @@ const CSS = `
   }
   .a360-ambient { animation: a360-ambient 28s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) { .a360-ambient { animation: none !important; } }
+
+  @keyframes a360-ticker {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .a360-ticker-track { animation: a360-ticker 35s linear infinite; display: inline-flex; white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .a360-ticker-track { animation: none !important; } }
 
   @media (max-width: 900px) {
     .a360-root   { overflow-y: auto !important; height: auto !important; min-height: 100vh !important; }
@@ -241,11 +248,10 @@ export default function Signup() {
                   </svg>
                 </span>
               </div>
-              <h1 style={{ margin: 0, fontSize: 'clamp(20px,2.3vw,36px)', fontWeight: 400, lineHeight: 1.28, color: '#F5F7FA', fontFamily: "'Playfair Display', Georgia, serif", maxWidth: '82%' }}>
-                Clarity across every<br/>dimension of your audit.
+              <h1 style={{ margin: 0, fontSize: 'clamp(20px,2.3vw,36px)', fontWeight: 400, lineHeight: 1.28, color: '#F5F7FA', fontFamily: "'Playfair Display', Georgia, serif", whiteSpace: 'nowrap' }}>
+                Clarity across every dimension of your audit.
               </h1>
-              <div style={{ marginTop: 'clamp(12px,1.6vh,22px)', display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 32, height: 2, background: '#F7193D', borderRadius: 1 }} />
+              <div style={{ marginTop: 'clamp(12px,1.6vh,22px)' }}>
                 <span style={{ fontSize: 'clamp(9px,0.82vw,12px)', color: 'rgba(200,215,235,0.65)', letterSpacing: '0.12em', fontWeight: 500, fontFamily: 'Inter, system-ui, sans-serif' }}>
                   Audit &nbsp;·&nbsp; Assurance &nbsp;·&nbsp; Risk &nbsp;·&nbsp; Compliance
                 </span>
@@ -255,13 +261,10 @@ export default function Signup() {
             {/* Service list */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: 'clamp(16px,2vh,28px)' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2px,0.5vh,6px)' }}>
-                {SERVICES.map(({ icon: Icon, name, desc }) => (
-                  <div key={name} className="su-svc-item" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div className="su-svc-icon" style={{ color: 'rgba(180,205,235,0.55)', flexShrink: 0, transition: 'color 0.18s' }}><Icon /></div>
-                    <div>
-                      <div style={{ fontSize: 'clamp(11px,1vw,14px)', fontWeight: 600, color: '#F5F7FA', fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1.3 }}>{name}</div>
-                      <div style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: 'rgba(160,185,215,0.62)', fontFamily: 'Inter, system-ui, sans-serif', marginTop: 1 }}>{desc}</div>
-                    </div>
+                {SERVICES.map(({ name, desc }) => (
+                  <div key={name} className="su-svc-item" style={{ padding: '7px 10px' }}>
+                    <div style={{ fontSize: 'clamp(11px,1vw,14px)', fontWeight: 600, color: '#F5F7FA', fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1.3 }}>{name}</div>
+                    <div style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: 'rgba(160,185,215,0.62)', fontFamily: 'Inter, system-ui, sans-serif', marginTop: 1 }}>{desc}</div>
                   </div>
                 ))}
               </div>
@@ -269,19 +272,15 @@ export default function Signup() {
 
             {/* Global Presence */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-                <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#F7193D' }} />
-                <span style={{ fontSize: 'clamp(8px,0.7vw,10px)', fontWeight: 700, letterSpacing: '0.18em', color: 'rgba(200,215,235,0.75)', fontFamily: 'Inter, system-ui, sans-serif' }}>GLOBAL PRESENCE</span>
+              <div style={{ textAlign: 'center', marginBottom: 'clamp(6px,0.8vh,10px)' }}>
+                <span style={{ fontSize: 'clamp(10px,0.9vw,13px)', fontWeight: 700, letterSpacing: '0.18em', color: 'rgba(200,215,235,0.88)', fontFamily: 'Inter, system-ui, sans-serif' }}>GLOBAL PRESENCE</span>
               </div>
-              <div style={{ fontSize: 'clamp(8px,0.68vw,10px)', color: 'rgba(160,185,215,0.55)', fontFamily: 'Inter, system-ui, sans-serif', letterSpacing: '0.06em', marginBottom: 5 }}>
-                13 LOCATIONS &nbsp;·&nbsp; 4 REGIONS
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
-                {COUNTRY_CODES.map((c, i) => (
-                  <span key={c} style={{ fontSize: 'clamp(8px,0.7vw,10px)', color: 'rgba(145,164,184,0.7)', fontFamily: 'Inter, system-ui, sans-serif', letterSpacing: '0.06em' }}>
-                    {c}{i < COUNTRY_CODES.length - 1 && <span style={{ color: 'rgba(100,130,170,0.4)', marginLeft: 10 }}>·</span>}
-                  </span>
-                ))}
+              <div style={{ overflow: 'hidden', width: '100%', WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)', maskImage: 'linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)' }}>
+                <div className="a360-ticker-track">
+                  {[...COUNTRY_CODES, ...COUNTRY_CODES].map((c, i) => (
+                    <span key={i} style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: 'rgba(145,164,184,0.72)', fontFamily: 'Inter, system-ui, sans-serif', letterSpacing: '0.06em', paddingRight: 'clamp(20px,2.2vw,36px)' }}>{c}</span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
