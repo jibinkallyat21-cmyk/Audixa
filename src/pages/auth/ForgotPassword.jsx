@@ -51,16 +51,16 @@ const CSS = `
 
   @keyframes a360-bgwarp {
     0%, 100% { transform: perspective(1200px) rotateX(0deg); }
-    50%       { transform: perspective(1200px) rotateX(0.85deg); }
+    50%       { transform: perspective(1200px) rotateX(3deg); }
   }
   .a360-bgwarp { animation: a360-bgwarp 40s ease-in-out infinite; transform-origin: center 62%; }
   @media (prefers-reduced-motion: reduce) { .a360-bgwarp { animation: none !important; } }
 
   @keyframes a360-breathe {
-    0%, 100% { transform: scale(1);    opacity: 0.7; }
-    50%       { transform: scale(1.1); opacity: 1;   }
+    0%, 100% { transform: scale(1);    opacity: 0.5; }
+    50%       { transform: scale(1.18); opacity: 1;   }
   }
-  .a360-ring-breathe { animation: a360-breathe 8s ease-in-out infinite; transform-origin: 0 0; }
+  .a360-ring-breathe { animation: a360-breathe 6s ease-in-out infinite; transform-origin: 0 0; }
   @media (prefers-reduced-motion: reduce) { .a360-ring-breathe { animation: none !important; } }
 
   @media (max-width: 900px) {
@@ -94,9 +94,9 @@ export default function ForgotPassword() {
       c.x += (t.x - c.x) * 0.1
       c.y += (t.y - c.y) * 0.1
       if (bgRef.current) bgRef.current.style.transform = `scale(1.06) translate(${-c.x * 2}px, ${-c.y * 2}px)`
-      if (cardTiltRef.current) cardTiltRef.current.style.transform = `perspective(1400px) rotateX(${c.y * 2}deg) rotateY(${-c.x * 2}deg)`
-      if (ghost1Ref.current) ghost1Ref.current.style.transform = `perspective(1400px) rotateX(${c.y*1.5}deg) rotateY(${-c.x*1.5}deg) translate(6px,8px)`
-      if (ghost2Ref.current) ghost2Ref.current.style.transform = `perspective(1400px) rotateX(${c.y*0.9}deg) rotateY(${-c.x*0.9}deg) translate(12px,16px)`
+      if (cardTiltRef.current) cardTiltRef.current.style.transform = `perspective(1400px) rotateX(${c.y * 6}deg) rotateY(${-c.x * 6}deg)`
+      if (ghost1Ref.current) ghost1Ref.current.style.transform = `perspective(1400px) rotateX(${c.y*4}deg) rotateY(${-c.x*4}deg) translate(10px,14px)`
+      if (ghost2Ref.current) ghost2Ref.current.style.transform = `perspective(1400px) rotateX(${c.y*2.5}deg) rotateY(${-c.x*2.5}deg) translate(20px,28px)`
       if (deepRef.current)  deepRef.current.style.transform  = `translate(${-c.x * 1}px, ${-c.y * 1}px)`
       if (nearRef.current)  nearRef.current.style.transform  = `translate(${-c.x * 7}px, ${-c.y * 4}px)`
       if (geoRef.current)   geoRef.current.style.transform   = `translate(${-c.x * 14}px, ${-c.y * 8}px)`
@@ -184,8 +184,8 @@ export default function ForgotPassword() {
           {/* ══ LEFT PANEL ══ */}
           <div className="a360-left" style={{ flex: '0 0 62%', width: '62%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
             <div ref={geoRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', willChange: 'transform' }}>
-              <div style={{ position: 'absolute', left: '4%', top: '16%', width: '46%', height: '30%', border: '0.5px solid rgba(175,205,238,0.052)', borderRadius: 3, transform: 'perspective(900px) rotateY(15deg) rotateX(4deg)', transformOrigin: 'left center' }} />
-              <div style={{ position: 'absolute', left: '26%', top: '46%', width: '42%', height: '34%', border: '0.5px solid rgba(247,25,61,0.036)', borderRadius: 3, transform: 'perspective(900px) rotateY(-9deg) rotateX(-3deg)', transformOrigin: 'right center' }} />
+              <div style={{ position: 'absolute', left: '4%', top: '16%', width: '46%', height: '30%', border: '1px solid rgba(175,205,238,0.14)', borderRadius: 3, transform: 'perspective(900px) rotateY(15deg) rotateX(4deg)', transformOrigin: 'left center' }} />
+              <div style={{ position: 'absolute', left: '26%', top: '46%', width: '42%', height: '34%', border: '1px solid rgba(247,25,61,0.12)', borderRadius: 3, transform: 'perspective(900px) rotateY(-9deg) rotateX(-3deg)', transformOrigin: 'right center' }} />
             </div>
 
             {/* Brand */}
@@ -207,7 +207,7 @@ export default function ForgotPassword() {
                   </svg>
                   <svg className="a360-ring-breathe" viewBox="-90 -90 180 180" overflow="visible" aria-hidden="true"
                     style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
-                    <circle cx="0" cy="0" r="76" fill="none" stroke="rgba(52,86,148,0.07)" strokeWidth="0.7"/>
+                    <circle cx="0" cy="0" r="76" fill="none" stroke="rgba(52,86,148,0.28)" strokeWidth="2"/>
                   </svg>
                 </span>
               </div>
@@ -239,8 +239,8 @@ export default function ForgotPassword() {
           {/* ══ RIGHT PANEL — FORGOT PASSWORD CARD ══ */}
           <div className="a360-right" style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
             <div style={{ position: 'relative', width: '100%' }}>
-              <div ref={ghost2Ref} style={{ position: 'absolute', inset: 0, background: 'rgba(5,16,34,0.36)', border: '1px solid rgba(118,158,205,0.06)', borderTop: '1px solid rgba(158,196,238,0.09)', borderRadius: 'clamp(8px,0.9vw,14px)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', willChange: 'transform', pointerEvents: 'none', transform: 'translate(12px,16px)' }} />
-              <div ref={ghost1Ref} style={{ position: 'absolute', inset: 0, background: 'rgba(5,16,34,0.52)', border: '1px solid rgba(118,158,205,0.08)', borderTop: '1px solid rgba(158,196,238,0.12)', borderRadius: 'clamp(8px,0.9vw,14px)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', willChange: 'transform', pointerEvents: 'none', transform: 'translate(6px,8px)' }} />
+              <div ref={ghost2Ref} style={{ position: 'absolute', inset: 0, background: 'rgba(5,16,34,0.5)', border: '1px solid rgba(118,158,205,0.18)', borderTop: '1px solid rgba(158,196,238,0.26)', borderRadius: 'clamp(8px,0.9vw,14px)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', boxShadow: '0 8px 40px rgba(0,4,14,0.55)', willChange: 'transform', pointerEvents: 'none', transform: 'translate(20px,28px)' }} />
+              <div ref={ghost1Ref} style={{ position: 'absolute', inset: 0, background: 'rgba(5,16,34,0.65)', border: '1px solid rgba(118,158,205,0.15)', borderTop: '1px solid rgba(158,196,238,0.22)', borderRadius: 'clamp(8px,0.9vw,14px)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 6px 30px rgba(0,4,14,0.45)', willChange: 'transform', pointerEvents: 'none', transform: 'translate(10px,14px)' }} />
             <div ref={cardTiltRef} style={{ width: '100%', willChange: 'transform', transformOrigin: 'center center' }}>
             <div style={{
               width: '100%',

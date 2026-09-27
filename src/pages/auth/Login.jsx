@@ -141,17 +141,17 @@ const CSS = `
   /* ── Background perspective warp ────────────────────────────── */
   @keyframes a360-bgwarp {
     0%, 100% { transform: perspective(1200px) rotateX(0deg); }
-    50%       { transform: perspective(1200px) rotateX(0.85deg); }
+    50%       { transform: perspective(1200px) rotateX(3deg); }
   }
   .a360-bgwarp { animation: a360-bgwarp 40s ease-in-out infinite; transform-origin: center 62%; }
   @media (prefers-reduced-motion: reduce) { .a360-bgwarp { animation: none !important; } }
 
   /* ── Breathing outer ring ────────────────────────────────────── */
   @keyframes a360-breathe {
-    0%, 100% { transform: scale(1);    opacity: 0.7; }
-    50%       { transform: scale(1.1); opacity: 1;   }
+    0%, 100% { transform: scale(1);    opacity: 0.5; }
+    50%       { transform: scale(1.18); opacity: 1;   }
   }
-  .a360-ring-breathe { animation: a360-breathe 8s ease-in-out infinite; transform-origin: 0 0; }
+  .a360-ring-breathe { animation: a360-breathe 6s ease-in-out infinite; transform-origin: 0 0; }
   @media (prefers-reduced-motion: reduce) { .a360-ring-breathe { animation: none !important; } }
 
   /* ── Country ticker ─────────────────────────────────────────── */
@@ -218,15 +218,15 @@ export default function Login() {
       if (fgRef.current)  fgRef.current.style.transform  = `translate(${-cx * 9}px, ${-cy * 5}px)`
       // Layer 4: atmospheric city-light bloom — same plane as fg
       if (atmRef.current) atmRef.current.style.transform = `translate(${-cx * 9}px, ${-cy * 5}px)`
-      // Card tilt — ±1deg max on both axes, physical glass panel feel
+      // Card tilt — physical glass panel feel
       if (cardTiltRef.current) {
-        const rx =  cy * 2   // top away when mouse is at top
-        const ry = -cx * 2   // right away when mouse is at right
+        const rx =  cy * 6
+        const ry = -cx * 6
         cardTiltRef.current.style.transform = `perspective(1400px) rotateX(${rx}deg) rotateY(${ry}deg)`
       }
       // Ghost cards — same tilt at lower rates, base translate stays fixed
-      if (ghost1Ref.current) ghost1Ref.current.style.transform = `perspective(1400px) rotateX(${cy*1.5}deg) rotateY(${-cx*1.5}deg) translate(6px,8px)`
-      if (ghost2Ref.current) ghost2Ref.current.style.transform = `perspective(1400px) rotateX(${cy*0.9}deg) rotateY(${-cx*0.9}deg) translate(12px,16px)`
+      if (ghost1Ref.current) ghost1Ref.current.style.transform = `perspective(1400px) rotateX(${cy*4}deg) rotateY(${-cx*4}deg) translate(10px,14px)`
+      if (ghost2Ref.current) ghost2Ref.current.style.transform = `perspective(1400px) rotateX(${cy*2.5}deg) rotateY(${-cx*2.5}deg) translate(20px,28px)`
       // Extra parallax depth planes
       if (deepRef.current)  deepRef.current.style.transform  = `translate(${-cx * 1}px, ${-cy * 1}px)`
       if (nearRef.current)  nearRef.current.style.transform  = `translate(${-cx * 7}px, ${-cy * 4}px)`
@@ -433,18 +433,18 @@ export default function Login() {
             justifyContent: 'space-between',
             position: 'relative',
           }}>
-            {/* Geometric depth planes — razor-thin angled rectangles, ~5% opacity */}
+            {/* Geometric depth planes */}
             <div ref={geoRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', willChange: 'transform' }}>
               <div style={{
                 position: 'absolute', left: '4%', top: '16%', width: '46%', height: '30%',
-                border: '0.5px solid rgba(175,205,238,0.052)',
+                border: '1px solid rgba(175,205,238,0.14)',
                 borderRadius: 3,
                 transform: 'perspective(900px) rotateY(15deg) rotateX(4deg)',
                 transformOrigin: 'left center',
               }} />
               <div style={{
                 position: 'absolute', left: '26%', top: '46%', width: '42%', height: '34%',
-                border: '0.5px solid rgba(247,25,61,0.036)',
+                border: '1px solid rgba(247,25,61,0.12)',
                 borderRadius: 3,
                 transform: 'perspective(900px) rotateY(-9deg) rotateX(-3deg)',
                 transformOrigin: 'right center',
@@ -480,10 +480,10 @@ export default function Login() {
                     <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(52,86,148,0.13)" strokeWidth="1.5"/>
                     <circle cx="0" cy="0" r="51" fill="none" stroke="rgba(247,25,61,0.038)" strokeWidth="0.9"/>
                   </svg>
-                  {/* Breathing outer ring — pulses scale 1→1.1 over 8s, adds depth */}
+                  {/* Breathing outer ring */}
                   <svg className="a360-ring-breathe" viewBox="-90 -90 180 180" overflow="visible" aria-hidden="true"
                     style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
-                    <circle cx="0" cy="0" r="76" fill="none" stroke="rgba(52,86,148,0.07)" strokeWidth="0.7"/>
+                    <circle cx="0" cy="0" r="76" fill="none" stroke="rgba(52,86,148,0.28)" strokeWidth="2"/>
                   </svg>
                 </span>
               </div>
@@ -544,27 +544,29 @@ export default function Login() {
           <div className="a360-right" style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
             {/* Card stack — ghost layers behind give physical depth on tilt */}
             <div style={{ position: 'relative', width: '100%' }}>
-              {/* Ghost card 2 — furthest back, least tilt */}
+              {/* Ghost card 2 — furthest back */}
               <div ref={ghost2Ref} style={{
                 position: 'absolute', inset: 0,
-                background: 'rgba(5,16,34,0.36)',
-                border: '1px solid rgba(118,158,205,0.06)',
-                borderTop: '1px solid rgba(158,196,238,0.09)',
+                background: 'rgba(5,16,34,0.5)',
+                border: '1px solid rgba(118,158,205,0.18)',
+                borderTop: '1px solid rgba(158,196,238,0.26)',
                 borderRadius: 'clamp(8px,0.9vw,14px)',
                 backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+                boxShadow: '0 8px 40px rgba(0,4,14,0.55)',
                 willChange: 'transform', pointerEvents: 'none',
-                transform: 'translate(12px,16px)',
+                transform: 'translate(20px,28px)',
               }} />
               {/* Ghost card 1 — mid depth */}
               <div ref={ghost1Ref} style={{
                 position: 'absolute', inset: 0,
-                background: 'rgba(5,16,34,0.52)',
-                border: '1px solid rgba(118,158,205,0.08)',
-                borderTop: '1px solid rgba(158,196,238,0.12)',
+                background: 'rgba(5,16,34,0.65)',
+                border: '1px solid rgba(118,158,205,0.15)',
+                borderTop: '1px solid rgba(158,196,238,0.22)',
                 borderRadius: 'clamp(8px,0.9vw,14px)',
                 backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                boxShadow: '0 6px 30px rgba(0,4,14,0.45)',
                 willChange: 'transform', pointerEvents: 'none',
-                transform: 'translate(6px,8px)',
+                transform: 'translate(10px,14px)',
               }} />
             {/* 3D tilt wrapper — perspective container, never affects layout */}
             <div
