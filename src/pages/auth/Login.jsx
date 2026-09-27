@@ -141,15 +141,45 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [demoRole, setDemoRole] = useState(DEMO_ROLES[0].value)
   const [error, setError] = useState('')
-  const bgRef = useRef(null)
+  const bgRef  = useRef(null)
+  const midRef = useRef(null)
+  const fgRef  = useRef(null)
+  const atmRef = useRef(null)
 
-  // Subtle parallax on background image only
+  // Normalized mouse target and smoothed current position for lerp
+  const mouseTarget = useRef({ x: 0, y: 0 })
+  const mouseCurr   = useRef({ x: 0, y: 0 })
+  const rafId       = useRef(null)
+
+  // rAF-based smooth parallax — 4 depth layers at different speeds
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const tick = () => {
+      const t = mouseTarget.current
+      const c = mouseCurr.current
+      // lerp factor: ~0.1 → ~30 frames to settle, physical camera feel
+      c.x += (t.x - c.x) * 0.1
+      c.y += (t.y - c.y) * 0.1
+      const cx = c.x  // normalized [-0.5, +0.5]
+      const cy = c.y
+      // Layer 1: distant/background image — ~1px at edge
+      if (bgRef.current)  bgRef.current.style.transform  = `scale(1.06) translate(${-cx * 2}px, ${-cy * 2}px)`
+      // Layer 2: midground architectural plane — ~2.5px at edge
+      if (midRef.current) midRef.current.style.transform = `translate(${-cx * 5}px, ${-cy * 3}px)`
+      // Layer 3: foreground atmospheric depth — ~4.5px at edge
+      if (fgRef.current)  fgRef.current.style.transform  = `translate(${-cx * 9}px, ${-cy * 5}px)`
+      // Layer 4: atmospheric city-light bloom — same plane as fg
+      if (atmRef.current) atmRef.current.style.transform = `translate(${-cx * 9}px, ${-cy * 5}px)`
+      rafId.current = requestAnimationFrame(tick)
+    }
+    rafId.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId.current)
+  }, [])
+
   const handleMouseMove = useCallback(e => {
-    const el = bgRef.current
-    if (!el) return
-    const rx = (e.clientX / window.innerWidth  - 0.5) * 8
-    const ry = (e.clientY / window.innerHeight - 0.5) * 5
-    el.style.transform = `scale(1.06) translate(${-rx}px, ${-ry}px)`
+    mouseTarget.current.x = e.clientX / window.innerWidth  - 0.5
+    mouseTarget.current.y = e.clientY / window.innerHeight - 0.5
   }, [])
 
   const doSignIn = () => {
@@ -196,7 +226,7 @@ export default function Login() {
         onMouseMove={handleMouseMove}
       >
 
-        {/* ── LAYER 2: Architectural background ─────────────────── */}
+        {/* ── LAYER 1: Distant/background architecture ──────────── */}
         <img
           ref={bgRef}
           src="/arch-bg.webp"
@@ -205,8 +235,41 @@ export default function Login() {
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', objectPosition: 'center 30%',
             transform: 'scale(1.06)',
-            transition: 'transform 0.12s ease-out',
+            willChange: 'transform',
             pointerEvents: 'none',
+          }}
+        />
+
+        {/* ── LAYER 2: Middle architectural plane ───────────────── */}
+        {/* Nearly invisible gradient — moves 2-3px, creates depth against bg */}
+        <div
+          ref={midRef}
+          style={{
+            position: 'absolute', inset: '-10px',
+            background: 'linear-gradient(135deg, rgba(15,35,60,0.07) 0%, transparent 45%, transparent 55%, rgba(5,15,30,0.05) 100%)',
+            pointerEvents: 'none', willChange: 'transform',
+          }}
+        />
+
+        {/* ── LAYER 3: Foreground atmospheric depth ─────────────── */}
+        {/* Subtle edge vignette — moves 4-5px, anchors depth in foreground */}
+        <div
+          ref={fgRef}
+          style={{
+            position: 'absolute', inset: '-10px',
+            background: 'radial-gradient(ellipse 88% 72% at 48% 44%, transparent 28%, rgba(2,9,20,0.06) 100%)',
+            pointerEvents: 'none', willChange: 'transform',
+          }}
+        />
+
+        {/* ── LAYER 4: Atmospheric city-light bloom ─────────────── */}
+        {/* Faint warm glow from city lights — moves with foreground plane */}
+        <div
+          ref={atmRef}
+          style={{
+            position: 'absolute', inset: '-10px',
+            background: 'radial-gradient(ellipse 42% 28% at 42% 64%, rgba(190,140,60,0.022) 0%, transparent 68%)',
+            pointerEvents: 'none', willChange: 'transform',
           }}
         />
 
