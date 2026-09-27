@@ -92,6 +92,15 @@ const CSS = `
   }
   .a360-ring-svg { animation: a360-ring 26s linear infinite; }
   @media (prefers-reduced-motion: reduce) { .a360-ring-svg { animation: none !important; } }
+
+  @keyframes a360-ambient {
+    0%   { transform: translate(0px, 0px); }
+    30%  { transform: translate(16px, -10px); }
+    65%  { transform: translate(-12px, 14px); }
+    100% { transform: translate(0px, 0px); }
+  }
+  .a360-ambient { animation: a360-ambient 28s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .a360-ambient { animation: none !important; } }
 `
 
 export default function Signup() {
@@ -172,6 +181,17 @@ export default function Signup() {
         <img ref={bgRef} src="/arch-bg.webp" alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', transform: 'scale(1.06)', willChange: 'transform', pointerEvents: 'none' }}
         />
+
+        {/* Ambient atmospheric gradient */}
+        <div className="a360-ambient" style={{
+          position: 'absolute', inset: '-32px',
+          background: [
+            'radial-gradient(ellipse 65% 50% at 38% 32%, rgba(10,24,52,0.16) 0%, transparent 65%)',
+            'radial-gradient(ellipse 50% 38% at 68% 72%, rgba(3,10,26,0.12) 0%, transparent 60%)',
+            'radial-gradient(ellipse 90% 70% at 50% 50%, rgba(6,16,42,0.08) 0%, transparent 80%)',
+          ].join(', '),
+          pointerEvents: 'none', willChange: 'transform',
+        }} />
 
         {/* Dark overlays */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(90deg, rgba(2,9,20,0.92) 0%, rgba(2,9,20,0.72) 38%, rgba(2,9,20,0.38) 62%, rgba(2,9,20,0.72) 100%)' }} />
