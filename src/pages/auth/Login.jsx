@@ -131,6 +131,29 @@ const CSS = `
 
   .a360-tab { transition: color 0.15s; }
   .a360-tab:hover { color: rgba(220,235,255,0.9) !important; }
+
+  /* ── Environmental lighting ──────────────────────────────────── */
+  /* Cool horizontal band drifting slowly upward */
+  @keyframes a360-env1 {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-28px); }
+  }
+  /* Diagonal reflection sweeping left-to-right */
+  @keyframes a360-env2 {
+    0%, 100% { transform: translate(0, 0); }
+    50%       { transform: translate(22px, -10px); }
+  }
+  /* Warm lower-city glow shifting gently */
+  @keyframes a360-env3 {
+    0%, 100% { transform: translateX(0); }
+    50%       { transform: translateX(-18px); }
+  }
+  .a360-env1 { animation: a360-env1 14s ease-in-out infinite; }
+  .a360-env2 { animation: a360-env2 11s -3.5s ease-in-out infinite; }
+  .a360-env3 { animation: a360-env3 15s -6.2s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .a360-env1, .a360-env2, .a360-env3 { animation: none !important; }
+  }
 `
 
 export default function Login() {
@@ -273,7 +296,27 @@ export default function Login() {
           }}
         />
 
-        {/* ── LAYER 3: Dark overlays ─────────────────────────────── */}
+        {/* ── Environmental lighting — natural city-light reflections ── */}
+        {/* Cool horizontal band across mid-building glass — drifts vertically */}
+        <div className="a360-env1" style={{
+          position: 'absolute', inset: '-32px',
+          background: 'linear-gradient(180deg, transparent 43%, rgba(182,208,238,0.028) 50%, transparent 57%)',
+          pointerEvents: 'none', willChange: 'transform',
+        }} />
+        {/* Diagonal reflection — wide soft band sweeping across tower faces */}
+        <div className="a360-env2" style={{
+          position: 'absolute', inset: '-32px',
+          background: 'linear-gradient(128deg, transparent 30%, rgba(198,218,242,0.022) 44%, transparent 58%)',
+          pointerEvents: 'none', willChange: 'transform',
+        }} />
+        {/* Warm lower glow — city-light bounce off lower facades */}
+        <div className="a360-env3" style={{
+          position: 'absolute', inset: '-32px',
+          background: 'radial-gradient(ellipse 58% 24% at 40% 74%, rgba(208,168,92,0.024) 0%, transparent 68%)',
+          pointerEvents: 'none', willChange: 'transform',
+        }} />
+
+        {/* ── Dark overlays ──────────────────────────────────────────── */}
         {/* Left darkening — brand area */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
