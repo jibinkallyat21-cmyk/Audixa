@@ -49,6 +49,20 @@ const CSS = `
   .a360-ticker-track { animation: a360-ticker 35s linear infinite; display: inline-flex; white-space: nowrap; }
   @media (prefers-reduced-motion: reduce) { .a360-ticker-track { animation: none !important; } }
 
+  @keyframes a360-bgwarp {
+    0%, 100% { transform: perspective(1200px) rotateX(0deg); }
+    50%       { transform: perspective(1200px) rotateX(0.85deg); }
+  }
+  .a360-bgwarp { animation: a360-bgwarp 40s ease-in-out infinite; transform-origin: center 62%; }
+  @media (prefers-reduced-motion: reduce) { .a360-bgwarp { animation: none !important; } }
+
+  @keyframes a360-breathe {
+    0%, 100% { transform: scale(1);    opacity: 0.7; }
+    50%       { transform: scale(1.1); opacity: 1;   }
+  }
+  .a360-ring-breathe { animation: a360-breathe 8s ease-in-out infinite; transform-origin: 0 0; }
+  @media (prefers-reduced-motion: reduce) { .a360-ring-breathe { animation: none !important; } }
+
   @media (max-width: 900px) {
     .a360-root   { overflow-y: auto !important; height: auto !important; min-height: 100vh !important; }
     .a360-layout { flex-direction: column !important; height: auto !important;
@@ -63,6 +77,11 @@ export default function ForgotPassword() {
   const [status, setStatus] = useState('idle') // idle | loading | sent
   const bgRef       = useRef(null)
   const cardTiltRef = useRef(null)
+  const deepRef     = useRef(null)
+  const nearRef     = useRef(null)
+  const ghost1Ref   = useRef(null)
+  const ghost2Ref   = useRef(null)
+  const geoRef      = useRef(null)
   const mouseTarget = useRef({ x: 0, y: 0 })
   const mouseCurr   = useRef({ x: 0, y: 0 })
   const rafId       = useRef(null)
@@ -76,6 +95,11 @@ export default function ForgotPassword() {
       c.y += (t.y - c.y) * 0.1
       if (bgRef.current) bgRef.current.style.transform = `scale(1.06) translate(${-c.x * 2}px, ${-c.y * 2}px)`
       if (cardTiltRef.current) cardTiltRef.current.style.transform = `perspective(1400px) rotateX(${c.y * 2}deg) rotateY(${-c.x * 2}deg)`
+      if (ghost1Ref.current) ghost1Ref.current.style.transform = `perspective(1400px) rotateX(${c.y*1.5}deg) rotateY(${-c.x*1.5}deg) translate(6px,8px)`
+      if (ghost2Ref.current) ghost2Ref.current.style.transform = `perspective(1400px) rotateX(${c.y*0.9}deg) rotateY(${-c.x*0.9}deg) translate(12px,16px)`
+      if (deepRef.current)  deepRef.current.style.transform  = `translate(${-c.x * 1}px, ${-c.y * 1}px)`
+      if (nearRef.current)  nearRef.current.style.transform  = `translate(${-c.x * 7}px, ${-c.y * 4}px)`
+      if (geoRef.current)   geoRef.current.style.transform   = `translate(${-c.x * 14}px, ${-c.y * 8}px)`
       rafId.current = requestAnimationFrame(tick)
     }
     rafId.current = requestAnimationFrame(tick)
@@ -121,10 +145,14 @@ export default function ForgotPassword() {
         style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: '#020914', fontFamily: 'Inter, system-ui, sans-serif' }}
         onMouseMove={handleMouseMove}
       >
-        {/* Architectural background */}
-        <img ref={bgRef} src="/arch-bg.webp" alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', transform: 'scale(1.06)', willChange: 'transform', pointerEvents: 'none' }}
-        />
+        {/* Architectural background — wrapped in bgwarp for slow perspective tilt */}
+        <div className="a360-bgwarp" style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <img ref={bgRef} src="/arch-bg.webp" alt=""
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', transform: 'scale(1.06)', willChange: 'transform', pointerEvents: 'none' }}
+          />
+        </div>
+        <div ref={deepRef} style={{ position: 'absolute', inset: '-6px', background: 'linear-gradient(155deg, rgba(8,20,46,0.055) 0%, transparent 42%, transparent 58%, rgba(3,10,26,0.04) 100%)', pointerEvents: 'none', willChange: 'transform' }} />
+        <div ref={nearRef} style={{ position: 'absolute', inset: '-12px', background: 'radial-gradient(ellipse 52% 34% at 36% 54%, rgba(12,28,58,0.055) 0%, transparent 66%)', pointerEvents: 'none', willChange: 'transform' }} />
 
         {/* Ambient atmospheric gradient */}
         <div className="a360-ambient" style={{
@@ -154,7 +182,11 @@ export default function ForgotPassword() {
           }}>
 
           {/* ══ LEFT PANEL ══ */}
-          <div className="a360-left" style={{ flex: '0 0 62%', width: '62%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="a360-left" style={{ flex: '0 0 62%', width: '62%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
+            <div ref={geoRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', willChange: 'transform' }}>
+              <div style={{ position: 'absolute', left: '4%', top: '16%', width: '46%', height: '30%', border: '0.5px solid rgba(175,205,238,0.052)', borderRadius: 3, transform: 'perspective(900px) rotateY(15deg) rotateX(4deg)', transformOrigin: 'left center' }} />
+              <div style={{ position: 'absolute', left: '26%', top: '46%', width: '42%', height: '34%', border: '0.5px solid rgba(247,25,61,0.036)', borderRadius: 3, transform: 'perspective(900px) rotateY(-9deg) rotateX(-3deg)', transformOrigin: 'right center' }} />
+            </div>
 
             {/* Brand */}
             <div>
@@ -172,6 +204,10 @@ export default function ForgotPassword() {
                     style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
                     <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(52,86,148,0.13)" strokeWidth="1.5"/>
                     <circle cx="0" cy="0" r="51" fill="none" stroke="rgba(247,25,61,0.038)" strokeWidth="0.9"/>
+                  </svg>
+                  <svg className="a360-ring-breathe" viewBox="-90 -90 180 180" overflow="visible" aria-hidden="true"
+                    style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
+                    <circle cx="0" cy="0" r="76" fill="none" stroke="rgba(52,86,148,0.07)" strokeWidth="0.7"/>
                   </svg>
                 </span>
               </div>
@@ -202,6 +238,9 @@ export default function ForgotPassword() {
 
           {/* ══ RIGHT PANEL — FORGOT PASSWORD CARD ══ */}
           <div className="a360-right" style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
+            <div style={{ position: 'relative', width: '100%' }}>
+              <div ref={ghost2Ref} style={{ position: 'absolute', inset: 0, background: 'rgba(5,16,34,0.36)', border: '1px solid rgba(118,158,205,0.06)', borderTop: '1px solid rgba(158,196,238,0.09)', borderRadius: 'clamp(8px,0.9vw,14px)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', willChange: 'transform', pointerEvents: 'none', transform: 'translate(12px,16px)' }} />
+              <div ref={ghost1Ref} style={{ position: 'absolute', inset: 0, background: 'rgba(5,16,34,0.52)', border: '1px solid rgba(118,158,205,0.08)', borderTop: '1px solid rgba(158,196,238,0.12)', borderRadius: 'clamp(8px,0.9vw,14px)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', willChange: 'transform', pointerEvents: 'none', transform: 'translate(6px,8px)' }} />
             <div ref={cardTiltRef} style={{ width: '100%', willChange: 'transform', transformOrigin: 'center center' }}>
             <div style={{
               width: '100%',
@@ -338,6 +377,7 @@ export default function ForgotPassword() {
               </div>
             </div>
             </div>{/* /tilt wrapper */}
+            </div>{/* /card stack */}
           </div>
         </div>
 

@@ -138,6 +138,22 @@ const CSS = `
     .a360-env1, .a360-env2, .a360-env3 { animation: none !important; }
   }
 
+  /* ── Background perspective warp ────────────────────────────── */
+  @keyframes a360-bgwarp {
+    0%, 100% { transform: perspective(1200px) rotateX(0deg); }
+    50%       { transform: perspective(1200px) rotateX(0.85deg); }
+  }
+  .a360-bgwarp { animation: a360-bgwarp 40s ease-in-out infinite; transform-origin: center 62%; }
+  @media (prefers-reduced-motion: reduce) { .a360-bgwarp { animation: none !important; } }
+
+  /* ── Breathing outer ring ────────────────────────────────────── */
+  @keyframes a360-breathe {
+    0%, 100% { transform: scale(1);    opacity: 0.7; }
+    50%       { transform: scale(1.1); opacity: 1;   }
+  }
+  .a360-ring-breathe { animation: a360-breathe 8s ease-in-out infinite; transform-origin: 0 0; }
+  @media (prefers-reduced-motion: reduce) { .a360-ring-breathe { animation: none !important; } }
+
   /* ── Country ticker ─────────────────────────────────────────── */
   @keyframes a360-ticker {
     from { transform: translateX(0); }
@@ -166,11 +182,16 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [demoRole, setDemoRole] = useState(DEMO_ROLES[0].value)
   const [error, setError] = useState('')
-  const bgRef      = useRef(null)
-  const midRef     = useRef(null)
-  const fgRef      = useRef(null)
-  const atmRef     = useRef(null)
+  const bgRef       = useRef(null)
+  const midRef      = useRef(null)
+  const fgRef       = useRef(null)
+  const atmRef      = useRef(null)
   const cardTiltRef = useRef(null)
+  const deepRef     = useRef(null)   // deep bg plane  0.5× speed
+  const nearRef     = useRef(null)   // near-mid plane 1.5× speed
+  const ghost1Ref   = useRef(null)   // stacked card layer 1
+  const ghost2Ref   = useRef(null)   // stacked card layer 2
+  const geoRef      = useRef(null)   // geometric planes in left panel
 
   // Normalized mouse target and smoothed current position for lerp
   const mouseTarget = useRef({ x: 0, y: 0 })
@@ -203,6 +224,14 @@ export default function Login() {
         const ry = -cx * 2   // right away when mouse is at right
         cardTiltRef.current.style.transform = `perspective(1400px) rotateX(${rx}deg) rotateY(${ry}deg)`
       }
+      // Ghost cards — same tilt at lower rates, base translate stays fixed
+      if (ghost1Ref.current) ghost1Ref.current.style.transform = `perspective(1400px) rotateX(${cy*1.5}deg) rotateY(${-cx*1.5}deg) translate(6px,8px)`
+      if (ghost2Ref.current) ghost2Ref.current.style.transform = `perspective(1400px) rotateX(${cy*0.9}deg) rotateY(${-cx*0.9}deg) translate(12px,16px)`
+      // Extra parallax depth planes
+      if (deepRef.current)  deepRef.current.style.transform  = `translate(${-cx * 1}px, ${-cy * 1}px)`
+      if (nearRef.current)  nearRef.current.style.transform  = `translate(${-cx * 7}px, ${-cy * 4}px)`
+      // Geometric planes in left panel — faster parallax, creates foreground feel
+      if (geoRef.current)   geoRef.current.style.transform   = `translate(${-cx * 14}px, ${-cy * 8}px)`
       rafId.current = requestAnimationFrame(tick)
     }
     rafId.current = requestAnimationFrame(tick)
@@ -259,18 +288,35 @@ export default function Login() {
       >
 
         {/* ── LAYER 1: Distant/background architecture ──────────── */}
-        <img
-          ref={bgRef}
-          src="/arch-bg.webp"
-          alt=""
-          style={{
-            position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center 30%',
-            transform: 'scale(1.06)',
-            willChange: 'transform',
-            pointerEvents: 'none',
-          }}
-        />
+        {/* bgwarp wrapper adds slow perspective tilt — 40s ease-in-out cycle */}
+        <div className="a360-bgwarp" style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <img
+            ref={bgRef}
+            src="/arch-bg.webp"
+            alt=""
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center 30%',
+              transform: 'scale(1.06)',
+              willChange: 'transform',
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
+
+        {/* ── LAYER 1b: Deep background plane — 0.5× parallax speed ─ */}
+        <div ref={deepRef} style={{
+          position: 'absolute', inset: '-6px',
+          background: 'linear-gradient(155deg, rgba(8,20,46,0.055) 0%, transparent 42%, transparent 58%, rgba(3,10,26,0.04) 100%)',
+          pointerEvents: 'none', willChange: 'transform',
+        }} />
+
+        {/* ── LAYER 2b: Near-mid plane — 1.5× parallax speed ────── */}
+        <div ref={nearRef} style={{
+          position: 'absolute', inset: '-12px',
+          background: 'radial-gradient(ellipse 52% 34% at 36% 54%, rgba(12,28,58,0.055) 0%, transparent 66%)',
+          pointerEvents: 'none', willChange: 'transform',
+        }} />
 
         {/* ── Ambient atmospheric gradient — slow 28s drift ──────── */}
         <div className="a360-ambient" style={{
@@ -385,7 +431,25 @@ export default function Login() {
             flex: '0 0 62%', width: '62%',
             display: 'flex', flexDirection: 'column',
             justifyContent: 'space-between',
+            position: 'relative',
           }}>
+            {/* Geometric depth planes — razor-thin angled rectangles, ~5% opacity */}
+            <div ref={geoRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', willChange: 'transform' }}>
+              <div style={{
+                position: 'absolute', left: '4%', top: '16%', width: '46%', height: '30%',
+                border: '0.5px solid rgba(175,205,238,0.052)',
+                borderRadius: 3,
+                transform: 'perspective(900px) rotateY(15deg) rotateX(4deg)',
+                transformOrigin: 'left center',
+              }} />
+              <div style={{
+                position: 'absolute', left: '26%', top: '46%', width: '42%', height: '34%',
+                border: '0.5px solid rgba(247,25,61,0.036)',
+                borderRadius: 3,
+                transform: 'perspective(900px) rotateY(-9deg) rotateX(-3deg)',
+                transformOrigin: 'right center',
+              }} />
+            </div>
             {/* Brand block */}
             <div className="a360-brand">
               {/* ANALYTIX mark + text */}
@@ -410,11 +474,16 @@ export default function Login() {
                 <span style={{ color: '#F5F7FA' }}>AUDIT </span>
                 <span style={{ color: '#F7193D', position: 'relative', display: 'inline-block' }}>
                   360
-                  {/* Dimensional ring — barely visible, rotates very slowly behind/around "360" */}
+                  {/* Dimensional ring — rotates 26s, edge-on 68° perspective */}
                   <svg className="a360-ring-svg" viewBox="-70 -70 140 140" overflow="visible" aria-hidden="true"
                     style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
                     <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(52,86,148,0.13)" strokeWidth="1.5"/>
                     <circle cx="0" cy="0" r="51" fill="none" stroke="rgba(247,25,61,0.038)" strokeWidth="0.9"/>
+                  </svg>
+                  {/* Breathing outer ring — pulses scale 1→1.1 over 8s, adds depth */}
+                  <svg className="a360-ring-breathe" viewBox="-90 -90 180 180" overflow="visible" aria-hidden="true"
+                    style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
+                    <circle cx="0" cy="0" r="76" fill="none" stroke="rgba(52,86,148,0.07)" strokeWidth="0.7"/>
                   </svg>
                 </span>
               </div>
@@ -473,6 +542,30 @@ export default function Login() {
 
           {/* ══ RIGHT PANEL — LOGIN CARD ═════════════════════════════ */}
           <div className="a360-right" style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
+            {/* Card stack — ghost layers behind give physical depth on tilt */}
+            <div style={{ position: 'relative', width: '100%' }}>
+              {/* Ghost card 2 — furthest back, least tilt */}
+              <div ref={ghost2Ref} style={{
+                position: 'absolute', inset: 0,
+                background: 'rgba(5,16,34,0.36)',
+                border: '1px solid rgba(118,158,205,0.06)',
+                borderTop: '1px solid rgba(158,196,238,0.09)',
+                borderRadius: 'clamp(8px,0.9vw,14px)',
+                backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+                willChange: 'transform', pointerEvents: 'none',
+                transform: 'translate(12px,16px)',
+              }} />
+              {/* Ghost card 1 — mid depth */}
+              <div ref={ghost1Ref} style={{
+                position: 'absolute', inset: 0,
+                background: 'rgba(5,16,34,0.52)',
+                border: '1px solid rgba(118,158,205,0.08)',
+                borderTop: '1px solid rgba(158,196,238,0.12)',
+                borderRadius: 'clamp(8px,0.9vw,14px)',
+                backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                willChange: 'transform', pointerEvents: 'none',
+                transform: 'translate(6px,8px)',
+              }} />
             {/* 3D tilt wrapper — perspective container, never affects layout */}
             <div
               ref={cardTiltRef}
@@ -709,6 +802,7 @@ export default function Login() {
               </div>
             </div>
             </div>{/* /tilt wrapper */}
+            </div>{/* /card stack */}
           </div>
         </div>
 
