@@ -273,8 +273,8 @@ export default function Login() {
             <div className="a360-brand">
               {/* ANALYTIX mark + text */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 'clamp(12px,1.8vh,26px)' }}>
-                <div style={{ width: 40, height: 26, overflow: 'hidden', flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(247,25,61,0.3))' }}>
-                  <img src="/analytix-logo.png" alt="Analytix" style={{ width: 40, height: 'auto', display: 'block' }} />
+                <div style={{ width: 42, height: 20, overflow: 'hidden', flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(247,25,61,0.3))' }}>
+                  <img src="/analytix-logo.png" alt="Analytix" style={{ width: 42, height: 'auto', display: 'block' }} />
                 </div>
                 <span style={{
                   fontSize: 'clamp(11px,1.1vw,16px)', fontWeight: 600,
