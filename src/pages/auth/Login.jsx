@@ -164,10 +164,11 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [demoRole, setDemoRole] = useState(DEMO_ROLES[0].value)
   const [error, setError] = useState('')
-  const bgRef  = useRef(null)
-  const midRef = useRef(null)
-  const fgRef  = useRef(null)
-  const atmRef = useRef(null)
+  const bgRef      = useRef(null)
+  const midRef     = useRef(null)
+  const fgRef      = useRef(null)
+  const atmRef     = useRef(null)
+  const cardTiltRef = useRef(null)
 
   // Normalized mouse target and smoothed current position for lerp
   const mouseTarget = useRef({ x: 0, y: 0 })
@@ -194,6 +195,12 @@ export default function Login() {
       if (fgRef.current)  fgRef.current.style.transform  = `translate(${-cx * 9}px, ${-cy * 5}px)`
       // Layer 4: atmospheric city-light bloom — same plane as fg
       if (atmRef.current) atmRef.current.style.transform = `translate(${-cx * 9}px, ${-cy * 5}px)`
+      // Card tilt — ±1deg max on both axes, physical glass panel feel
+      if (cardTiltRef.current) {
+        const rx =  cy * 2   // top away when mouse is at top
+        const ry = -cx * 2   // right away when mouse is at right
+        cardTiltRef.current.style.transform = `perspective(1400px) rotateX(${rx}deg) rotateY(${ry}deg)`
+      }
       rafId.current = requestAnimationFrame(tick)
     }
     rafId.current = requestAnimationFrame(tick)
@@ -456,16 +463,32 @@ export default function Login() {
 
           {/* ══ RIGHT PANEL — LOGIN CARD ═════════════════════════════ */}
           <div style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
+            {/* 3D tilt wrapper — perspective container, never affects layout */}
+            <div
+              ref={cardTiltRef}
+              style={{ width: '100%', willChange: 'transform', transformOrigin: 'center center' }}
+            >
             <div
               className="a360-card"
               style={{
                 width: '100%',
-                background: 'rgba(8, 24, 42, 0.78)',
-                border: '1px solid rgba(100,150,190,0.18)',
+                // Translucent dark glass — slightly deeper than before
+                background: 'rgba(5,16,34,0.82)',
+                // Physical border: brighter on top edge where light catches, dimmer on sides
+                border: '1px solid rgba(118,158,205,0.12)',
+                borderTop: '1px solid rgba(158,196,238,0.17)',
                 borderRadius: 'clamp(8px,0.9vw,14px)',
-                backdropFilter: 'blur(20px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                boxShadow: '0 8px 48px rgba(0,5,18,0.55), inset 0 1px 0 rgba(255,255,255,0.045)',
+                // Reduced blur — see more architecture through, genuine glass not frosted glass
+                backdropFilter: 'blur(13px) saturate(1.4)',
+                WebkitBackdropFilter: 'blur(13px) saturate(1.4)',
+                // Layered shadow: contact → mid-depth → ambient + inner highlights
+                boxShadow: [
+                  '0 2px 6px rgba(0,4,14,0.44)',
+                  '0 14px 44px rgba(0,5,18,0.52)',
+                  '0 38px 88px rgba(0,3,12,0.30)',
+                  'inset 0 1px 0 rgba(205,228,255,0.058)',
+                  'inset 1px 0 0 rgba(182,210,242,0.022)',
+                ].join(', '),
                 display: 'flex', flexDirection: 'column',
                 padding: 'clamp(16px,2vw,28px)',
                 gap: 'clamp(8px,0.9vw,13px)',
@@ -675,6 +698,7 @@ export default function Login() {
                 }}>Secure encrypted connection</span>
               </div>
             </div>
+            </div>{/* /tilt wrapper */}
           </div>
         </div>
 
