@@ -132,6 +132,16 @@ const CSS = `
   .a360-tab { transition: color 0.15s; }
   .a360-tab:hover { color: rgba(220,235,255,0.9) !important; }
 
+  /* ── Dimensional 360 ring ─────────────────────────────────────── */
+  @keyframes a360-ring {
+    from { transform: perspective(480px) rotateX(68deg) rotateZ(0deg); }
+    to   { transform: perspective(480px) rotateX(68deg) rotateZ(360deg); }
+  }
+  .a360-ring-svg { animation: a360-ring 26s linear infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .a360-ring-svg { animation: none !important; }
+  }
+
   /* ── Environmental lighting ──────────────────────────────────── */
   /* Cool horizontal band drifting slowly upward */
   @keyframes a360-env1 {
@@ -378,7 +388,15 @@ export default function Login() {
                 marginBottom: 'clamp(10px,1.4vh,20px)',
               }}>
                 <span style={{ color: '#F5F7FA' }}>AUDIT </span>
-                <span style={{ color: '#F7193D' }}>360</span>
+                <span style={{ color: '#F7193D', position: 'relative', display: 'inline-block' }}>
+                  360
+                  {/* Dimensional ring — barely visible, rotates very slowly behind/around "360" */}
+                  <svg className="a360-ring-svg" viewBox="-70 -70 140 140" overflow="visible" aria-hidden="true"
+                    style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
+                    <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(52,86,148,0.13)" strokeWidth="1.5"/>
+                    <circle cx="0" cy="0" r="51" fill="none" stroke="rgba(247,25,61,0.038)" strokeWidth="0.9"/>
+                  </svg>
+                </span>
               </div>
 
               {/* Headline */}

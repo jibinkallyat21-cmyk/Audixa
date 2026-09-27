@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import PageTransition from '../../components/shared/PageTransition'
 
@@ -86,6 +86,12 @@ const CSS = `
   .su-inp { transition: border-color 0.18s, background 0.18s; }
   .su-inp:focus { border-color: rgba(80,130,220,0.55) !important; background: rgba(255,255,255,0.09) !important; outline: none; }
   .su-btn:hover { opacity: 0.88; box-shadow: 0 8px 28px rgba(247,25,61,0.5) !important; }
+  @keyframes a360-ring {
+    from { transform: perspective(480px) rotateX(68deg) rotateZ(0deg); }
+    to   { transform: perspective(480px) rotateX(68deg) rotateZ(360deg); }
+  }
+  .a360-ring-svg { animation: a360-ring 26s linear infinite; }
+  @media (prefers-reduced-motion: reduce) { .a360-ring-svg { animation: none !important; } }
 `
 
 export default function Signup() {
@@ -98,14 +104,30 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
-  const bgRef = useRef(null)
+  const bgRef       = useRef(null)
+  const cardTiltRef = useRef(null)
+  const mouseTarget = useRef({ x: 0, y: 0 })
+  const mouseCurr   = useRef({ x: 0, y: 0 })
+  const rafId       = useRef(null)
+
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const tick = () => {
+      const t = mouseTarget.current, c = mouseCurr.current
+      c.x += (t.x - c.x) * 0.1
+      c.y += (t.y - c.y) * 0.1
+      if (bgRef.current) bgRef.current.style.transform = `scale(1.06) translate(${-c.x * 2}px, ${-c.y * 2}px)`
+      if (cardTiltRef.current) cardTiltRef.current.style.transform = `perspective(1400px) rotateX(${c.y * 2}deg) rotateY(${-c.x * 2}deg)`
+      rafId.current = requestAnimationFrame(tick)
+    }
+    rafId.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId.current)
+  }, [])
 
   const handleMouseMove = useCallback(e => {
-    const el = bgRef.current
-    if (!el) return
-    const rx = (e.clientX / window.innerWidth  - 0.5) * 8
-    const ry = (e.clientY / window.innerHeight - 0.5) * 5
-    el.style.transform = `scale(1.06) translate(${-rx}px, ${-ry}px)`
+    mouseTarget.current.x = e.clientX / window.innerWidth  - 0.5
+    mouseTarget.current.y = e.clientY / window.innerHeight - 0.5
   }, [])
 
   const handleSubmit = e => {
@@ -148,7 +170,7 @@ export default function Signup() {
       >
         {/* Architectural background */}
         <img ref={bgRef} src="/arch-bg.webp" alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', transform: 'scale(1.06)', transition: 'transform 0.12s ease-out', pointerEvents: 'none' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', transform: 'scale(1.06)', willChange: 'transform', pointerEvents: 'none' }}
         />
 
         {/* Dark overlays */}
@@ -178,7 +200,14 @@ export default function Signup() {
               </div>
               <div style={{ fontSize: 'clamp(32px,4.6vw,72px)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter, system-ui, sans-serif', marginBottom: 'clamp(10px,1.4vh,20px)' }}>
                 <span style={{ color: '#F5F7FA' }}>AUDIT </span>
-                <span style={{ color: '#F7193D' }}>360</span>
+                <span style={{ color: '#F7193D', position: 'relative', display: 'inline-block' }}>
+                  360
+                  <svg className="a360-ring-svg" viewBox="-70 -70 140 140" overflow="visible" aria-hidden="true"
+                    style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
+                    <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(52,86,148,0.13)" strokeWidth="1.5"/>
+                    <circle cx="0" cy="0" r="51" fill="none" stroke="rgba(247,25,61,0.038)" strokeWidth="0.9"/>
+                  </svg>
+                </span>
               </div>
               <h1 style={{ margin: 0, fontSize: 'clamp(20px,2.3vw,36px)', fontWeight: 400, lineHeight: 1.28, color: '#F5F7FA', fontFamily: "'Playfair Display', Georgia, serif", maxWidth: '82%' }}>
                 Clarity across every<br/>dimension of your audit.
@@ -227,14 +256,16 @@ export default function Signup() {
 
           {/* ══ RIGHT PANEL — SIGNUP CARD ══ */}
           <div style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
+            <div ref={cardTiltRef} style={{ width: '100%', willChange: 'transform', transformOrigin: 'center center' }}>
             <div style={{
               width: '100%',
-              background: 'rgba(8, 24, 42, 0.78)',
-              border: '1px solid rgba(100,150,190,0.18)',
+              background: 'rgba(5,16,34,0.82)',
+              border: '1px solid rgba(118,158,205,0.12)',
+              borderTop: '1px solid rgba(158,196,238,0.17)',
               borderRadius: 'clamp(8px,0.9vw,14px)',
-              backdropFilter: 'blur(20px) saturate(1.6)',
-              WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-              boxShadow: '0 8px 48px rgba(0,5,18,0.55), inset 0 1px 0 rgba(255,255,255,0.045)',
+              backdropFilter: 'blur(13px) saturate(1.4)',
+              WebkitBackdropFilter: 'blur(13px) saturate(1.4)',
+              boxShadow: ['0 2px 6px rgba(0,4,14,0.44)', '0 14px 44px rgba(0,5,18,0.52)', '0 38px 88px rgba(0,3,12,0.30)', 'inset 0 1px 0 rgba(205,228,255,0.058)', 'inset 1px 0 0 rgba(182,210,242,0.022)'].join(', '),
               display: 'flex', flexDirection: 'column',
               padding: 'clamp(16px,2vw,28px)',
               gap: 'clamp(8px,0.9vw,13px)',
@@ -333,6 +364,7 @@ export default function Signup() {
                 <Link to="/login" style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: '#F7193D', fontFamily: 'Inter, system-ui, sans-serif', textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
               </div>
             </div>
+            </div>{/* /tilt wrapper */}
           </div>
         </div>
       </div>
