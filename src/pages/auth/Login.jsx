@@ -316,7 +316,8 @@ export default function Login() {
       ),
       title: 'AUDIT &\nASSURANCE',
       desc: 'Independent insight.\nGreater confidence.',
-      l: '50%', t: '6.7%',
+      l: '50%', t: '12.3%',
+      sx: 0, sy: -148,
     },
     {
       key: 'lft',
@@ -328,7 +329,8 @@ export default function Login() {
       ),
       title: 'ADVISORY &\nSTRATEGY',
       desc: 'Practical guidance.\nLasting value.',
-      l: '5.8%', t: '40%',
+      l: '15%', t: '42%',
+      sx: -168, sy: -32,
     },
     {
       key: 'rgt',
@@ -341,7 +343,8 @@ export default function Login() {
       ),
       title: 'ACCOUNTING\n& TAX',
       desc: 'Financial clarity.\nRegulatory confidence.',
-      l: '94.2%', t: '40%',
+      l: '85%', t: '42%',
+      sx: 168, sy: -32,
     },
     {
       key: 'btl',
@@ -353,7 +356,8 @@ export default function Login() {
       ),
       title: 'BUSINESS &\nCOMPLIANCE',
       desc: 'Stay compliant.\nMove forward.',
-      l: '13.5%', t: '88.2%',
+      l: '21.25%', t: '80.5%',
+      sx: -138, sy: 118,
     },
     {
       key: 'btr',
@@ -366,7 +370,8 @@ export default function Login() {
       ),
       title: 'GLOBAL BUSINESS\nSERVICES',
       desc: 'Expand. Establish. Thrive.',
-      l: '86.5%', t: '88.2%',
+      l: '78.75%', t: '80.5%',
+      sx: 138, sy: 118,
     },
   ]
 
@@ -641,15 +646,21 @@ export default function Login() {
                       <feGaussianBlur stdDeviation="22" result="blur"/>
                       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
-                    <filter id="eco-dot-glow" x="-300%" y="-300%" width="700%" height="700%">
-                      <feGaussianBlur stdDeviation="4" result="blur"/>
-                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
                   </defs>
 
                   {/* Ambient halos behind everything */}
                   <circle className="eco-halo1" cx="0" cy="0" r="145" fill="url(#eco-halo-body)"/>
                   <circle className="eco-halo2" cx="-12" cy="28" r="118" fill="url(#eco-halo-red)"/>
+
+                  {/* Radial connection lines from orb center to each node — orb drawn on top masks inner portion */}
+                  {ECO_NODES.map(n => (
+                    <line key={n.key} x1="0" y1="0" x2={n.sx} y2={n.sy}
+                      stroke="rgba(100,145,215,0.28)" strokeWidth="0.9" strokeDasharray="none"/>
+                  ))}
+                  {/* Small dot at each node anchor */}
+                  {ECO_NODES.map(n => (
+                    <circle key={n.key+'-dot'} cx={n.sx} cy={n.sy} r="2.5" fill="rgba(218,38,56,0.55)"/>
+                  ))}
 
                   {/* BACK HALVES of rings — bottom arcs drawn before the orb */}
                   <path className="eco-ring1" d="M -195,0 A 195,55 0 0,1 195,0"
@@ -700,17 +711,6 @@ export default function Login() {
                   <path d="M 105,0 A 105,30 0 0,1 -105,0"
                     fill="none" stroke="rgba(120,162,225,0.14)" strokeWidth="0.6"/>
 
-                  {/* Travelling red dot on outer ring */}
-                  {!ecoReducedMotion && (<>
-                    <circle r="9" fill="rgba(215,32,48,0.14)" filter="url(#eco-dot-glow)">
-                      <animateMotion dur="7s" repeatCount="indefinite"
-                        path="M 195,0 A 195,55 0 1,1 -195,0 A 195,55 0 1,1 195,0"/>
-                    </circle>
-                    <circle r="2.8" fill="#F7193D">
-                      <animateMotion dur="7s" repeatCount="indefinite"
-                        path="M 195,0 A 195,55 0 1,1 -195,0 A 195,55 0 1,1 195,0"/>
-                    </circle>
-                  </>)}
                 </svg>
 
                 {/* Service nodes — floating icon + text, no card background */}
@@ -745,6 +745,23 @@ export default function Login() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Company tagline */}
+            <div style={{
+              textAlign: 'center',
+              padding: 'clamp(6px,0.8vh,10px) clamp(16px,2vw,28px)',
+            }}>
+              <span style={{
+                fontSize: 'clamp(9px,0.82vw,12px)',
+                color: 'rgba(180,200,225,0.62)',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontStyle: 'italic',
+                letterSpacing: '0.02em',
+                whiteSpace: 'nowrap',
+              }}>
+                Analytix helps businesses navigate financial, regulatory and strategic complexity across markets.
+              </span>
             </div>
 
             {/* Global Presence */}
