@@ -174,27 +174,20 @@ const CSS = `
   }
 
   /* ── Service Ecosystem ──────────────────────────────────── */
-  @keyframes eco-breathe {
-    0%,100% { opacity: 0.58; }
+  @keyframes eco-orb-breathe {
+    0%,100% { opacity: 0.92; }
     50%     { opacity: 1; }
   }
-  @keyframes eco-ring-fade {
-    0%,100% { opacity: 0.52; }
-    50%     { opacity: 0.90; }
+  .eco-orb-g { animation: eco-orb-breathe 9s ease-in-out infinite; }
+  .eco-node  { transition: opacity 0.2s ease; }
+  .eco-node:hover { opacity: 0.9; }
+  .eco-icon-ring { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .eco-node:hover .eco-icon-ring {
+    border-color: rgba(160,200,250,0.70) !important;
+    box-shadow: 0 0 16px rgba(80,130,200,0.35) !important;
   }
-  @keyframes eco-orb-pulse {
-    0%,100% { transform: scale(1); }
-    50%     { transform: scale(1.04); }
-  }
-  .eco-halo1    { animation: eco-breathe 12s ease-in-out infinite; }
-  .eco-halo2    { animation: eco-breathe 8s -3s ease-in-out infinite; }
-  .eco-orb-core { animation: eco-orb-pulse 10s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-  .eco-node     { transition: opacity 0.2s ease; }
-  .eco-node:hover { opacity: 0.95; }
-  .eco-icon-ring { transition: border-color 0.2s ease; }
-  .eco-node:hover .eco-icon-ring { border-color: rgba(145,185,240,0.65) !important; }
   @media (prefers-reduced-motion: reduce) {
-    .eco-halo1,.eco-halo2,.eco-ring1,.eco-ring2,.eco-orb-core { animation: none !important; }
+    .eco-orb-g { animation: none !important; }
   }
 `
 
@@ -303,70 +296,6 @@ export default function Login() {
   }
 
   const ecoReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  const ECO_NODES = [
-    {
-      key: 'top',
-      icon: (
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="rgba(155,188,228,0.82)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10 1.5L3 5v5.5c0 4.55 3.02 8.43 7 9.5 3.98-1.07 7-4.95 7-9.5V5L10 1.5z"/>
-        </svg>
-      ),
-      title: 'AUDIT &\nASSURANCE',
-      desc: 'Independent insight.\nGreater confidence.',
-      l: '50%', t: '11%',
-    },
-    {
-      key: 'lft',
-      icon: (
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="rgba(155,188,228,0.82)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="8" cy="6" r="3"/><path d="M2 17c0-3.3 2.7-5 6-5s6 1.7 6 5"/>
-          <circle cx="15" cy="5" r="2"/><path d="M13 17c0-2 1.3-3.5 4-3.5"/>
-        </svg>
-      ),
-      title: 'ADVISORY &\nSTRATEGY',
-      desc: 'Practical guidance.\nLasting value.',
-      l: '11%', t: '42%',
-    },
-    {
-      key: 'rgt',
-      icon: (
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="rgba(155,188,228,0.82)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <ellipse cx="10" cy="5" rx="7" ry="2.5"/>
-          <path d="M3 5v5c0 1.38 3.13 2.5 7 2.5S17 11.38 17 10V5"/>
-          <path d="M3 10v5c0 1.38 3.13 2.5 7 2.5S17 16.38 17 15v-5"/>
-        </svg>
-      ),
-      title: 'ACCOUNTING\n& TAX',
-      desc: 'Financial clarity.\nRegulatory confidence.',
-      l: '89%', t: '42%',
-    },
-    {
-      key: 'btl',
-      icon: (
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="rgba(155,188,228,0.82)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8L12 2z"/>
-          <path d="M12 2v6h6"/><path d="M7 11.5l2 2 4-4"/>
-        </svg>
-      ),
-      title: 'BUSINESS &\nCOMPLIANCE',
-      desc: 'Stay compliant.\nMove forward.',
-      l: '19%', t: '83%',
-    },
-    {
-      key: 'btr',
-      icon: (
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="rgba(155,188,228,0.82)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="10" cy="10" r="8"/>
-          <path d="M10 2c3 2.5 4.5 5 4.5 8s-1.5 5.5-4.5 8c-3-2.5-4.5-5-4.5-8s1.5-5.5 4.5-8z"/>
-          <path d="M2 10h16"/>
-        </svg>
-      ),
-      title: 'GLOBAL BUSINESS\nSERVICES',
-      desc: 'Expand. Establish. Thrive.',
-      l: '81%', t: '83%',
-    },
-  ]
 
   return (
     <PageTransition>
@@ -587,7 +516,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* ── SERVICE ECOSYSTEM ──────────────────────────── */}
+            {/* ── SERVICE ECOSYSTEM — rebuilt from scratch ────────── */}
             <div style={{
               flex: 1,
               display: 'flex',
@@ -597,134 +526,176 @@ export default function Login() {
               minHeight: 0,
               overflow: 'visible',
             }}>
+              {/* Fixed-coordinate container — all children positioned relative to this */}
               <div style={{
                 position: 'relative',
-                width: 'clamp(380px, 58vw, 580px)',
-                aspectRatio: '480/390',
-                overflow: 'visible',
+                width: 'clamp(340px, 46vw, 520px)',
+                aspectRatio: '520 / 430',
+                flexShrink: 0,
               }}>
-                {/* SVG — split-arc orbital rings wrapping the orb for 3D depth */}
-                <svg viewBox="-240 -196 480 390" width="100%" height="100%"
-                  style={{ position: 'absolute', inset: 0, overflow: 'visible' }} aria-hidden="true">
+                {/* ── SVG layer: rings + orb ── */}
+                <svg
+                  viewBox="-260 -215 520 430"
+                  width="100%" height="100%"
+                  style={{ position: 'absolute', inset: 0, overflow: 'visible' }}
+                  aria-hidden="true"
+                >
                   <defs>
-                    {/* Glass orb gradients using userSpaceOnUse for precise positioning */}
-                    <radialGradient id="eco-orb-body" cx="-18" cy="-28" r="105" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="rgba(22,56,110,0.96)"/>
-                      <stop offset="42%" stopColor="rgba(8,24,60,0.98)"/>
-                      <stop offset="100%" stopColor="rgba(2,8,22,1)"/>
+                    {/* Orb body: dark navy glass, highlight upper-left */}
+                    <radialGradient id="g-orb-body" cx="-28" cy="-32" r="110" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%"   stopColor="rgba(28,62,128,0.96)"/>
+                      <stop offset="38%"  stopColor="rgba(6,18,52,0.98)"/>
+                      <stop offset="100%" stopColor="rgba(2,5,16,1)"/>
                     </radialGradient>
-                    <radialGradient id="eco-orb-red" cx="0" cy="58" r="95" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="rgba(222,40,52,0.70)"/>
-                      <stop offset="40%" stopColor="rgba(185,26,38,0.30)"/>
-                      <stop offset="100%" stopColor="rgba(140,12,22,0)"/>
-                    </radialGradient>
-                    <radialGradient id="eco-orb-blue" cx="32" cy="-38" r="70" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="rgba(110,168,255,0.10)"/>
+                    {/* Orb blue highlight: upper-left lens glint */}
+                    <radialGradient id="g-orb-hi" cx="-26" cy="-30" r="48" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%"   stopColor="rgba(150,195,255,0.13)"/>
                       <stop offset="100%" stopColor="rgba(80,140,230,0)"/>
                     </radialGradient>
-                    <radialGradient id="eco-halo-body" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="rgba(42,82,185,0.22)"/>
-                      <stop offset="65%" stopColor="rgba(32,62,150,0.06)"/>
-                      <stop offset="100%" stopColor="rgba(20,40,100,0)"/>
+                    {/* Orb red: subtle bottom-edge reflection, stays inside orb */}
+                    <radialGradient id="g-orb-red" cx="0" cy="72" r="48" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%"   stopColor="rgba(215,38,52,0.25)"/>
+                      <stop offset="100%" stopColor="rgba(170,18,30,0)"/>
                     </radialGradient>
-                    <radialGradient id="eco-halo-red" cx="38%" cy="62%" r="50%">
-                      <stop offset="0%" stopColor="rgba(215,32,48,0.14)"/>
-                      <stop offset="100%" stopColor="rgba(180,20,36,0)"/>
+                    {/* Ambient blue glow behind orb */}
+                    <radialGradient id="g-orb-glow" cx="50%" cy="54%" r="50%">
+                      <stop offset="0%"   stopColor="rgba(28,68,158,0.26)"/>
+                      <stop offset="100%" stopColor="rgba(8,24,70,0)"/>
                     </radialGradient>
-                    <filter id="eco-orb-glow" x="-60%" y="-60%" width="220%" height="220%">
-                      <feGaussianBlur stdDeviation="18" result="blur"/>
+                    {/* Ring red glow filter */}
+                    <filter id="f-ring-red" x="-250%" y="-250%" width="600%" height="600%">
+                      <feGaussianBlur stdDeviation="4.5" result="blur"/>
                       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
-                    <filter id="eco-red-glow" x="-80%" y="-80%" width="260%" height="260%">
-                      <feGaussianBlur stdDeviation="26" result="blur"/>
+                    {/* Travelling dot glow */}
+                    <filter id="f-dot-glow" x="-500%" y="-500%" width="1100%" height="1100%">
+                      <feGaussianBlur stdDeviation="3" result="blur"/>
                       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
-                    <filter id="eco-ring-glow" x="-300%" y="-300%" width="700%" height="700%">
-                      <feGaussianBlur stdDeviation="5" result="blur"/>
-                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
+                    {/* Full orbit path for animateMotion (two arcs = closed ellipse) */}
+                    <path id="eco-orbit-path" d="M 210,0 A 210,60 0 1 1 -210,0 A 210,60 0 1 1 210,0" fill="none"/>
                   </defs>
 
-                  {/* Ambient halos */}
-                  <circle className="eco-halo1" cx="0" cy="0" r="148" fill="url(#eco-halo-body)"/>
-                  <circle className="eco-halo2" cx="-6" cy="36" r="132" fill="url(#eco-halo-red)"/>
+                  {/* ── Ambient orb glow (behind everything) ── */}
+                  <ellipse cx="0" cy="10" rx="118" ry="102" fill="url(#g-orb-glow)" opacity="0.85"/>
 
-                  {/* RING 1 BACK — top arc goes behind sphere, dim blue-gray */}
-                  <path className="eco-ring1" d="M -170,0 A 170,48 0 0,0 170,0"
-                    fill="none" stroke="rgba(88,125,198,0.24)" strokeWidth="1.1"/>
-                  {/* RING 2 BACK — top arc of inner ring */}
-                  <path className="eco-ring1" d="M -128,0 A 128,36 0 0,0 128,0"
-                    fill="none" stroke="rgba(88,125,198,0.16)" strokeWidth="0.8"/>
+                  {/* ── RING 1 BACK: top half, dim, behind orb ── */}
+                  <path d="M -210,0 A 210,60 0 0,0 210,0"
+                    fill="none" stroke="rgba(75,115,195,0.20)" strokeWidth="1.0"/>
+                  {/* ── RING 2 BACK: top half of inner ring ── */}
+                  <path d="M -155,0 A 155,44 0 0,0 155,0"
+                    fill="none" stroke="rgba(75,115,195,0.13)" strokeWidth="0.75"/>
 
-                  {/* THE ORB */}
-                  <g className="eco-orb-core">
-                    <circle cx="0" cy="0" r="82" fill="rgba(10,28,80,0.50)" filter="url(#eco-orb-glow)"/>
-                    <circle cx="0" cy="30" r="78" fill="rgba(215,32,48,0.20)" filter="url(#eco-red-glow)"/>
-                    <circle cx="0" cy="0" r="80" fill="url(#eco-orb-body)"/>
-                    <circle cx="0" cy="0" r="80" fill="url(#eco-orb-red)"/>
-                    <circle cx="0" cy="0" r="80" fill="url(#eco-orb-blue)"/>
-                    <circle cx="0" cy="0" r="80" fill="none" stroke="rgba(110,155,228,0.30)" strokeWidth="1.2"/>
-                    <ellipse cx="-18" cy="-28" rx="30" ry="19" fill="rgba(138,192,250,0.042)"/>
-                    <text x="0" y="-12" textAnchor="middle"
-                      fill="rgba(232,242,255,0.94)" fontSize="10.5" fontWeight="700"
-                      letterSpacing="0.28em" fontFamily="Inter,system-ui,sans-serif">ANALYTIX</text>
-                    <text x="0" y="4" textAnchor="middle"
-                      fill="rgba(155,188,228,0.65)" fontSize="6.5"
-                      letterSpacing="0.04em" fontFamily="Inter,system-ui,sans-serif">Global Professional Services</text>
-                    <text x="0" y="16" textAnchor="middle"
-                      fill="rgba(140,172,210,0.52)" fontSize="6.2" fontStyle="italic"
+                  {/* ── THE ORB ── */}
+                  <g className="eco-orb-g">
+                    {/* Body */}
+                    <circle cx="0" cy="0" r="80" fill="url(#g-orb-body)"/>
+                    {/* Bottom-edge red reflection (subtle, inside orb boundary) */}
+                    <circle cx="0" cy="0" r="80" fill="url(#g-orb-red)"/>
+                    {/* Upper-left blue highlight */}
+                    <circle cx="0" cy="0" r="80" fill="url(#g-orb-hi)"/>
+                    {/* Small lens glint ellipse */}
+                    <ellipse cx="-20" cy="-26" rx="16" ry="10" fill="rgba(190,220,255,0.048)"/>
+                    {/* Glass rim */}
+                    <circle cx="0" cy="0" r="80" fill="none" stroke="rgba(95,148,222,0.26)" strokeWidth="1.1"/>
+                    {/* Orb text */}
+                    <text x="0" y="-14" textAnchor="middle"
+                      fill="rgba(232,242,255,0.95)" fontSize="11" fontWeight="700"
+                      letterSpacing="5" fontFamily="Inter,system-ui,sans-serif">ANALYTIX</text>
+                    <text x="0" y="1" textAnchor="middle"
+                      fill="rgba(150,185,228,0.60)" fontSize="6.2"
+                      letterSpacing="0.5" fontFamily="Inter,system-ui,sans-serif">Global Professional</text>
+                    <text x="0" y="12" textAnchor="middle"
+                      fill="rgba(150,185,228,0.60)" fontSize="6.2"
+                      letterSpacing="0.5" fontFamily="Inter,system-ui,sans-serif">Services</text>
+                    <text x="0" y="24" textAnchor="middle"
+                      fill="rgba(125,158,200,0.42)" fontSize="5.6" fontStyle="italic"
                       fontFamily="Playfair Display,Georgia,serif">for a Stronger Tomorrow</text>
                   </g>
 
-                  {/* RING 1 FRONT — bottom arc comes in front of sphere, brighter */}
-                  <path className="eco-ring1" d="M -170,0 A 170,48 0 0,1 170,0"
-                    fill="none" stroke="rgba(118,158,225,0.45)" strokeWidth="1.2"/>
-                  {/* Red glow accent — where front arc crosses in front of orb's red zone */}
-                  <path d="M 86,42 A 170,48 0 0,1 -86,42"
-                    fill="none" stroke="rgba(218,40,56,0.65)" strokeWidth="3"
-                    strokeLinecap="round" filter="url(#eco-ring-glow)"/>
-                  <path d="M 86,42 A 170,48 0 0,1 -86,42"
-                    fill="none" stroke="rgba(235,65,78,0.45)" strokeWidth="1.4"
+                  {/* ── RING 1 FRONT: bottom half, in front of orb ── */}
+                  <path d="M -210,0 A 210,60 0 0,1 210,0"
+                    fill="none" stroke="rgba(105,152,225,0.40)" strokeWidth="1.1"/>
+                  {/* Red glow: central section of front arc where ring crosses orb equator */}
+                  <path d="M 115,56 A 210,60 0 0,1 -115,56"
+                    fill="none" stroke="rgba(228,45,65,0.75)" strokeWidth="3.2"
+                    strokeLinecap="round" filter="url(#f-ring-red)"/>
+                  <path d="M 115,56 A 210,60 0 0,1 -115,56"
+                    fill="none" stroke="rgba(245,70,88,0.50)" strokeWidth="1.3"
                     strokeLinecap="round"/>
 
-                  {/* RING 2 FRONT — inner ring front arc */}
-                  <path className="eco-ring1" d="M -128,0 A 128,36 0 0,1 128,0"
-                    fill="none" stroke="rgba(118,158,225,0.32)" strokeWidth="0.9"/>
-                  {/* Inner ring red accent (smaller) */}
-                  <path d="M 64,32 A 128,36 0 0,1 -64,32"
-                    fill="none" stroke="rgba(200,38,52,0.42)" strokeWidth="2"
-                    strokeLinecap="round" filter="url(#eco-ring-glow)"/>
+                  {/* ── RING 2 FRONT: inner ring bottom half ── */}
+                  <path d="M -155,0 A 155,44 0 0,1 155,0"
+                    fill="none" stroke="rgba(105,152,225,0.28)" strokeWidth="0.8"/>
+                  {/* Inner ring red accent */}
+                  <path d="M 85,41 A 155,44 0 0,1 -85,41"
+                    fill="none" stroke="rgba(210,42,58,0.46)" strokeWidth="2.0"
+                    strokeLinecap="round" filter="url(#f-ring-red)"/>
 
+                  {/* ── Travelling red dot (animateMotion along full orbit) ── */}
+                  {!ecoReducedMotion && (
+                    <circle r="3.5" fill="rgba(248,65,82,0.95)" filter="url(#f-dot-glow)">
+                      <animateMotion dur="13s" repeatCount="indefinite">
+                        <mpath href="#eco-orbit-path"/>
+                      </animateMotion>
+                    </circle>
+                  )}
                 </svg>
 
-                {/* Service nodes — floating icon + text */}
-                {ECO_NODES.map(n => (
+                {/* ── Service nodes: floating icon + title + desc, NO card backgrounds ── */}
+                {[
+                  {
+                    key: 'top', l: '50%', t: '4%',
+                    icon: <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="rgba(155,188,228,0.88)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 1.5L3 5v5.5c0 4.55 3.02 8.43 7 9.5 3.98-1.07 7-4.95 7-9.5V5L10 1.5z"/></svg>,
+                    title: 'AUDIT &\nASSURANCE', desc: 'Independent insight.\nGreater confidence.',
+                  },
+                  {
+                    key: 'lft', l: '5%', t: '44%',
+                    icon: <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="rgba(155,188,228,0.88)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="6" r="3"/><path d="M2 17c0-3.3 2.7-5 6-5s6 1.7 6 5"/><circle cx="15" cy="5" r="2"/><path d="M13 17c0-2 1.3-3.5 4-3.5"/></svg>,
+                    title: 'ADVISORY &\nSTRATEGY', desc: 'Practical guidance.\nLasting value.',
+                  },
+                  {
+                    key: 'rgt', l: '95%', t: '44%',
+                    icon: <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="rgba(155,188,228,0.88)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="10" cy="5" rx="7" ry="2.5"/><path d="M3 5v5c0 1.38 3.13 2.5 7 2.5S17 11.38 17 10V5"/><path d="M3 10v5c0 1.38 3.13 2.5 7 2.5S17 16.38 17 15v-5"/></svg>,
+                    title: 'ACCOUNTING\n& TAX', desc: 'Financial clarity.\nRegulatory confidence.',
+                  },
+                  {
+                    key: 'btl', l: '14%', t: '91%',
+                    icon: <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="rgba(155,188,228,0.88)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8L12 2z"/><path d="M12 2v6h6"/><path d="M7 11.5l2 2 4-4"/></svg>,
+                    title: 'BUSINESS &\nCOMPLIANCE', desc: 'Stay compliant.\nMove forward.',
+                  },
+                  {
+                    key: 'btr', l: '86%', t: '91%',
+                    icon: <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="rgba(155,188,228,0.88)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="10" r="8"/><path d="M10 2c3 2.5 4.5 5 4.5 8s-1.5 5.5-4.5 8c-3-2.5-4.5-5-4.5-8s1.5-5.5 4.5-8z"/><path d="M2 10h16"/></svg>,
+                    title: 'GLOBAL BUSINESS\nSERVICES', desc: 'Expand. Establish. Thrive.',
+                  },
+                ].map(n => (
                   <div key={n.key} className="eco-node" style={{
                     position: 'absolute', left: n.l, top: n.t,
                     transform: 'translateX(-50%) translateY(-50%)',
                     textAlign: 'center',
-                    width: 'clamp(90px, 10vw, 130px)',
+                    width: 'clamp(78px, 9vw, 112px)',
                   }}>
                     <div className="eco-icon-ring" style={{
-                      width: 46, height: 46,
-                      border: '1.5px solid rgba(100,145,210,0.48)',
+                      width: 40, height: 40,
+                      border: '1.2px solid rgba(88,135,210,0.44)',
                       borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      margin: '0 auto 7px',
-                      background: 'rgba(4,12,32,0.72)',
-                      backdropFilter: 'blur(8px)',
-                      WebkitBackdropFilter: 'blur(8px)',
-                      boxShadow: '0 0 12px rgba(60,100,180,0.22)',
+                      margin: '0 auto 6px',
+                      background: 'rgba(3,9,26,0.70)',
+                      backdropFilter: 'blur(6px)',
+                      WebkitBackdropFilter: 'blur(6px)',
+                      boxShadow: '0 0 10px rgba(45,85,175,0.18)',
                     }}>{n.icon}</div>
                     <div style={{
-                      fontSize: 'clamp(8.5px,0.76vw,11px)', fontWeight: 700,
-                      letterSpacing: '0.08em', color: 'rgba(225,238,255,0.95)',
-                      fontFamily: 'Inter,system-ui,sans-serif', lineHeight: 1.28,
-                      whiteSpace: 'pre-line', marginBottom: 4,
+                      fontSize: 'clamp(8px,0.72vw,10px)', fontWeight: 700,
+                      letterSpacing: '0.07em', color: 'rgba(218,232,255,0.93)',
+                      fontFamily: 'Inter,system-ui,sans-serif', lineHeight: 1.3,
+                      whiteSpace: 'pre-line', marginBottom: 3,
                     }}>{n.title}</div>
                     <div style={{
-                      fontSize: 'clamp(7px,0.60vw,9px)', fontWeight: 400,
-                      color: 'rgba(130,162,200,0.75)',
+                      fontSize: 'clamp(6.5px,0.57vw,8px)', fontWeight: 400,
+                      color: 'rgba(118,152,195,0.70)',
                       fontFamily: 'Inter,system-ui,sans-serif', lineHeight: 1.5,
                       whiteSpace: 'pre-line',
                     }}>{n.desc}</div>
