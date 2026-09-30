@@ -518,20 +518,21 @@ export default function Login() {
 
             {/* ── SERVICE ECOSYSTEM — rebuilt from scratch ────────── */}
             <div style={{
-              flex: 1,
+              flex: '0 0 auto',
+              maxHeight: 'clamp(260px, 42vh, 420px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
-              minHeight: 0,
               overflow: 'visible',
             }}>
               {/* Fixed-coordinate container — all children positioned relative to this */}
               <div style={{
                 position: 'relative',
-                width: 'clamp(340px, 46vw, 520px)',
+                width: 'clamp(260px, 40vw, 480px)',
                 aspectRatio: '520 / 430',
-                flexShrink: 0,
+                maxHeight: '100%',
+                flexShrink: 1,
               }}>
                 {/* ── SVG layer: rings + orb ── */}
                 <svg
