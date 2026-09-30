@@ -163,7 +163,7 @@ const CSS = `
   @media (prefers-reduced-motion: reduce) { .a360-ticker-track { animation: none !important; } }
 
   /* ── Responsive ─────────────────────────────────────────────── */
-  @media (max-width: 900px) {
+  @media (max-width: 480px) {
     .a360-root   { overflow-y: auto !important; height: auto !important; min-height: 100vh !important; }
     .a360-layout { flex-direction: column !important; height: auto !important;
                    padding: clamp(20px,5vw,32px) !important; align-items: center !important; }
