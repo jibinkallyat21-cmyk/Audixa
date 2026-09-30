@@ -530,16 +530,28 @@ export default function Login() {
               overflow: 'hidden',
             }}>
               <svg
-                viewBox="0 0 720 510"
+                viewBox="0 0 720 490"
                 width="100%"
                 style={{ display: 'block', overflow: 'visible' }}
                 aria-label="Analytix service ecosystem"
               >
                 <defs>
-                  <radialGradient id="csg-glob" cx="38%" cy="32%" r="65%">
-                    <stop offset="0%"   stopColor="#1e3460"/>
-                    <stop offset="50%"  stopColor="#0c1a38"/>
-                    <stop offset="100%" stopColor="#040c1e"/>
+                  {/* Globe base gradient — bright upper-left highlight, dark lower-right */}
+                  <radialGradient id="csg-glob" cx="36%" cy="30%" r="68%">
+                    <stop offset="0%"   stopColor="#223870"/>
+                    <stop offset="40%"  stopColor="#0e2048"/>
+                    <stop offset="100%" stopColor="#03091c"/>
+                  </radialGradient>
+                  {/* Atmosphere rim gradient */}
+                  <radialGradient id="csg-atm" cx="50%" cy="50%" r="50%">
+                    <stop offset="72%" stopColor="rgba(0,0,0,0)"/>
+                    <stop offset="92%" stopColor="rgba(80,140,240,0.10)"/>
+                    <stop offset="100%" stopColor="rgba(110,170,255,0.22)"/>
+                  </radialGradient>
+                  {/* Terminator shadow — subtle dark gradient on right/lower hemisphere */}
+                  <radialGradient id="csg-shd" cx="72%" cy="68%" r="60%">
+                    <stop offset="0%"  stopColor="rgba(0,0,10,0.28)"/>
+                    <stop offset="100%" stopColor="rgba(0,0,0,0)"/>
                   </radialGradient>
                   <filter id="csg-rg" x="-120%" y="-120%" width="340%" height="340%">
                     <feGaussianBlur stdDeviation="6" result="b"/>
@@ -553,81 +565,90 @@ export default function Login() {
                     <feGaussianBlur stdDeviation="2" result="b"/>
                     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                   </filter>
-                  {/* Clip to globe circle for continent fills */}
+                  {/* Clip path for continent fills */}
                   <clipPath id="csg-gc">
-                    <circle cx={360} cy={252} r={126}/>
+                    <circle cx={360} cy={245} r={103}/>
                   </clipPath>
-                  {/* Orbit path for animated dots: clockwise ellipse */}
+                  {/* Orbit path: clockwise ellipse, rx=192 ry=68 center (360,245) */}
                   <path id="csg-op" fill="none"
-                    d="M 588,252 A 228,81 0 0 1 132,252 A 228,81 0 0 1 588,252"/>
+                    d="M 552,245 A 192,68 0 0 1 168,245 A 192,68 0 0 1 552,245"/>
                 </defs>
 
                 {/* Globe body */}
-                <circle cx={360} cy={252} r={128} fill="url(#csg-glob)"/>
-                {/* Globe rim glow */}
-                <circle cx={360} cy={252} r={128} fill="none" stroke="rgba(40,80,160,0.32)" strokeWidth="5"/>
-                <circle cx={360} cy={252} r={128} fill="none" stroke="rgba(60,100,180,0.1)"  strokeWidth="18"/>
+                <circle cx={360} cy={245} r={105} fill="url(#csg-glob)"/>
 
-                {/* Continent fills — subtle land mass tones clipped to globe */}
-                <g clipPath="url(#csg-gc)" fill="rgba(52,108,78,0.32)" stroke="rgba(70,140,100,0.18)" strokeWidth="0.5">
+                {/* Continents — more natural polygon outlines clipped to globe */}
+                <g clipPath="url(#csg-gc)" fill="rgba(48,105,68,0.38)" stroke="rgba(68,138,90,0.22)" strokeWidth="0.6">
                   {/* North America */}
-                  <polygon points="253,164 327,155 331,184 313,216 306,231 295,224 285,209 278,181 249,167"/>
+                  <polygon points="264,173 284,177 285,189 287,201 290,208 296,218 303,215 308,211 310,210 313,216 316,236 319,231 324,225 328,191 325,166 313,166 302,161 278,166"/>
+                  {/* Greenland */}
+                  <polygon points="334,149 348,152 350,156 334,161 331,156"/>
                   {/* South America */}
-                  <polygon points="313,238 345,238 345,330 320,330 317,266"/>
+                  <polygon points="313,233 315,239 316,245 316,249 313,263 313,280 322,309 334,272 340,254 340,239 340,233"/>
                   {/* Europe */}
-                  <polygon points="363,152 391,152 391,198 381,201 366,195 363,189"/>
+                  <polygon points="354,203 357,201 355,195 357,194 360,187 365,182 368,173 371,175 375,169 378,163 378,201 369,203 354,203"/>
                   {/* Africa */}
-                  <polygon points="357,202 406,202 406,302 381,302 388,259 357,231"/>
-                  {/* Asia */}
-                  <polygon points="398,152 470,152 473,216 441,252 427,266 398,252"/>
+                  <polygon points="350,204 366,201 378,201 386,228 389,286 380,286 375,251 369,251 350,228"/>
+                  {/* Asia (including Indian sub-continent) */}
+                  <polygon points="383,163 418,163 442,163 445,216 418,245 407,257 407,236 404,228 401,222 400,216 401,204 392,216 386,228 383,245"/>
                   {/* Australia */}
-                  <polygon points="452,273 480,273 480,309 452,309"/>
+                  <polygon points="427,263 450,263 450,292 427,292"/>
                 </g>
 
-                {/* Latitude lines */}
-                {[-3,-2,-1,0,1,2,3].map(i => {
-                  const ly = 252 + i*38;
-                  const lrx = Math.sqrt(Math.max(0, 128**2 - (i*38)**2));
-                  return lrx > 5 ? (
-                    <ellipse key={i} cx={360} cy={ly} rx={lrx} ry={lrx*0.17}
-                      fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"/>
-                  ) : null;
-                })}
-                {/* Longitude lines */}
-                {[0,36,72,108,144].map(a => {
-                  const lrx = 128 * Math.abs(Math.sin(a*Math.PI/180));
-                  return lrx > 5 ? (
-                    <ellipse key={a} cx={360} cy={252} rx={lrx} ry={128}
-                      fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"
-                      transform={`rotate(${a} 360 252)`}/>
-                  ) : null;
-                })}
+                {/* Latitude lines clipped to globe */}
+                <g clipPath="url(#csg-gc)">
+                  {[-3,-2,-1,0,1,2,3].map(i => {
+                    const ly = 245 + i*35;
+                    const lrx = Math.sqrt(Math.max(0, 105**2 - (i*35)**2));
+                    return lrx > 5 ? (
+                      <ellipse key={i} cx={360} cy={ly} rx={lrx} ry={lrx*0.17}
+                        fill="none" stroke="rgba(100,140,200,0.14)" strokeWidth="0.5"/>
+                    ) : null;
+                  })}
+                  {/* Longitude lines */}
+                  {[36,72,108,144].map(a => {
+                    const lrx = 105 * Math.abs(Math.sin(a*Math.PI/180));
+                    return lrx > 5 ? (
+                      <ellipse key={a} cx={360} cy={245} rx={lrx} ry={105}
+                        fill="none" stroke="rgba(100,140,200,0.14)" strokeWidth="0.5"
+                        transform={`rotate(${a} 360 245)`}/>
+                    ) : null;
+                  })}
+                </g>
 
-                {/* Orbital ring — full dim layer (shows "back" of ring) */}
-                <ellipse cx={360} cy={252} rx={228} ry={81}
-                  fill="none" stroke="rgba(190,28,48,0.22)" strokeWidth="1"/>
-                {/* Orbital ring — front half brighter */}
-                <ellipse cx={360} cy={252} rx={228} ry={81}
-                  fill="none" stroke="#c81428" strokeWidth="1.5"
-                  strokeDasharray="513 513"
+                {/* Atmosphere + terminator depth */}
+                <circle cx={360} cy={245} r={105} fill="url(#csg-atm)"/>
+                <circle cx={360} cy={245} r={105} fill="url(#csg-shd)"/>
+
+                {/* Globe rim glow */}
+                <circle cx={360} cy={245} r={105} fill="none" stroke="rgba(40,80,160,0.30)" strokeWidth="4"/>
+                <circle cx={360} cy={245} r={105} fill="none" stroke="rgba(60,100,180,0.08)" strokeWidth="16"/>
+
+                {/* Orbital ring — dim full ellipse (back of ring visible through globe) */}
+                <ellipse cx={360} cy={245} rx={192} ry={68}
+                  fill="none" stroke="rgba(190,28,48,0.20)" strokeWidth="1"/>
+                {/* Orbital ring — front (bottom) half brighter */}
+                <ellipse cx={360} cy={245} rx={192} ry={68}
+                  fill="none" stroke="#c81428" strokeWidth="1.4"
+                  strokeDasharray="432 432"
                   filter="url(#csg-sg)"/>
 
                 {/* Bottom arc — intense red neon glow */}
-                <ellipse cx={360} cy={252} rx={228} ry={81}
+                <ellipse cx={360} cy={245} rx={192} ry={68}
                   fill="none" stroke="#ff0022" strokeWidth="5"
-                  strokeDasharray="180 846" strokeDashoffset="-89"
+                  strokeDasharray="152 712" strokeDashoffset="-75"
                   filter="url(#csg-rg)"/>
-                <ellipse cx={360} cy={252} rx={228} ry={81}
-                  fill="none" stroke="#ff4455" strokeWidth="1.8"
-                  strokeDasharray="180 846" strokeDashoffset="-89"/>
+                <ellipse cx={360} cy={245} rx={192} ry={68}
+                  fill="none" stroke="#ff4455" strokeWidth="1.6"
+                  strokeDasharray="152 712" strokeDashoffset="-75"/>
 
-                {/* Static red accent dots at 9-o'clock and 3-o'clock */}
-                <circle cx={132} cy={252} r={4.5} fill="#e01030" filter="url(#csg-sg)"/>
-                <circle cx={588} cy={252} r={4.5} fill="#e01030" filter="url(#csg-sg)"/>
+                {/* Static dots at 9-o'clock and 3-o'clock */}
+                <circle cx={168} cy={245} r={4} fill="#e01030" filter="url(#csg-sg)"/>
+                <circle cx={552} cy={245} r={4} fill="#e01030" filter="url(#csg-sg)"/>
 
-                {/* 3 animated travelling dots */}
+                {/* 3 animated dots travelling the ring */}
                 {!ecoReducedMotion && [0, -3.5, -7].map((begin, i) => (
-                  <circle key={i} r={4} fill="#e8001a" filter="url(#csg-sg)">
+                  <circle key={i} r={3.5} fill="#e8001a" filter="url(#csg-sg)">
                     <animateMotion dur="10s" begin={`${begin}s`} repeatCount="indefinite">
                       <mpath href="#csg-op"/>
                     </animateMotion>
@@ -635,88 +656,88 @@ export default function Login() {
                 ))}
 
                 {/* Globe centre text */}
-                <text x={360} y={237} textAnchor="middle" fill="white"
-                  fontSize="15" fontWeight="700" letterSpacing="7"
+                <text x={360} y={230} textAnchor="middle" fill="white"
+                  fontSize="14" fontWeight="700" letterSpacing="6.5"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">ANALYTIX</text>
-                <text x={360} y={249} textAnchor="middle" fill="rgba(190,210,235,0.82)"
-                  fontSize="6" letterSpacing="3" fontWeight="500"
+                <text x={360} y={242} textAnchor="middle" fill="rgba(190,210,235,0.80)"
+                  fontSize="5.5" letterSpacing="2.5" fontWeight="500"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">GLOBAL PROFESSIONAL</text>
-                <text x={360} y={258} textAnchor="middle" fill="rgba(190,210,235,0.82)"
-                  fontSize="6" letterSpacing="3" fontWeight="500"
+                <text x={360} y={251} textAnchor="middle" fill="rgba(190,210,235,0.80)"
+                  fontSize="5.5" letterSpacing="2.5" fontWeight="500"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">SERVICES</text>
-                <line x1={330} y1={264} x2={390} y2={264}
+                <line x1={330} y1={257} x2={390} y2={257}
                   stroke="rgba(200,40,60,0.6)" strokeWidth="0.7"/>
-                <text x={360} y={276} textAnchor="middle" fill="rgba(185,205,232,0.78)"
-                  fontSize="8" fontStyle="italic"
+                <text x={360} y={268} textAnchor="middle" fill="rgba(185,205,232,0.76)"
+                  fontSize="7.5" fontStyle="italic"
                   fontFamily="Georgia,'Times New Roman',serif">Smarter Strategies.</text>
-                <text x={360} y={287} textAnchor="middle" fill="rgba(185,205,232,0.78)"
-                  fontSize="8" fontStyle="italic"
+                <text x={360} y={279} textAnchor="middle" fill="rgba(185,205,232,0.76)"
+                  fontSize="7.5" fontStyle="italic"
                   fontFamily="Georgia,'Times New Roman',serif">Stronger Tomorrow.</text>
 
-                {/* 5 Service nodes */}
+                {/* 5 Service nodes — tighter around the globe */}
                 {[
-                  { x:360, y:58,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',    icon:'shield' },
-                  { x:98,  y:226, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',          icon:'gear'   },
-                  { x:622, y:226, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',         d2:'Regulatory confidence.',  icon:'coins'  },
-                  { x:152, y:418, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',            d2:'Move forward.',           icon:'doc'    },
-                  { x:562, y:418, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                      icon:'world'  },
+                  { x:360, y:60,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',    icon:'shield' },
+                  { x:125, y:228, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',          icon:'gear'   },
+                  { x:595, y:228, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',         d2:'Regulatory confidence.',  icon:'coins'  },
+                  { x:152, y:398, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',            d2:'Move forward.',           icon:'doc'    },
+                  { x:562, y:398, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                      icon:'world'  },
                 ].map(nd => (
                   <g key={`${nd.x}-${nd.y}`} transform={`translate(${nd.x},${nd.y})`}>
-                    <circle cx={0} cy={0} r={24} fill="rgba(4,10,24,0.92)"/>
-                    <circle cx={0} cy={0} r={24} fill="none" stroke="#b81224" strokeWidth="1.4" filter="url(#csg-ng)"/>
+                    <circle cx={0} cy={0} r={22} fill="rgba(4,10,24,0.92)"/>
+                    <circle cx={0} cy={0} r={22} fill="none" stroke="#b81224" strokeWidth="1.3" filter="url(#csg-ng)"/>
 
                     {nd.icon === 'shield' && (
-                      <g fill="none" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M0,-11 C-6,-11 -11,-6 -11,0 C-11,6 -5,11 0,14 C5,11 11,6 11,0 C11,-6 6,-11 0,-11Z"/>
-                        <polyline points="-4,1 -1,5 6,-3"/>
+                      <g fill="none" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M0,-10 C-5.5,-10 -10,-5.5 -10,0 C-10,5.5 -4.5,10 0,13 C4.5,10 10,5.5 10,0 C10,-5.5 5.5,-10 0,-10Z"/>
+                        <polyline points="-4,1 -1.5,5 6,-3"/>
                       </g>
                     )}
                     {nd.icon === 'gear' && (
                       <g fill="none" stroke="white" strokeLinecap="round">
-                        <circle cx={0} cy={0} r={5} strokeWidth="1.4"/>
+                        <circle cx={0} cy={0} r={4.5} strokeWidth="1.3"/>
                         {[0,45,90,135,180,225,270,315].map(a => {
                           const ar = a*Math.PI/180;
                           return <line key={a}
-                            x1={5.8*Math.cos(ar)} y1={5.8*Math.sin(ar)}
-                            x2={9.5*Math.cos(ar)}  y2={9.5*Math.sin(ar)}
-                            strokeWidth="2.2"/>;
+                            x1={5.2*Math.cos(ar)} y1={5.2*Math.sin(ar)}
+                            x2={8.8*Math.cos(ar)} y2={8.8*Math.sin(ar)}
+                            strokeWidth="2.1"/>;
                         })}
                       </g>
                     )}
                     {nd.icon === 'coins' && (
-                      <g fill="none" stroke="white" strokeWidth="1.3" strokeLinecap="round">
-                        {[-6,0,6].map(yy => <ellipse key={yy} cx={0} cy={yy} rx={8} ry={2.8}/>)}
-                        <line x1={-8} y1={-6} x2={-8} y2={6}/>
-                        <line x1={8}  y1={-6} x2={8}  y2={6}/>
+                      <g fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round">
+                        {[-5.5,0,5.5].map(yy => <ellipse key={yy} cx={0} cy={yy} rx={7.5} ry={2.6}/>)}
+                        <line x1={-7.5} y1={-5.5} x2={-7.5} y2={5.5}/>
+                        <line x1={7.5}  y1={-5.5} x2={7.5}  y2={5.5}/>
                       </g>
                     )}
                     {nd.icon === 'doc' && (
                       <g fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x={-7} y={-11} width={14} height={20} rx={2} strokeWidth="1.3"/>
-                        <line x1={-3.5} y1={-5} x2={5} y2={-5} strokeWidth="0.9"/>
-                        <line x1={-3.5} y1={-1} x2={5} y2={-1} strokeWidth="0.9"/>
-                        <line x1={-3.5} y1={3}  x2={2} y2={3}  strokeWidth="0.9"/>
+                        <rect x={-6.5} y={-10} width={13} height={19} rx={1.8} strokeWidth="1.2"/>
+                        <line x1={-3} y1={-4.5} x2={4.5} y2={-4.5} strokeWidth="0.85"/>
+                        <line x1={-3} y1={-0.5} x2={4.5} y2={-0.5} strokeWidth="0.85"/>
+                        <line x1={-3} y1={3.5}  x2={2}   y2={3.5}  strokeWidth="0.85"/>
                       </g>
                     )}
                     {nd.icon === 'world' && (
                       <g fill="none" stroke="white" strokeLinecap="round">
-                        <circle cx={0} cy={0} r={10} strokeWidth="1.4"/>
-                        <ellipse cx={0} cy={0} rx={5.5} ry={10} strokeWidth="0.9"/>
-                        <ellipse cx={0} cy={0} rx={10}  ry={4.5} strokeWidth="0.9"/>
+                        <circle cx={0} cy={0} r={9.5} strokeWidth="1.3"/>
+                        <ellipse cx={0} cy={0} rx={5} ry={9.5} strokeWidth="0.85"/>
+                        <ellipse cx={0} cy={0} rx={9.5} ry={4.2} strokeWidth="0.85"/>
                       </g>
                     )}
 
-                    <text x={0} y={38} textAnchor="middle" fill="white"
-                      fontSize="9.5" fontWeight="700" letterSpacing="0.4"
+                    <text x={0} y={36} textAnchor="middle" fill="white"
+                      fontSize="9" fontWeight="700" letterSpacing="0.4"
                       fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n1}</text>
-                    <text x={0} y={49} textAnchor="middle" fill="white"
-                      fontSize="9.5" fontWeight="700" letterSpacing="0.4"
+                    <text x={0} y={46} textAnchor="middle" fill="white"
+                      fontSize="9" fontWeight="700" letterSpacing="0.4"
                       fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n2}</text>
-                    <text x={0} y={62} textAnchor="middle" fill="rgba(175,198,225,0.76)"
-                      fontSize="7.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d1}</text>
+                    <text x={0} y={58} textAnchor="middle" fill="rgba(175,198,225,0.76)"
+                      fontSize="7" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d1}</text>
                     {nd.d2 && (
-                      <text x={0} y={72} textAnchor="middle" fill="rgba(175,198,225,0.76)"
-                        fontSize="7.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d2}</text>
+                      <text x={0} y={67} textAnchor="middle" fill="rgba(175,198,225,0.76)"
+                        fontSize="7" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d2}</text>
                     )}
                   </g>
                 ))}
