@@ -516,7 +516,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* ── SERVICE ECOSYSTEM — reference image, no recreation ── */}
+            {/* ── SERVICE ECOSYSTEM — original 1790×879 reference image ── */}
             <div style={{
               flex: 1,
               display: 'flex',
@@ -526,23 +526,24 @@ export default function Login() {
               minHeight: 0,
               overflow: 'visible',
             }}>
-              {/* Image is the complete visual. Transparent hit areas sit on top. */}
+              {/* Original image, proportionally scaled to container width. Zero CSS modifications. */}
               <div style={{
                 position: 'relative',
                 width: '100%',
-                maxHeight: 'clamp(260px, 50vh, 460px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}>
                 <img
-                  src="/eco-reference.png"
+                  src="/login-bg.webp"
                   alt="Analytix service ecosystem"
+                  width={1790}
+                  height={879}
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
                     display: 'block',
+                    width: '100%',
+                    height: 'auto',
+                    filter: 'none',
+                    opacity: 1,
+                    transform: 'none',
+                    mixBlendMode: 'normal',
                     userSelect: 'none',
                     pointerEvents: 'none',
                   }}
