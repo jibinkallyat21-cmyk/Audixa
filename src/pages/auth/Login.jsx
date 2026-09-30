@@ -199,6 +199,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [demoRole, setDemoRole] = useState(DEMO_ROLES[0].value)
   const [error, setError] = useState('')
+  const [fpMode, setFpMode] = useState(false)
+  const [fpEmail, setFpEmail] = useState('')
+  const [fpSent, setFpSent] = useState(false)
   const bgRef       = useRef(null)
   const midRef      = useRef(null)
   const fgRef       = useRef(null)
@@ -447,7 +450,7 @@ export default function Login() {
 
           {/* ══ LEFT PANEL ══════════════════════════════════════════ */}
           <div className="a360-left" style={{
-            flex: '0 0 62%', width: '62%',
+            flex: '0 0 66%', width: '66%',
             display: 'flex', flexDirection: 'column',
             justifyContent: 'space-between',
             position: 'relative',
@@ -524,10 +527,10 @@ export default function Login() {
               justifyContent: 'center',
               position: 'relative',
               minHeight: 0,
-              overflow: 'visible',
+              overflow: 'hidden',
             }}>
               <svg
-                viewBox="0 0 820 568"
+                viewBox="0 0 720 510"
                 width="100%"
                 style={{ display: 'block', overflow: 'visible' }}
                 aria-label="Analytix service ecosystem"
@@ -539,72 +542,92 @@ export default function Login() {
                     <stop offset="100%" stopColor="#040c1e"/>
                   </radialGradient>
                   <filter id="csg-rg" x="-120%" y="-120%" width="340%" height="340%">
-                    <feGaussianBlur stdDeviation="7" result="b"/>
+                    <feGaussianBlur stdDeviation="6" result="b"/>
                     <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                   </filter>
                   <filter id="csg-sg" x="-60%" y="-60%" width="220%" height="220%">
-                    <feGaussianBlur stdDeviation="3" result="b"/>
-                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                  </filter>
-                  <filter id="csg-ng" x="-40%" y="-40%" width="180%" height="180%">
                     <feGaussianBlur stdDeviation="2.5" result="b"/>
                     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                   </filter>
+                  <filter id="csg-ng" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="2" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  {/* Clip to globe circle for continent fills */}
+                  <clipPath id="csg-gc">
+                    <circle cx={360} cy={252} r={126}/>
+                  </clipPath>
                   {/* Orbit path for animated dots: clockwise ellipse */}
                   <path id="csg-op" fill="none"
-                    d="M 674,268 A 266,95 0 0 1 142,268 A 266,95 0 0 1 674,268"/>
+                    d="M 588,252 A 228,81 0 0 1 132,252 A 228,81 0 0 1 588,252"/>
                 </defs>
 
                 {/* Globe body */}
-                <circle cx={408} cy={268} r={150} fill="url(#csg-glob)"/>
+                <circle cx={360} cy={252} r={128} fill="url(#csg-glob)"/>
                 {/* Globe rim glow */}
-                <circle cx={408} cy={268} r={150} fill="none" stroke="rgba(40,80,160,0.32)" strokeWidth="6"/>
-                <circle cx={408} cy={268} r={150} fill="none" stroke="rgba(60,100,180,0.1)"  strokeWidth="20"/>
+                <circle cx={360} cy={252} r={128} fill="none" stroke="rgba(40,80,160,0.32)" strokeWidth="5"/>
+                <circle cx={360} cy={252} r={128} fill="none" stroke="rgba(60,100,180,0.1)"  strokeWidth="18"/>
+
+                {/* Continent fills — subtle land mass tones clipped to globe */}
+                <g clipPath="url(#csg-gc)" fill="rgba(52,108,78,0.32)" stroke="rgba(70,140,100,0.18)" strokeWidth="0.5">
+                  {/* North America */}
+                  <polygon points="253,164 327,155 331,184 313,216 306,231 295,224 285,209 278,181 249,167"/>
+                  {/* South America */}
+                  <polygon points="313,238 345,238 345,330 320,330 317,266"/>
+                  {/* Europe */}
+                  <polygon points="363,152 391,152 391,198 381,201 366,195 363,189"/>
+                  {/* Africa */}
+                  <polygon points="357,202 406,202 406,302 381,302 388,259 357,231"/>
+                  {/* Asia */}
+                  <polygon points="398,152 470,152 473,216 441,252 427,266 398,252"/>
+                  {/* Australia */}
+                  <polygon points="452,273 480,273 480,309 452,309"/>
+                </g>
 
                 {/* Latitude lines */}
                 {[-3,-2,-1,0,1,2,3].map(i => {
-                  const ly = 268 + i*44;
-                  const lrx = Math.sqrt(Math.max(0, 150**2 - (i*44)**2));
+                  const ly = 252 + i*38;
+                  const lrx = Math.sqrt(Math.max(0, 128**2 - (i*38)**2));
                   return lrx > 5 ? (
-                    <ellipse key={i} cx={408} cy={ly} rx={lrx} ry={lrx*0.17}
+                    <ellipse key={i} cx={360} cy={ly} rx={lrx} ry={lrx*0.17}
                       fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"/>
                   ) : null;
                 })}
                 {/* Longitude lines */}
                 {[0,36,72,108,144].map(a => {
-                  const lrx = 150 * Math.abs(Math.sin(a*Math.PI/180));
+                  const lrx = 128 * Math.abs(Math.sin(a*Math.PI/180));
                   return lrx > 5 ? (
-                    <ellipse key={a} cx={408} cy={268} rx={lrx} ry={150}
+                    <ellipse key={a} cx={360} cy={252} rx={lrx} ry={128}
                       fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"
-                      transform={`rotate(${a} 408 268)`}/>
+                      transform={`rotate(${a} 360 252)`}/>
                   ) : null;
                 })}
 
                 {/* Orbital ring — full dim layer (shows "back" of ring) */}
-                <ellipse cx={408} cy={268} rx={266} ry={95}
+                <ellipse cx={360} cy={252} rx={228} ry={81}
                   fill="none" stroke="rgba(190,28,48,0.22)" strokeWidth="1"/>
-                {/* Orbital ring — front half (below globe) brighter */}
-                <ellipse cx={408} cy={268} rx={266} ry={95}
-                  fill="none" stroke="#c81428" strokeWidth="1.6"
-                  strokeDasharray="628 628"
+                {/* Orbital ring — front half brighter */}
+                <ellipse cx={360} cy={252} rx={228} ry={81}
+                  fill="none" stroke="#c81428" strokeWidth="1.5"
+                  strokeDasharray="513 513"
                   filter="url(#csg-sg)"/>
 
                 {/* Bottom arc — intense red neon glow */}
-                <ellipse cx={408} cy={268} rx={266} ry={95}
-                  fill="none" stroke="#ff0022" strokeWidth="6"
-                  strokeDasharray="210 1046" strokeDashoffset="-104"
+                <ellipse cx={360} cy={252} rx={228} ry={81}
+                  fill="none" stroke="#ff0022" strokeWidth="5"
+                  strokeDasharray="180 846" strokeDashoffset="-89"
                   filter="url(#csg-rg)"/>
-                <ellipse cx={408} cy={268} rx={266} ry={95}
-                  fill="none" stroke="#ff4455" strokeWidth="2"
-                  strokeDasharray="210 1046" strokeDashoffset="-104"/>
+                <ellipse cx={360} cy={252} rx={228} ry={81}
+                  fill="none" stroke="#ff4455" strokeWidth="1.8"
+                  strokeDasharray="180 846" strokeDashoffset="-89"/>
 
                 {/* Static red accent dots at 9-o'clock and 3-o'clock */}
-                <circle cx={142} cy={268} r={5.5} fill="#e01030" filter="url(#csg-sg)"/>
-                <circle cx={674} cy={268} r={5.5} fill="#e01030" filter="url(#csg-sg)"/>
+                <circle cx={132} cy={252} r={4.5} fill="#e01030" filter="url(#csg-sg)"/>
+                <circle cx={588} cy={252} r={4.5} fill="#e01030" filter="url(#csg-sg)"/>
 
                 {/* 3 animated travelling dots */}
                 {!ecoReducedMotion && [0, -3.5, -7].map((begin, i) => (
-                  <circle key={i} r={4.5} fill="#e8001a" filter="url(#csg-sg)">
+                  <circle key={i} r={4} fill="#e8001a" filter="url(#csg-sg)">
                     <animateMotion dur="10s" begin={`${begin}s`} repeatCount="indefinite">
                       <mpath href="#csg-op"/>
                     </animateMotion>
@@ -612,88 +635,88 @@ export default function Login() {
                 ))}
 
                 {/* Globe centre text */}
-                <text x={408} y={250} textAnchor="middle" fill="white"
-                  fontSize="18" fontWeight="700" letterSpacing="8"
+                <text x={360} y={237} textAnchor="middle" fill="white"
+                  fontSize="15" fontWeight="700" letterSpacing="7"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">ANALYTIX</text>
-                <text x={408} y={264} textAnchor="middle" fill="rgba(190,210,235,0.82)"
-                  fontSize="7" letterSpacing="3.5" fontWeight="500"
+                <text x={360} y={249} textAnchor="middle" fill="rgba(190,210,235,0.82)"
+                  fontSize="6" letterSpacing="3" fontWeight="500"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">GLOBAL PROFESSIONAL</text>
-                <text x={408} y={274} textAnchor="middle" fill="rgba(190,210,235,0.82)"
-                  fontSize="7" letterSpacing="3.5" fontWeight="500"
+                <text x={360} y={258} textAnchor="middle" fill="rgba(190,210,235,0.82)"
+                  fontSize="6" letterSpacing="3" fontWeight="500"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">SERVICES</text>
-                <line x1={374} y1={281} x2={442} y2={281}
+                <line x1={330} y1={264} x2={390} y2={264}
                   stroke="rgba(200,40,60,0.6)" strokeWidth="0.7"/>
-                <text x={408} y={295} textAnchor="middle" fill="rgba(185,205,232,0.78)"
-                  fontSize="9" fontStyle="italic"
+                <text x={360} y={276} textAnchor="middle" fill="rgba(185,205,232,0.78)"
+                  fontSize="8" fontStyle="italic"
                   fontFamily="Georgia,'Times New Roman',serif">Smarter Strategies.</text>
-                <text x={408} y={308} textAnchor="middle" fill="rgba(185,205,232,0.78)"
-                  fontSize="9" fontStyle="italic"
+                <text x={360} y={287} textAnchor="middle" fill="rgba(185,205,232,0.78)"
+                  fontSize="8" fontStyle="italic"
                   fontFamily="Georgia,'Times New Roman',serif">Stronger Tomorrow.</text>
 
                 {/* 5 Service nodes */}
                 {[
-                  { x:408, y:40,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',    d2:'Greater confidence.',     icon:'shield' },
-                  { x:108, y:240, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',     d2:'Lasting value.',           icon:'gear'   },
-                  { x:708, y:240, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',      d2:'Regulatory confidence.',   icon:'coins'  },
-                  { x:175, y:464, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',         d2:'Move forward.',            icon:'doc'    },
-                  { x:640, y:464, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                   icon:'world'  },
+                  { x:360, y:58,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',    icon:'shield' },
+                  { x:98,  y:226, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',          icon:'gear'   },
+                  { x:622, y:226, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',         d2:'Regulatory confidence.',  icon:'coins'  },
+                  { x:152, y:418, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',            d2:'Move forward.',           icon:'doc'    },
+                  { x:562, y:418, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                      icon:'world'  },
                 ].map(nd => (
                   <g key={`${nd.x}-${nd.y}`} transform={`translate(${nd.x},${nd.y})`}>
-                    <circle cx={0} cy={0} r={27} fill="rgba(4,10,24,0.92)"/>
-                    <circle cx={0} cy={0} r={27} fill="none" stroke="#b81224" strokeWidth="1.5" filter="url(#csg-ng)"/>
+                    <circle cx={0} cy={0} r={24} fill="rgba(4,10,24,0.92)"/>
+                    <circle cx={0} cy={0} r={24} fill="none" stroke="#b81224" strokeWidth="1.4" filter="url(#csg-ng)"/>
 
                     {nd.icon === 'shield' && (
-                      <g fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M0,-12 C-7,-12 -13,-7 -13,0 C-13,7 -6,13 0,16 C6,13 13,7 13,0 C13,-7 7,-12 0,-12Z"/>
-                        <polyline points="-5,1 -2,6 7,-4"/>
+                      <g fill="none" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M0,-11 C-6,-11 -11,-6 -11,0 C-11,6 -5,11 0,14 C5,11 11,6 11,0 C11,-6 6,-11 0,-11Z"/>
+                        <polyline points="-4,1 -1,5 6,-3"/>
                       </g>
                     )}
                     {nd.icon === 'gear' && (
                       <g fill="none" stroke="white" strokeLinecap="round">
-                        <circle cx={0} cy={0} r={5.5} strokeWidth="1.5"/>
+                        <circle cx={0} cy={0} r={5} strokeWidth="1.4"/>
                         {[0,45,90,135,180,225,270,315].map(a => {
                           const ar = a*Math.PI/180;
                           return <line key={a}
-                            x1={6.5*Math.cos(ar)} y1={6.5*Math.sin(ar)}
-                            x2={11*Math.cos(ar)}  y2={11*Math.sin(ar)}
-                            strokeWidth="2.4"/>;
+                            x1={5.8*Math.cos(ar)} y1={5.8*Math.sin(ar)}
+                            x2={9.5*Math.cos(ar)}  y2={9.5*Math.sin(ar)}
+                            strokeWidth="2.2"/>;
                         })}
                       </g>
                     )}
                     {nd.icon === 'coins' && (
-                      <g fill="none" stroke="white" strokeWidth="1.4" strokeLinecap="round">
-                        {[-7,0,7].map(yy => <ellipse key={yy} cx={0} cy={yy} rx={9} ry={3.2}/>)}
-                        <line x1={-9} y1={-7} x2={-9} y2={7}/>
-                        <line x1={9}  y1={-7} x2={9}  y2={7}/>
+                      <g fill="none" stroke="white" strokeWidth="1.3" strokeLinecap="round">
+                        {[-6,0,6].map(yy => <ellipse key={yy} cx={0} cy={yy} rx={8} ry={2.8}/>)}
+                        <line x1={-8} y1={-6} x2={-8} y2={6}/>
+                        <line x1={8}  y1={-6} x2={8}  y2={6}/>
                       </g>
                     )}
                     {nd.icon === 'doc' && (
                       <g fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x={-8} y={-12} width={16} height={23} rx={2} strokeWidth="1.4"/>
-                        <line x1={-4} y1={-6} x2={6} y2={-6} strokeWidth="1"/>
-                        <line x1={-4} y1={-1} x2={6} y2={-1} strokeWidth="1"/>
-                        <line x1={-4} y1={4}  x2={3} y2={4}  strokeWidth="1"/>
+                        <rect x={-7} y={-11} width={14} height={20} rx={2} strokeWidth="1.3"/>
+                        <line x1={-3.5} y1={-5} x2={5} y2={-5} strokeWidth="0.9"/>
+                        <line x1={-3.5} y1={-1} x2={5} y2={-1} strokeWidth="0.9"/>
+                        <line x1={-3.5} y1={3}  x2={2} y2={3}  strokeWidth="0.9"/>
                       </g>
                     )}
                     {nd.icon === 'world' && (
                       <g fill="none" stroke="white" strokeLinecap="round">
-                        <circle cx={0} cy={0} r={11} strokeWidth="1.5"/>
-                        <ellipse cx={0} cy={0} rx={6}  ry={11} strokeWidth="1"/>
-                        <ellipse cx={0} cy={0} rx={11} ry={5}  strokeWidth="1"/>
+                        <circle cx={0} cy={0} r={10} strokeWidth="1.4"/>
+                        <ellipse cx={0} cy={0} rx={5.5} ry={10} strokeWidth="0.9"/>
+                        <ellipse cx={0} cy={0} rx={10}  ry={4.5} strokeWidth="0.9"/>
                       </g>
                     )}
 
-                    <text x={0} y={44} textAnchor="middle" fill="white"
-                      fontSize="10.5" fontWeight="700" letterSpacing="0.4"
+                    <text x={0} y={38} textAnchor="middle" fill="white"
+                      fontSize="9.5" fontWeight="700" letterSpacing="0.4"
                       fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n1}</text>
-                    <text x={0} y={57} textAnchor="middle" fill="white"
-                      fontSize="10.5" fontWeight="700" letterSpacing="0.4"
+                    <text x={0} y={49} textAnchor="middle" fill="white"
+                      fontSize="9.5" fontWeight="700" letterSpacing="0.4"
                       fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n2}</text>
-                    <text x={0} y={73} textAnchor="middle" fill="rgba(175,198,225,0.76)"
-                      fontSize="8.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d1}</text>
+                    <text x={0} y={62} textAnchor="middle" fill="rgba(175,198,225,0.76)"
+                      fontSize="7.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d1}</text>
                     {nd.d2 && (
-                      <text x={0} y={84} textAnchor="middle" fill="rgba(175,198,225,0.76)"
-                        fontSize="8.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d2}</text>
+                      <text x={0} y={72} textAnchor="middle" fill="rgba(175,198,225,0.76)"
+                        fontSize="7.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d2}</text>
                     )}
                   </g>
                 ))}
@@ -746,7 +769,7 @@ export default function Login() {
           </div>
 
           {/* ══ RIGHT PANEL — LOGIN CARD ═════════════════════════════ */}
-          <div className="a360-right" style={{ flex: '0 0 35%', width: '35%', display: 'flex', alignItems: 'center' }}>
+          <div className="a360-right" style={{ flex: '0 0 31%', width: '31%', display: 'flex', alignItems: 'center' }}>
             {/* Card stack — ghost layers behind give physical depth on tilt */}
             <div style={{ position: 'relative', width: '100%' }}>
               {/* Ghost card 2 — furthest back */}
@@ -812,15 +835,83 @@ export default function Login() {
                   margin: 0,
                   fontSize: 'clamp(16px,1.9vw,26px)', fontWeight: 800, color: '#F5F7FA',
                   fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1.15,
-                }}>Welcome back</h2>
+                }}>{fpMode ? 'Reset Password' : 'Welcome back'}</h2>
                 <p style={{
                   margin: 'clamp(2px,0.3vw,5px) 0 0',
                   fontSize: 'clamp(9px,0.8vw,12px)', color: 'rgba(145,164,184,0.82)',
                   fontFamily: 'Inter, system-ui, sans-serif',
-                }}>Sign in to your AUDIT 360 workspace</p>
+                }}>{fpMode ? 'Enter your work email to receive a reset link' : 'Sign in to your AUDIT 360 workspace'}</p>
               </div>
 
-              {/* Tabs */}
+              {/* ── FORGOT PASSWORD INLINE VIEW ── */}
+              {fpMode && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(8px,0.9vw,13px)' }}>
+                  <div>
+                    <label style={lbl}>Work email</label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={iconWrap}><IconEnvelope /></span>
+                      <input
+                        type="email" value={fpEmail} placeholder="you@analytix.com"
+                        onChange={e => setFpEmail(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && fpEmail) setFpSent(true); }}
+                        autoComplete="email"
+                        className="a360-inp"
+                        style={inp}
+                      />
+                    </div>
+                  </div>
+
+                  {fpSent ? (
+                    <div style={{
+                      background: 'rgba(20,60,30,0.7)',
+                      border: '1px solid rgba(60,200,100,0.3)',
+                      borderRadius: 6, padding: 'clamp(8px,0.9vw,12px)',
+                      color: 'rgba(140,220,160,0.95)', fontSize: 'clamp(9px,0.8vw,12px)',
+                      fontFamily: 'Inter, system-ui, sans-serif', textAlign: 'center',
+                    }}>
+                      Reset link sent — check your inbox.
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => { if (fpEmail) setFpSent(true); }}
+                      className="a360-signin"
+                      style={{
+                        background: 'linear-gradient(135deg, #F7193D 0%, #C9102F 100%)',
+                        border: 'none', borderRadius: 7,
+                        padding: 'clamp(9px,1vw,13px)',
+                        color: '#fff', fontWeight: 700,
+                        fontSize: 'clamp(11px,1vw,14px)',
+                        fontFamily: 'Inter, system-ui, sans-serif',
+                        cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                        boxShadow: '0 4px 20px rgba(247,25,61,0.38)',
+                        transition: 'opacity 0.15s, box-shadow 0.15s',
+                      }}
+                    >
+                      Send reset link
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => { setFpMode(false); setFpEmail(''); setFpSent(false); }}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: '#F7193D', fontSize: 'clamp(9px,0.78vw,11px)',
+                      fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 500,
+                      display: 'flex', alignItems: 'center', gap: 4, padding: 0,
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    Back to sign in
+                  </button>
+                </div>
+              )}
+
+              {/* Tabs + login form — hidden when in forgot-password mode */}
+              {!fpMode && (<>
+
               <div style={{ borderBottom: '1px solid rgba(65,105,200,0.18)', display: 'flex', alignItems: 'flex-end', gap: 2 }}>
                 {[{ key: 'client', label: 'Client Portal' }, { key: 'team', label: 'Analytix Team' }].map((tab, i) => (
                   <span key={tab.key} style={{ display: 'contents' }}>
@@ -886,12 +977,17 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Forgot password */}
+              {/* Forgot password — inline toggle, no route */}
               <div style={{ textAlign: 'right', marginTop: -4 }}>
-                <Link to="/forgot-password" style={{
-                  color: '#F7193D', fontSize: 'clamp(9px,0.78vw,11px)',
-                  fontFamily: 'Inter, system-ui, sans-serif', textDecoration: 'none', fontWeight: 500,
-                }}>Forgot password?</Link>
+                <button
+                  type="button"
+                  onClick={() => { setFpMode(true); setFpSent(false); setFpEmail(''); }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    color: '#F7193D', fontSize: 'clamp(9px,0.78vw,11px)',
+                    fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 500,
+                  }}
+                >Forgot password?</button>
               </div>
 
               {/* Sign In */}
@@ -945,6 +1041,8 @@ export default function Login() {
                   </Link>
                 </div>
               )}
+
+              </>)}
 
               {/* DEMO ACCESS divider */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
