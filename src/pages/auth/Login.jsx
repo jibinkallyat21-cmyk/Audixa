@@ -516,7 +516,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* ── SERVICE ECOSYSTEM — original 1790×879 reference image ── */}
+            {/* ── CENTRAL SERVICES GRAPHIC — cropped from reference, 835×545 ── */}
             <div style={{
               flex: 1,
               display: 'flex',
@@ -526,16 +526,12 @@ export default function Login() {
               minHeight: 0,
               overflow: 'visible',
             }}>
-              {/* Original image, proportionally scaled to container width. Zero CSS modifications. */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-              }}>
+              <div style={{ position: 'relative', width: '100%' }}>
                 <img
-                  src="/login-bg.webp"
+                  src="/eco-central.webp"
                   alt="Analytix service ecosystem"
-                  width={1790}
-                  height={879}
+                  width={835}
+                  height={545}
                   style={{
                     display: 'block',
                     width: '100%',
@@ -549,13 +545,13 @@ export default function Login() {
                   }}
                   draggable={false}
                 />
-                {/* Transparent hit areas — no visible graphics, only pointer targets */}
+                {/* Transparent hit areas over service nodes */}
                 {[
                   { key: 'top', title: 'Audit & Assurance',        l: '36%', t:  '2%', w: '28%', h: '22%' },
                   { key: 'lft', title: 'Advisory & Strategy',      l:  '0%', t: '36%', w: '28%', h: '22%' },
-                  { key: 'rgt', title: 'Accounting & Tax',         l: '72%', t: '36%', w: '28%', h: '22%' },
-                  { key: 'btl', title: 'Business & Compliance',    l:  '8%', t: '76%', w: '28%', h: '22%' },
-                  { key: 'btr', title: 'Global Business Services', l: '64%', t: '76%', w: '28%', h: '22%' },
+                  { key: 'rgt', title: 'Accounting & Tax',         l: '65%', t: '36%', w: '28%', h: '22%' },
+                  { key: 'btl', title: 'Business & Compliance',    l:  '8%', t: '73%', w: '28%', h: '22%' },
+                  { key: 'btr', title: 'Global Business Services', l: '60%', t: '73%', w: '28%', h: '22%' },
                 ].map(n => (
                   <div
                     key={n.key}
