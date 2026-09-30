@@ -536,21 +536,18 @@ export default function Login() {
                 aria-label="Analytix service ecosystem"
               >
                 <defs>
-                  {/* Globe base gradient — bright upper-left highlight, dark lower-right */}
                   <radialGradient id="csg-glob" cx="36%" cy="30%" r="68%">
                     <stop offset="0%"   stopColor="#223870"/>
                     <stop offset="40%"  stopColor="#0e2048"/>
                     <stop offset="100%" stopColor="#03091c"/>
                   </radialGradient>
-                  {/* Atmosphere rim gradient */}
                   <radialGradient id="csg-atm" cx="50%" cy="50%" r="50%">
                     <stop offset="72%" stopColor="rgba(0,0,0,0)"/>
-                    <stop offset="92%" stopColor="rgba(80,140,240,0.10)"/>
-                    <stop offset="100%" stopColor="rgba(110,170,255,0.22)"/>
+                    <stop offset="90%" stopColor="rgba(80,140,240,0.12)"/>
+                    <stop offset="100%" stopColor="rgba(110,170,255,0.26)"/>
                   </radialGradient>
-                  {/* Terminator shadow — subtle dark gradient on right/lower hemisphere */}
                   <radialGradient id="csg-shd" cx="72%" cy="68%" r="60%">
-                    <stop offset="0%"  stopColor="rgba(0,0,10,0.28)"/>
+                    <stop offset="0%"  stopColor="rgba(0,0,10,0.30)"/>
                     <stop offset="100%" stopColor="rgba(0,0,0,0)"/>
                   </radialGradient>
                   <filter id="csg-rg" x="-120%" y="-120%" width="340%" height="340%">
@@ -565,11 +562,9 @@ export default function Login() {
                     <feGaussianBlur stdDeviation="2" result="b"/>
                     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                   </filter>
-                  {/* Clip path for continent fills */}
                   <clipPath id="csg-gc">
                     <circle cx={360} cy={245} r={103}/>
                   </clipPath>
-                  {/* Orbit path: clockwise ellipse, rx=192 ry=68 center (360,245) */}
                   <path id="csg-op" fill="none"
                     d="M 552,245 A 192,68 0 0 1 168,245 A 192,68 0 0 1 552,245"/>
                 </defs>
@@ -577,46 +572,56 @@ export default function Login() {
                 {/* Globe body */}
                 <circle cx={360} cy={245} r={105} fill="url(#csg-glob)"/>
 
-                {/* Continents — more natural polygon outlines clipped to globe */}
-                <g clipPath="url(#csg-gc)" fill="rgba(48,105,68,0.38)" stroke="rgba(68,138,90,0.22)" strokeWidth="0.6">
-                  {/* North America */}
-                  <polygon points="264,173 284,177 285,189 287,201 290,208 296,218 303,215 308,211 310,210 313,216 316,236 319,231 324,225 328,191 325,166 313,166 302,161 278,166"/>
-                  {/* Greenland */}
-                  <polygon points="334,149 348,152 350,156 334,161 331,156"/>
-                  {/* South America */}
-                  <polygon points="313,233 315,239 316,245 316,249 313,263 313,280 322,309 334,272 340,254 340,239 340,233"/>
-                  {/* Europe */}
-                  <polygon points="354,203 357,201 355,195 357,194 360,187 365,182 368,173 371,175 375,169 378,163 378,201 369,203 354,203"/>
-                  {/* Africa */}
-                  <polygon points="350,204 366,201 378,201 386,228 389,286 380,286 375,251 369,251 350,228"/>
-                  {/* Asia (including Indian sub-continent) */}
-                  <polygon points="383,163 418,163 442,163 445,216 418,245 407,257 407,236 404,228 401,222 400,216 401,204 392,216 386,228 383,245"/>
-                  {/* Australia */}
-                  <polygon points="427,263 450,263 450,292 427,292"/>
+                {/* Rotating continents — outer group holds the clip, inner group spins */}
+                <g clipPath="url(#csg-gc)">
+                  <g fill="rgba(50,108,72,0.42)" stroke="rgba(70,140,92,0.24)" strokeWidth="0.65">
+                    {!ecoReducedMotion && (
+                      <animateTransform attributeName="transform" type="translate"
+                        from="0 0" to="-210 0" dur="28s" repeatCount="indefinite"/>
+                    )}
+                    {/* Three tiled copies so the seam never shows */}
+                    {[-210, 0, 210].map(ox => (
+                      <g key={ox} transform={`translate(${ox},0)`}>
+                        {/* North America — 22 points: west coast, Gulf, Florida, east coast, arctic */}
+                        <polygon points="261,183 271,179 281,180 288,189 290,202 296,218 310,233 312,236 315,224 313,217 317,204 317,198 323,194 329,190 327,183 319,171 315,172 312,168 302,160 290,160 281,164 279,166"/>
+                        {/* Greenland */}
+                        <polygon points="333,148 347,151 350,155 345,160 333,162 329,156"/>
+                        {/* South America — Pacific coast, Cape Horn, Atlantic, Amazon */}
+                        <polygon points="315,243 313,247 313,251 318,280 320,297 321,310 326,306 326,291 327,285 330,279 334,272 340,255 340,251 331,245 326,238 320,232"/>
+                        {/* Europe — Iberian, Britain, Scandinavia, Mediterranean */}
+                        <polygon points="355,202 357,201 355,195 357,193 360,187 365,181 366,177 369,163 375,162 376,163 375,179 371,181 368,194 369,201 373,202 378,201 378,204 369,203 365,202"/>
+                        {/* Africa — Gulf of Guinea, Cape, Horn of Africa, Sahara */}
+                        <polygon points="357,204 353,208 350,229 353,235 358,239 363,239 368,240 367,266 371,286 376,285 380,274 390,231 385,227 382,219 380,209 368,202"/>
+                        {/* Asia — Turkey, Siberia, SE Asia, Indian subcontinent, Arabia */}
+                        <polygon points="376,201 378,195 390,196 404,184 407,163 424,159 448,160 455,184 438,195 435,204 431,219 423,231 420,244 408,236 406,238 402,222 400,219 396,216 394,219 393,227 386,230 382,227 379,210 380,203"/>
+                        {/* Australia — detailed coastal outline */}
+                        <polygon points="427,282 428,286 436,283 442,291 445,290 448,285 449,277 445,258 439,265 436,259 427,271"/>
+                      </g>
+                    ))}
+                  </g>
                 </g>
 
-                {/* Latitude lines clipped to globe */}
+                {/* Grid lines clipped to globe */}
                 <g clipPath="url(#csg-gc)">
                   {[-3,-2,-1,0,1,2,3].map(i => {
                     const ly = 245 + i*35;
                     const lrx = Math.sqrt(Math.max(0, 105**2 - (i*35)**2));
                     return lrx > 5 ? (
                       <ellipse key={i} cx={360} cy={ly} rx={lrx} ry={lrx*0.17}
-                        fill="none" stroke="rgba(100,140,200,0.14)" strokeWidth="0.5"/>
+                        fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"/>
                     ) : null;
                   })}
-                  {/* Longitude lines */}
                   {[36,72,108,144].map(a => {
                     const lrx = 105 * Math.abs(Math.sin(a*Math.PI/180));
                     return lrx > 5 ? (
                       <ellipse key={a} cx={360} cy={245} rx={lrx} ry={105}
-                        fill="none" stroke="rgba(100,140,200,0.14)" strokeWidth="0.5"
+                        fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"
                         transform={`rotate(${a} 360 245)`}/>
                     ) : null;
                   })}
                 </g>
 
-                {/* Atmosphere + terminator depth */}
+                {/* Atmosphere + terminator */}
                 <circle cx={360} cy={245} r={105} fill="url(#csg-atm)"/>
                 <circle cx={360} cy={245} r={105} fill="url(#csg-shd)"/>
 
@@ -624,16 +629,24 @@ export default function Login() {
                 <circle cx={360} cy={245} r={105} fill="none" stroke="rgba(40,80,160,0.30)" strokeWidth="4"/>
                 <circle cx={360} cy={245} r={105} fill="none" stroke="rgba(60,100,180,0.08)" strokeWidth="16"/>
 
-                {/* Orbital ring — dim full ellipse (back of ring visible through globe) */}
+                {/* Connecting lines — globe edge → node edge, drawn behind the ring */}
+                <g fill="none" stroke="rgba(100,145,210,0.38)" strokeWidth="0.85" strokeDasharray="4.5 5">
+                  {/* top */}   <line x1={360} y1={140} x2={360} y2={82}/>
+                  {/* left */}  <line x1={255} y1={237} x2={147} y2={230}/>
+                  {/* right */} <line x1={465} y1={237} x2={573} y2={230}/>
+                  {/* bot-L */} <line x1={275} y1={307} x2={170} y2={385}/>
+                  {/* bot-R */} <line x1={444} y1={308} x2={545} y2={385}/>
+                </g>
+
+                {/* Orbital ring — dim full ellipse */}
                 <ellipse cx={360} cy={245} rx={192} ry={68}
                   fill="none" stroke="rgba(190,28,48,0.20)" strokeWidth="1"/>
-                {/* Orbital ring — front (bottom) half brighter */}
+                {/* Orbital ring — front half brighter */}
                 <ellipse cx={360} cy={245} rx={192} ry={68}
                   fill="none" stroke="#c81428" strokeWidth="1.4"
-                  strokeDasharray="432 432"
-                  filter="url(#csg-sg)"/>
+                  strokeDasharray="432 432" filter="url(#csg-sg)"/>
 
-                {/* Bottom arc — intense red neon glow */}
+                {/* Bottom arc neon glow */}
                 <ellipse cx={360} cy={245} rx={192} ry={68}
                   fill="none" stroke="#ff0022" strokeWidth="5"
                   strokeDasharray="152 712" strokeDashoffset="-75"
@@ -642,11 +655,11 @@ export default function Login() {
                   fill="none" stroke="#ff4455" strokeWidth="1.6"
                   strokeDasharray="152 712" strokeDashoffset="-75"/>
 
-                {/* Static dots at 9-o'clock and 3-o'clock */}
+                {/* Static dots */}
                 <circle cx={168} cy={245} r={4} fill="#e01030" filter="url(#csg-sg)"/>
                 <circle cx={552} cy={245} r={4} fill="#e01030" filter="url(#csg-sg)"/>
 
-                {/* 3 animated dots travelling the ring */}
+                {/* 3 animated dots on orbit */}
                 {!ecoReducedMotion && [0, -3.5, -7].map((begin, i) => (
                   <circle key={i} r={3.5} fill="#e8001a" filter="url(#csg-sg)">
                     <animateMotion dur="10s" begin={`${begin}s`} repeatCount="indefinite">
@@ -674,7 +687,7 @@ export default function Login() {
                   fontSize="7.5" fontStyle="italic"
                   fontFamily="Georgia,'Times New Roman',serif">Stronger Tomorrow.</text>
 
-                {/* 5 Service nodes — tighter around the globe */}
+                {/* 5 Service nodes */}
                 {[
                   { x:360, y:60,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',    icon:'shield' },
                   { x:125, y:228, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',          icon:'gear'   },
