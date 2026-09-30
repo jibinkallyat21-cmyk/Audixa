@@ -516,7 +516,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* ── CENTRAL SERVICES GRAPHIC — cropped from reference, 835×545 ── */}
+            {/* ── CENTRAL SERVICES GRAPHIC — SVG replica ── */}
             <div style={{
               flex: 1,
               display: 'flex',
@@ -526,46 +526,178 @@ export default function Login() {
               minHeight: 0,
               overflow: 'visible',
             }}>
-              <div style={{ position: 'relative', width: '100%' }}>
-                <img
-                  src="/eco-central.webp"
-                  alt="Analytix service ecosystem"
-                  width={835}
-                  height={545}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    height: 'auto',
-                    filter: 'none',
-                    opacity: 1,
-                    transform: 'none',
-                    mixBlendMode: 'normal',
-                    userSelect: 'none',
-                    pointerEvents: 'none',
-                  }}
-                  draggable={false}
-                />
-                {/* Transparent hit areas over service nodes */}
-                {[
-                  { key: 'top', title: 'Audit & Assurance',        l: '36%', t:  '2%', w: '28%', h: '22%' },
-                  { key: 'lft', title: 'Advisory & Strategy',      l:  '0%', t: '36%', w: '28%', h: '22%' },
-                  { key: 'rgt', title: 'Accounting & Tax',         l: '65%', t: '36%', w: '28%', h: '22%' },
-                  { key: 'btl', title: 'Business & Compliance',    l:  '8%', t: '73%', w: '28%', h: '22%' },
-                  { key: 'btr', title: 'Global Business Services', l: '60%', t: '73%', w: '28%', h: '22%' },
-                ].map(n => (
-                  <div
-                    key={n.key}
-                    title={n.title}
-                    style={{
-                      position: 'absolute',
-                      left: n.l, top: n.t,
-                      width: n.w, height: n.h,
-                      cursor: 'pointer',
-                      background: 'transparent',
-                    }}
-                  />
+              <svg
+                viewBox="0 0 820 568"
+                width="100%"
+                style={{ display: 'block', overflow: 'visible' }}
+                aria-label="Analytix service ecosystem"
+              >
+                <defs>
+                  <radialGradient id="csg-glob" cx="38%" cy="32%" r="65%">
+                    <stop offset="0%"   stopColor="#1e3460"/>
+                    <stop offset="50%"  stopColor="#0c1a38"/>
+                    <stop offset="100%" stopColor="#040c1e"/>
+                  </radialGradient>
+                  <filter id="csg-rg" x="-120%" y="-120%" width="340%" height="340%">
+                    <feGaussianBlur stdDeviation="7" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  <filter id="csg-sg" x="-60%" y="-60%" width="220%" height="220%">
+                    <feGaussianBlur stdDeviation="3" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  <filter id="csg-ng" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="2.5" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  {/* Orbit path for animated dots: clockwise ellipse */}
+                  <path id="csg-op" fill="none"
+                    d="M 674,268 A 266,95 0 0 1 142,268 A 266,95 0 0 1 674,268"/>
+                </defs>
+
+                {/* Globe body */}
+                <circle cx={408} cy={268} r={150} fill="url(#csg-glob)"/>
+                {/* Globe rim glow */}
+                <circle cx={408} cy={268} r={150} fill="none" stroke="rgba(40,80,160,0.32)" strokeWidth="6"/>
+                <circle cx={408} cy={268} r={150} fill="none" stroke="rgba(60,100,180,0.1)"  strokeWidth="20"/>
+
+                {/* Latitude lines */}
+                {[-3,-2,-1,0,1,2,3].map(i => {
+                  const ly = 268 + i*44;
+                  const lrx = Math.sqrt(Math.max(0, 150**2 - (i*44)**2));
+                  return lrx > 5 ? (
+                    <ellipse key={i} cx={408} cy={ly} rx={lrx} ry={lrx*0.17}
+                      fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"/>
+                  ) : null;
+                })}
+                {/* Longitude lines */}
+                {[0,36,72,108,144].map(a => {
+                  const lrx = 150 * Math.abs(Math.sin(a*Math.PI/180));
+                  return lrx > 5 ? (
+                    <ellipse key={a} cx={408} cy={268} rx={lrx} ry={150}
+                      fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"
+                      transform={`rotate(${a} 408 268)`}/>
+                  ) : null;
+                })}
+
+                {/* Orbital ring — full dim layer (shows "back" of ring) */}
+                <ellipse cx={408} cy={268} rx={266} ry={95}
+                  fill="none" stroke="rgba(190,28,48,0.22)" strokeWidth="1"/>
+                {/* Orbital ring — front half (below globe) brighter */}
+                <ellipse cx={408} cy={268} rx={266} ry={95}
+                  fill="none" stroke="#c81428" strokeWidth="1.6"
+                  strokeDasharray="628 628"
+                  filter="url(#csg-sg)"/>
+
+                {/* Bottom arc — intense red neon glow */}
+                <ellipse cx={408} cy={268} rx={266} ry={95}
+                  fill="none" stroke="#ff0022" strokeWidth="6"
+                  strokeDasharray="210 1046" strokeDashoffset="-104"
+                  filter="url(#csg-rg)"/>
+                <ellipse cx={408} cy={268} rx={266} ry={95}
+                  fill="none" stroke="#ff4455" strokeWidth="2"
+                  strokeDasharray="210 1046" strokeDashoffset="-104"/>
+
+                {/* Static red accent dots at 9-o'clock and 3-o'clock */}
+                <circle cx={142} cy={268} r={5.5} fill="#e01030" filter="url(#csg-sg)"/>
+                <circle cx={674} cy={268} r={5.5} fill="#e01030" filter="url(#csg-sg)"/>
+
+                {/* 3 animated travelling dots */}
+                {!ecoReducedMotion && [0, -3.5, -7].map((begin, i) => (
+                  <circle key={i} r={4.5} fill="#e8001a" filter="url(#csg-sg)">
+                    <animateMotion dur="10s" begin={`${begin}s`} repeatCount="indefinite">
+                      <mpath href="#csg-op"/>
+                    </animateMotion>
+                  </circle>
                 ))}
-              </div>
+
+                {/* Globe centre text */}
+                <text x={408} y={250} textAnchor="middle" fill="white"
+                  fontSize="18" fontWeight="700" letterSpacing="8"
+                  fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">ANALYTIX</text>
+                <text x={408} y={264} textAnchor="middle" fill="rgba(190,210,235,0.82)"
+                  fontSize="7" letterSpacing="3.5" fontWeight="500"
+                  fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">GLOBAL PROFESSIONAL</text>
+                <text x={408} y={274} textAnchor="middle" fill="rgba(190,210,235,0.82)"
+                  fontSize="7" letterSpacing="3.5" fontWeight="500"
+                  fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">SERVICES</text>
+                <line x1={374} y1={281} x2={442} y2={281}
+                  stroke="rgba(200,40,60,0.6)" strokeWidth="0.7"/>
+                <text x={408} y={295} textAnchor="middle" fill="rgba(185,205,232,0.78)"
+                  fontSize="9" fontStyle="italic"
+                  fontFamily="Georgia,'Times New Roman',serif">Smarter Strategies.</text>
+                <text x={408} y={308} textAnchor="middle" fill="rgba(185,205,232,0.78)"
+                  fontSize="9" fontStyle="italic"
+                  fontFamily="Georgia,'Times New Roman',serif">Stronger Tomorrow.</text>
+
+                {/* 5 Service nodes */}
+                {[
+                  { x:408, y:40,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',    d2:'Greater confidence.',     icon:'shield' },
+                  { x:108, y:240, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',     d2:'Lasting value.',           icon:'gear'   },
+                  { x:708, y:240, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',      d2:'Regulatory confidence.',   icon:'coins'  },
+                  { x:175, y:464, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',         d2:'Move forward.',            icon:'doc'    },
+                  { x:640, y:464, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                   icon:'world'  },
+                ].map(nd => (
+                  <g key={`${nd.x}-${nd.y}`} transform={`translate(${nd.x},${nd.y})`}>
+                    <circle cx={0} cy={0} r={27} fill="rgba(4,10,24,0.92)"/>
+                    <circle cx={0} cy={0} r={27} fill="none" stroke="#b81224" strokeWidth="1.5" filter="url(#csg-ng)"/>
+
+                    {nd.icon === 'shield' && (
+                      <g fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M0,-12 C-7,-12 -13,-7 -13,0 C-13,7 -6,13 0,16 C6,13 13,7 13,0 C13,-7 7,-12 0,-12Z"/>
+                        <polyline points="-5,1 -2,6 7,-4"/>
+                      </g>
+                    )}
+                    {nd.icon === 'gear' && (
+                      <g fill="none" stroke="white" strokeLinecap="round">
+                        <circle cx={0} cy={0} r={5.5} strokeWidth="1.5"/>
+                        {[0,45,90,135,180,225,270,315].map(a => {
+                          const ar = a*Math.PI/180;
+                          return <line key={a}
+                            x1={6.5*Math.cos(ar)} y1={6.5*Math.sin(ar)}
+                            x2={11*Math.cos(ar)}  y2={11*Math.sin(ar)}
+                            strokeWidth="2.4"/>;
+                        })}
+                      </g>
+                    )}
+                    {nd.icon === 'coins' && (
+                      <g fill="none" stroke="white" strokeWidth="1.4" strokeLinecap="round">
+                        {[-7,0,7].map(yy => <ellipse key={yy} cx={0} cy={yy} rx={9} ry={3.2}/>)}
+                        <line x1={-9} y1={-7} x2={-9} y2={7}/>
+                        <line x1={9}  y1={-7} x2={9}  y2={7}/>
+                      </g>
+                    )}
+                    {nd.icon === 'doc' && (
+                      <g fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x={-8} y={-12} width={16} height={23} rx={2} strokeWidth="1.4"/>
+                        <line x1={-4} y1={-6} x2={6} y2={-6} strokeWidth="1"/>
+                        <line x1={-4} y1={-1} x2={6} y2={-1} strokeWidth="1"/>
+                        <line x1={-4} y1={4}  x2={3} y2={4}  strokeWidth="1"/>
+                      </g>
+                    )}
+                    {nd.icon === 'world' && (
+                      <g fill="none" stroke="white" strokeLinecap="round">
+                        <circle cx={0} cy={0} r={11} strokeWidth="1.5"/>
+                        <ellipse cx={0} cy={0} rx={6}  ry={11} strokeWidth="1"/>
+                        <ellipse cx={0} cy={0} rx={11} ry={5}  strokeWidth="1"/>
+                      </g>
+                    )}
+
+                    <text x={0} y={44} textAnchor="middle" fill="white"
+                      fontSize="10.5" fontWeight="700" letterSpacing="0.4"
+                      fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n1}</text>
+                    <text x={0} y={57} textAnchor="middle" fill="white"
+                      fontSize="10.5" fontWeight="700" letterSpacing="0.4"
+                      fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n2}</text>
+                    <text x={0} y={73} textAnchor="middle" fill="rgba(175,198,225,0.76)"
+                      fontSize="8.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d1}</text>
+                    {nd.d2 && (
+                      <text x={0} y={84} textAnchor="middle" fill="rgba(175,198,225,0.76)"
+                        fontSize="8.5" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d2}</text>
+                    )}
+                  </g>
+                ))}
+              </svg>
             </div>
 
             {/* Company tagline */}
