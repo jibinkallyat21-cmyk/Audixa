@@ -326,11 +326,11 @@ export default function Login() {
         <div className="a360-bgwarp" style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
           <img
             ref={bgRef}
-            src="/arch-bg.webp"
+            src="/bg/audit360.webp"
             alt=""
             style={{
               position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center 30%',
+              objectFit: 'cover', objectPosition: 'center center',
               transform: 'scale(1.06)',
               willChange: 'transform',
               pointerEvents: 'none',
@@ -416,37 +416,24 @@ export default function Login() {
           pointerEvents: 'none', willChange: 'transform',
         }} />
 
-        {/* ── Dark overlays ──────────────────────────────────────────── */}
-        {/* Left darkening — brand area */}
+        {/* ── Minimal overlays — image shows through, right side darkened for login card ── */}
+        {/* Subtle edge vignette only */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'linear-gradient(90deg, rgba(2,9,20,0.92) 0%, rgba(2,9,20,0.72) 38%, rgba(2,9,20,0.38) 62%, rgba(2,9,20,0.72) 100%)',
+          background: 'radial-gradient(ellipse 110% 90% at 42% 50%, transparent 55%, rgba(1,6,16,0.55) 100%)',
         }} />
-        {/* Top fade */}
+        {/* Bottom fade */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'linear-gradient(180deg, rgba(2,9,20,0.75) 0%, transparent 28%, transparent 72%, rgba(2,9,20,0.82) 100%)',
+          background: 'linear-gradient(180deg, rgba(1,6,16,0.18) 0%, transparent 14%, transparent 82%, rgba(1,6,16,0.50) 100%)',
         }} />
-        {/* Right darkening — behind card */}
+        {/* Right darkening — behind login card */}
         <div style={{
-          position: 'absolute', top: 0, right: 0, bottom: 0, width: '38%', pointerEvents: 'none',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(6,20,38,0.65) 40%, rgba(6,20,38,0.88) 100%)',
+          position: 'absolute', top: 0, right: 0, bottom: 0, width: '42%', pointerEvents: 'none',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(2,9,22,0.60) 30%, rgba(2,9,22,0.84) 70%, rgba(1,6,16,0.92) 100%)',
         }} />
 
-        {/* ── Red diagonal accent line ───────────────────────────── */}
-        <svg
-          className="a360-diag"
-          viewBox="0 0 1 1"
-          preserveAspectRatio="none"
-          style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', pointerEvents: 'none', overflow: 'hidden' }}
-          aria-hidden="true"
-        >
-          <line x1="0.02" y1="0.98" x2="0.98" y2="0.02"
-            stroke="#F7193D" strokeWidth="0.8"
-            strokeDasharray="2400" strokeDashoffset="2400"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+        {/* Red diagonal removed — image supplies it */}
 
         {/* ── LAYER 5: Page content ─────────────────────────────── */}
         <div
@@ -460,26 +447,14 @@ export default function Login() {
             gap: '3%',
           }}>
 
-          {/* ══ LEFT PANEL ══════════════════════════════════════════ */}
+          {/* ══ LEFT PANEL — invisible spacer; image supplies all visuals ══ */}
           <div className="a360-left" style={{
             flex: '0 0 66%', width: '66%',
-            display: 'flex', flexDirection: 'column',
-            justifyContent: 'space-between',
             position: 'relative',
+            visibility: 'hidden',
+            pointerEvents: 'none',
           }}>
-            {/* Brand block */}
-            <div className="a360-brand">
-              {/* ANALYTIX mark + text */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 'clamp(12px,1.8vh,26px)' }}>
-                <div style={{ width: 42, height: 20, overflow: 'hidden', flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(247,25,61,0.3))' }}>
-                  <img src="/analytix-logo.png" alt="Analytix" style={{ width: 42, height: 'auto', display: 'block' }} />
-                </div>
-                <span style={{
-                  fontSize: 'clamp(11px,1.1vw,16px)', fontWeight: 600,
-                  letterSpacing: '0.3em', color: 'rgba(235,242,250,0.88)',
-                  fontFamily: 'Inter, system-ui, sans-serif',
-                }}>ANALYTIX</span>
-              </div>
+            {/* Left panel content hidden — background image supplies all visuals */}
 
               {/* AUDIT 360 */}
               <div style={{
@@ -529,7 +504,6 @@ export default function Login() {
                   </span>
                 </div>
               </div>
-            </div>
 
             {/* ── CENTRAL SERVICES GRAPHIC — CSS/SVG hybrid ── */}
             <div style={{
@@ -801,30 +775,30 @@ export default function Login() {
           </div>
 
           {/* ══ RIGHT PANEL — LOGIN CARD ═════════════════════════════ */}
-          <div className="a360-right" style={{ flex: '0 0 31%', width: '31%', display: 'flex', alignItems: 'center' }}>
+          <div className="a360-right" style={{ flex: '0 0 31%', width: '31%', display: 'flex', alignItems: 'center', paddingLeft: '1%' }}>
             {/* Card stack — ghost layers behind give physical depth on tilt */}
             <div style={{ position: 'relative', width: '100%' }}>
               {/* Ghost card 2 — furthest back */}
               <div ref={ghost2Ref} style={{
                 position: 'absolute', inset: 0,
-                background: 'rgba(5,16,34,0.5)',
-                border: '1px solid rgba(118,158,205,0.18)',
-                borderTop: '1px solid rgba(158,196,238,0.26)',
-                borderRadius: 'clamp(8px,0.9vw,14px)',
-                backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
-                boxShadow: '0 8px 40px rgba(0,4,14,0.55)',
+                background: 'rgba(2,8,20,0.48)',
+                border: '1px solid rgba(130,170,220,0.14)',
+                borderTop: '1px solid rgba(180,215,255,0.20)',
+                borderRadius: 'clamp(10px,1vw,16px)',
+                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                boxShadow: '0 10px 50px rgba(0,4,14,0.62)',
                 willChange: 'transform', pointerEvents: 'none',
                 transform: 'translate(20px,28px)',
               }} />
               {/* Ghost card 1 — mid depth */}
               <div ref={ghost1Ref} style={{
                 position: 'absolute', inset: 0,
-                background: 'rgba(5,16,34,0.65)',
-                border: '1px solid rgba(118,158,205,0.15)',
-                borderTop: '1px solid rgba(158,196,238,0.22)',
-                borderRadius: 'clamp(8px,0.9vw,14px)',
-                backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                boxShadow: '0 6px 30px rgba(0,4,14,0.45)',
+                background: 'rgba(3,10,24,0.60)',
+                border: '1px solid rgba(130,170,220,0.16)',
+                borderTop: '1px solid rgba(180,215,255,0.24)',
+                borderRadius: 'clamp(10px,1vw,16px)',
+                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                boxShadow: '0 8px 36px rgba(0,4,14,0.52)',
                 willChange: 'transform', pointerEvents: 'none',
                 transform: 'translate(10px,14px)',
               }} />
@@ -837,25 +811,24 @@ export default function Login() {
               className="a360-card"
               style={{
                 width: '100%',
-                // Translucent dark glass — slightly deeper than before
-                background: 'rgba(5,16,34,0.82)',
-                // Physical border: brighter on top edge where light catches, dimmer on sides
-                border: '1px solid rgba(118,158,205,0.12)',
-                borderTop: '1px solid rgba(158,196,238,0.17)',
-                borderRadius: 'clamp(8px,0.9vw,14px)',
-                // Reduced blur — see more architecture through, genuine glass not frosted glass
-                backdropFilter: 'blur(13px) saturate(1.4)',
-                WebkitBackdropFilter: 'blur(13px) saturate(1.4)',
-                // Layered shadow: contact → mid-depth → ambient + inner highlights
+                background: 'rgba(3,11,26,0.72)',
+                border: '1px solid rgba(130,170,220,0.18)',
+                borderTop: '1px solid rgba(180,215,255,0.28)',
+                borderLeft: '1px solid rgba(140,180,230,0.14)',
+                borderRadius: 'clamp(10px,1vw,16px)',
+                backdropFilter: 'blur(22px) saturate(1.6) brightness(1.05)',
+                WebkitBackdropFilter: 'blur(22px) saturate(1.6) brightness(1.05)',
                 boxShadow: [
-                  '0 2px 6px rgba(0,4,14,0.44)',
-                  '0 14px 44px rgba(0,5,18,0.52)',
-                  '0 38px 88px rgba(0,3,12,0.30)',
-                  'inset 0 1px 0 rgba(205,228,255,0.058)',
-                  'inset 1px 0 0 rgba(182,210,242,0.022)',
+                  '0 0 0 1px rgba(100,150,220,0.07)',
+                  '0 4px 12px rgba(0,4,14,0.55)',
+                  '0 18px 55px rgba(0,6,22,0.60)',
+                  '0 48px 100px rgba(0,3,14,0.38)',
+                  'inset 0 1px 0 rgba(220,238,255,0.10)',
+                  'inset 1px 0 0 rgba(200,220,255,0.05)',
+                  'inset 0 -1px 0 rgba(0,0,0,0.25)',
                 ].join(', '),
                 display: 'flex', flexDirection: 'column',
-                padding: 'clamp(16px,2vw,28px)',
+                padding: 'clamp(18px,2.2vw,32px)',
                 gap: 'clamp(8px,0.9vw,13px)',
                 overflowY: 'auto', overflowX: 'hidden',
                 maxHeight: 'calc(100vh - clamp(24px,3vh,44px) * 2)',
