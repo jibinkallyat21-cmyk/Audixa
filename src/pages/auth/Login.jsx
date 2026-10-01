@@ -321,22 +321,111 @@ export default function Login() {
         onMouseMove={handleMouseMove}
       >
 
-        {/* ── LAYER 1: Distant/background architecture ──────────── */}
-        {/* bgwarp wrapper adds slow perspective tilt — 40s ease-in-out cycle */}
-        <div className="a360-bgwarp" style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-          <img
-            ref={bgRef}
-            src="/bg/audit360.webp"
-            alt=""
-            style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center center',
-              transform: 'scale(1.06)',
-              willChange: 'transform',
-              pointerEvents: 'none',
-            }}
-          />
-        </div>
+        {/* ── LAYER 1: Base background — pure CSS, no image ──────── */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: [
+            'radial-gradient(ellipse 70% 55% at 38% 52%, rgba(10,42,95,0.38) 0%, transparent 65%)',
+            'radial-gradient(ellipse 45% 35% at 72% 24%, rgba(15,55,120,0.18) 0%, transparent 55%)',
+            'linear-gradient(155deg, #010a18 0%, #020d1e 40%, #010b16 100%)',
+          ].join(', '),
+        }} />
+        {/* Dot-grid texture */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'radial-gradient(rgba(72,142,218,0.32) 1px, transparent 1px)',
+          backgroundSize: '38px 38px', opacity: 0.07,
+          maskImage: 'radial-gradient(ellipse 90% 80% at 40% 50%, black 0%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 90% 80% at 40% 50%, black 0%, transparent 80%)',
+        }} />
+        {/* City skyline — SVG, bottom-left */}
+        <svg viewBox="0 0 1200 520" preserveAspectRatio="xMidYMax meet"
+          style={{ position:'absolute', bottom:0, left:0, width:'72%', height:'82%', pointerEvents:'none', zIndex:1 }}>
+          <defs>
+            <linearGradient id="bld" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(8,28,56,0.95)"/>
+              <stop offset="100%" stopColor="rgba(3,12,26,0.98)"/>
+            </linearGradient>
+            <pattern id="win" x="0" y="0" width="13" height="16" patternUnits="userSpaceOnUse">
+              <rect width="5" height="7" rx="0.5" fill="rgba(68,142,208,0.24)"/>
+            </pattern>
+            <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          {/* back layer — silhouette */}
+          <g fill="rgba(4,14,30,0.72)" opacity="0.8">
+            <rect x="0"   y="320" width="55"  height="200"/>
+            <rect x="60"  y="280" width="42"  height="240"/>
+            <rect x="108" y="310" width="32"  height="210"/>
+            <rect x="146" y="256" width="52"  height="264"/>
+            <rect x="204" y="290" width="38"  height="230"/>
+            <rect x="248" y="260" width="68"  height="260"/>
+            <rect x="322" y="330" width="40"  height="190"/>
+            <rect x="368" y="240" width="84"  height="280"/>
+            <rect x="458" y="285" width="50"  height="235"/>
+            <rect x="514" y="220" width="106" height="300"/>
+            <rect x="626" y="272" width="62"  height="248"/>
+            <rect x="694" y="200" width="96"  height="320"/>
+            <rect x="796" y="265" width="50"  height="255"/>
+            <rect x="852" y="228" width="80"  height="292"/>
+            <rect x="938" y="260" width="55"  height="260"/>
+            <rect x="1000" y="240" width="82" height="280"/>
+            <rect x="1088" y="278" width="48" height="242"/>
+            <rect x="1142" y="256" width="58" height="264"/>
+          </g>
+          {/* front layer — darker, edge-lit */}
+          <g fill="url(#bld)" stroke="rgba(80,155,215,0.16)" strokeWidth="0.5">
+            <rect x="15"  y="300" width="52"  height="220" rx="1"/>
+            <rect x="72"  y="258" width="68"  height="262" rx="1"/>
+            <rect x="148" y="232" width="48"  height="288" rx="1"/>
+            <rect x="204" y="268" width="38"  height="252" rx="1"/>
+            <rect x="250" y="236" width="88"  height="284" rx="1"/>
+            <rect x="346" y="290" width="55"  height="230" rx="1"/>
+            <rect x="408" y="210" width="110" height="310" rx="1"/>
+            <rect x="525" y="248" width="62"  height="272" rx="1"/>
+            <rect x="595" y="178" width="124" height="342" rx="1"/>
+            <rect x="727" y="236" width="66"  height="284" rx="1"/>
+            <rect x="800" y="192" width="102" height="328" rx="1"/>
+            <rect x="910" y="250" width="56"  height="270" rx="1"/>
+            <rect x="972" y="218" width="82"  height="302" rx="1"/>
+            <rect x="1060" y="262" width="50" height="258" rx="1"/>
+            <rect x="1116" y="232" width="66" height="288" rx="1"/>
+          </g>
+          {/* window lights */}
+          <g fill="url(#win)" opacity="0.45">
+            <rect x="74"  y="262" width="64"  height="250"/>
+            <rect x="150" y="236" width="44"  height="275"/>
+            <rect x="252" y="240" width="84"  height="270"/>
+            <rect x="410" y="214" width="106" height="298"/>
+            <rect x="597" y="182" width="120" height="328"/>
+            <rect x="802" y="196" width="98"  height="315"/>
+            <rect x="974" y="222" width="78"  height="290"/>
+          </g>
+          {/* warm amber windows — scattered on dark buildings */}
+          <g fill="rgba(255,185,70,0.38)">
+            {[[80,270],[95,288],[82,306],[156,242],[172,260],[413,220],[428,238],[601,188],[618,206],[634,224],[808,200],[823,218],[978,228],[993,246]].map(([x,y],i) => (
+              <rect key={i} x={x} y={y} width="5" height="7" rx="0.5"/>
+            ))}
+          </g>
+          {/* antenna spires */}
+          <g filter="url(#glow)" stroke="rgba(80,155,215,0.45)" strokeWidth="1.5" fill="none">
+            <line x1="464"  y1="210" x2="464"  y2="174"/><circle cx="464" cy="173" r="2" fill="rgba(80,155,215,0.72)"/>
+            <line x1="657"  y1="178" x2="657"  y2="138"/><circle cx="657" cy="137" r="2.5" fill="rgba(80,155,215,0.82)"/>
+            <line x1="852"  y1="192" x2="852"  y2="158"/><circle cx="852" cy="157" r="2" fill="rgba(80,155,215,0.65)"/>
+          </g>
+          {/* top-edge light line on tallest buildings */}
+          <g stroke="rgba(80,155,215,0.28)" strokeWidth="0.8">
+            <line x1="408" y1="210" x2="518" y2="210"/>
+            <line x1="595" y1="178" x2="719" y2="178"/>
+            <line x1="800" y1="192" x2="912" y2="192"/>
+          </g>
+          {/* base ground glow */}
+          <ellipse cx="600" cy="490" rx="600" ry="42" fill="rgba(18,70,158,0.08)"/>
+          {/* water — reflection band */}
+          <rect x="0" y="462" width="1200" height="58" fill="rgba(4,14,30,0.55)"/>
+          <g stroke="rgba(52,128,205,0.12)" strokeWidth="0.7">
+            <line x1="0" y1="472" x2="1200" y2="472"/>
+            <line x1="0" y1="482" x2="1200" y2="482"/>
+            <line x1="0" y1="492" x2="1200" y2="492"/>
+          </g>
+        </svg>
 
         {/* ── LAYER 1b: Deep background plane — 0.5× parallax speed ─ */}
         <div ref={deepRef} style={{
@@ -416,21 +505,21 @@ export default function Login() {
           pointerEvents: 'none', willChange: 'transform',
         }} />
 
-        {/* ── Minimal overlays — image shows through, right side darkened for login card ── */}
-        {/* Subtle edge vignette only */}
+        {/* ── Scene overlays ─────────────────────────────────────── */}
+        {/* Edge vignette */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 110% 90% at 42% 50%, transparent 55%, rgba(1,6,16,0.55) 100%)',
+          background: 'radial-gradient(ellipse 100% 88% at 40% 50%, transparent 50%, rgba(1,5,14,0.62) 100%)',
         }} />
-        {/* Bottom fade */}
+        {/* Top & bottom fade */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'linear-gradient(180deg, rgba(1,6,16,0.18) 0%, transparent 14%, transparent 82%, rgba(1,6,16,0.50) 100%)',
+          background: 'linear-gradient(180deg, rgba(1,6,16,0.28) 0%, transparent 16%, transparent 78%, rgba(1,6,16,0.60) 100%)',
         }} />
-        {/* Right darkening — behind login card */}
+        {/* Right panel backdrop — darkens area behind the login card */}
         <div style={{
-          position: 'absolute', top: 0, right: 0, bottom: 0, width: '42%', pointerEvents: 'none',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(2,9,22,0.60) 30%, rgba(2,9,22,0.84) 70%, rgba(1,6,16,0.92) 100%)',
+          position: 'absolute', top: 0, right: 0, bottom: 0, width: '44%', pointerEvents: 'none',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(2,8,20,0.55) 22%, rgba(2,8,20,0.80) 55%, rgba(1,5,16,0.94) 100%)',
         }} />
 
         {/* Red diagonal removed — image supplies it */}
@@ -447,63 +536,56 @@ export default function Login() {
             gap: '3%',
           }}>
 
-          {/* ══ LEFT PANEL — invisible spacer; image supplies all visuals ══ */}
+          {/* ══ LEFT PANEL — CSS/SVG visual ═══════════════════════════ */}
           <div className="a360-left" style={{
             flex: '0 0 66%', width: '66%',
             position: 'relative',
-            visibility: 'hidden',
-            pointerEvents: 'none',
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
           }}>
-            {/* Left panel content hidden — background image supplies all visuals */}
+            {/* Brand + title block */}
+            <div>
+              {/* Brand */}
+              <div className="a360-brand" style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'clamp(14px,2vh,24px)' }}>
+                <div style={{ width:18, height:17, background:'#F7193D', clipPath:'polygon(50% 0,100% 100%,72% 100%,50% 52%,28% 100%,0 100%)', flexShrink:0 }}/>
+                <span style={{ fontSize:13, fontWeight:700, letterSpacing:'0.38em', color:'#f4f7fb', fontFamily:'Inter,sans-serif' }}>ANALYTIX</span>
+              </div>
 
               {/* AUDIT 360 */}
               <div style={{
-                fontSize: 'clamp(32px,4.6vw,72px)',
-                fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1,
+                fontSize: 'clamp(40px,5.2vw,82px)',
+                fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 0.92,
                 fontFamily: 'Inter, system-ui, sans-serif',
-                marginBottom: 'clamp(10px,1.4vh,20px)',
+                marginBottom: 'clamp(10px,1.4vh,18px)',
               }}>
                 <span style={{ color: '#F5F7FA' }}>AUDIT </span>
-                <span style={{ color: '#F7193D', position: 'relative', display: 'inline-block' }}>
-                  360
-                  {/* Dimensional ring — rotates 26s, edge-on 68° perspective */}
-                  <svg className="a360-ring-svg" viewBox="-70 -70 140 140" overflow="visible" aria-hidden="true"
-                    style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
-                    <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(52,86,148,0.13)" strokeWidth="1.5"/>
-                    <circle cx="0" cy="0" r="51" fill="none" stroke="rgba(247,25,61,0.038)" strokeWidth="0.9"/>
-                  </svg>
-                  {/* Breathing outer ring */}
-                  <svg className="a360-ring-breathe" viewBox="-90 -90 180 180" overflow="visible" aria-hidden="true"
-                    style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
-                    <circle cx="0" cy="0" r="76" fill="none" stroke="rgba(52,86,148,0.28)" strokeWidth="2"/>
-                  </svg>
-                </span>
+                <span style={{ color: '#F7193D' }}>360</span>
               </div>
 
               {/* Headline */}
               <div className="a360-hl">
                 <h1 style={{
                   margin: 0,
-                  fontSize: 'clamp(20px,2.3vw,36px)',
-                  fontWeight: 400, lineHeight: 1.28,
-                  color: '#F5F7FA',
+                  fontSize: 'clamp(18px,2.0vw,32px)',
+                  fontWeight: 400, lineHeight: 1.25,
+                  color: '#F0F4FA',
                   fontFamily: "'Playfair Display', Georgia, serif",
-                  whiteSpace: 'nowrap',
                 }}>
-                  Clarity across every dimension of your audit.
+                  Clarity across every<br/>dimension of your audit.
                 </h1>
 
                 {/* Tagline */}
-                <div className="a360-sep" style={{ marginTop: 'clamp(12px,1.6vh,22px)' }}>
+                <div className="a360-sep" style={{ marginTop: 'clamp(10px,1.4vh,18px)' }}>
                   <span style={{
                     fontSize: 'clamp(9px,0.82vw,12px)', color: 'rgba(200,215,235,0.65)',
-                    letterSpacing: '0.12em', fontWeight: 500,
+                    letterSpacing: '0.12em', fontWeight: 600,
                     fontFamily: 'Inter, system-ui, sans-serif',
                   }}>
-                    Audit &nbsp;·&nbsp; Assurance &nbsp;·&nbsp; Risk &nbsp;·&nbsp; Compliance
+                    AUDIT &nbsp;·&nbsp; ASSURANCE &nbsp;·&nbsp; RISK &nbsp;·&nbsp; COMPLIANCE
                   </span>
+                  <div style={{ width:48, height:2, background:'#F7193D', marginTop:10 }}/>
                 </div>
               </div>
+            </div>
 
             {/* ── CENTRAL SERVICES GRAPHIC — CSS/SVG hybrid ── */}
             <div style={{
@@ -513,21 +595,36 @@ export default function Login() {
               overflow: 'hidden',
             }}>
 
-              {/* Orbit rings — 3 CSS ellipses at different angles */}
-              {[
-                { width:'62%', border:'rgba(55,142,221,0.24)', rotate:'-9deg' },
-                { width:'72%', border:'rgba(255,30,64,0.16)',  rotate:'18deg' },
-                { width:'50%', border:'rgba(91,174,239,0.20)', rotate:'65deg' },
-              ].map((o, i) => (
-                <div key={i} style={{
-                  position:'absolute', left:'50%', top:'48%',
-                  width: o.width, aspectRatio:'1.9',
-                  border:`1px solid ${o.border}`,
-                  borderRadius:'50%',
-                  transform:`translate(-50%,-50%) rotate(${o.rotate})`,
-                  pointerEvents:'none',
+              {/* 3D perspective orbital rings */}
+              <div style={{
+                position:'absolute', left:'50%', top:'48%',
+                width:'min(58%,390px)', aspectRatio:'1',
+                transform:'translate(-50%,-50%)',
+                perspective:'900px', perspectiveOrigin:'50% 48%',
+                pointerEvents:'none',
+              }}>
+                {/* ring 1 — main outer ring, tilted ~71° */}
+                <div style={{
+                  position:'absolute', inset:0, borderRadius:'50%',
+                  border:'1.5px solid rgba(55,138,221,0.44)',
+                  boxShadow:'0 0 18px rgba(40,118,210,0.10)',
+                  transform:'rotateX(71deg) rotateZ(-14deg)',
                 }}/>
-              ))}
+                {/* ring 2 — red-tinted ring, shallower tilt */}
+                <div style={{
+                  position:'absolute', inset:'-12%',
+                  borderRadius:'50%',
+                  border:'1.4px solid rgba(255,23,66,0.22)',
+                  transform:'rotateX(54deg) rotateZ(34deg)',
+                }}/>
+                {/* ring 3 — inner accent ring */}
+                <div style={{
+                  position:'absolute', inset:'22%',
+                  borderRadius:'50%',
+                  border:'1px solid rgba(72,152,226,0.24)',
+                  transform:'rotateX(18deg) rotateZ(66deg)',
+                }}/>
+              </div>
 
               {/* Connecting lines — full-size SVG overlay, behind globe/nodes */}
               <svg
@@ -560,10 +657,19 @@ export default function Login() {
                 ))}
               </svg>
 
+              {/* Globe glow halo — behind globe */}
+              <div style={{
+                position:'absolute', left:'50%', top:'48%',
+                width:'min(44%,300px)', aspectRatio:'1',
+                transform:'translate(-50%,-50%)',
+                borderRadius:'50%', pointerEvents:'none', zIndex:4,
+                background:'radial-gradient(circle, rgba(30,100,220,0.22) 0%, rgba(15,70,170,0.10) 45%, transparent 72%)',
+                filter:'blur(18px)',
+              }}/>
               {/* Globe — CSS div with floating animation, continent SVG inside */}
               <div style={{
                 position:'absolute', left:'50%', top:'48%',
-                width:'min(30%, 200px)', aspectRatio:'1',
+                width:'min(36%,240px)', aspectRatio:'1',
                 transform:'translate(-50%,-50%)',
                 animation: ecoReducedMotion ? 'none' : 'csg-float 7s ease-in-out infinite',
                 zIndex:5,
@@ -586,22 +692,66 @@ export default function Login() {
                   <svg viewBox="0 0 200 200" style={{ position:'absolute', inset:0, width:'100%', height:'100%' }}>
                     <defs><clipPath id="csg-gc3"><circle cx="100" cy="100" r="97"/></clipPath></defs>
                     <g clipPath="url(#csg-gc3)">
-                      <g fill="rgba(45,106,68,0.54)" stroke="rgba(58,128,82,0.24)" strokeWidth="0.5">
+                      <g>
                         {!ecoReducedMotion && (
                           <animateTransform attributeName="transform" type="translate"
                             from="0 0" to="-200 0" dur="28s" repeatCount="indefinite"/>
                         )}
-                        {[-200,0,200].map(ox => (
-                          <g key={ox} transform={`translate(${ox},0)`}>
-                            <polygon points="72,83 76,81 80,82 83,87 83,92 86,100 91,107 92,108 93,103 93,101 94,96 94,94 97,92 99,91 98,88 96,83 94,84 93,82 90,79 85,79 82,80 81,81"/>
-                            <polygon points="95,72 101,73 102,75 100,77 95,78 94,74"/>
-                            <polygon points="93,100 92,102 92,104 93,114 95,120 95,124 97,122 97,117 97,115 98,113 99,110 101,104 101,102 98,100 97,97 95,95"/>
-                            <polygon points="102,90 103,89 102,87 103,87 104,85 106,82 107,81 108,76 110,75 110,76 110,82 109,82 108,87 108,90 109,90 111,89 111,91 109,90 107,90"/>
-                            <polygon points="102,90 101,92 100,100 101,103 103,105 105,105 107,106 107,116 108,122 110,122 111,118 114,103 112,101 111,97 110,93 107,90"/>
-                            <polygon points="110,90 111,87 114,88 118,84 119,76 122,75 128,76 130,84 124,88 123,90 122,95 120,100 119,105 115,101 115,102 113,96 113,95 112,94 112,95 111,98 109,99 108,97 107,93 108,90"/>
-                            <polygon points="122,112 122,114 124,113 126,117 126,116 127,114 128,112 126,106 124,108 124,106 122,110"/>
-                          </g>
-                        ))}
+                        {/* copy 1 */}
+                        <g fill="rgba(45,106,68,0.60)" stroke="rgba(58,128,82,0.26)" strokeWidth="0.5">
+                          <polygon points="72,83 76,81 80,82 83,87 83,92 86,100 91,107 92,108 93,103 93,101 94,96 94,94 97,92 99,91 98,88 96,83 94,84 93,82 90,79 85,79 82,80 81,81"/>
+                          <polygon points="95,72 101,73 102,75 100,77 95,78 94,74"/>
+                          <polygon points="93,100 92,102 92,104 93,114 95,120 95,124 97,122 97,117 97,115 98,113 99,110 101,104 101,102 98,100 97,97 95,95"/>
+                          <polygon points="102,90 103,89 102,87 103,87 104,85 106,82 107,81 108,76 110,75 110,76 110,82 109,82 108,87 108,90 109,90 111,89 111,91 109,90 107,90"/>
+                          <polygon points="102,90 101,92 100,100 101,103 103,105 105,105 107,106 107,116 108,122 110,122 111,118 114,103 112,101 111,97 110,93 107,90"/>
+                          <polygon points="110,90 111,87 114,88 118,84 119,76 122,75 128,76 130,84 124,88 123,90 122,95 120,100 119,105 115,101 115,102 113,96 113,95 112,94 112,95 111,98 109,99 108,97 107,93 108,90"/>
+                          <polygon points="122,112 122,114 124,113 126,117 126,116 127,114 128,112 126,106 124,108 124,106 122,110"/>
+                        </g>
+                        {/* city lights copy 1 */}
+                        <g fill="rgba(255,195,90,0.92)">
+                          <circle cx="127" cy="64" r="1.6"/>
+                          <circle cx="121" cy="68" r="1.2"/>
+                          <circle cx="133" cy="70" r="1.1"/>
+                          <circle cx="116" cy="72" r="1.4"/>
+                          <circle cx="143" cy="79" r="1.5"/>
+                          <circle cx="161" cy="88" r="1.3"/>
+                          <circle cx="170" cy="70" r="1.3"/>
+                          <circle cx="174" cy="61" r="1.4"/>
+                          <circle cx="183" cy="55" r="1.6"/>
+                          <circle cx="90"  cy="36" r="1.4"/>
+                          <circle cx="97"  cy="39" r="1.2"/>
+                          <circle cx="106" cy="65" r="1.3"/>
+                          <circle cx="88"  cy="90" r="1.2"/>
+                          <circle cx="104" cy="126" r="1.3"/>
+                          <circle cx="15"  cy="52" r="1.5"/>
+                        </g>
+                        {/* copy 2 — offset 200px for seamless loop */}
+                        <g fill="rgba(45,106,68,0.60)" stroke="rgba(58,128,82,0.26)" strokeWidth="0.5" transform="translate(200,0)">
+                          <polygon points="72,83 76,81 80,82 83,87 83,92 86,100 91,107 92,108 93,103 93,101 94,96 94,94 97,92 99,91 98,88 96,83 94,84 93,82 90,79 85,79 82,80 81,81"/>
+                          <polygon points="95,72 101,73 102,75 100,77 95,78 94,74"/>
+                          <polygon points="93,100 92,102 92,104 93,114 95,120 95,124 97,122 97,117 97,115 98,113 99,110 101,104 101,102 98,100 97,97 95,95"/>
+                          <polygon points="102,90 103,89 102,87 103,87 104,85 106,82 107,81 108,76 110,75 110,76 110,82 109,82 108,87 108,90 109,90 111,89 111,91 109,90 107,90"/>
+                          <polygon points="102,90 101,92 100,100 101,103 103,105 105,105 107,106 107,116 108,122 110,122 111,118 114,103 112,101 111,97 110,93 107,90"/>
+                          <polygon points="110,90 111,87 114,88 118,84 119,76 122,75 128,76 130,84 124,88 123,90 122,95 120,100 119,105 115,101 115,102 113,96 113,95 112,94 112,95 111,98 109,99 108,97 107,93 108,90"/>
+                          <polygon points="122,112 122,114 124,113 126,117 126,116 127,114 128,112 126,106 124,108 124,106 122,110"/>
+                        </g>
+                        <g fill="rgba(255,195,90,0.92)" transform="translate(200,0)">
+                          <circle cx="127" cy="64" r="1.6"/>
+                          <circle cx="121" cy="68" r="1.2"/>
+                          <circle cx="133" cy="70" r="1.1"/>
+                          <circle cx="116" cy="72" r="1.4"/>
+                          <circle cx="143" cy="79" r="1.5"/>
+                          <circle cx="161" cy="88" r="1.3"/>
+                          <circle cx="170" cy="70" r="1.3"/>
+                          <circle cx="174" cy="61" r="1.4"/>
+                          <circle cx="183" cy="55" r="1.6"/>
+                          <circle cx="90"  cy="36" r="1.4"/>
+                          <circle cx="97"  cy="39" r="1.2"/>
+                          <circle cx="106" cy="65" r="1.3"/>
+                          <circle cx="88"  cy="90" r="1.2"/>
+                          <circle cx="104" cy="126" r="1.3"/>
+                          <circle cx="15"  cy="52" r="1.5"/>
+                        </g>
                       </g>
                     </g>
                   </svg>
