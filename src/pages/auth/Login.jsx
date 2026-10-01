@@ -184,11 +184,23 @@ const CSS = `
   .eco-icon-ring { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
   .eco-node:hover .eco-icon-ring {
     border-color: rgba(240,55,75,0.90) !important;
-    box-shadow: 0 0 20px rgba(220,40,60,0.50), inset 0 0 10px rgba(220,40,60,0.12) !important;
+    box-shadow: 0 0 22px rgba(220,40,60,0.52), inset 0 0 10px rgba(220,40,60,0.14) !important;
   }
   @media (prefers-reduced-motion: reduce) {
     .eco-orb-g { animation: none !important; }
   }
+
+  /* ── Globe float + particle pulse ───────────────────────── */
+  @keyframes csg-float {
+    0%,100% { transform: translateY(0px); }
+    50%     { transform: translateY(-9px); }
+  }
+  @keyframes csg-particle {
+    0%,100% { transform: translate(-50%,-50%) scale(0.72); opacity: 0.42; }
+    50%     { transform: translate(-50%,-50%) scale(1.32); opacity: 1; }
+  }
+  .csg-float-anim { animation: csg-float 7s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .csg-float-anim { animation: none !important; } }
 `
 
 export default function Login() {
@@ -519,225 +531,228 @@ export default function Login() {
               </div>
             </div>
 
-            {/* ── CENTRAL SERVICES GRAPHIC — SVG replica ── */}
+            {/* ── CENTRAL SERVICES GRAPHIC — CSS/SVG hybrid ── */}
             <div style={{
               flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               position: 'relative',
               minHeight: 0,
               overflow: 'hidden',
             }}>
+
+              {/* Orbit rings — 3 CSS ellipses at different angles */}
+              {[
+                { width:'62%', border:'rgba(55,142,221,0.24)', rotate:'-9deg' },
+                { width:'72%', border:'rgba(255,30,64,0.16)',  rotate:'18deg' },
+                { width:'50%', border:'rgba(91,174,239,0.20)', rotate:'65deg' },
+              ].map((o, i) => (
+                <div key={i} style={{
+                  position:'absolute', left:'50%', top:'48%',
+                  width: o.width, aspectRatio:'1.9',
+                  border:`1px solid ${o.border}`,
+                  borderRadius:'50%',
+                  transform:`translate(-50%,-50%) rotate(${o.rotate})`,
+                  pointerEvents:'none',
+                }}/>
+              ))}
+
+              {/* Connecting lines — full-size SVG overlay, behind globe/nodes */}
               <svg
-                viewBox="0 0 720 450"
-                width="100%"
-                style={{ display: 'block', overflow: 'hidden' }}
-                aria-label="Analytix service ecosystem"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }}
+                aria-hidden="true"
               >
-                <defs>
-                  <radialGradient id="csg-glob" cx="36%" cy="30%" r="68%">
-                    <stop offset="0%"   stopColor="#223870"/>
-                    <stop offset="40%"  stopColor="#0e2048"/>
-                    <stop offset="100%" stopColor="#03091c"/>
-                  </radialGradient>
-                  <radialGradient id="csg-atm" cx="50%" cy="50%" r="50%">
-                    <stop offset="72%" stopColor="rgba(0,0,0,0)"/>
-                    <stop offset="90%" stopColor="rgba(80,140,240,0.12)"/>
-                    <stop offset="100%" stopColor="rgba(110,170,255,0.26)"/>
-                  </radialGradient>
-                  <radialGradient id="csg-shd" cx="72%" cy="68%" r="60%">
-                    <stop offset="0%"  stopColor="rgba(0,0,10,0.30)"/>
-                    <stop offset="100%" stopColor="rgba(0,0,0,0)"/>
-                  </radialGradient>
-                  <filter id="csg-ng" x="-40%" y="-40%" width="180%" height="180%">
-                    <feGaussianBlur stdDeviation="2" result="b"/>
-                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                  </filter>
-                  <filter id="csg-lg" x="-80%" y="-80%" width="260%" height="260%">
-                    <feGaussianBlur stdDeviation="3.5" result="b"/>
-                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                  </filter>
-                  {/* Globe clip — cy=225, r=78 */}
-                  <clipPath id="csg-gc">
-                    <circle cx={360} cy={225} r={76}/>
-                  </clipPath>
-                </defs>
-
-                {/* Globe body */}
-                <circle cx={360} cy={225} r={78} fill="url(#csg-glob)"/>
-
-                {/* Rotating continents */}
-                <g clipPath="url(#csg-gc)">
-                  <g fill="rgba(48,106,70,0.46)" stroke="rgba(65,135,88,0.26)" strokeWidth="0.6">
-                    {!ecoReducedMotion && (
-                      <animateTransform attributeName="transform" type="translate"
-                        from="0 0" to="-156 0" dur="28s" repeatCount="indefinite"/>
-                    )}
-                    {[-156, 0, 156].map(ox => (
-                      <g key={ox} transform={`translate(${ox},0)`}>
-                        {/* North America */}
-                        <polygon points="287,179 294,176 302,177 307,183 308,193 312,205 323,216 325,218 326,209 325,205 328,195 328,191 333,187 338,184 335,179 330,170 326,171 325,168 318,162 308,162 302,165 300,166"/>
-                        {/* Greenland */}
-                        <polygon points="340,153 350,155 353,158 349,162 340,163 337,158"/>
-                        {/* South America */}
-                        <polygon points="326,223 325,227 325,229 326,251 331,264 331,274 335,270 335,260 335,255 338,251 341,246 345,232 345,229 339,225 335,220 331,215"/>
-                        {/* Europe */}
-                        <polygon points="357,193 358,192 357,188 358,187 360,183 364,178 364,175 367,164 372,163 372,164 372,176 368,178 366,187 367,192 370,193 373,192 373,195 367,194 364,193"/>
-                        {/* Africa */}
-                        <polygon points="357,195 355,198 353,214 355,218 358,221 363,221 366,222 367,241 368,255 372,255 375,246 382,214 379,212 377,205 375,198 366,195"/>
-                        {/* Asia */}
-                        <polygon points="372,195 373,188 382,189 393,180 395,164 408,161 426,162 431,180 419,188 416,195 413,205 407,214 404,224 395,218 395,220 391,208 390,205 387,204 386,205 385,212 380,214 377,212 374,199 374,194"/>
-                        {/* Australia */}
-                        <polygon points="410,253 411,255 417,253 421,260 423,259 426,255 427,249 423,235 419,240 417,236 410,245"/>
-                      </g>
-                    ))}
-                  </g>
-                </g>
-
-                {/* Grid lines */}
-                <g clipPath="url(#csg-gc)">
-                  {[-2,-1,0,1,2].map(i => {
-                    const ly = 225 + i*32;
-                    const lrx = Math.sqrt(Math.max(0, 78**2 - (i*32)**2));
-                    return lrx > 5 ? (
-                      <ellipse key={i} cx={360} cy={ly} rx={lrx} ry={lrx*0.17}
-                        fill="none" stroke="rgba(100,140,200,0.12)" strokeWidth="0.5"/>
-                    ) : null;
-                  })}
-                  {[45,90,135].map(a => {
-                    const lrx = 78 * Math.abs(Math.sin(a*Math.PI/180));
-                    return lrx > 5 ? (
-                      <ellipse key={a} cx={360} cy={225} rx={lrx} ry={78}
-                        fill="none" stroke="rgba(100,140,200,0.12)" strokeWidth="0.5"
-                        transform={`rotate(${a} 360 225)`}/>
-                    ) : null;
-                  })}
-                </g>
-
-                {/* Atmosphere + terminator */}
-                <circle cx={360} cy={225} r={78} fill="url(#csg-atm)"/>
-                <circle cx={360} cy={225} r={78} fill="url(#csg-shd)"/>
-
-                {/* Globe rim */}
-                <circle cx={360} cy={225} r={78} fill="none" stroke="rgba(40,80,160,0.26)" strokeWidth="3"/>
-                <circle cx={360} cy={225} r={78} fill="none" stroke="rgba(60,100,180,0.07)" strokeWidth="12"/>
-
-                {/* Connecting lines — solid, subtle glow + crisp line */}
                 <g fill="none" strokeLinecap="round">
-                  {/* Soft glow layer */}
-                  <g stroke="rgba(100,160,255,0.22)" strokeWidth="4">
+                  <g stroke="rgba(100,160,255,0.18)" strokeWidth="0.6">
                     {!ecoReducedMotion && (
-                      <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+                      <animate attributeName="opacity" values="0.45;1;0.45" dur="3s" repeatCount="indefinite"/>
                     )}
-                    <line x1={360} y1={147} x2={360} y2={72}/>
-                    <line x1={282} y1={222} x2={140} y2={216}/>
-                    <line x1={438} y1={222} x2={568} y2={216}/>
-                    <line x1={296} y1={269} x2={173} y2={353}/>
-                    <line x1={424} y1={270} x2={540} y2={352}/>
+                    <line x1="50" y1="33" x2="50" y2="14"/>
+                    <line x1="38" y1="46" x2="16" y2="43"/>
+                    <line x1="62" y1="46" x2="84" y2="43"/>
+                    <line x1="41" y1="60" x2="24" y2="80"/>
+                    <line x1="59" y1="60" x2="76" y2="80"/>
                   </g>
-                  {/* Crisp line */}
-                  <g stroke="rgba(90,145,220,0.65)" strokeWidth="0.9">
-                    <line x1={360} y1={147} x2={360} y2={72}/>
-                    <line x1={282} y1={222} x2={140} y2={216}/>
-                    <line x1={438} y1={222} x2={568} y2={216}/>
-                    <line x1={296} y1={269} x2={173} y2={353}/>
-                    <line x1={424} y1={270} x2={540} y2={352}/>
+                  <g stroke="rgba(75,135,220,0.60)" strokeWidth="0.22">
+                    <line x1="50" y1="33" x2="50" y2="14"/>
+                    <line x1="38" y1="46" x2="16" y2="43"/>
+                    <line x1="62" y1="46" x2="84" y2="43"/>
+                    <line x1="41" y1="60" x2="24" y2="80"/>
+                    <line x1="59" y1="60" x2="76" y2="80"/>
                   </g>
                 </g>
-
-                {/* Small dot at each line's globe end */}
-                {[[360,147],[282,222],[438,222],[296,269],[424,270]].map(([x,y],i) => (
-                  <circle key={i} cx={x} cy={y} r={2} fill="rgba(110,165,230,0.7)"/>
-                ))}
-
-                {/* Globe centre text */}
-                <text x={360} y={211} textAnchor="middle" fill="white"
-                  fontSize="12.5" fontWeight="700" letterSpacing="5.5"
-                  fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">ANALYTIX</text>
-                <text x={360} y={221} textAnchor="middle" fill="rgba(190,210,235,0.80)"
-                  fontSize="5" letterSpacing="2.2" fontWeight="500"
-                  fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">GLOBAL PROFESSIONAL</text>
-                <text x={360} y={229} textAnchor="middle" fill="rgba(190,210,235,0.80)"
-                  fontSize="5" letterSpacing="2.2" fontWeight="500"
-                  fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">SERVICES</text>
-                <line x1={334} y1={234} x2={386} y2={234}
-                  stroke="rgba(200,40,60,0.55)" strokeWidth="0.6"/>
-                <text x={360} y={243} textAnchor="middle" fill="rgba(185,205,232,0.72)"
-                  fontSize="7" fontStyle="italic"
-                  fontFamily="Georgia,'Times New Roman',serif">Smarter Strategies.</text>
-                <text x={360} y={253} textAnchor="middle" fill="rgba(185,205,232,0.72)"
-                  fontSize="7" fontStyle="italic"
-                  fontFamily="Georgia,'Times New Roman',serif">Stronger Tomorrow.</text>
-
-                {/* 5 Service nodes — all within viewBox 0 0 720 450 */}
-                {[
-                  { x:360, y:50,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',    icon:'shield' },
-                  { x:118, y:215, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',          icon:'gear'   },
-                  { x:590, y:215, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',         d2:'Regulatory confidence.',  icon:'coins'  },
-                  { x:155, y:365, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',            d2:'Move forward.',           icon:'doc'    },
-                  { x:558, y:365, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                      icon:'world'  },
-                ].map(nd => (
-                  <g key={`${nd.x}-${nd.y}`} transform={`translate(${nd.x},${nd.y})`}>
-                    <circle cx={0} cy={0} r={22} fill="rgba(4,10,24,0.92)"/>
-                    <circle cx={0} cy={0} r={22} fill="none" stroke="#b81224" strokeWidth="1.3" filter="url(#csg-ng)"/>
-
-                    {nd.icon === 'shield' && (
-                      <g fill="none" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M0,-10 C-5.5,-10 -10,-5.5 -10,0 C-10,5.5 -4.5,10 0,13 C4.5,10 10,5.5 10,0 C10,-5.5 5.5,-10 0,-10Z"/>
-                        <polyline points="-4,1 -1.5,5 6,-3"/>
-                      </g>
-                    )}
-                    {nd.icon === 'gear' && (
-                      <g fill="none" stroke="white" strokeLinecap="round">
-                        <circle cx={0} cy={0} r={4.5} strokeWidth="1.3"/>
-                        {[0,45,90,135,180,225,270,315].map(a => {
-                          const ar = a*Math.PI/180;
-                          return <line key={a}
-                            x1={5.2*Math.cos(ar)} y1={5.2*Math.sin(ar)}
-                            x2={8.8*Math.cos(ar)} y2={8.8*Math.sin(ar)}
-                            strokeWidth="2.1"/>;
-                        })}
-                      </g>
-                    )}
-                    {nd.icon === 'coins' && (
-                      <g fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round">
-                        {[-5.5,0,5.5].map(yy => <ellipse key={yy} cx={0} cy={yy} rx={7.5} ry={2.6}/>)}
-                        <line x1={-7.5} y1={-5.5} x2={-7.5} y2={5.5}/>
-                        <line x1={7.5}  y1={-5.5} x2={7.5}  y2={5.5}/>
-                      </g>
-                    )}
-                    {nd.icon === 'doc' && (
-                      <g fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x={-6.5} y={-10} width={13} height={19} rx={1.8} strokeWidth="1.2"/>
-                        <line x1={-3} y1={-4.5} x2={4.5} y2={-4.5} strokeWidth="0.85"/>
-                        <line x1={-3} y1={-0.5} x2={4.5} y2={-0.5} strokeWidth="0.85"/>
-                        <line x1={-3} y1={3.5}  x2={2}   y2={3.5}  strokeWidth="0.85"/>
-                      </g>
-                    )}
-                    {nd.icon === 'world' && (
-                      <g fill="none" stroke="white" strokeLinecap="round">
-                        <circle cx={0} cy={0} r={9.5} strokeWidth="1.3"/>
-                        <ellipse cx={0} cy={0} rx={5} ry={9.5} strokeWidth="0.85"/>
-                        <ellipse cx={0} cy={0} rx={9.5} ry={4.2} strokeWidth="0.85"/>
-                      </g>
-                    )}
-
-                    <text x={0} y={36} textAnchor="middle" fill="white"
-                      fontSize="9" fontWeight="700" letterSpacing="0.4"
-                      fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n1}</text>
-                    <text x={0} y={46} textAnchor="middle" fill="white"
-                      fontSize="9" fontWeight="700" letterSpacing="0.4"
-                      fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.n2}</text>
-                    <text x={0} y={58} textAnchor="middle" fill="rgba(175,198,225,0.76)"
-                      fontSize="7" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d1}</text>
-                    {nd.d2 && (
-                      <text x={0} y={67} textAnchor="middle" fill="rgba(175,198,225,0.76)"
-                        fontSize="7" fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">{nd.d2}</text>
-                    )}
-                  </g>
+                {[['50','33'],['38','46'],['62','46'],['41','60'],['59','60']].map(([x,y],i) => (
+                  <circle key={i} cx={x} cy={y} r="0.85" fill="rgba(110,165,230,0.78)"/>
                 ))}
               </svg>
+
+              {/* Globe — CSS div with floating animation, continent SVG inside */}
+              <div style={{
+                position:'absolute', left:'50%', top:'48%',
+                width:'min(30%, 200px)', aspectRatio:'1',
+                transform:'translate(-50%,-50%)',
+                animation: ecoReducedMotion ? 'none' : 'csg-float 7s ease-in-out infinite',
+                zIndex:5,
+              }}>
+                <div style={{
+                  width:'100%', height:'100%', borderRadius:'50%',
+                  position:'relative', overflow:'hidden',
+                  background:[
+                    'radial-gradient(circle at 36% 31%, rgba(75,166,255,0.92) 0 1%, transparent 1.8%)',
+                    'radial-gradient(circle at 48% 40%, #163d67 0%, #0a2343 42%, #031124 72%, #010914 100%)',
+                  ].join(', '),
+                  boxShadow:[
+                    '0 0 0 1.5px rgba(75,159,241,0.28)',
+                    '0 0 22px rgba(40,139,241,0.50)',
+                    '0 0 75px rgba(19,105,197,0.26)',
+                    'inset -18px -14px 42px rgba(0,0,0,0.66)',
+                  ].join(', '),
+                }}>
+                  {/* Continent SVG inside globe */}
+                  <svg viewBox="0 0 200 200" style={{ position:'absolute', inset:0, width:'100%', height:'100%' }}>
+                    <defs><clipPath id="csg-gc3"><circle cx="100" cy="100" r="97"/></clipPath></defs>
+                    <g clipPath="url(#csg-gc3)">
+                      <g fill="rgba(45,106,68,0.54)" stroke="rgba(58,128,82,0.24)" strokeWidth="0.5">
+                        {!ecoReducedMotion && (
+                          <animateTransform attributeName="transform" type="translate"
+                            from="0 0" to="-200 0" dur="28s" repeatCount="indefinite"/>
+                        )}
+                        {[-200,0,200].map(ox => (
+                          <g key={ox} transform={`translate(${ox},0)`}>
+                            <polygon points="72,83 76,81 80,82 83,87 83,92 86,100 91,107 92,108 93,103 93,101 94,96 94,94 97,92 99,91 98,88 96,83 94,84 93,82 90,79 85,79 82,80 81,81"/>
+                            <polygon points="95,72 101,73 102,75 100,77 95,78 94,74"/>
+                            <polygon points="93,100 92,102 92,104 93,114 95,120 95,124 97,122 97,117 97,115 98,113 99,110 101,104 101,102 98,100 97,97 95,95"/>
+                            <polygon points="102,90 103,89 102,87 103,87 104,85 106,82 107,81 108,76 110,75 110,76 110,82 109,82 108,87 108,90 109,90 111,89 111,91 109,90 107,90"/>
+                            <polygon points="102,90 101,92 100,100 101,103 103,105 105,105 107,106 107,116 108,122 110,122 111,118 114,103 112,101 111,97 110,93 107,90"/>
+                            <polygon points="110,90 111,87 114,88 118,84 119,76 122,75 128,76 130,84 124,88 123,90 122,95 120,100 119,105 115,101 115,102 113,96 113,95 112,94 112,95 111,98 109,99 108,97 107,93 108,90"/>
+                            <polygon points="122,112 122,114 124,113 126,117 126,116 127,114 128,112 126,106 124,108 124,106 122,110"/>
+                          </g>
+                        ))}
+                      </g>
+                    </g>
+                  </svg>
+
+                  {/* Globe grid overlay */}
+                  <div style={{
+                    position:'absolute', inset:'9%', borderRadius:'50%', overflow:'hidden',
+                    background:[
+                      'repeating-linear-gradient(0deg, transparent 0 37%, rgba(91,173,239,0.17) 37% calc(37% + 1px), transparent calc(37% + 1px) 74%)',
+                      'repeating-linear-gradient(90deg, transparent 0 48%, rgba(91,173,239,0.14) 48% calc(48% + 1px), transparent calc(48% + 1px) 96%)',
+                    ].join(', '),
+                    transform:'rotate(-12deg)',
+                  }}/>
+
+                  {/* Atmosphere */}
+                  <div style={{
+                    position:'absolute', inset:0, borderRadius:'50%',
+                    background:[
+                      'radial-gradient(circle at 72% 68%, rgba(0,0,10,0.28) 0%, transparent 56%)',
+                      'radial-gradient(circle at 50% 50%, transparent 72%, rgba(80,140,240,0.12) 90%, rgba(110,170,255,0.22) 100%)',
+                    ].join(', '),
+                  }}/>
+
+                  {/* Globe centre text */}
+                  <div style={{
+                    position:'absolute', inset:0, display:'flex', flexDirection:'column',
+                    alignItems:'center', justifyContent:'center', textAlign:'center',
+                    zIndex:2, gap:'1.5%',
+                  }}>
+                    <span style={{ fontSize:'clamp(7px,0.90vw,12px)', fontWeight:700, letterSpacing:'0.32em', color:'white', fontFamily:'Inter,sans-serif' }}>ANALYTIX</span>
+                    <span style={{ fontSize:'clamp(3.5px,0.44vw,6px)', letterSpacing:'0.16em', color:'rgba(190,210,235,0.78)', fontFamily:'Inter,sans-serif' }}>GLOBAL PROFESSIONAL</span>
+                    <span style={{ fontSize:'clamp(3.5px,0.44vw,6px)', letterSpacing:'0.16em', color:'rgba(190,210,235,0.78)', fontFamily:'Inter,sans-serif' }}>SERVICES</span>
+                    <div style={{ width:'48%', height:1, background:'rgba(200,40,60,0.50)' }}/>
+                    <span style={{ fontSize:'clamp(3.5px,0.48vw,6.5px)', color:'rgba(185,205,232,0.68)', fontFamily:'Georgia,serif', fontStyle:'italic' }}>Smarter Strategies.</span>
+                    <span style={{ fontSize:'clamp(3.5px,0.48vw,6.5px)', color:'rgba(185,205,232,0.68)', fontFamily:'Georgia,serif', fontStyle:'italic' }}>Stronger Tomorrow.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ambient pulsing particles */}
+              {!ecoReducedMotion && [[18,28],[82,26],[10,60],[90,57],[50,85]].map(([lp,tp],i) => (
+                <div key={i} style={{
+                  position:'absolute', left:`${lp}%`, top:`${tp}%`,
+                  width:7, height:7, borderRadius:'50%',
+                  background:'#e8001a', boxShadow:'0 0 10px rgba(232,0,26,0.9)',
+                  transform:'translate(-50%,-50%)',
+                  animation:`csg-particle ${2.7}s ${i*0.52}s ease-in-out infinite`,
+                }}/>
+              ))}
+
+              {/* 5 Service nodes — CSS absolute positioned */}
+              {[
+                { l:'50%', t:'6%',  xf:'translateX(-50%)',     n1:'AUDIT &',        n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',   icon:'shield' },
+                { l:'5%',  t:'41%', xf:'translateY(-50%)',     n1:'ADVISORY &',      n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',         icon:'gear'   },
+                { r:'5%',  t:'41%', xf:'translateY(-50%)',     n1:'ACCOUNTING',      n2:'& TAX',      d1:'Financial clarity.',         d2:'Regulatory confidence.', icon:'coins'  },
+                { l:'16%', b:'8%',  xf:'translateX(-50%)',     n1:'BUSINESS &',      n2:'COMPLIANCE', d1:'Stay compliant.',            d2:'Move forward.',          icon:'doc'    },
+                { r:'16%', b:'8%',  xf:'translateX(50%)',      n1:'GLOBAL BUSINESS', n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                     icon:'world'  },
+              ].map((nd, idx) => {
+                const posStyle = {
+                  position:'absolute', textAlign:'center', zIndex:10,
+                  width:'clamp(72px,12%,115px)',
+                  ...(nd.l ? { left:nd.l } : {}),
+                  ...(nd.r ? { right:nd.r } : {}),
+                  ...(nd.t ? { top:nd.t } : {}),
+                  ...(nd.b ? { bottom:nd.b } : {}),
+                  transform: nd.xf,
+                };
+                return (
+                  <div key={idx} className="eco-node" style={posStyle}>
+                    <div className="eco-icon-ring" style={{
+                      width:'clamp(44px,6.2vw,64px)', height:'clamp(44px,6.2vw,64px)',
+                      borderRadius:'50%', border:'1.5px solid rgba(184,18,36,0.72)',
+                      background:'rgba(3,9,24,0.90)',
+                      boxShadow:'0 0 16px rgba(220,20,50,0.26), inset 0 0 12px rgba(35,95,195,0.12)',
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      margin:'0 auto clamp(5px,0.7vh,9px)',
+                    }}>
+                      {nd.icon === 'shield' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2L4 6v6c0 5.5 3.5 10.7 8 12 4.5-1.3 8-6.5 8-12V6z"/>
+                          <polyline points="9 12 11 14 15 10"/>
+                        </svg>
+                      )}
+                      {nd.icon === 'gear' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="3" strokeWidth="1.5"/>
+                          {[0,45,90,135,180,225,270,315].map(a => {
+                            const ar = a*Math.PI/180;
+                            return <line key={a}
+                              x1={12+5.2*Math.cos(ar)} y1={12+5.2*Math.sin(ar)}
+                              x2={12+8.5*Math.cos(ar)} y2={12+8.5*Math.sin(ar)}
+                              strokeWidth="2"/>;
+                          })}
+                        </svg>
+                      )}
+                      {nd.icon === 'coins' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round">
+                          {[-3,0,3].map(yy => <ellipse key={yy} cx="12" cy={12+yy} rx="7" ry="2.4"/>)}
+                          <line x1="5" y1="9" x2="5" y2="15"/>
+                          <line x1="19" y1="9" x2="19" y2="15"/>
+                        </svg>
+                      )}
+                      {nd.icon === 'doc' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="5" y="2" width="14" height="20" rx="2" strokeWidth="1.5"/>
+                          <line x1="9" y1="8"  x2="15" y2="8"  strokeWidth="1"/>
+                          <line x1="9" y1="12" x2="15" y2="12" strokeWidth="1"/>
+                          <line x1="9" y1="16" x2="13" y2="16" strokeWidth="1"/>
+                        </svg>
+                      )}
+                      {nd.icon === 'world' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeLinecap="round">
+                          <circle cx="12" cy="12" r="10" strokeWidth="1.5"/>
+                          <ellipse cx="12" cy="12" rx="4" ry="10" strokeWidth="1"/>
+                          <line x1="2" y1="12" x2="22" y2="12" strokeWidth="1"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ fontSize:'clamp(8px,0.86vw,11px)', fontWeight:700, letterSpacing:'0.04em', color:'white', fontFamily:'Inter,sans-serif', lineHeight:1.15 }}>{nd.n1}</div>
+                    <div style={{ fontSize:'clamp(8px,0.86vw,11px)', fontWeight:700, letterSpacing:'0.04em', color:'white', fontFamily:'Inter,sans-serif', lineHeight:1.15 }}>{nd.n2}</div>
+                    <div style={{ fontSize:'clamp(6.5px,0.70vw,9px)', color:'rgba(175,198,225,0.72)', fontFamily:'Inter,sans-serif', marginTop:'clamp(3px,0.4vh,5px)', lineHeight:1.3 }}>{nd.d1}</div>
+                    {nd.d2 && <div style={{ fontSize:'clamp(6.5px,0.70vw,9px)', color:'rgba(175,198,225,0.72)', fontFamily:'Inter,sans-serif', lineHeight:1.3 }}>{nd.d2}</div>}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Company tagline */}
