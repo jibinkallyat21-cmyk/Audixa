@@ -527,12 +527,12 @@ export default function Login() {
               justifyContent: 'center',
               position: 'relative',
               minHeight: 0,
-              overflow: 'visible',
+              overflow: 'hidden',
             }}>
               <svg
-                viewBox="0 -18 720 536"
+                viewBox="0 0 720 450"
                 width="100%"
-                style={{ display: 'block', overflow: 'visible' }}
+                style={{ display: 'block', overflow: 'hidden' }}
                 aria-label="Analytix service ecosystem"
               >
                 <defs>
@@ -550,149 +550,133 @@ export default function Login() {
                     <stop offset="0%"  stopColor="rgba(0,0,10,0.30)"/>
                     <stop offset="100%" stopColor="rgba(0,0,0,0)"/>
                   </radialGradient>
-                  <filter id="csg-sg" x="-60%" y="-60%" width="220%" height="220%">
-                    <feGaussianBlur stdDeviation="2.5" result="b"/>
-                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                  </filter>
                   <filter id="csg-ng" x="-40%" y="-40%" width="180%" height="180%">
                     <feGaussianBlur stdDeviation="2" result="b"/>
                     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                   </filter>
-                  {/* Globe clip — r=88 center (360,248) */}
+                  <filter id="csg-lg" x="-80%" y="-80%" width="260%" height="260%">
+                    <feGaussianBlur stdDeviation="3.5" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  {/* Globe clip — cy=225, r=78 */}
                   <clipPath id="csg-gc">
-                    <circle cx={360} cy={248} r={86}/>
+                    <circle cx={360} cy={225} r={76}/>
                   </clipPath>
-                  {/* Orbit path: rx=165, ry=58 */}
-                  <path id="csg-op" fill="none"
-                    d="M 525,248 A 165,58 0 0 1 195,248 A 165,58 0 0 1 525,248"/>
                 </defs>
 
                 {/* Globe body */}
-                <circle cx={360} cy={248} r={88} fill="url(#csg-glob)"/>
+                <circle cx={360} cy={225} r={78} fill="url(#csg-glob)"/>
 
-                {/* Rotating continents — outer clips, inner spins */}
+                {/* Rotating continents */}
                 <g clipPath="url(#csg-gc)">
-                  <g fill="rgba(50,108,72,0.44)" stroke="rgba(68,138,90,0.24)" strokeWidth="0.65">
+                  <g fill="rgba(48,106,70,0.46)" stroke="rgba(65,135,88,0.26)" strokeWidth="0.6">
                     {!ecoReducedMotion && (
                       <animateTransform attributeName="transform" type="translate"
-                        from="0 0" to="-176 0" dur="28s" repeatCount="indefinite"/>
+                        from="0 0" to="-156 0" dur="28s" repeatCount="indefinite"/>
                     )}
-                    {/* Three tiles (176 px = 360° in this projection) */}
-                    {[-176, 0, 176].map(ox => (
+                    {[-156, 0, 156].map(ox => (
                       <g key={ox} transform={`translate(${ox},0)`}>
                         {/* North America */}
-                        <polygon points="277,196 285,193 294,194 300,201 301,212 306,225 318,238 320,240 322,230 321,225 324,214 324,209 330,205 335,202 332,196 326,186 322,187 320,184 312,177 301,177 294,180 292,182"/>
+                        <polygon points="287,179 294,176 302,177 307,183 308,193 312,205 323,216 325,218 326,209 325,205 328,195 328,191 333,187 338,184 335,179 330,170 326,171 325,168 318,162 308,162 302,165 300,166"/>
                         {/* Greenland */}
-                        <polygon points="337,167 349,169 352,173 347,177 337,178 334,173"/>
+                        <polygon points="340,153 350,155 353,158 349,162 340,163 337,158"/>
                         {/* South America */}
-                        <polygon points="322,246 320,250 320,253 322,277 327,292 327,303 332,299 332,287 332,282 335,277 338,271 343,256 343,253 336,248 332,242 327,237"/>
+                        <polygon points="326,223 325,227 325,229 326,251 331,264 331,274 335,270 335,260 335,255 338,251 341,246 345,232 345,229 339,225 335,220 331,215"/>
                         {/* Europe */}
-                        <polygon points="356,212 358,211 356,206 358,205 360,200 364,195 365,191 368,179 373,178 373,179 373,193 369,195 367,205 368,211 371,212 375,211 375,214 368,213 364,212"/>
+                        <polygon points="357,193 358,192 357,188 358,187 360,183 364,178 364,175 367,164 372,163 372,164 372,176 368,178 366,187 367,192 370,193 373,192 373,195 367,194 364,193"/>
                         {/* Africa */}
-                        <polygon points="356,214 354,217 352,235 354,240 358,243 363,243 367,244 368,266 369,282 373,282 377,272 385,236 381,233 379,225 377,218 367,212"/>
-                        {/* Asia (Turkey → Siberia → SE Asia → India → Arabia) */}
-                        <polygon points="373,212 375,206 385,207 397,197 400,179 414,176 434,177 440,197 426,206 423,214 420,226 413,236 410,247 400,240 399,242 395,229 394,226 390,224 389,226 388,233 382,235 379,233 376,219 377,213"/>
+                        <polygon points="357,195 355,198 353,214 355,218 358,221 363,221 366,222 367,241 368,255 372,255 375,246 382,214 379,212 377,205 375,198 366,195"/>
+                        {/* Asia */}
+                        <polygon points="372,195 373,188 382,189 393,180 395,164 408,161 426,162 431,180 419,188 416,195 413,205 407,214 404,224 395,218 395,220 391,208 390,205 387,204 386,205 385,212 380,214 377,212 374,199 374,194"/>
                         {/* Australia */}
-                        <polygon points="416,279 417,282 424,280 429,287 431,286 434,282 435,275 431,259 426,265 424,260 416,270"/>
+                        <polygon points="410,253 411,255 417,253 421,260 423,259 426,255 427,249 423,235 419,240 417,236 410,245"/>
                       </g>
                     ))}
                   </g>
                 </g>
 
-                {/* Grid lines clipped */}
+                {/* Grid lines */}
                 <g clipPath="url(#csg-gc)">
                   {[-2,-1,0,1,2].map(i => {
-                    const ly = 248 + i*35;
-                    const lrx = Math.sqrt(Math.max(0, 88**2 - (i*35)**2));
+                    const ly = 225 + i*32;
+                    const lrx = Math.sqrt(Math.max(0, 78**2 - (i*32)**2));
                     return lrx > 5 ? (
                       <ellipse key={i} cx={360} cy={ly} rx={lrx} ry={lrx*0.17}
-                        fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"/>
+                        fill="none" stroke="rgba(100,140,200,0.12)" strokeWidth="0.5"/>
                     ) : null;
                   })}
-                  {[36,72,108,144].map(a => {
-                    const lrx = 88 * Math.abs(Math.sin(a*Math.PI/180));
+                  {[45,90,135].map(a => {
+                    const lrx = 78 * Math.abs(Math.sin(a*Math.PI/180));
                     return lrx > 5 ? (
-                      <ellipse key={a} cx={360} cy={248} rx={lrx} ry={88}
-                        fill="none" stroke="rgba(100,140,200,0.13)" strokeWidth="0.5"
-                        transform={`rotate(${a} 360 248)`}/>
+                      <ellipse key={a} cx={360} cy={225} rx={lrx} ry={78}
+                        fill="none" stroke="rgba(100,140,200,0.12)" strokeWidth="0.5"
+                        transform={`rotate(${a} 360 225)`}/>
                     ) : null;
                   })}
                 </g>
 
                 {/* Atmosphere + terminator */}
-                <circle cx={360} cy={248} r={88} fill="url(#csg-atm)"/>
-                <circle cx={360} cy={248} r={88} fill="url(#csg-shd)"/>
+                <circle cx={360} cy={225} r={78} fill="url(#csg-atm)"/>
+                <circle cx={360} cy={225} r={78} fill="url(#csg-shd)"/>
 
                 {/* Globe rim */}
-                <circle cx={360} cy={248} r={88} fill="none" stroke="rgba(40,80,160,0.28)" strokeWidth="3.5"/>
-                <circle cx={360} cy={248} r={88} fill="none" stroke="rgba(60,100,180,0.07)" strokeWidth="14"/>
+                <circle cx={360} cy={225} r={78} fill="none" stroke="rgba(40,80,160,0.26)" strokeWidth="3"/>
+                <circle cx={360} cy={225} r={78} fill="none" stroke="rgba(60,100,180,0.07)" strokeWidth="12"/>
 
-                {/* Connecting lines with pulsing glow */}
-                <g fill="none" strokeLinecap="round" strokeDasharray="4.5 5">
-                  {/* Glow layer — pulses */}
-                  <g stroke="rgba(110,170,255,0.9)" strokeWidth="5" opacity="0.12">
+                {/* Connecting lines — solid, subtle glow + crisp line */}
+                <g fill="none" strokeLinecap="round">
+                  {/* Soft glow layer */}
+                  <g stroke="rgba(100,160,255,0.22)" strokeWidth="4">
                     {!ecoReducedMotion && (
-                      <animate attributeName="opacity" values="0.08;0.40;0.08" dur="2.6s" repeatCount="indefinite"/>
+                      <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
                     )}
-                    <line x1={360} y1={160} x2={360} y2={98}/>
-                    <line x1={272} y1={244} x2={140} y2={235}/>
-                    <line x1={448} y1={244} x2={568} y2={235}/>
-                    <line x1={289} y1={302} x2={173} y2={388}/>
-                    <line x1={430} y1={304} x2={540} y2={388}/>
+                    <line x1={360} y1={147} x2={360} y2={72}/>
+                    <line x1={282} y1={222} x2={140} y2={216}/>
+                    <line x1={438} y1={222} x2={568} y2={216}/>
+                    <line x1={296} y1={269} x2={173} y2={353}/>
+                    <line x1={424} y1={270} x2={540} y2={352}/>
                   </g>
-                  {/* Crisp main lines */}
-                  <g stroke="rgba(110,165,230,0.72)" strokeWidth="1.1">
-                    <line x1={360} y1={160} x2={360} y2={98}/>
-                    <line x1={272} y1={244} x2={140} y2={235}/>
-                    <line x1={448} y1={244} x2={568} y2={235}/>
-                    <line x1={289} y1={302} x2={173} y2={388}/>
-                    <line x1={430} y1={304} x2={540} y2={388}/>
+                  {/* Crisp line */}
+                  <g stroke="rgba(90,145,220,0.65)" strokeWidth="0.9">
+                    <line x1={360} y1={147} x2={360} y2={72}/>
+                    <line x1={282} y1={222} x2={140} y2={216}/>
+                    <line x1={438} y1={222} x2={568} y2={216}/>
+                    <line x1={296} y1={269} x2={173} y2={353}/>
+                    <line x1={424} y1={270} x2={540} y2={352}/>
                   </g>
                 </g>
 
-                {/* Orbital ring — clean thin dashed ellipse, no neon blast */}
-                <ellipse cx={360} cy={248} rx={165} ry={58}
-                  fill="none" stroke="rgba(160,28,48,0.28)" strokeWidth="0.85" strokeDasharray="6 7"/>
-
-                {/* Static dots at ring tips */}
-                <circle cx={195} cy={248} r={3.5} fill="#e01030" filter="url(#csg-sg)"/>
-                <circle cx={525} cy={248} r={3.5} fill="#e01030" filter="url(#csg-sg)"/>
-
-                {/* 3 animated dots */}
-                {!ecoReducedMotion && [0, -3.5, -7].map((begin, i) => (
-                  <circle key={i} r={3.2} fill="#e8001a" filter="url(#csg-sg)">
-                    <animateMotion dur="10s" begin={`${begin}s`} repeatCount="indefinite">
-                      <mpath href="#csg-op"/>
-                    </animateMotion>
-                  </circle>
+                {/* Small dot at each line's globe end */}
+                {[[360,147],[282,222],[438,222],[296,269],[424,270]].map(([x,y],i) => (
+                  <circle key={i} cx={x} cy={y} r={2} fill="rgba(110,165,230,0.7)"/>
                 ))}
 
                 {/* Globe centre text */}
-                <text x={360} y={233} textAnchor="middle" fill="white"
-                  fontSize="13.5" fontWeight="700" letterSpacing="6"
+                <text x={360} y={211} textAnchor="middle" fill="white"
+                  fontSize="12.5" fontWeight="700" letterSpacing="5.5"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">ANALYTIX</text>
-                <text x={360} y={244} textAnchor="middle" fill="rgba(190,210,235,0.80)"
-                  fontSize="5.5" letterSpacing="2.5" fontWeight="500"
+                <text x={360} y={221} textAnchor="middle" fill="rgba(190,210,235,0.80)"
+                  fontSize="5" letterSpacing="2.2" fontWeight="500"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">GLOBAL PROFESSIONAL</text>
-                <text x={360} y={253} textAnchor="middle" fill="rgba(190,210,235,0.80)"
-                  fontSize="5.5" letterSpacing="2.5" fontWeight="500"
+                <text x={360} y={229} textAnchor="middle" fill="rgba(190,210,235,0.80)"
+                  fontSize="5" letterSpacing="2.2" fontWeight="500"
                   fontFamily="Inter,'Helvetica Neue',Arial,sans-serif">SERVICES</text>
-                <line x1={332} y1={259} x2={388} y2={259}
-                  stroke="rgba(200,40,60,0.6)" strokeWidth="0.7"/>
-                <text x={360} y={270} textAnchor="middle" fill="rgba(185,205,232,0.76)"
-                  fontSize="7.5" fontStyle="italic"
+                <line x1={334} y1={234} x2={386} y2={234}
+                  stroke="rgba(200,40,60,0.55)" strokeWidth="0.6"/>
+                <text x={360} y={243} textAnchor="middle" fill="rgba(185,205,232,0.72)"
+                  fontSize="7" fontStyle="italic"
                   fontFamily="Georgia,'Times New Roman',serif">Smarter Strategies.</text>
-                <text x={360} y={281} textAnchor="middle" fill="rgba(185,205,232,0.76)"
-                  fontSize="7.5" fontStyle="italic"
+                <text x={360} y={253} textAnchor="middle" fill="rgba(185,205,232,0.72)"
+                  fontSize="7" fontStyle="italic"
                   fontFamily="Georgia,'Times New Roman',serif">Stronger Tomorrow.</text>
 
-                {/* 5 Service nodes — closer, everything inside viewBox */}
+                {/* 5 Service nodes — all within viewBox 0 0 720 450 */}
                 {[
-                  { x:360, y:76,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',    icon:'shield' },
-                  { x:118, y:232, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',          icon:'gear'   },
-                  { x:590, y:232, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',         d2:'Regulatory confidence.',  icon:'coins'  },
-                  { x:155, y:402, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',            d2:'Move forward.',           icon:'doc'    },
-                  { x:558, y:402, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                      icon:'world'  },
+                  { x:360, y:50,  n1:'AUDIT &',         n2:'ASSURANCE',  d1:'Independent insight.',       d2:'Greater confidence.',    icon:'shield' },
+                  { x:118, y:215, n1:'ADVISORY &',       n2:'STRATEGY',   d1:'Practical guidance.',        d2:'Lasting value.',          icon:'gear'   },
+                  { x:590, y:215, n1:'ACCOUNTING',       n2:'& TAX',      d1:'Financial clarity.',         d2:'Regulatory confidence.',  icon:'coins'  },
+                  { x:155, y:365, n1:'BUSINESS &',       n2:'COMPLIANCE', d1:'Stay compliant.',            d2:'Move forward.',           icon:'doc'    },
+                  { x:558, y:365, n1:'GLOBAL BUSINESS',  n2:'SERVICES',   d1:'Expand. Establish. Thrive.', d2:null,                      icon:'world'  },
                 ].map(nd => (
                   <g key={`${nd.x}-${nd.y}`} transform={`translate(${nd.x},${nd.y})`}>
                     <circle cx={0} cy={0} r={22} fill="rgba(4,10,24,0.92)"/>
