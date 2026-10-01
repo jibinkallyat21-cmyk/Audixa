@@ -321,111 +321,21 @@ export default function Login() {
         onMouseMove={handleMouseMove}
       >
 
-        {/* ── LAYER 1: Base background — pure CSS, no image ──────── */}
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: [
-            'radial-gradient(ellipse 70% 55% at 38% 52%, rgba(10,42,95,0.38) 0%, transparent 65%)',
-            'radial-gradient(ellipse 45% 35% at 72% 24%, rgba(15,55,120,0.18) 0%, transparent 55%)',
-            'linear-gradient(155deg, #010a18 0%, #020d1e 40%, #010b16 100%)',
-          ].join(', '),
-        }} />
-        {/* Dot-grid texture */}
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: 'radial-gradient(rgba(72,142,218,0.32) 1px, transparent 1px)',
-          backgroundSize: '38px 38px', opacity: 0.07,
-          maskImage: 'radial-gradient(ellipse 90% 80% at 40% 50%, black 0%, transparent 80%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 90% 80% at 40% 50%, black 0%, transparent 80%)',
-        }} />
-        {/* City skyline — SVG, bottom-left */}
-        <svg viewBox="0 0 1200 520" preserveAspectRatio="xMidYMax meet"
-          style={{ position:'absolute', bottom:0, left:0, width:'72%', height:'82%', pointerEvents:'none', zIndex:1 }}>
-          <defs>
-            <linearGradient id="bld" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(8,28,56,0.95)"/>
-              <stop offset="100%" stopColor="rgba(3,12,26,0.98)"/>
-            </linearGradient>
-            <pattern id="win" x="0" y="0" width="13" height="16" patternUnits="userSpaceOnUse">
-              <rect width="5" height="7" rx="0.5" fill="rgba(68,142,208,0.24)"/>
-            </pattern>
-            <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          {/* back layer — silhouette */}
-          <g fill="rgba(4,14,30,0.72)" opacity="0.8">
-            <rect x="0"   y="320" width="55"  height="200"/>
-            <rect x="60"  y="280" width="42"  height="240"/>
-            <rect x="108" y="310" width="32"  height="210"/>
-            <rect x="146" y="256" width="52"  height="264"/>
-            <rect x="204" y="290" width="38"  height="230"/>
-            <rect x="248" y="260" width="68"  height="260"/>
-            <rect x="322" y="330" width="40"  height="190"/>
-            <rect x="368" y="240" width="84"  height="280"/>
-            <rect x="458" y="285" width="50"  height="235"/>
-            <rect x="514" y="220" width="106" height="300"/>
-            <rect x="626" y="272" width="62"  height="248"/>
-            <rect x="694" y="200" width="96"  height="320"/>
-            <rect x="796" y="265" width="50"  height="255"/>
-            <rect x="852" y="228" width="80"  height="292"/>
-            <rect x="938" y="260" width="55"  height="260"/>
-            <rect x="1000" y="240" width="82" height="280"/>
-            <rect x="1088" y="278" width="48" height="242"/>
-            <rect x="1142" y="256" width="58" height="264"/>
-          </g>
-          {/* front layer — darker, edge-lit */}
-          <g fill="url(#bld)" stroke="rgba(80,155,215,0.16)" strokeWidth="0.5">
-            <rect x="15"  y="300" width="52"  height="220" rx="1"/>
-            <rect x="72"  y="258" width="68"  height="262" rx="1"/>
-            <rect x="148" y="232" width="48"  height="288" rx="1"/>
-            <rect x="204" y="268" width="38"  height="252" rx="1"/>
-            <rect x="250" y="236" width="88"  height="284" rx="1"/>
-            <rect x="346" y="290" width="55"  height="230" rx="1"/>
-            <rect x="408" y="210" width="110" height="310" rx="1"/>
-            <rect x="525" y="248" width="62"  height="272" rx="1"/>
-            <rect x="595" y="178" width="124" height="342" rx="1"/>
-            <rect x="727" y="236" width="66"  height="284" rx="1"/>
-            <rect x="800" y="192" width="102" height="328" rx="1"/>
-            <rect x="910" y="250" width="56"  height="270" rx="1"/>
-            <rect x="972" y="218" width="82"  height="302" rx="1"/>
-            <rect x="1060" y="262" width="50" height="258" rx="1"/>
-            <rect x="1116" y="232" width="66" height="288" rx="1"/>
-          </g>
-          {/* window lights */}
-          <g fill="url(#win)" opacity="0.45">
-            <rect x="74"  y="262" width="64"  height="250"/>
-            <rect x="150" y="236" width="44"  height="275"/>
-            <rect x="252" y="240" width="84"  height="270"/>
-            <rect x="410" y="214" width="106" height="298"/>
-            <rect x="597" y="182" width="120" height="328"/>
-            <rect x="802" y="196" width="98"  height="315"/>
-            <rect x="974" y="222" width="78"  height="290"/>
-          </g>
-          {/* warm amber windows — scattered on dark buildings */}
-          <g fill="rgba(255,185,70,0.38)">
-            {[[80,270],[95,288],[82,306],[156,242],[172,260],[413,220],[428,238],[601,188],[618,206],[634,224],[808,200],[823,218],[978,228],[993,246]].map(([x,y],i) => (
-              <rect key={i} x={x} y={y} width="5" height="7" rx="0.5"/>
-            ))}
-          </g>
-          {/* antenna spires */}
-          <g filter="url(#glow)" stroke="rgba(80,155,215,0.45)" strokeWidth="1.5" fill="none">
-            <line x1="464"  y1="210" x2="464"  y2="174"/><circle cx="464" cy="173" r="2" fill="rgba(80,155,215,0.72)"/>
-            <line x1="657"  y1="178" x2="657"  y2="138"/><circle cx="657" cy="137" r="2.5" fill="rgba(80,155,215,0.82)"/>
-            <line x1="852"  y1="192" x2="852"  y2="158"/><circle cx="852" cy="157" r="2" fill="rgba(80,155,215,0.65)"/>
-          </g>
-          {/* top-edge light line on tallest buildings */}
-          <g stroke="rgba(80,155,215,0.28)" strokeWidth="0.8">
-            <line x1="408" y1="210" x2="518" y2="210"/>
-            <line x1="595" y1="178" x2="719" y2="178"/>
-            <line x1="800" y1="192" x2="912" y2="192"/>
-          </g>
-          {/* base ground glow */}
-          <ellipse cx="600" cy="490" rx="600" ry="42" fill="rgba(18,70,158,0.08)"/>
-          {/* water — reflection band */}
-          <rect x="0" y="462" width="1200" height="58" fill="rgba(4,14,30,0.55)"/>
-          <g stroke="rgba(52,128,205,0.12)" strokeWidth="0.7">
-            <line x1="0" y1="472" x2="1200" y2="472"/>
-            <line x1="0" y1="482" x2="1200" y2="482"/>
-            <line x1="0" y1="492" x2="1200" y2="492"/>
-          </g>
-        </svg>
+        {/* ── LAYER 1: Background photo ────────────────────────────── */}
+        <div className="a360-bgwarp" style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <img
+            ref={bgRef}
+            src="/bg/audit360.webp"
+            alt=""
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center center',
+              transform: 'scale(1.06)',
+              willChange: 'transform',
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
 
         {/* ── LAYER 1b: Deep background plane — 0.5× parallax speed ─ */}
         <div ref={deepRef} style={{
@@ -505,21 +415,21 @@ export default function Login() {
           pointerEvents: 'none', willChange: 'transform',
         }} />
 
-        {/* ── Scene overlays ─────────────────────────────────────── */}
-        {/* Edge vignette */}
+        {/* ── Overlays on top of photo ───────────────────────────── */}
+        {/* Subtle edge vignette */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 100% 88% at 40% 50%, transparent 50%, rgba(1,5,14,0.62) 100%)',
+          background: 'radial-gradient(ellipse 110% 90% at 42% 50%, transparent 55%, rgba(1,6,16,0.55) 100%)',
         }} />
         {/* Top & bottom fade */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'linear-gradient(180deg, rgba(1,6,16,0.28) 0%, transparent 16%, transparent 78%, rgba(1,6,16,0.60) 100%)',
+          background: 'linear-gradient(180deg, rgba(1,6,16,0.18) 0%, transparent 14%, transparent 82%, rgba(1,6,16,0.50) 100%)',
         }} />
-        {/* Right panel backdrop — darkens area behind the login card */}
+        {/* Right darkening — behind login card */}
         <div style={{
-          position: 'absolute', top: 0, right: 0, bottom: 0, width: '44%', pointerEvents: 'none',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(2,8,20,0.55) 22%, rgba(2,8,20,0.80) 55%, rgba(1,5,16,0.94) 100%)',
+          position: 'absolute', top: 0, right: 0, bottom: 0, width: '42%', pointerEvents: 'none',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(2,9,22,0.60) 30%, rgba(2,9,22,0.84) 70%, rgba(1,6,16,0.92) 100%)',
         }} />
 
         {/* Red diagonal removed — image supplies it */}
