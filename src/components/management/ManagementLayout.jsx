@@ -5,6 +5,7 @@ import { LayoutDashboard, BarChart3, Banknote, ShieldAlert, Trophy, ScrollText, 
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
+import { useMgmtScope, MGMT_SCOPES } from '../../hooks/useMgmtScope'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import { mgmtUser, mgmtNotifications } from '../../data/sampleData'
@@ -167,6 +168,7 @@ function NotificationsDropdown() {
 }
 
 function ManagementHeader({ title, headerSearch }) {
+  const [scope, setScope] = useMgmtScope()
   return (
     <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
       <div className="flex items-center gap-2">
@@ -182,9 +184,26 @@ function ManagementHeader({ title, headerSearch }) {
       <div className="flex items-center gap-3">
         {headerSearch && <div className="hidden sm:block">{headerSearch}</div>}
 
-        <span className="hidden lg:inline-flex rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80">
-          Firm Wide
-        </span>
+        <div
+          role="group"
+          aria-label="Firm scope"
+          title="View ABCPA, MISCPA or both firms combined"
+          className="hidden items-center gap-1 rounded-full border border-white/20 bg-white/5 p-0.5 text-[10px] font-semibold lg:flex"
+        >
+          {MGMT_SCOPES.map((s) => (
+            <button
+              key={s}
+              type="button"
+              aria-pressed={scope === s}
+              onClick={() => setScope(s)}
+              className={`rounded-full px-2.5 py-1 transition-colors ${
+                scope === s ? 'bg-white text-navy' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
 
         <NotificationsDropdown />
 

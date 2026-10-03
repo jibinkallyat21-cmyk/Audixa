@@ -3,6 +3,7 @@ import { ShieldAlert, ShieldCheck, AlertTriangle, CheckCircle2, Clock } from 'lu
 import ManagementLayout from '../../components/management/ManagementLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
+import { useMgmtScope } from '../../hooks/useMgmtScope'
 import {
   mgmtRiskHeatmap,
   mgmtComplianceChecks,
@@ -31,6 +32,8 @@ const CHECK_STATUS = {
 
 export default function ManagementRisk() {
   const showToast = useToast()
+  const [scope] = useMgmtScope()
+  const atRiskFiles = mgmtAtRiskFiles.filter((f) => scope === 'Combined' || f.dept === scope)
   const maxHeat = Math.max(...mgmtRiskHeatmap.flatMap((d) => [d.tier1, d.tier2, d.tier3]))
 
   return (
@@ -159,7 +162,8 @@ export default function ManagementRisk() {
           <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
             <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>At-Risk Files — Blockers</h3>
             <div className="space-y-3">
-              {mgmtAtRiskFiles.map((f) => (
+              {atRiskFiles.length === 0 && <p className="text-xs" style={{ color: D.muted }}>No at-risk files for {scope}.</p>}
+              {atRiskFiles.map((f) => (
                 <div key={f.client} className="flex items-start justify-between gap-3 rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold" style={{ color: D.heading }}>{f.client} <span className="font-normal" style={{ color: D.muted }}>· {f.dept}</span></p>

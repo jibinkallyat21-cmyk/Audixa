@@ -6,6 +6,7 @@ import {
   ChevronRight, ExternalLink, AlertCircle, Clock, PauseCircle, ShieldAlert,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
+import { useMgmtScope } from '../../hooks/useMgmtScope'
 import {
   mgmtUser,
   mgmtFOFiles,
@@ -15,6 +16,8 @@ import {
   mgmtRevenueTiles,
   mgmtTotalTurnover,
   mgmtClientDirectory,
+  mgmtAbcpaPortfolio,
+  mgmtMiscpaPortfolio,
   mgmtLeadConversion,
   mgmtConversionRate,
   mgmtRealization,
@@ -105,13 +108,14 @@ export function ClientSearch() {
   const [active, setActive] = useState(null)
   const [open, setOpen] = useState(false)
   const containerRef = useRef(null)
+  const [scope] = useMgmtScope()
 
   const results = query.trim().length >= 2
-    ? mgmtClientDirectory.filter(c =>
+    ? mgmtClientDirectory.filter(c => (scope === 'Combined' || c.dept === scope) && (
         c.name.toLowerCase().includes(query.toLowerCase()) ||
         c.code.toLowerCase().includes(query.toLowerCase()) ||
         c.sector.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 6)
+      )).slice(0, 6)
     : []
 
   const handleBlur = (e) => {
@@ -299,7 +303,9 @@ function ARModal({ onClose }) {
 /* ─── Full Escalations modal ─── */
 function EscalationsModal({ onClose }) {
   const [filter, setFilter] = useState('All')
-  const filtered = filter === 'All' ? mgmtAllEscalations : mgmtAllEscalations.filter(e => e.status === filter)
+  const [scope] = useMgmtScope()
+  const scoped = mgmtAllEscalations.filter(e => scope === 'Combined' || e.dept === scope)
+  const filtered = filter === 'All' ? scoped : scoped.filter(e => e.status === filter)
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
@@ -312,7 +318,7 @@ function EscalationsModal({ onClose }) {
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
           <div>
             <h3 className="text-base font-bold text-navy">Full Escalation Centre</h3>
-            <p className="text-xs text-slate-400 mt-0.5">{mgmtAllEscalations.length} escalations on record</p>
+            <p className="text-xs text-slate-400 mt-0.5">{scoped.length} escalations on record</p>
           </div>
           <button onClick={onClose} className="text-slate-300 hover:text-slate-600"><X className="h-5 w-5" /></button>
         </div>
@@ -327,7 +333,7 @@ function EscalationsModal({ onClose }) {
             </button>
           ))}
           <span className="ml-auto text-[10px] font-semibold text-slate-400 self-center">
-            {mgmtAllEscalations.filter(e => e.status === 'Open').length} open
+            {scoped.filter(e => e.status === 'Open').length} open
           </span>
         </div>
 
@@ -430,11 +436,14 @@ function AttentionStrip({ navigate }) {
 /* ─── Main Dashboard ─── */
 export default function ManagementDashboard() {
   const [modal, setModal] = useState(null)
+  const [scope] = useMgmtScope()
+  const portfolio = scope === 'ABCPA' ? mgmtAbcpaPortfolio : scope === 'MISCPA' ? mgmtMiscpaPortfolio : null
   const navigate = useNavigate()
 
   const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
-  const openEscalations = mgmtAllEscalations.filter(e => e.status === 'Open').length
-  const recent5 = mgmtAllEscalations.slice(0, 5)
+  const escalations = mgmtAllEscalations.filter(e => scope === 'Combined' || e.dept === scope)
+  const openEscalations = escalations.filter(e => e.status === 'Open').length
+  const recent5 = escalations.slice(0, 5)
   const breachCount = mgmtDeadlineBreaches.filter(b => b.daysLeft < 0).length
 
   return (
@@ -445,7 +454,7 @@ export default function ManagementDashboard() {
         <div className="shrink-0 flex items-start justify-between gap-3">
           <div>
             <h1 className="text-lg font-bold text-navy">Good morning, {mgmtUser.name.split(' ')[0]}.</h1>
-            <p className="text-xs text-slate-400">Firm-Wide View — ABCPA + MISCPA · 25 Sep 2026</p>
+            <p className="text-xs text-slate-400">{portfolio ? `${scope} Department View` : 'Combined View — ABCPA + MISCPA'} · 25 Sep 2026</p>
           </div>
           {breachCount > 0 && (
             <button
@@ -458,25 +467,48 @@ export default function ManagementDashboard() {
           )}
         </div>
 
+        {portfolio && (
+          <div className="shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-navy">{portfolio.label}</p>
+                <p className="text-[11px] text-slate-400">Manager {portfolio.manager} · Asst. Manager {portfolio.am}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {portfolio.breakdown.map((b) => (
+                  <span key={b.label} className="rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: `${b.color}1F`, color: b.color }}>
+                    {b.label} {b.value}
+                  </span>
+                ))}
+              </div>
+              <p className="min-w-0 text-[11px] text-slate-500">
+                <span className="font-semibold text-navy">Urgent:</span>{' '}
+                {portfolio.urgentFiles.map((f) => `${f.client} (${f.days}d · ${f.status})`).join(' · ')}
+              </p>
+              <p className="w-full text-[10px] text-slate-400">Files, escalations and client search follow the selected firm; turnover, billing and FO figures are firm-wide.</p>
+            </div>
+          </div>
+        )}
+
         {/* ── Needs Your Attention ── */}
         <AttentionStrip navigate={navigate} />
 
         {/* ── 5 Stat Cards ── */}
         <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <StatCard icon={Briefcase} iconColor="#0D1B2A"
-            label="Total Files Engaged" value="148"
-            sub="ABCPA: 89 · MISCPA: 59"
+            label="Total Files Engaged" value={portfolio ? String(portfolio.total) : '148'}
+            sub={portfolio ? `${scope} Department` : 'ABCPA: 89 · MISCPA: 59'}
             onClick={() => setModal('files')} delay={0} />
           <StatCard icon={TrendingUp} iconColor="#059669"
             label="Total Client Turnover" value={mgmtTotalTurnover.value}
-            sub={mgmtTotalTurnover.note} delay={0.06} />
+            sub={portfolio ? 'Firm-wide · FY2025' : mgmtTotalTurnover.note} delay={0.06} />
           <StatCard icon={Banknote} iconColor="#DC2626"
             label="AR — Pending Payments" value={`SAR ${(totalBalance / 1000).toFixed(0)}K`}
             sub={`${mgmtARPending.filter(c => c.daysOverdue > 0).length} clients overdue`}
             onClick={() => setModal('ar')} delay={0.12} />
           <StatCard icon={AlertCircle} iconColor="#D97706"
             label="Open Escalations" value={`${openEscalations} Open`}
-            sub={`${mgmtAllEscalations.length} total on record`}
+            sub={`${escalations.length} total on record`}
             onClick={() => setModal('escalations')} delay={0.18} />
           <StatCard icon={Wallet} iconColor="#2563EB"
             label="Fee Realization Rate" value={`${mgmtRealization.rate}%`}
@@ -534,7 +566,7 @@ export default function ManagementDashboard() {
             </div>
 
             <div className="shrink-0 border-t border-slate-100 px-5 py-3 flex items-center justify-between">
-              <p className="text-[11px] text-slate-400">Showing latest 5 of {mgmtAllEscalations.length}</p>
+              <p className="text-[11px] text-slate-400">Showing latest {recent5.length} of {escalations.length}</p>
               <button onClick={() => setModal('escalations')}
                 className="flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline">
                 View all <ChevronRight className="h-3 w-3" />
