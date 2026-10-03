@@ -446,11 +446,12 @@ export default function Login() {
             gap: '3%',
           }}>
 
-          {/* ══ LEFT PANEL — CSS/SVG visual ═══════════════════════════ */}
+          {/* ══ LEFT PANEL — transparent spacer; photo supplies visuals ══ */}
           <div className="a360-left" style={{
             flex: '0 0 66%', width: '66%',
             position: 'relative',
-            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            visibility: 'hidden',
+            pointerEvents: 'none',
           }}>
             {/* Brand + title block */}
             <div>
