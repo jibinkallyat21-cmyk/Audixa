@@ -47,7 +47,7 @@ const CSS = `
 #l360 .link{font-size:16px;color:#dfe4f2;background:none;border:0;padding:8px 0;white-space:nowrap;flex-shrink:0;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(255,255,255,.35)}
 #l360 .link:hover{color:#fff}
 #l360 :focus-visible{outline:2px solid #ff6b7a;outline-offset:3px;box-shadow:none}
-#l360 .link:focus-visible,#l360 .tab:focus-visible,#l360 .quiet:focus-visible,#l360 .back:focus-visible,#l360 .row button:focus-visible{border-radius:0}
+#l360 .link:focus-visible,#l360 .quiet:focus-visible,#l360 .back:focus-visible,#l360 .row button:focus-visible{border-radius:0}
 #l360 .strip{position:relative;padding:0 clamp(20px,5vw,72px) clamp(10px,3.1vh,28px);animation:l360-up 1s .2s ease both}
 #l360 .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:clamp(10px,2.7vh,24px) 32px}
 #l360 .svc{border-top:1px solid rgba(255,255,255,.22);padding-top:clamp(6px,1.8vh,16px)}
@@ -77,9 +77,6 @@ const CSS = `
 #l360 .view.on{display:block}
 #l360 h2{margin:0;font-size:30px;font-weight:600;color:#fff;letter-spacing:-.01em}
 #l360 .sub{margin:4px 0 22px;font-size:15px;color:#b4bbd0;line-height:1.45}
-#l360 .tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(180,195,235,.2);margin-bottom:22px}
-#l360 .tab{font-size:15px;font-weight:500;padding:10px 0;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;color:#a2abc4}
-#l360 .tab[aria-selected=true]{color:#fff;border-bottom-color:#f2434f}
 #l360 label{display:block;font-size:14px;font-weight:500;color:#dfe3ef;margin-bottom:8px}
 #l360 .row{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 8px}
 #l360 .row label{margin:0}
@@ -109,6 +106,7 @@ const CSS = `
 #l360 .quiet{margin-top:14px;width:100%;font-size:15px;color:#b4bbd0;background:none;border:0;padding:6px}
 #l360 .quiet:hover{color:#fff}
 #l360 .back{margin-top:16px;font-size:15px;color:#ff6b7a;background:none;border:0;padding:6px 0}
+#l360 .change{margin:-6px 0 14px;display:block}
 #l360 .secure{margin-top:10px;text-align:center;font-size:13px;color:#a2abc4}
 #l360 .done{padding:28px 0;text-align:center}
 #l360 .done .ok{width:56px;height:56px;margin:0 auto 18px;border-radius:50%;border:2px solid #f2434f;display:flex;align-items:center;justify-content:center;font-size:26px;color:#f2434f}
@@ -118,8 +116,8 @@ const CSS = `
 @media (max-width:760px){#l360 .kicker{gap:10px}#l360 .kicker i{flex-shrink:0;width:24px}#l360 .kicker span{font-size:11px;letter-spacing:.1em}#l360 .services{grid-template-columns:1fr 1fr;gap:10px 16px}#l360 .svc p,#l360 .svc small{display:none}#l360 .svc b{margin-top:0;font-size:14px}#l360 .presence{gap:14px}#l360 .btn-main{padding:14px 22px;font-size:16px}}
 @media (max-width:360px){#l360 .kicker span{font-size:10px;letter-spacing:.06em}}
 @media (max-height:520px){#l360 .services{display:none}}
-@media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 .tabs{margin-bottom:12px}#l360 .tab{padding:6px 0}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .create{margin-top:8px;padding-top:6px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}#l360 .picks{gap:10px}#l360 .pick{padding:10px 14px}#l360 .pick .ico{width:38px;height:38px}#l360 .pick small{display:none}}
-@media (max-height:430px){#l360 .secure{display:none}#l360 .card{padding:10px 22px}#l360 h2{font-size:22px}#l360 input,#l360 select{height:36px}#l360 .show{top:0}#l360 .sub{margin-bottom:8px}#l360 .tabs{margin-bottom:8px}#l360 .go{margin-top:8px;height:40px}#l360 .create{margin-top:6px;padding-top:4px;font-size:13px}}
+@media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .create{margin-top:8px;padding-top:6px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}#l360 .picks{gap:10px}#l360 .pick{padding:10px 14px}#l360 .pick .ico{width:38px;height:38px}#l360 .pick small{display:none}}
+@media (max-height:430px){#l360 .secure{display:none}#l360 .card{padding:10px 22px}#l360 h2{font-size:22px}#l360 input,#l360 select{height:36px}#l360 .show{top:0}#l360 .sub{margin-bottom:8px}#l360 .go{margin-top:8px;height:40px}#l360 .create{margin-top:6px;padding-top:4px;font-size:13px}}
 @media (max-height:380px){#l360 .sub{display:none}#l360 h2{margin-bottom:8px}}
 @keyframes l360-rise{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes l360-fade{from{opacity:0}to{opacity:1}}
@@ -163,7 +161,6 @@ export default function Login() {
     }
     function setTab(t) {
       tab = t
-      rootEl.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t))
       $('create').classList.toggle('on', t === 'team')
       $('si-sub').textContent = t === 'team' ? 'Sign in to your Analytix team workspace' : 'Sign in to your AUDIT 360 client portal'
     }
@@ -211,7 +208,7 @@ export default function Login() {
         view(g, g === 'forgot' ? 'fe' : g === 'demo' ? 'dr' : 'em')
       }
     })
-    rootEl.querySelectorAll('.tab').forEach(b => { b.onclick = () => setTab(b.dataset.tab) })
+    $('change').onclick = () => view('choose', tab === 'team' ? 'pick-team' : 'pick-client')
 
     $('show').onclick = function () {
       const p = $('pw')
@@ -326,10 +323,7 @@ export default function Login() {
               <form className="view" id="v-signin" noValidate>
                 <h2>Welcome back</h2>
                 <p className="sub" id="si-sub">Sign in to your AUDIT 360 client portal</p>
-                <div className="tabs" role="tablist">
-                  <button type="button" className="tab" role="tab" aria-selected="true" data-tab="client">Client Portal</button>
-                  <button type="button" className="tab" role="tab" aria-selected="false" data-tab="team">Analytix Team</button>
-                </div>
+                <button type="button" className="back change" id="change">← Change portal</button>
                 <label htmlFor="em">Work email</label>
                 <input id="em" type="email" autoComplete="username" placeholder="you@analytix.com" />
                 <div className="row"><label htmlFor="pw">Password</label><button type="button" data-go="forgot">Forgot password?</button></div>
