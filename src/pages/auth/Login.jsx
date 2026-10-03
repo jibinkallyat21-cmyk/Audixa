@@ -118,6 +118,7 @@ const CSS = `
 @media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .create{margin-top:8px;padding-top:6px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}#l360 .picks{gap:10px}#l360 .pick{padding:10px 14px}#l360 .pick .ico{width:38px;height:38px}#l360 .pick small{display:none}}
 @media (max-height:430px){#l360 .secure{display:none}#l360 .card{padding:10px 22px}#l360 h2{font-size:22px}#l360 input,#l360 select{height:36px}#l360 .show{top:0}#l360 .sub{margin-bottom:8px}#l360 .go{margin-top:8px;height:40px}#l360 .create{margin-top:6px;padding-top:4px;font-size:13px}}
 @media (max-height:380px){#l360 .sub{display:none}#l360 h2{margin-bottom:8px}}
+@media (min-width:1100px){#l360 .svc b{white-space:nowrap;font-size:clamp(12px,calc((100vw - 2 * clamp(20px,5vw,72px) - 128px) / 5 / 14.4),17px)}}
 @keyframes l360-rise{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes l360-fade{from{opacity:0}to{opacity:1}}
 @keyframes l360-shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
