@@ -2376,17 +2376,19 @@ export const mgmtPnlSummary = [
 
 export const mgmtRealization = { rate: 86, target: 90, note: 'Billed vs. standard rate · FY2025' }
 
-export const mgmtProfitabilityByDept = [
-  { dept: 'ABCPA', revenue: 742000, cost: 468000, margin: 37 },
-  { dept: 'MISCPA', revenue: 498000, cost: 329000, margin: 34 },
+// Revenue only — no cost/payroll/timesheet data exists in this system to derive
+// true profitability or margin, so these are billed-fee figures, not profit.
+export const mgmtRevenueByDept = [
+  { dept: 'ABCPA', revenue: 742000, files: 89 },
+  { dept: 'MISCPA', revenue: 498000, files: 59 },
 ]
 
-export const mgmtProfitabilityByLead = [
-  { lead: 'Rijin Philip', dept: 'ABCPA', files: 14, revenue: 176000, margin: 44 },
-  { lead: 'Tariq Al-Ghamdi', dept: 'ABCPA', files: 22, revenue: 312000, margin: 41 },
-  { lead: 'Khalid Al-Farsi', dept: 'MISCPA', files: 19, revenue: 268000, margin: 36 },
-  { lead: 'Majed Al-Subaie', dept: 'ABCPA', files: 12, revenue: 142000, margin: 33 },
-  { lead: 'Fahad Al-Otaibi', dept: 'ABCPA', files: 15, revenue: 198000, margin: 29 },
+export const mgmtRevenueByLead = [
+  { lead: 'Tariq Al-Ghamdi', dept: 'ABCPA', files: 22, revenue: 312000 },
+  { lead: 'Khalid Al-Farsi', dept: 'MISCPA', files: 19, revenue: 268000 },
+  { lead: 'Fahad Al-Otaibi', dept: 'ABCPA', files: 15, revenue: 198000 },
+  { lead: 'Rijin Philip', dept: 'ABCPA', files: 14, revenue: 176000 },
+  { lead: 'Majed Al-Subaie', dept: 'ABCPA', files: 12, revenue: 142000 },
 ]
 
 export const mgmtWipAging = [

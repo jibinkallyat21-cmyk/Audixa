@@ -8,8 +8,8 @@ import { useToast } from '../../components/shared/Toast'
 import {
   mgmtPnlSummary,
   mgmtRealization,
-  mgmtProfitabilityByDept,
-  mgmtProfitabilityByLead,
+  mgmtRevenueByDept,
+  mgmtRevenueByLead,
   mgmtWipAging,
   mgmtMonthlyRevenue,
   mgmtReportingPeriods,
@@ -44,6 +44,7 @@ export default function ManagementFinancials() {
   const showToast = useToast()
   const [period, setPeriod] = useState(mgmtReportingPeriods[0])
   const totalWip = mgmtWipAging.reduce((s, b) => s + b.value, 0)
+  const totalDeptRevenue = mgmtRevenueByDept.reduce((s, d) => s + d.revenue, 0)
 
   return (
     <ManagementLayout title="Financials">
@@ -53,7 +54,7 @@ export default function ManagementFinancials() {
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-bold" style={{ color: D.heading }}>Financials & Profitability — ABCPA + MISCPA</h1>
+              <h1 className="text-xl font-bold" style={{ color: D.heading }}>Financials & Revenue — ABCPA + MISCPA</h1>
               <span className="mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: 'rgba(255,255,255,0.08)', color: D.muted }}>
                 Firm-Wide View
               </span>
@@ -136,16 +137,16 @@ export default function ManagementFinancials() {
             </div>
           </div>
 
-          {/* Profitability by department */}
+          {/* Revenue by department */}
           <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
-            <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Profitability by Department</h3>
+            <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Revenue by Department</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {mgmtProfitabilityByDept.map((d) => (
+              {mgmtRevenueByDept.map((d) => (
                 <div key={d.dept} className="rounded-lg p-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-bold" style={{ color: D.heading }}>{d.dept}</p>
-                    <span className="rounded-full px-2 py-0.5 text-[11px] font-bold" style={{ background: 'rgba(5,150,105,0.15)', color: '#059669' }}>
-                      {d.margin}% margin
+                    <span className="rounded-full px-2 py-0.5 text-[11px] font-bold" style={{ background: 'rgba(37,99,235,0.15)', color: '#2563EB' }}>
+                      {Math.round((d.revenue / totalDeptRevenue) * 100)}% of revenue
                     </span>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
@@ -154,8 +155,8 @@ export default function ManagementFinancials() {
                       <p className="mt-0.5 font-bold" style={{ color: D.heading }}>SAR {d.revenue.toLocaleString()}</p>
                     </div>
                     <div>
-                      <p style={{ color: D.muted }}>Cost</p>
-                      <p className="mt-0.5 font-bold" style={{ color: D.heading }}>SAR {d.cost.toLocaleString()}</p>
+                      <p style={{ color: D.muted }}>Files</p>
+                      <p className="mt-0.5 font-bold" style={{ color: D.heading }}>{d.files}</p>
                     </div>
                   </div>
                 </div>
@@ -163,9 +164,12 @@ export default function ManagementFinancials() {
             </div>
           </div>
 
-          {/* Profitability by lead */}
+          {/* Revenue by lead */}
           <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
-            <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Profitability by Audit Lead</h3>
+            <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Revenue by Audit Lead</h3>
+            <p className="mb-4 -mt-2 text-[11px]" style={{ color: D.subtle }}>
+              Billed fees per lead's engagements. Margin isn't shown — the firm doesn't track staff cost or chargeable hours per file.
+            </p>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
@@ -174,24 +178,17 @@ export default function ManagementFinancials() {
                     <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Dept</th>
                     <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Files</th>
                     <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Revenue</th>
-                    <th className="pb-2 font-semibold uppercase tracking-wide">Margin</th>
+                    <th className="pb-2 font-semibold uppercase tracking-wide">Avg / File</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {mgmtProfitabilityByLead.map((l) => (
+                  {mgmtRevenueByLead.map((l) => (
                     <tr key={l.lead} style={{ borderTop: `1px solid ${D.cardBorder}` }}>
                       <td className="py-2.5 pr-4 font-semibold" style={{ color: D.heading }}>{l.lead}</td>
                       <td className="py-2.5 pr-4" style={{ color: D.muted }}>{l.dept}</td>
                       <td className="py-2.5 pr-4" style={{ color: D.muted }}>{l.files}</td>
                       <td className="py-2.5 pr-4" style={{ color: D.heading }}>SAR {l.revenue.toLocaleString()}</td>
-                      <td className="py-2.5">
-                        <span
-                          className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                          style={{ background: l.margin >= 38 ? 'rgba(5,150,105,0.15)' : 'rgba(217,119,6,0.15)', color: l.margin >= 38 ? '#059669' : '#D97706' }}
-                        >
-                          {l.margin}%
-                        </span>
-                      </td>
+                      <td className="py-2.5" style={{ color: D.muted }}>SAR {Math.round(l.revenue / l.files).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
