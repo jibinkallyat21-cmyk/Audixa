@@ -321,7 +321,7 @@ export default function Login() {
             <div style={{ position: 'absolute', left: 'calc(60*var(--u))', top: 'calc(86*var(--u))', fontSize: 'calc(82*var(--u))', fontWeight: 700, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>
               AUDIT <span style={{ color: '#ff2a45' }}>360</span>
             </div>
-            <div style={{ position: 'absolute', left: 'calc(66*var(--u))', top: 'calc(180*var(--u))', fontFamily: "Georgia,'Times New Roman',serif", fontSize: 'calc(41*var(--u))', lineHeight: 1.12, width: 'calc(450*var(--u))' }}>
+            <div style={{ position: 'absolute', left: 'calc(66*var(--u))', top: 'calc(180*var(--u))', fontFamily: "Georgia,'Times New Roman',serif", fontSize: 'calc(28*var(--u))', lineHeight: 1.2, width: 'calc(370*var(--u))', color: 'rgba(235,242,255,0.92)' }}>
               Clarity across every dimension of your audit.
             </div>
             <div style={{ position: 'absolute', left: 'calc(66*var(--u))', top: 'calc(286*var(--u))', fontSize: 'calc(13*var(--u))', letterSpacing: '.3em', whiteSpace: 'nowrap', color: '#d6d9e6' }}>
