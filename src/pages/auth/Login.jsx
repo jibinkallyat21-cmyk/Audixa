@@ -59,6 +59,14 @@ const CSS = `
 #l360 .card{position:relative;width:min(100%,440px);max-height:calc(100vh - 40px);overflow:auto;background:linear-gradient(180deg,rgba(18,30,64,.92),rgba(10,18,40,.94));border:1px solid rgba(190,205,240,.2);border-radius:16px;padding:36px;box-shadow:0 40px 100px rgba(0,0,0,.6);animation:l360-rise .35s cubic-bezier(.2,.8,.2,1) both}
 #l360 .card.shake{animation:l360-shake .4s}
 #l360 .x{position:absolute;top:14px;right:14px;width:36px;height:36px;color:#b4bbd0;background:none;border:0;border-radius:8px;font-size:22px;line-height:1;padding:0}
+#l360 .picks{display:flex;flex-direction:column;gap:14px}
+#l360 .pick{display:flex;align-items:center;gap:16px;width:100%;text-align:left;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid rgba(180,195,235,.28);border-radius:12px;padding:16px 18px;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+#l360 .pick:hover{transform:translateY(-3px);border-color:#f2434f;background:rgba(242,67,79,.12);box-shadow:0 18px 40px rgba(229,48,61,.25)}
+#l360 .pick .ico{flex-shrink:0;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#ff6b7a;background:rgba(242,67,79,.14);border:1px solid rgba(242,67,79,.4)}
+#l360 .pick .txt{flex:1;min-width:0}
+#l360 .pick b{display:block;font-size:17px;font-weight:600}
+#l360 .pick small{display:block;margin-top:3px;font-size:13px;color:#b4bbd0;line-height:1.35}
+#l360 .pick .go-ar{flex-shrink:0;font-size:20px;color:#ff6b7a}
 #l360 .x:hover{background:rgba(255,255,255,.08);color:#fff}
 #l360 .view{display:none;animation:l360-swap .3s ease both}
 #l360 .view.on{display:block}
@@ -105,7 +113,7 @@ const CSS = `
 @media (max-width:760px){#l360 .kicker{gap:10px}#l360 .kicker i{flex-shrink:0;width:24px}#l360 .kicker span{font-size:11px;letter-spacing:.1em}#l360 .services{grid-template-columns:1fr 1fr;gap:10px 16px}#l360 .svc p,#l360 .svc small{display:none}#l360 .svc b{margin-top:0;font-size:14px}#l360 .presence{gap:14px}#l360 .btn-main{padding:14px 22px;font-size:16px}}
 @media (max-width:360px){#l360 .kicker span{font-size:10px;letter-spacing:.06em}}
 @media (max-height:520px){#l360 .services{display:none}}
-@media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 .tabs{margin-bottom:12px}#l360 .tab{padding:6px 0}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .create{margin-top:8px;padding-top:6px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}}
+@media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 .tabs{margin-bottom:12px}#l360 .tab{padding:6px 0}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .create{margin-top:8px;padding-top:6px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}#l360 .picks{gap:10px}#l360 .pick{padding:10px 14px}#l360 .pick .ico{width:38px;height:38px}#l360 .pick small{display:none}}
 @media (max-height:430px){#l360 .secure{display:none}#l360 .card{padding:10px 22px}#l360 h2{font-size:22px}#l360 input,#l360 select{height:36px}#l360 .show{top:0}#l360 .sub{margin-bottom:8px}#l360 .tabs{margin-bottom:8px}#l360 .go{margin-top:8px;height:40px}#l360 .create{margin-top:6px;padding-top:4px;font-size:13px}}
 @media (max-height:380px){#l360 .sub{display:none}#l360 h2{margin-bottom:8px}}
 @keyframes l360-rise{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
@@ -139,7 +147,8 @@ export default function Login() {
       return t
     }
     function view(name, focusId) {
-      ;['signin', 'forgot', 'demo', 'done'].forEach(n => $('v-' + n).classList.toggle('on', n === name))
+      ;['choose', 'signin', 'forgot', 'demo', 'done'].forEach(n => $('v-' + n).classList.toggle('on', n === name))
+      card.dataset.view = name
       $('err').classList.remove('on')
       if (focusId) later(() => { const el = $(focusId); if (el) el.focus() }, 80)
     }
@@ -147,12 +156,13 @@ export default function Login() {
       tab = t
       rootEl.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t))
       $('create').classList.toggle('on', t === 'team')
+      $('si-sub').textContent = t === 'team' ? 'Sign in to your Analytix team workspace' : 'Sign in to your AUDIT 360 client portal'
     }
     function open(name, t) {
       lastFocus = document.activeElement
       if (t) setTab(t)
       backdrop.classList.add('open')
-      view(name, name === 'demo' ? 'dr' : 'em')
+      view(name, name === 'demo' ? 'dr' : name === 'choose' ? 'pick-client' : 'em')
     }
     function close() {
       clearTimeout(timer)
@@ -176,8 +186,10 @@ export default function Login() {
       later(() => navigate(route), 1100)
     }
 
-    $('open-signin').onclick = () => open('signin')
+    $('open-signin').onclick = () => open('choose')
     $('open-demo').onclick = () => open('demo')
+    $('pick-client').onclick = () => { setTab('client'); view('signin', 'em') }
+    $('pick-team').onclick = () => { setTab('team'); view('signin', 'em') }
     $('close').onclick = close
     const onBackdrop = e => { if (e.target === backdrop) close() }
     backdrop.addEventListener('click', onBackdrop)
@@ -284,9 +296,26 @@ export default function Login() {
             <div className="card" id="card" role="dialog" aria-modal="true" aria-label="Sign in">
               <button className="x" id="close" aria-label="Close">×</button>
 
-              <form className="view on" id="v-signin" noValidate>
+              <div className="view on" id="v-choose">
+                <h2>Choose your portal</h2>
+                <p className="sub">Select how you'll be signing in to AUDIT 360</p>
+                <div className="picks">
+                  <button type="button" className="pick" id="pick-client">
+                    <span className="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg></span>
+                    <span className="txt"><b>I'm a Client</b><small>Engagement tracker, documents and audit queries</small></span>
+                    <span className="go-ar" aria-hidden="true">→</span>
+                  </button>
+                  <button type="button" className="pick" id="pick-team">
+                    <span className="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.4c2 .8 3.5 2.6 3.5 5.6"/></svg></span>
+                    <span className="txt"><b>I'm a Team Member</b><small>Audit, advisory and operations professionals</small></span>
+                    <span className="go-ar" aria-hidden="true">→</span>
+                  </button>
+                </div>
+              </div>
+
+              <form className="view" id="v-signin" noValidate>
                 <h2>Welcome back</h2>
-                <p className="sub">Sign in to your AUDIT 360 workspace</p>
+                <p className="sub" id="si-sub">Sign in to your AUDIT 360 client portal</p>
                 <div className="tabs" role="tablist">
                   <button type="button" className="tab" role="tab" aria-selected="true" data-tab="client">Client Portal</button>
                   <button type="button" className="tab" role="tab" aria-selected="false" data-tab="team">Analytix Team</button>
