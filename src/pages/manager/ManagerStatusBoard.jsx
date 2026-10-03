@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Download, Plus, Grid3x3, List, ArrowUp, X } from 'lucide-react'
 import ManagerLayout from '../../components/manager/ManagerLayout'
@@ -86,6 +87,7 @@ function FileDrawer({ file, onClose }) {
 }
 
 export default function ManagerStatusBoard() {
+  const navigate = useNavigate()
   const showToast = useToast()
   const [filter, setFilter] = useState('All')
   const [selectedFile, setSelectedFile] = useState(null)

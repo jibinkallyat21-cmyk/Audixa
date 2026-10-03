@@ -2126,8 +2126,8 @@ export const mgmtStatChips = [
 ]
 
 export const mgmtActionCards = [
-  { id: 'tier3', tone: 'alert-red', icon: 'Clock', title: '3 Tier-3 Critical Files — Immediate Partner Action', action: 'Escalate Now', route: '/manager/escalation?tier=3' },
-  { id: 'parked', tone: 'amber', icon: 'PauseCircle', title: '8 Files Parked >14 Days', action: 'Review Parking', route: '/manager/status-board' },
+  { id: 'tier3', tone: 'alert-red', icon: 'Clock', title: '3 Tier-3 Critical Files — Immediate Partner Action', action: 'Escalate Now', route: '/management/risk' },
+  { id: 'parked', tone: 'amber', icon: 'PauseCircle', title: '8 Files Parked >14 Days', action: 'Review Parking', route: '/management/analytics' },
   { id: 'overdue', tone: 'alert-red', icon: 'Banknote', title: 'SAR 84K Overdue Invoices', action: 'Follow Up', route: null },
 ]
 
@@ -2341,8 +2341,8 @@ export const mgmtAuditLog = [
 export const mgmtLogEventFilters = ['All Events', 'Tier-3 Escalations', 'Proposals', 'Engagements', 'Stage Changes', 'Meetings']
 
 export const mgmtNotifications = [
-  { id: 'mn-1', title: 'Tier-3 Escalation — Al-Yamamah Steel Industries', message: '18 days overdue. PBC Bank Confirmation missing.', timestamp: '05 Nov 2024, 09:15 AM', route: '/manager/escalation?tier=3' },
-  { id: 'mn-2', title: 'Tier-3 Escalation — Saudi Petrochem Logistics', message: '14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', timestamp: '04 Nov 2024, 03:00 PM', route: '/manager/escalation?tier=3' },
+  { id: 'mn-1', title: 'Tier-3 Escalation — Al-Yamamah Steel Industries', message: '18 days overdue. PBC Bank Confirmation missing.', timestamp: '05 Nov 2024, 09:15 AM', route: '/management/risk' },
+  { id: 'mn-2', title: 'Tier-3 Escalation — Saudi Petrochem Logistics', message: '14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', timestamp: '04 Nov 2024, 03:00 PM', route: '/management/risk' },
   { id: 'mn-3', title: 'SAR 84K in Overdue Invoices', message: '6 clients overdue on payment — review AR aging.', timestamp: '04 Nov 2024, 01:00 PM', route: '/management/financials' },
 ]
 
