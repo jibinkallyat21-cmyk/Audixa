@@ -2,8 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Search, X, TrendingUp, Briefcase, Banknote, Wallet,
-  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2,
+  Search, X, TrendingUp, Briefcase, ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2, Users, ClipboardCheck, CalendarClock,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
 import { useMgmtScope } from '../../hooks/useMgmtScope'
@@ -17,8 +16,6 @@ import {
   mgmtFOFiles,
   mgmtARPending,
   mgmtAllEscalations,
-  mgmtRevenueTiles,
-  mgmtTotalTurnover,
   mgmtClientDirectory,
   mgmtAbcpaPortfolio,
   mgmtMiscpaPortfolio,
@@ -26,7 +23,6 @@ import {
   mgmtFOContacts,
   mgmtLeadConversion,
   mgmtConversionRate,
-  mgmtRealization,
   mgmtDeadlineBreaches,
 } from '../../data/sampleData'
 
@@ -605,23 +601,32 @@ export default function ManagementDashboard() {
   const portfolio = scope === 'ABCPA' ? mgmtAbcpaPortfolio : scope === 'MISCPA' ? mgmtMiscpaPortfolio : null
   const navigate = useNavigate()
 
-  const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
   const raised = useManagementRaisedEscalations()
   const escalations = useMemo(() => [...raised, ...mgmtAllEscalations].filter(e => scope === 'Combined' || e.dept === scope), [scope, raised])
   const [detail, setDetail] = useState(null)
   const openEscalations = escalations.filter(e => e.status === 'Open').length
   const [meetingOpen, setMeetingOpen] = useState(false)
   const breachCount = mgmtDeadlineBreaches.filter(b => b.daysLeft < 0).length
+  const dueSoon = mgmtDeadlineBreaches.filter(b => b.daysLeft >= 0 && b.daysLeft <= 7).length
+  const scopedClients = useMemo(
+    () => mgmtClientDirectory.filter(client => scope === 'Combined' || client.dept === scope),
+    [scope],
+  )
+  const activeEngagements = portfolio
+    ? portfolio.total
+    : mgmtFOFiles.reduce((total, frontOffice) => total + frontOffice.total, 0)
+  const atRiskClients = scopedClients.filter(client => client.status !== 'ok').length
+  const healthyClients = scopedClients.filter(client => client.status === 'ok').length
 
   return (
-    <ManagementLayout title="Dashboard" fullHeight headerSearch={<ClientSearch />}>
+    <ManagementLayout title="Executive Overview" fullHeight headerSearch={<ClientSearch />}>
       <div className="flex h-full flex-col gap-4 overflow-hidden">
-
-        {/* ── Greeting ── */}
-        <div className="shrink-0 flex items-start justify-between gap-3">
+        <div className="shrink-0 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-lg font-bold text-navy">Good morning, {mgmtUser.name.split(' ')[0]}.</h1>
-            <p className="text-xs text-slate-400">{portfolio ? `${scope} Department View` : 'Combined View — ABCPA + MISCPA'} · 25 Sep 2026</p>
+            <h1 className="text-xl font-bold tracking-tight text-navy">Executive overview</h1>
+            <p className="mt-1 text-xs text-slate-500">
+              {portfolio ? scope + ' department view' : 'Combined view — ABCPA + MISCPA'} · Business status, attention items and critical dates
+            </p>
           </div>
           {breachCount > 0 && (
             <button
@@ -643,47 +648,39 @@ export default function ManagementDashboard() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {portfolio.breakdown.map((b) => (
-                  <span key={b.label} className="rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: `${b.color}1F`, color: b.color }}>
+                  <span key={b.label} className="rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: b.color + '1F', color: b.color }}>
                     {b.label} {b.value}
                   </span>
                 ))}
               </div>
               <p className="min-w-0 text-[11px] text-slate-500">
-                <span className="font-semibold text-navy">Urgent:</span>{' '}
-                {portfolio.urgentFiles.map((f) => `${f.client} (${f.days}d · ${f.status})`).join(' · ')}
+                <span className="font-semibold text-navy">Priority:</span>{' '}
+                {portfolio.urgentFiles.map((f) => f.client + ' (' + f.days + 'd · ' + f.status + ')').join(' · ')}
               </p>
             </div>
           </div>
         )}
 
-        {/* ── 5 Stat Cards ── */}
         <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <StatCard icon={Briefcase} iconColor="#0D1B2A"
-            label="Total Files Engaged" value={portfolio ? String(portfolio.total) : '148'}
-            sub={portfolio ? `${scope} Department` : 'ABCPA: 89 · MISCPA: 59'}
-            onClick={() => setModal('files')} delay={0} />
-          <StatCard icon={TrendingUp} iconColor="#059669"
-            label="Total Client Turnover" value={mgmtTotalTurnover.value}
-            sub={portfolio ? 'Firm-wide · FY2025' : mgmtTotalTurnover.note} delay={0.06} />
-          <StatCard icon={Banknote} iconColor="#DC2626"
-            label="AR — Pending Payments" value={`SAR ${(totalBalance / 1000).toFixed(0)}K`}
-            sub={`${mgmtARPending.filter(c => c.daysOverdue > 0).length} clients overdue`}
-            onClick={() => setModal('ar')} delay={0.12} />
-          <StatCard icon={AlertCircle} iconColor="#D97706"
-            label="Open Escalations" value={`${openEscalations} Open`}
-            sub={`${escalations.length} total on record`}
-            onClick={() => setModal('escalations')} delay={0.18} />
-          <StatCard icon={Wallet} iconColor="#2563EB"
-            label="Fee Realization Rate" value={`${mgmtRealization.rate}%`}
-            sub={`Target ${mgmtRealization.target}% · View P&L`}
-            onClick={() => navigate('/management/financials')} delay={0.24} />
+          <StatCard icon={Users} iconColor="#0D1B2A"
+            label="Clients in scope" value={String(scopedClients.length)}
+            sub={healthyClients + ' currently on track'} delay={0} />
+          <StatCard icon={Briefcase} iconColor="#2563EB"
+            label="Active engagements" value={String(activeEngagements)}
+            sub={portfolio ? scope + ' department' : 'Combined portfolio'} onClick={() => setModal('files')} delay={0.06} />
+          <StatCard icon={TrendingUp} iconColor="#D97706"
+            label="Portfolio needs attention" value={String(atRiskClients)}
+            sub="Derived from current client status" onClick={() => navigate('/management/risk')} delay={0.12} />
+          <StatCard icon={CalendarClock} iconColor="#DC2626"
+            label="Critical dates" value={String(breachCount + dueSoon)}
+            sub={breachCount + ' breached · ' + dueSoon + ' due within 7 days'} onClick={() => navigate('/management/risk')} delay={0.18} />
+          <StatCard icon={AlertCircle} iconColor="#DC2626"
+            label="Open escalations" value={openEscalations + ' Open'}
+            sub={escalations.length + ' total on record'} onClick={() => setModal('escalations')} delay={0.24} />
         </div>
 
-        {/* ── Main content row ── */}
-        <div className="flex min-h-0 flex-1 gap-4">
-
-          {/* LEFT — Escalation Centre */}
-          <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.85fr)]">
+          <div className="flex min-h-0 flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3.5">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-alert-red" />
@@ -707,9 +704,7 @@ export default function ManagementDashboard() {
             </div>
           </div>
 
-          {/* RIGHT — Meeting + Revenue + Lead funnel */}
-          <div className="flex w-[272px] shrink-0 flex-col gap-3 min-h-0 overflow-y-auto">
-
+          <div className="flex min-h-0 flex-col gap-3 overflow-y-auto pr-1">
             <motion.button
               type="button"
               whileHover={{ scale: 1.02 }}
@@ -722,37 +717,43 @@ export default function ManagementDashboard() {
               Request a Meeting
             </motion.button>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
-              <h2 className="mb-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Revenue & Billing</h2>
-              <div className="space-y-2">
-                {mgmtRevenueTiles.map(tile => {
-                  const TONE = { navy: '#0D1B2A', emerald: '#059669', amber: '#D97706', 'alert-red': '#DC2626' }
-                  return (
-                    <div key={tile.label} className="flex items-center justify-between">
-                      <p className="text-xs text-slate-500 truncate">{tile.label}</p>
-                      <p className="text-xs font-bold ml-2 shrink-0" style={{ color: TONE[tile.tone] }}>{tile.display}</p>
-                    </div>
-                  )
-                })}
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">Management attention</h2>
+                <ClipboardCheck className="h-4 w-4 text-brand" />
               </div>
-            </div>
+              <div className="space-y-3">
+                <button onClick={() => navigate('/management/risk')} className="flex w-full items-start justify-between gap-3 text-left">
+                  <span className="text-xs text-slate-500">Engagements past a critical date</span>
+                  <span className="text-xs font-bold text-alert-red">{breachCount}</span>
+                </button>
+                <button onClick={() => navigate('/management/risk')} className="flex w-full items-start justify-between gap-3 text-left">
+                  <span className="text-xs text-slate-500">Clients needing attention</span>
+                  <span className="text-xs font-bold text-amber">{atRiskClients}</span>
+                </button>
+                <button onClick={() => setModal('escalations')} className="flex w-full items-start justify-between gap-3 text-left">
+                  <span className="text-xs text-slate-500">Open escalations</span>
+                  <span className="text-xs font-bold text-alert-red">{openEscalations}</span>
+                </button>
+              </div>
+            </section>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Lead Funnel</h2>
-                <span className="text-[10px] font-bold text-amber">{mgmtConversionRate}% Conv.</span>
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">Business development</h2>
+                <span className="text-[10px] font-bold text-amber">{mgmtConversionRate}% conversion</span>
               </div>
               <div className="space-y-1.5">
                 {mgmtLeadConversion.map((stage, i) => {
                   const max = mgmtLeadConversion[0].value
                   return (
                     <div key={stage.label}>
-                      <div className="flex items-center justify-between text-[10px] mb-0.5">
+                      <div className="mb-0.5 flex items-center justify-between text-[10px]">
                         <span className="text-slate-500">{stage.label}</span>
                         <span className="font-bold text-navy">{stage.value.toLocaleString()}</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${(stage.value / max) * 100}%` }}
+                      <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <motion.div initial={{ width: 0 }} animate={{ width: ((stage.value / max) * 100) + '%' }}
                           transition={{ duration: 0.7, delay: i * 0.1, ease: 'easeOut' }}
                           className="h-full rounded-full bg-navy" style={{ opacity: 1 - i * 0.18 }} />
                       </div>
@@ -760,7 +761,7 @@ export default function ManagementDashboard() {
                   )
                 })}
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>
