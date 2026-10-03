@@ -154,7 +154,6 @@ const BG_SVG = `<svg viewBox="0 0 1708 921" preserveAspectRatio="none" style="po
     <circle cx="912" cy="661" r="16"/>
     <path d="M896 661h32M912 645c-8 8-8 24 0 32M912 645c8 8 8 24 0 32"/>
   </g>
-  <path d="M66 70l16-23 16 23-11-3-5 8-5-8z" fill="#ff2a45"/>
   <g fill="none" stroke="#e9e9ed" stroke-width="1.5">
     <circle cx="78" cy="873" r="12"/>
     <ellipse cx="78" cy="873" rx="5" ry="12"/>
