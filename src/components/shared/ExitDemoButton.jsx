@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
+import { clearPortal } from '../../utils/portalSession'
 
 const CLIENT_GREETING_KEY = 'audit360_client_greeted_v3'
 
@@ -8,6 +9,7 @@ export default function ExitDemoButton() {
 
   const handleExit = () => {
     try { sessionStorage.removeItem(CLIENT_GREETING_KEY) } catch {}
+    clearPortal()
     navigate('/login')
   }
 

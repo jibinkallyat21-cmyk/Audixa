@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Download, Plus, Grid3x3, List, ArrowUp, X } from 'lucide-react'
 import ManagerLayout from '../../components/manager/ManagerLayout'
@@ -11,7 +10,6 @@ import { statusBoardFiles, statusBoardFilterCounts } from '../../data/sampleData
 const FILTERS = ['All', 'Active', 'With Reviewer', 'On Hold', 'Parked']
 
 function FileDrawer({ file, onClose }) {
-  const navigate = useNavigate()
   const showToast = useToast()
   if (!file) return null
 
@@ -65,7 +63,7 @@ function FileDrawer({ file, onClose }) {
 
         <div className="mt-6 space-y-2.5">
           <button
-            onClick={() => navigate('/team/workspace/requirements')}
+            onClick={() => showToast(`Workspace access is limited to the assigned engagement team — ${file.client}`)}
             className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
           >
             Open Workspace
@@ -88,7 +86,6 @@ function FileDrawer({ file, onClose }) {
 }
 
 export default function ManagerStatusBoard() {
-  const navigate = useNavigate()
   const showToast = useToast()
   const [filter, setFilter] = useState('All')
   const [selectedFile, setSelectedFile] = useState(null)
@@ -130,7 +127,7 @@ export default function ManagerStatusBoard() {
                 Export CSV
               </button>
               <button
-                onClick={() => navigate('/frontoffice/intake')}
+                onClick={() => showToast('New engagements are registered by Front Office')}
                 className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
               >
                 <Plus className="h-3.5 w-3.5" />

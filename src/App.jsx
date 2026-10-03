@@ -70,6 +70,7 @@ import ManagerNotifications from './pages/manager/ManagerNotifications'
 import FODashboard from './pages/frontoffice/FODashboard'
 import FOLeads from './pages/frontoffice/FOLeads'
 import FOProposals from './pages/frontoffice/FOProposals'
+import FORegistration from './pages/frontoffice/FORegistration'
 import FOProposalDetail from './pages/frontoffice/FOProposalDetail'
 import FONotifications from './pages/frontoffice/FONotifications'
 import FOClientDocuments from './pages/frontoffice/FOClientDocuments'
@@ -83,6 +84,8 @@ import ManagementLog from './pages/management/ManagementLog'
 import ManagementNotifications from './pages/management/ManagementNotifications'
 
 import ClientGreeting from './components/client/ClientGreeting'
+import RequirePortal from './components/shared/RequirePortal'
+import { getPortal, homeFor } from './utils/portalSession'
 import { ClientFYProvider } from './context/ClientFYContext'
 import { TBProvider } from './context/TBContext'
 import { ThemeProvider } from './context/ThemeContext'
@@ -93,7 +96,7 @@ function AnimatedRoutes() {
   return (
     <>
       {location.pathname === '/' && <CinematicIntro />}
-      {location.pathname.startsWith('/client') && (
+      {location.pathname.startsWith('/client') && getPortal() === 'client' && (
         <ClientGreeting name="Karim Rahman" company="Kingdom Retail Holdings LLC" />
       )}
       <AnimatePresence mode="wait">
@@ -107,6 +110,7 @@ function AnimatedRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Client */}
+        <Route element={<RequirePortal portal="client" />}>
         <Route path="/client/dashboard" element={<ClientDashboard />} />
         <Route path="/client/documents" element={<ClientDocuments />} />
         <Route path="/client/requirements" element={<Navigate to="/client/documents" replace />} />
@@ -117,7 +121,11 @@ function AnimatedRoutes() {
         <Route path="/client/activity" element={<ClientActivityLog />} />
         <Route path="/client/working-tb" element={<ClientWorkingTB />} />
 
+        
+        </Route>
+
         {/* Audit Team (Module 3) */}
+        <Route element={<RequirePortal portal="team" />}>
         <Route path="/team/dashboard" element={<TeamDashboard />} />
         <Route path="/team/workspace" element={<TeamFiles />} />
         <Route path="/team/files" element={<Navigate to="/team/workspace" replace />} />
@@ -134,7 +142,11 @@ function AnimatedRoutes() {
         <Route path="/team/schedule-meeting" element={<TeamScheduleMeeting />} />
         <Route path="/team/chat" element={<TeamChat />} />
 
+        
+        </Route>
+
         {/* Manager (Module 4) */}
+        <Route element={<RequirePortal portal="manager" />}>
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
         <Route path="/manager/status-board" element={<ManagerStatusBoard />} />
         <Route path="/manager/workload" element={<ManagerWorkload />} />
@@ -144,16 +156,25 @@ function AnimatedRoutes() {
         <Route path="/manager/meetings" element={<ManagerMeetings />} />
         <Route path="/manager/notifications" element={<ManagerNotifications />} />
 
+        
+        </Route>
+
         {/* Front Office */}
+        <Route element={<RequirePortal portal="fo" />}>
         <Route path="/fo/dashboard" element={<FODashboard />} />
         <Route path="/fo/leads" element={<FOLeads />} />
         <Route path="/fo/proposals" element={<FOProposals />} />
         <Route path="/fo/proposal/:id" element={<FOProposalDetail />} />
+        <Route path="/fo/registration" element={<FORegistration />} />
         <Route path="/fo/chat" element={<Navigate to="/fo/dashboard" replace />} />
         <Route path="/fo/client-documents" element={<FOClientDocuments />} />
         <Route path="/fo/notifications" element={<FONotifications />} />
 
+        
+        </Route>
+
         {/* Management */}
+        <Route element={<RequirePortal portal="management" />}>
         <Route path="/management/dashboard" element={<ManagementDashboard />} />
         <Route path="/management/analytics" element={<ManagementAnalytics />} />
         <Route path="/management/financials" element={<ManagementFinancials />} />
@@ -162,7 +183,10 @@ function AnimatedRoutes() {
         <Route path="/management/log" element={<ManagementLog />} />
         <Route path="/management/notifications" element={<ManagementNotifications />} />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        
+        </Route>
+
+        <Route path="*" element={<Navigate to={getPortal() ? homeFor(getPortal()) : '/login'} replace />} />
         </Routes>
       </AnimatePresence>
     </>

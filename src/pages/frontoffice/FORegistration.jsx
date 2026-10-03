@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import FrontOfficeLayout from '../../components/frontoffice/FrontOfficeLayout'
 import PageTransition from '../../components/shared/PageTransition'
+import { useToast } from '../../components/shared/Toast'
 
 const AUDIT_TYPES = [
   'Proper Audit',
@@ -56,6 +57,7 @@ const inputCls = (err) =>
 
 export default function FORegistration() {
   const navigate = useNavigate()
+  const showToast = useToast()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
   const [reference, setReference] = useState(null)
@@ -259,7 +261,7 @@ export default function FORegistration() {
                 </p>
                 <div className="mt-6 space-y-2">
                   <button
-                    onClick={() => navigate('/manager/status-board')}
+                    onClick={() => showToast('Engagement routed to Audit Management')}
                     className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]"
                   >
                     View Engagement

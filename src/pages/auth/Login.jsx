@@ -3,18 +3,17 @@ import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '../../components/shared/PageTransition'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
 import { fxCss, fxClass, initFx, morph, dolly } from './loginFx'
+import { setPortal } from '../../utils/portalSession'
 
 const PLACES = ['Kuwait', 'Bahrain', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Oman', 'India', 'Singapore', 'Hong Kong', 'China']
 
 // Sign-in tab → portal. Demo options come from the app's role list.
-const TAB_ROUTES = {
-  client: ROLES.client.route,
-  team: ROLES['execution-team'].route,
-}
+const TAB_ROLES = { client: ROLES.client, team: ROLES['execution-team'] }
 const DEMO_ROLES = ROLE_ORDER.map(id => ({
   value: ROLES[id].id,
   label: id === 'managerial' ? 'Partner' : ROLES[id].label,
   route: ROLES[id].route,
+  portal: ROLES[id].route.split('/')[1],
 }))
 
 function Letters({ text, from = 0 }) {
@@ -187,7 +186,8 @@ export default function Login() {
       card.classList.add('shake')
       $(id).focus()
     }
-    function enter(route) {
+    function enter(route, portal) {
+      setPortal(portal)
       view('done')
       dolly(rootEl)
       later(() => navigate(route), 1100)
@@ -230,7 +230,7 @@ export default function Login() {
       timer = later(() => {
         const n = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
         $('welcome').textContent = 'Welcome, ' + n
-        enter(TAB_ROUTES[tab])
+        enter(TAB_ROLES[tab].route, TAB_ROLES[tab].route.split('/')[1])
       }, 1400)
     }
     $('v-signin').addEventListener('submit', onSubmit)
@@ -245,7 +245,8 @@ export default function Login() {
     $('enter-demo').onclick = () => {
       const sel = $('dr')
       $('welcome').textContent = 'Welcome, ' + sel.options[sel.selectedIndex].text
-      enter(DEMO_ROLES.find(r => r.value === sel.value).route)
+      const role = DEMO_ROLES.find(r => r.value === sel.value)
+      enter(role.route, role.portal)
     }
 
     const pending = timers.current
