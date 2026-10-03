@@ -2115,6 +2115,9 @@ export const foProposalDetail = {
 }
 
 // ── Module 6 — Management Portal ────────────────────────────────────────────
+// Escalation level Management can see (client portal levels: 1 Audit Lead, 2 Audit Manager, 3 Front Office Manager).
+export const MGMT_VISIBLE_ESCALATION_TIER = 3
+
 export const mgmtUser = { name: 'Mohammed Al-Rashid', role: 'Partner', department: 'Management', initials: 'MR' }
 
 export const mgmtStatChips = [
@@ -2126,7 +2129,7 @@ export const mgmtStatChips = [
 ]
 
 export const mgmtActionCards = [
-  { id: 'tier3', tone: 'alert-red', icon: 'Clock', title: '3 Tier-3 Critical Files — Immediate Partner Action', action: 'Escalate Now', route: '/management/risk' },
+  { id: 'tier3', tone: 'alert-red', icon: 'Clock', title: '3 Critical Files — Immediate Partner Action', action: 'Escalate Now', route: '/management/risk' },
   { id: 'parked', tone: 'amber', icon: 'PauseCircle', title: '8 Files Parked >14 Days', action: 'Review Parking', route: '/management/analytics' },
   { id: 'overdue', tone: 'alert-red', icon: 'Banknote', title: 'SAR 84K Overdue Invoices', action: 'Follow Up', route: null },
 ]
@@ -2187,16 +2190,17 @@ export const mgmtLeadConversion = [
 ]
 export const mgmtConversionRate = 17
 
-export const mgmtEscalationsToday = [
+const escalationsTodayAll = [
   { client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', daysOverdue: 18, lead: 'Fahad Al-Otaibi', tier: 3 },
   { client: 'Saudi Petrochem Logistics', dept: 'MISCPA', daysOverdue: 14, lead: 'Khalid Al-Farsi', tier: 3 },
   { client: 'Dammam Hospitality', dept: 'ABCPA', daysOverdue: 8, lead: 'Majed Al-Subaie', tier: 2 },
 ]
+export const mgmtEscalationsToday = escalationsTodayAll.filter(e => e.tier === MGMT_VISIBLE_ESCALATION_TIER)
 
 export const mgmtRecentActivity = [
-  { title: 'Tier-3 Escalation', client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', user: 'Tariq Al-Ghamdi', timestamp: '05 Nov 2024, 09:15 AM' },
+  { title: 'FO Escalation', client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', user: 'Tariq Al-Ghamdi', timestamp: '05 Nov 2024, 09:15 AM' },
   { title: 'Proposal Approved & Sent', client: 'Al-Bashir Trading Co.', dept: 'ABCPA', user: 'Layla Al-Khatib', timestamp: '04 Nov 2024, 04:30 PM' },
-  { title: 'Tier-3 Escalation', client: 'Saudi Petrochem Logistics', dept: 'MISCPA', user: 'Khalid Al-Farsi', timestamp: '04 Nov 2024, 03:00 PM' },
+  { title: 'FO Escalation', client: 'Saudi Petrochem Logistics', dept: 'MISCPA', user: 'Khalid Al-Farsi', timestamp: '04 Nov 2024, 03:00 PM' },
   { title: 'Engagement Letter Captured', client: 'Al-Rajhi Capital Audits', dept: 'ABCPA', user: 'Layla Al-Khatib', timestamp: '04 Nov 2024, 11:00 AM' },
   { title: 'Stage Changed', client: 'Noor FinTech Micro-Lending', dept: 'MISCPA', user: 'System', timestamp: '03 Nov 2024, 09:00 AM' },
 ]
@@ -2227,19 +2231,23 @@ export const mgmtARPending = [
   { client: 'Salam Services WLL', code: 'ZK-004', fee: 28000, paid: 14000, balance: 14000, daysOverdue: 0, dept: 'MISCPA', contact: 'Nada Salam', phone: '+966 11 208 5567', status: 'Due Today' },
 ]
 
-// Full escalation history
-export const mgmtAllEscalations = [
-  { id: 'ESC-041', client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', tier: 3, daysOverdue: 18, lead: 'Fahad Al-Otaibi', date: '05 Nov 2024', reason: 'TB schedules outstanding >14 days; client unresponsive to 3 follow-ups', status: 'Open', raisedBy: 'Tariq Al-Ghamdi' },
-  { id: 'ESC-040', client: 'Saudi Petrochem Logistics', dept: 'MISCPA', tier: 3, daysOverdue: 14, lead: 'Khalid Al-Farsi', date: '04 Nov 2024', reason: 'Statutory deadline breach imminent; audit plan not signed off', status: 'Open', raisedBy: 'Khalid Al-Farsi' },
+// Escalation levels raised from the client portal: 1 Audit Lead, 2 Audit Manager,
+// 3 Front Office Manager. Management is only shown level 3, so every management
+// view reads mgmtAllEscalations (filtered here) and never the raw records.
+const allEscalationRecords = [
+  { id: 'ESC-041', client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', tier: 3, daysOverdue: 18, lead: 'Fahad Al-Otaibi', date: '05 Nov 2024', reason: 'TB schedules outstanding >14 days; client unresponsive to 3 follow-ups', status: 'Open', raisedBy: 'Tariq Al-Ghamdi', fo: 'Allen' },
+  { id: 'ESC-040', client: 'Saudi Petrochem Logistics', dept: 'MISCPA', tier: 3, daysOverdue: 14, lead: 'Khalid Al-Farsi', date: '04 Nov 2024', reason: 'Statutory deadline breach imminent; audit plan not signed off', status: 'Open', raisedBy: 'Khalid Al-Farsi', fo: 'Uvais' },
   { id: 'ESC-039', client: 'Dammam Hospitality', dept: 'ABCPA', tier: 2, daysOverdue: 8, lead: 'Majed Al-Subaie', date: '04 Nov 2024', reason: 'Related party disclosures disputed; management representation delayed', status: 'Under Review', raisedBy: 'Majed Al-Subaie' },
   { id: 'ESC-038', client: 'Al-Rajhi Heavy Industries', dept: 'ABCPA', tier: 2, daysOverdue: 11, lead: 'Rijin Philip', date: '02 Nov 2024', reason: 'Cash & bank confirmations not received from 2 banks after 30-day chase', status: 'Resolved', raisedBy: 'Rijin Philip' },
   { id: 'ESC-037', client: 'Noor FinTech Micro-Lending', dept: 'MISCPA', tier: 2, daysOverdue: 6, lead: 'Pavithra Joy', date: '01 Nov 2024', reason: 'Provisioning policy disagreement — client seeking qualified opinion', status: 'Resolved', raisedBy: 'Ansa Davis' },
-  { id: 'ESC-036', client: 'Gulf Contracting Est.', dept: 'ABCPA', tier: 3, daysOverdue: 22, lead: 'Jefin Jose', date: '30 Oct 2024', reason: 'Contract work-in-progress valuation dispute; legal counsel involved', status: 'Resolved', raisedBy: 'Tariq Al-Ghamdi' },
+  { id: 'ESC-036', client: 'Gulf Contracting Est.', dept: 'ABCPA', tier: 3, daysOverdue: 22, lead: 'Jefin Jose', date: '30 Oct 2024', reason: 'Contract work-in-progress valuation dispute; legal counsel involved', status: 'Resolved', raisedBy: 'Tariq Al-Ghamdi', fo: 'M Ali' },
   { id: 'ESC-035', client: 'Tabuk Foods Co.', dept: 'MISCPA', tier: 2, daysOverdue: 5, lead: 'Deepak Suresh', date: '28 Oct 2024', reason: 'Inventory count discrepancy — SAR 1.8M variance unresolved at cut-off', status: 'Resolved', raisedBy: 'Khalid Al-Farsi' },
   { id: 'ESC-034', client: 'Al-Andalus Pharmaceutical', dept: 'MISCPA', tier: 2, daysOverdue: 9, lead: 'Yousef Al-Dosari', date: '25 Oct 2024', reason: 'Regulatory licence not renewed; going concern implication flagged', status: 'Resolved', raisedBy: 'Lina Al-Zahrani' },
   { id: 'ESC-033', client: 'Arabian Cloud Computing', dept: 'ABCPA', tier: 2, daysOverdue: 4, lead: 'Sara Al-Qahtani', date: '22 Oct 2024', reason: 'Revenue recognition policy — IFRS 15 variable consideration treatment disputed', status: 'Resolved', raisedBy: 'Noura Al-Zahrani' },
-  { id: 'ESC-032', client: 'Jeddah Hospitality Holdings', dept: 'ABCPA', tier: 3, daysOverdue: 19, lead: 'Omar Al-Harbi', date: '18 Oct 2024', reason: 'Prior year restatement identified; comparative figures to be restated', status: 'Resolved', raisedBy: 'Tariq Al-Ghamdi' },
+  { id: 'ESC-032', client: 'Jeddah Hospitality Holdings', dept: 'ABCPA', tier: 3, daysOverdue: 19, lead: 'Omar Al-Harbi', date: '18 Oct 2024', reason: 'Prior year restatement identified; comparative figures to be restated', status: 'Resolved', raisedBy: 'Tariq Al-Ghamdi', fo: 'Azhar' },
 ]
+
+export const mgmtAllEscalations = allEscalationRecords.filter(e => e.tier === MGMT_VISIBLE_ESCALATION_TIER)
 
 // Searchable client directory (full 148-file universe — abbreviated for demo)
 export const mgmtClientDirectory = [
@@ -2323,26 +2331,26 @@ export const mgmtAtRiskFiles = [
 // /manager/performance) — the shareholder-facing Management portal only
 // surfaces firm- and FO-level (business development) data.
 export const mgmtAuditLog = [
-  { id: 'al-1', tone: 'alert-red', category: 'Tier-3 Escalations', title: 'Tier-3 Escalation — Al-Yamamah Steel Industries', description: 'File escalated to Management — 18 days overdue. PBC Bank Confirmation missing.', user: 'Tariq Al-Ghamdi', client: 'Al-Yamamah Steel', dept: 'ABCPA', timestamp: '05 Nov 2024, 09:15 AM' },
+  { id: 'al-1', tone: 'alert-red', category: 'FO Escalations', title: 'FO Escalation — Al-Yamamah Steel Industries', description: 'File escalated to Management — 18 days overdue. PBC Bank Confirmation missing.', user: 'Tariq Al-Ghamdi', client: 'Al-Yamamah Steel', dept: 'ABCPA', timestamp: '05 Nov 2024, 09:15 AM' },
   { id: 'al-2', tone: 'emerald', category: 'Proposals', title: 'Proposal Approved & Sent', description: 'Proposal for Al-Bashir Trading Co. approved by FO Manager and sent to client.', user: 'Layla Al-Khatib', client: 'Al-Bashir Trading', dept: 'ABCPA', timestamp: '04 Nov 2024, 04:30 PM' },
-  { id: 'al-3', tone: 'alert-red', category: 'Tier-3 Escalations', title: 'Tier-3 Escalation — Saudi Petrochem Logistics', description: 'File escalated — 14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', user: 'Khalid Al-Farsi', client: 'Saudi Petrochem', dept: 'MISCPA', timestamp: '04 Nov 2024, 03:00 PM' },
+  { id: 'al-3', tone: 'alert-red', category: 'FO Escalations', title: 'FO Escalation — Saudi Petrochem Logistics', description: 'File escalated — 14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', user: 'Khalid Al-Farsi', client: 'Saudi Petrochem', dept: 'MISCPA', timestamp: '04 Nov 2024, 03:00 PM' },
   { id: 'al-4', tone: 'blue', category: 'Meetings', title: 'Meeting Scheduled', description: 'Client meeting scheduled — Jeddah Hospitality Holdings — Teams link generated.', user: 'Fahad Al-Otaibi', client: 'Jeddah Hospitality', dept: 'ABCPA', timestamp: '04 Nov 2024, 02:30 PM' },
   { id: 'al-5', tone: 'emerald', category: 'Engagements', title: 'Engagement Letter Captured', description: 'Signed EL captured for Al-Rajhi Capital Audits — engagement confirmed.', user: 'Layla Al-Khatib', client: 'Al-Rajhi Capital', dept: 'ABCPA', timestamp: '04 Nov 2024, 11:00 AM' },
   { id: 'al-6', tone: 'amber', category: 'Stage Changes', title: 'Stage Changed', description: 'Noor FinTech Micro-Lending advanced to Stage 3 Substantive Testing.', user: 'System', client: 'Noor FinTech', dept: 'MISCPA', timestamp: '03 Nov 2024, 09:00 AM' },
   { id: 'al-8', tone: 'emerald', category: 'Engagements', title: 'New Engagement Created', description: 'New engagement created — Eastern Tech Solutions — ABCPA — Proper Audit — SAR 15,000.', user: 'Layla Al-Khatib', client: 'Eastern Tech', dept: 'ABCPA', timestamp: '02 Nov 2024, 09:00 AM' },
   { id: 'al-9', tone: 'blue', category: 'Proposals', title: 'Proposal Generated via Odoo', description: 'Proposal auto-generated by Odoo for Madinah Contracting LLC — MISCPA Proper Audit.', user: 'Odoo System', client: 'Madinah Contracting', dept: 'MISCPA', timestamp: '01 Nov 2024, 10:15 AM' },
   { id: 'al-10', tone: 'emerald', category: 'Stage Changes', title: 'Stage Changed', description: 'Arabian Cloud Computing advanced to Stage 4 Quality Review.', user: 'System', client: 'Arabian Cloud', dept: 'MISCPA', timestamp: '01 Nov 2024, 09:30 AM' },
-  { id: 'al-12', tone: 'alert-red', category: 'Tier-3 Escalations', title: 'Tier-3 Escalation — Al-Yamamah Steel', description: 'Initial Tier-2 escalation upgraded to Tier-3. Partner action required.', user: 'System', client: 'Al-Yamamah Steel', dept: 'ABCPA', timestamp: '31 Oct 2024, 03:00 PM' },
+  { id: 'al-12', tone: 'alert-red', category: 'FO Escalations', title: 'FO Escalation — Al-Yamamah Steel', description: 'Escalated to the Front Office Manager. Partner action required.', user: 'System', client: 'Al-Yamamah Steel', dept: 'ABCPA', timestamp: '31 Oct 2024, 03:00 PM' },
   { id: 'al-13', tone: 'emerald', category: 'Proposals', title: 'Proposal Approved & Sent', description: 'Proposal for Gulf Star Logistics approved and sent — SAR 8,500 Disclaimer.', user: 'Layla Al-Khatib', client: 'Gulf Star', dept: 'ABCPA', timestamp: '30 Oct 2024, 02:00 PM' },
   { id: 'al-14', tone: 'emerald', category: 'Engagements', title: 'Client Account Created', description: 'Client account created for Kingdom Retail Holdings LLC — credentials sent.', user: 'FO System', client: 'Kingdom Retail', dept: 'ABCPA', timestamp: '30 Oct 2024, 08:30 AM' },
   { id: 'al-15', tone: 'emerald', category: 'Engagements', title: 'New Engagement Created', description: 'New engagement — Gulf Star Logistics — ABCPA — Disclaimer of Opinion — SAR 8,500.', user: 'Layla Al-Khatib', client: 'Gulf Star', dept: 'ABCPA', timestamp: '28 Oct 2024, 09:00 AM' },
 ]
 
-export const mgmtLogEventFilters = ['All Events', 'Tier-3 Escalations', 'Proposals', 'Engagements', 'Stage Changes', 'Meetings']
+export const mgmtLogEventFilters = ['All Events', 'FO Escalations', 'Proposals', 'Engagements', 'Stage Changes', 'Meetings']
 
 export const mgmtNotifications = [
-  { id: 'mn-1', title: 'Tier-3 Escalation — Al-Yamamah Steel Industries', message: '18 days overdue. PBC Bank Confirmation missing.', timestamp: '05 Nov 2024, 09:15 AM', route: '/management/risk' },
-  { id: 'mn-2', title: 'Tier-3 Escalation — Saudi Petrochem Logistics', message: '14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', timestamp: '04 Nov 2024, 03:00 PM', route: '/management/risk' },
+  { id: 'mn-1', title: 'FO Escalation — Al-Yamamah Steel Industries', message: '18 days overdue. PBC Bank Confirmation missing.', timestamp: '05 Nov 2024, 09:15 AM', route: '/management/risk' },
+  { id: 'mn-2', title: 'FO Escalation — Saudi Petrochem Logistics', message: '14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', timestamp: '04 Nov 2024, 03:00 PM', route: '/management/risk' },
   { id: 'mn-3', title: 'SAR 84K in Overdue Invoices', message: '6 clients overdue on payment — review AR aging.', timestamp: '04 Nov 2024, 01:00 PM', route: '/management/financials' },
 ]
 
@@ -2382,10 +2390,11 @@ export const mgmtMonthlyRevenue = [
 ]
 
 // ── Risk & Compliance (Management) ───────────────────────────────────────────
-export const mgmtRiskHeatmap = [
+const riskHeatmapAll = [
   { dept: 'ABCPA', tier1: 56, tier2: 31, tier3: 2 },
   { dept: 'MISCPA', tier1: 38, tier2: 20, tier3: 1 },
 ]
+export const mgmtRiskHeatmap = riskHeatmapAll.map(({ dept, tier3 }) => ({ dept, critical: tier3 }))
 
 export const mgmtComplianceChecks = [
   { id: 'cc-1', label: 'Independence Declarations Signed', status: 'ok', value: '96%', note: '142 of 148 files' },

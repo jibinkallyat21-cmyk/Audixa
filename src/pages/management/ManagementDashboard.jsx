@@ -9,6 +9,7 @@ import ManagementLayout from '../../components/management/ManagementLayout'
 import { useMgmtScope } from '../../hooks/useMgmtScope'
 import MeetingRequestModal from '../../components/client/MeetingRequestModal'
 import { useTheme } from '../../context/ThemeContext'
+import { useManagementRaisedEscalations } from '../../utils/escalations'
 import {
   mgmtUser,
   mgmtFOFiles,
@@ -19,6 +20,7 @@ import {
   mgmtClientDirectory,
   mgmtAbcpaPortfolio,
   mgmtMiscpaPortfolio,
+  auditors,
   mgmtLeadConversion,
   mgmtConversionRate,
   mgmtRealization,
@@ -303,7 +305,8 @@ function ARModal({ onClose }) {
 function EscalationsModal({ onClose }) {
   const [filter, setFilter] = useState('All')
   const [scope] = useMgmtScope()
-  const scoped = mgmtAllEscalations.filter(e => scope === 'Combined' || e.dept === scope)
+  const raised = useManagementRaisedEscalations()
+  const scoped = [...raised, ...mgmtAllEscalations].filter(e => scope === 'Combined' || e.dept === scope)
   const filtered = filter === 'All' ? scoped : scoped.filter(e => e.status === filter)
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -345,7 +348,7 @@ function EscalationsModal({ onClose }) {
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: `${TIER_COLOR[e.tier]}15`, color: TIER_COLOR[e.tier] }}>
-                      Tier {e.tier}
+                      FO Level
                     </span>
                     <p className="text-sm font-bold text-navy">{e.client}</p>
                     <span className="text-[10px] text-slate-400">{e.dept}</span>
@@ -357,7 +360,11 @@ function EscalationsModal({ onClose }) {
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">{e.reason}</p>
                 <div className="mt-2 flex items-center gap-3 text-[10px] text-slate-400">
-                  <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{e.daysOverdue}d overdue</span>
+                  <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{daysLabel(e)}</span>
+                  <span>·</span>
+                  <span>Auditor group: {auditorGroup(e.dept)}</span>
+                  <span>·</span>
+                  <span>FO manager: {e.fo}</span>
                 </div>
               </motion.div>
             )
@@ -392,6 +399,61 @@ function StatCard({ icon: Icon, iconColor, label, value, sub, onClick, delay = 0
       <p className="text-xs font-semibold text-slate-500">{label}</p>
       {sub && <p className="mt-0.5 text-[10px] text-slate-400">{sub}</p>}
     </motion.button>
+  )
+}
+
+const daysLabel = (e) => (e.daysOverdue > 0 ? `${e.daysOverdue}d overdue` : 'Raised today')
+const auditorGroup = (code) => {
+  const a = auditors.find((x) => x.code === code)
+  return a ? `${a.code} — ${a.name}` : code
+}
+
+/* ─── Escalation detail (what, which client, auditor group, responsible FO manager) ─── */
+function EscalationDetail({ escalation, onClose }) {
+  const e = escalation
+  const es = ESC_STATUS[e.status]
+  const rows = [
+    ['Client', e.client],
+    ['Auditor group', auditorGroup(e.dept)],
+    ['Responsible FO manager', e.fo],
+  ]
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[210] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div initial={{ scale: 0.95, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 16 }}
+        transition={{ duration: 0.22 }} onClick={(ev) => ev.stopPropagation()}
+        role="dialog" aria-label="Escalation details"
+        className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-6 py-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: `${TIER_COLOR[e.tier]}15`, color: TIER_COLOR[e.tier] }}>FO Level</span>
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: es.bg, color: es.color }}>{e.status}</span>
+            </div>
+            <h3 className="mt-2 text-base font-bold text-navy">Escalation Details</h3>
+            <p className="text-[11px] text-slate-400">{e.id} · {e.date} · {daysLabel(e)}</p>
+          </div>
+          <button onClick={onClose} aria-label="Close" className="text-slate-300 hover:text-slate-600"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="space-y-4 px-6 py-5">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">What it is about</p>
+            <p className="mt-1 text-sm leading-relaxed text-navy">{e.reason}</p>
+          </div>
+          <dl className="space-y-3">
+            {rows.map(([k, v]) => (
+              <div key={k} className="flex items-start justify-between gap-4 border-t border-slate-100 pt-3">
+                <dt className="text-xs text-slate-400">{k}</dt>
+                <dd className="text-right text-sm font-semibold text-navy">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -441,11 +503,12 @@ function EscalationTicker({ items, onOpen }) {
             <button
               key={`${e.id}-${i}`}
               type="button"
-              onClick={onOpen}
+              onClick={() => onOpen(e)}
+              aria-label={`View escalation — ${e.client}`}
               className="flex w-full items-start gap-3 border-b border-slate-100 px-5 py-3.5 text-left transition-colors hover:bg-slate-500/10"
             >
               <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white" style={{ background: TIER_COLOR[e.tier] }}>
-                T{e.tier}
+                FO
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -453,10 +516,12 @@ function EscalationTicker({ items, onOpen }) {
                   <span className="text-[10px] text-slate-400">{e.dept}</span>
                 </div>
                 <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{e.reason}</p>
-                <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
-                  <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{e.daysOverdue}d overdue</span>
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[10px] text-slate-400">
+                  <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{daysLabel(e)}</span>
                   <span>·</span>
                   <span>{e.date}</span>
+                  <span>·</span>
+                  <span>FO: {e.fo}</span>
                 </div>
               </div>
               <span className="mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: es.bg, color: es.color }}>{e.status}</span>
@@ -476,7 +541,9 @@ export default function ManagementDashboard() {
   const navigate = useNavigate()
 
   const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
-  const escalations = useMemo(() => mgmtAllEscalations.filter(e => scope === 'Combined' || e.dept === scope), [scope])
+  const raised = useManagementRaisedEscalations()
+  const escalations = useMemo(() => [...raised, ...mgmtAllEscalations].filter(e => scope === 'Combined' || e.dept === scope), [scope, raised])
+  const [detail, setDetail] = useState(null)
   const openEscalations = escalations.filter(e => e.status === 'Open').length
   const [meetingOpen, setMeetingOpen] = useState(false)
   const breachCount = mgmtDeadlineBreaches.filter(b => b.daysLeft < 0).length
@@ -564,7 +631,7 @@ export default function ManagementDashboard() {
               </button>
             </div>
 
-            <EscalationTicker items={escalations} onOpen={() => setModal('escalations')} />
+            <EscalationTicker items={escalations} onOpen={setDetail} />
 
             <div className="flex shrink-0 items-center justify-between border-t border-slate-100 px-5 py-3">
               <p className="text-[11px] text-slate-400">{escalations.length} escalation{escalations.length !== 1 ? 's' : ''} on record</p>
@@ -639,6 +706,7 @@ export default function ManagementDashboard() {
         {modal === 'files' && <FilesModal onClose={() => setModal(null)} />}
         {modal === 'ar' && <ARModal onClose={() => setModal(null)} />}
         {modal === 'escalations' && <EscalationsModal onClose={() => setModal(null)} />}
+        {detail && <EscalationDetail escalation={detail} onClose={() => setDetail(null)} />}
       </AnimatePresence>
     </ManagementLayout>
   )

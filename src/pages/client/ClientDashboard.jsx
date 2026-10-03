@@ -12,6 +12,7 @@ import LifecycleStepper from '../../components/shared/LifecycleStepper'
 import { clientPortal } from '../../data/sampleData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 import { getActivityEvents } from '../../data/activityLog'
+import { raiseEscalation } from '../../utils/escalations'
 import { useToast } from '../../components/shared/Toast'
 
 /* palette tokens (CSS vars from ThemeContext) */
@@ -445,6 +446,7 @@ function EscalationModal({ onClose, onRecord }) {
     if (!selectedLevel || !issue.trim()) return showToast('Please select a level and describe the issue')
     setSubmitted(true)
     setTimeout(() => {
+      raiseEscalation({ level: selectedLevel.level, issue: issue.trim() })
       const mgmtNote = selectedLevel.managementVisible ? ' This has also been flagged in the management portal.' : ''
       showToast(`Escalation submitted to ${selectedLevel.label} — your team has been notified.${mgmtNote}`)
       onRecord?.(`Issue escalated to ${selectedLevel.label}: "${issue.trim().slice(0, 60)}${issue.length > 60 ? '…' : ''}"`, 'amber')
