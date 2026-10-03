@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, X, TrendingUp, Briefcase, Banknote, Wallet,
-  ChevronRight, ExternalLink, AlertCircle, Clock, UserCog, PauseCircle, ShieldAlert,
+  ChevronRight, ExternalLink, AlertCircle, Clock, PauseCircle, ShieldAlert,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
 import {
@@ -21,7 +21,7 @@ import {
   mgmtDeadlineBreaches,
 } from '../../data/sampleData'
 
-const ACTION_ICON = { Clock, UserCog, PauseCircle, Banknote }
+const ACTION_ICON = { Clock, PauseCircle, Banknote }
 
 /* ─── helpers ─── */
 const STATUS_STYLE = {
@@ -90,7 +90,6 @@ function ClientQuickSummary({ client, onClose }) {
 
       <div className="px-4 py-3">
         <div className="flex flex-wrap gap-1.5">
-          <span className="rounded-full bg-navy/10 px-2.5 py-0.5 text-[9px] font-semibold text-navy">Lead: {client.lead}</span>
           <span className="rounded-full bg-amber/10 px-2.5 py-0.5 text-[9px] font-semibold text-amber">FO: {client.fo}</span>
           <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[9px] font-semibold text-blue-700">{client.sector}</span>
           <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[9px] font-semibold text-slate-500">{client.exceptions} exceptions</span>
@@ -353,8 +352,6 @@ function EscalationsModal({ onClose }) {
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">{e.reason}</p>
                 <div className="mt-2 flex items-center gap-3 text-[10px] text-slate-400">
-                  <span>Lead: <span className="font-semibold text-navy">{e.lead}</span></span>
-                  <span>·</span>
                   <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{e.daysOverdue}d overdue</span>
                 </div>
               </motion.div>
@@ -523,8 +520,6 @@ export default function ManagementDashboard() {
                       </div>
                       <p className="mt-0.5 text-xs text-slate-500 line-clamp-1">{e.reason}</p>
                       <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
-                        <span>Lead: {e.lead}</span>
-                        <span>·</span>
                         <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{e.daysOverdue}d overdue</span>
                         <span>·</span>
                         <span>{e.date}</span>

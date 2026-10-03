@@ -9,7 +9,7 @@ import {
   mgmtPnlSummary,
   mgmtRealization,
   mgmtRevenueByDept,
-  mgmtRevenueByLead,
+  mgmtFOFiles,
   mgmtWipAging,
   mgmtMonthlyRevenue,
   mgmtReportingPeriods,
@@ -164,31 +164,36 @@ export default function ManagementFinancials() {
             </div>
           </div>
 
-          {/* Revenue by lead */}
+          {/* Revenue by Front Office manager */}
           <div className="rounded-xl p-6" style={{ background: D.card, border: `1px solid ${D.cardBorder}` }}>
-            <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Revenue by Audit Lead</h3>
+            <h3 className="mb-4 text-sm font-bold" style={{ color: D.heading }}>Revenue by Front Office Manager</h3>
             <p className="mb-4 -mt-2 text-[11px]" style={{ color: D.subtle }}>
-              Billed fees per lead's engagements. Margin isn't shown — the firm doesn't track staff cost or chargeable hours per file.
+              Billed fees attributed to each FO manager's client portfolio — the business-development engine behind firm revenue.
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr style={{ color: D.subtle }}>
-                    <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Lead</th>
-                    <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Dept</th>
+                    <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">FO Manager</th>
                     <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Files</th>
+                    <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Won</th>
                     <th className="pb-2 pr-4 font-semibold uppercase tracking-wide">Revenue</th>
                     <th className="pb-2 font-semibold uppercase tracking-wide">Avg / File</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {mgmtRevenueByLead.map((l) => (
-                    <tr key={l.lead} style={{ borderTop: `1px solid ${D.cardBorder}` }}>
-                      <td className="py-2.5 pr-4 font-semibold" style={{ color: D.heading }}>{l.lead}</td>
-                      <td className="py-2.5 pr-4" style={{ color: D.muted }}>{l.dept}</td>
-                      <td className="py-2.5 pr-4" style={{ color: D.muted }}>{l.files}</td>
-                      <td className="py-2.5 pr-4" style={{ color: D.heading }}>SAR {l.revenue.toLocaleString()}</td>
-                      <td className="py-2.5" style={{ color: D.muted }}>SAR {Math.round(l.revenue / l.files).toLocaleString()}</td>
+                  {mgmtFOFiles.map((f) => (
+                    <tr key={f.fo} style={{ borderTop: `1px solid ${D.cardBorder}` }}>
+                      <td className="py-2.5 pr-4">
+                        <span className="flex items-center gap-2 font-semibold" style={{ color: D.heading }}>
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ background: f.color }}>{f.name[0]}</span>
+                          {f.name}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4" style={{ color: D.muted }}>{f.total}</td>
+                      <td className="py-2.5 pr-4" style={{ color: D.muted }}>{f.won}</td>
+                      <td className="py-2.5 pr-4" style={{ color: D.heading }}>SAR {f.revenue.toLocaleString()}</td>
+                      <td className="py-2.5" style={{ color: D.muted }}>SAR {Math.round(f.revenue / f.total).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
