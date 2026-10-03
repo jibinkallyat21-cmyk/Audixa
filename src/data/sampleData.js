@@ -1693,7 +1693,7 @@ export const managerActionCards = [
     title: '2 Staff Department Transfers Pending Approval',
     icon: 'Users',
     action: 'Review Transfers',
-    route: '/management/staff',
+    route: '/manager/workload',
   },
   {
     id: 'parked',
@@ -1979,7 +1979,7 @@ export const performanceTrend = [
 export const managerNotifications = [
   { id: 'mn1', title: 'Tier-3 Escalation — Al-Yamamah Steel', message: '18 days overdue. Partner action required immediately.', timestamp: '10 mins ago', route: '/manager/escalation' },
   { id: 'mn2', title: 'File Parked — Qassim Petrochemical', message: 'Parked 19 days — capacity constraint on Lead.', timestamp: '1 hour ago', route: '/manager/status-board' },
-  { id: 'mn3', title: 'Transfer Request Pending', message: '2 staff department transfers awaiting your approval.', timestamp: '2 hours ago', route: '/management/staff' },
+  { id: 'mn3', title: 'Transfer Request Pending', message: '2 staff department transfers awaiting your approval.', timestamp: '2 hours ago', route: '/manager/workload' },
   { id: 'mn4', title: 'Review Point Raised — Riyadh Fintech', message: 'RP-002 raised against Khalid Bin-Salman.', timestamp: '3 hours ago', route: '/manager/performance' },
   { id: 'mn5', title: 'Workload Alert — Nadia Hassan', message: '13 active files — over capacity threshold.', timestamp: 'Yesterday', route: '/manager/workload' },
 ]
@@ -2127,7 +2127,6 @@ export const mgmtStatChips = [
 
 export const mgmtActionCards = [
   { id: 'tier3', tone: 'alert-red', icon: 'Clock', title: '3 Tier-3 Critical Files — Immediate Partner Action', action: 'Escalate Now', route: '/manager/escalation?tier=3' },
-  { id: 'transfers', tone: 'amber', icon: 'UserCog', title: '2 Staff Department Transfers Pending Approval', action: 'Review Transfers', route: '/management/staff' },
   { id: 'parked', tone: 'amber', icon: 'PauseCircle', title: '8 Files Parked >14 Days', action: 'Review Parking', route: '/manager/status-board' },
   { id: 'overdue', tone: 'alert-red', icon: 'Banknote', title: 'SAR 84K Overdue Invoices', action: 'Follow Up', route: null },
 ]
@@ -2207,13 +2206,14 @@ export const mgmtRecentActivity = [
 // Total turnover across all 148 engaged files (FY2025)
 export const mgmtTotalTurnover = { value: 'SAR 4.84B', raw: 4840000000, note: '148 files · FY2025' }
 
-// FO-manager-wise file allocation
+// FO-manager-wise file allocation (business-development / client-acquisition level —
+// the detail shareholders care about; individual audit-staff assignments are not shown here)
 export const mgmtFOFiles = [
-  { fo: 'AL', name: 'Allen', role: 'FO Senior', color: '#DC2626', total: 36, active: 32, won: 14, pipeline: 6 },
-  { fo: 'MA', name: 'M Ali', role: 'Front Officer', color: '#D97706', total: 35, active: 30, won: 11, pipeline: 8 },
-  { fo: 'FY', name: 'Fayis', role: 'Front Officer', color: '#2563EB', total: 29, active: 25, won: 9, pipeline: 5 },
-  { fo: 'UV', name: 'Uvais', role: 'Front Officer', color: '#0F766E', total: 27, active: 23, won: 8, pipeline: 4 },
-  { fo: 'AZ', name: 'Azhar', role: 'Front Officer', color: '#7C3AED', total: 21, active: 17, won: 6, pipeline: 5 },
+  { fo: 'AL', name: 'Allen', role: 'FO Senior', color: '#DC2626', total: 36, active: 32, won: 14, pipeline: 6, revenue: 302000 },
+  { fo: 'MA', name: 'M Ali', role: 'Front Officer', color: '#D97706', total: 35, active: 30, won: 11, pipeline: 8, revenue: 293000 },
+  { fo: 'FY', name: 'Fayis', role: 'Front Officer', color: '#2563EB', total: 29, active: 25, won: 9, pipeline: 5, revenue: 243000 },
+  { fo: 'UV', name: 'Uvais', role: 'Front Officer', color: '#0F766E', total: 27, active: 23, won: 8, pipeline: 4, revenue: 226000 },
+  { fo: 'AZ', name: 'Azhar', role: 'Front Officer', color: '#7C3AED', total: 21, active: 17, won: 6, pipeline: 5, revenue: 176000 },
 ]
 
 // AR summary — clients with pending payments
@@ -2317,29 +2317,11 @@ export const mgmtAtRiskFiles = [
   { client: 'Kingdom Retail Consortia Ltd', dept: 'MISCPA', status: 'DUE IN 48H', blocker: 'Stage 4 Draft Financial Statement pending final Partner sign-off', action: 'review' },
 ]
 
-// ── Staff Department Assignments (screen 36) ─────────────────────────────────
-export const mgmtStaffAssignments = [
-  { id: 'st-1', name: 'Tariq Al-Ghamdi', role: 'Audit Manager', dept: 'ABCPA', since: '01 Jan 2026', transferred: false },
-  { id: 'st-2', name: 'Sarah Al-Mansoor', role: 'Assistant Manager', dept: 'ABCPA', since: '01 Jan 2026', transferred: false },
-  { id: 'st-3', name: 'Khalid Al-Farsi', role: 'Audit Manager', dept: 'MISCPA', since: '01 Jan 2026', transferred: false },
-  { id: 'st-4', name: 'Lina Al-Zahrani', role: 'Assistant Manager', dept: 'MISCPA', since: '01 Mar 2026', transferred: false },
-  { id: 'st-5', name: 'Fahad Al-Otaibi', role: 'Audit Lead', dept: 'ABCPA', since: '01 Jan 2026', transferred: false },
-  { id: 'st-6', name: 'Sarah Al-Harbi', role: 'Audit Lead', dept: 'ABCPA', since: '01 Jan 2026', transferred: false },
-  { id: 'st-7', name: 'Majed Al-Subaie', role: 'Audit Lead', dept: 'MISCPA', since: '01 Jan 2026', transferred: false },
-  { id: 'st-8', name: 'Nadia Hassan', role: 'Audit Lead', dept: 'MISCPA', since: '15 Feb 2026', transferred: true },
-  { id: 'st-9', name: 'Omar Bin-Shehri', role: 'Audit Lead', dept: 'MISCPA', since: '01 Jan 2026', transferred: false },
-  { id: 'st-10', name: 'Rayan Darwish', role: 'Audit Lead', dept: 'ABCPA', since: '01 Jan 2026', transferred: false },
-]
-
-export const mgmtTransferReasons = ['Annual Restructure', 'Capacity Rebalancing', 'File Expertise Match', 'Cover', 'Other']
-
-export const mgmtTransferHistory = [
-  { id: 'th-1', name: 'Nadia Hassan', from: 'ABCPA', to: 'MISCPA', date: '15 Feb 2026', approvedBy: 'Mohammed Al-Rashid', reason: 'Capacity Rebalancing' },
-  { id: 'th-2', name: 'Sara Mahmoud', from: 'MISCPA', to: 'ABCPA', date: '01 Apr 2026', approvedBy: 'Mohammed Al-Rashid', reason: 'File Expertise Match' },
-  { id: 'th-3', name: 'Rayan Darwish', from: 'MISCPA', to: 'ABCPA', date: '01 Jan 2026', approvedBy: 'Mohammed Al-Rashid', reason: 'Annual Restructure' },
-]
-
 // ── Audit Log — Management View (screen 37) ──────────────────────────────────
+// Note: individual staff assignments, transfers and performance reviews are
+// operational/HR detail owned by the Manager module (/manager/workload,
+// /manager/performance) — the shareholder-facing Management portal only
+// surfaces firm- and FO-level (business development) data.
 export const mgmtAuditLog = [
   { id: 'al-1', tone: 'alert-red', category: 'Tier-3 Escalations', title: 'Tier-3 Escalation — Al-Yamamah Steel Industries', description: 'File escalated to Management — 18 days overdue. PBC Bank Confirmation missing.', user: 'Tariq Al-Ghamdi', client: 'Al-Yamamah Steel', dept: 'ABCPA', timestamp: '05 Nov 2024, 09:15 AM' },
   { id: 'al-2', tone: 'emerald', category: 'Proposals', title: 'Proposal Approved & Sent', description: 'Proposal for Al-Bashir Trading Co. approved by FO Manager and sent to client.', user: 'Layla Al-Khatib', client: 'Al-Bashir Trading', dept: 'ABCPA', timestamp: '04 Nov 2024, 04:30 PM' },
@@ -2347,21 +2329,95 @@ export const mgmtAuditLog = [
   { id: 'al-4', tone: 'blue', category: 'Meetings', title: 'Meeting Scheduled', description: 'Client meeting scheduled — Jeddah Hospitality Holdings — Teams link generated.', user: 'Fahad Al-Otaibi', client: 'Jeddah Hospitality', dept: 'ABCPA', timestamp: '04 Nov 2024, 02:30 PM' },
   { id: 'al-5', tone: 'emerald', category: 'Engagements', title: 'Engagement Letter Captured', description: 'Signed EL captured for Al-Rajhi Capital Audits — engagement confirmed.', user: 'Layla Al-Khatib', client: 'Al-Rajhi Capital', dept: 'ABCPA', timestamp: '04 Nov 2024, 11:00 AM' },
   { id: 'al-6', tone: 'amber', category: 'Stage Changes', title: 'Stage Changed', description: 'Noor FinTech Micro-Lending advanced to Stage 3 Substantive Testing.', user: 'System', client: 'Noor FinTech', dept: 'MISCPA', timestamp: '03 Nov 2024, 09:00 AM' },
-  { id: 'al-7', tone: 'amber', category: 'Staff Transfers', title: 'Staff Transfer', description: 'Nadia Hassan transferred from ABCPA to MISCPA — Capacity Rebalancing.', user: 'Mohammed Al-Rashid', client: 'System', dept: 'Both', timestamp: '15 Feb 2026' },
   { id: 'al-8', tone: 'emerald', category: 'Engagements', title: 'New Engagement Created', description: 'New engagement created — Eastern Tech Solutions — ABCPA — Proper Audit — SAR 15,000.', user: 'Layla Al-Khatib', client: 'Eastern Tech', dept: 'ABCPA', timestamp: '02 Nov 2024, 09:00 AM' },
   { id: 'al-9', tone: 'blue', category: 'Proposals', title: 'Proposal Generated via Odoo', description: 'Proposal auto-generated by Odoo for Madinah Contracting LLC — MISCPA Proper Audit.', user: 'Odoo System', client: 'Madinah Contracting', dept: 'MISCPA', timestamp: '01 Nov 2024, 10:15 AM' },
   { id: 'al-10', tone: 'emerald', category: 'Stage Changes', title: 'Stage Changed', description: 'Arabian Cloud Computing advanced to Stage 4 Quality Review.', user: 'System', client: 'Arabian Cloud', dept: 'MISCPA', timestamp: '01 Nov 2024, 09:30 AM' },
-  { id: 'al-11', tone: 'amber', category: 'Staff Transfers', title: 'Staff Transfer', description: 'Sara Mahmoud transferred from MISCPA to ABCPA — File Expertise Match.', user: 'Mohammed Al-Rashid', client: 'System', dept: 'Both', timestamp: '01 Apr 2026' },
   { id: 'al-12', tone: 'alert-red', category: 'Tier-3 Escalations', title: 'Tier-3 Escalation — Al-Yamamah Steel', description: 'Initial Tier-2 escalation upgraded to Tier-3. Partner action required.', user: 'System', client: 'Al-Yamamah Steel', dept: 'ABCPA', timestamp: '31 Oct 2024, 03:00 PM' },
   { id: 'al-13', tone: 'emerald', category: 'Proposals', title: 'Proposal Approved & Sent', description: 'Proposal for Gulf Star Logistics approved and sent — SAR 8,500 Disclaimer.', user: 'Layla Al-Khatib', client: 'Gulf Star', dept: 'ABCPA', timestamp: '30 Oct 2024, 02:00 PM' },
   { id: 'al-14', tone: 'emerald', category: 'Engagements', title: 'Client Account Created', description: 'Client account created for Kingdom Retail Holdings LLC — credentials sent.', user: 'FO System', client: 'Kingdom Retail', dept: 'ABCPA', timestamp: '30 Oct 2024, 08:30 AM' },
   { id: 'al-15', tone: 'emerald', category: 'Engagements', title: 'New Engagement Created', description: 'New engagement — Gulf Star Logistics — ABCPA — Disclaimer of Opinion — SAR 8,500.', user: 'Layla Al-Khatib', client: 'Gulf Star', dept: 'ABCPA', timestamp: '28 Oct 2024, 09:00 AM' },
 ]
 
-export const mgmtLogEventFilters = ['All Events', 'Tier-3 Escalations', 'Staff Transfers', 'Proposals', 'Engagements', 'Stage Changes', 'Meetings']
+export const mgmtLogEventFilters = ['All Events', 'Tier-3 Escalations', 'Proposals', 'Engagements', 'Stage Changes', 'Meetings']
 
 export const mgmtNotifications = [
   { id: 'mn-1', title: 'Tier-3 Escalation — Al-Yamamah Steel Industries', message: '18 days overdue. PBC Bank Confirmation missing.', timestamp: '05 Nov 2024, 09:15 AM', route: '/manager/escalation?tier=3' },
   { id: 'mn-2', title: 'Tier-3 Escalation — Saudi Petrochem Logistics', message: '14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', timestamp: '04 Nov 2024, 03:00 PM', route: '/manager/escalation?tier=3' },
-  { id: 'mn-3', title: '2 Staff Transfers Pending Approval', message: 'Review department transfer requests.', timestamp: '04 Nov 2024, 01:00 PM', route: '/management/staff' },
+  { id: 'mn-3', title: 'SAR 84K in Overdue Invoices', message: '6 clients overdue on payment — review AR aging.', timestamp: '04 Nov 2024, 01:00 PM', route: '/management/financials' },
+]
+
+// ── Financials & Profitability (Management) ─────────────────────────────────
+export const mgmtPnlSummary = [
+  { label: 'Fees Contracted', value: 'SAR 1.24M', raw: 1240000, tone: 'navy' },
+  { label: 'Fees Collected', value: 'SAR 890K', raw: 890000, tone: 'emerald' },
+  { label: 'Fees Outstanding', value: 'SAR 352K', raw: 352000, tone: 'amber' },
+  { label: 'Written Off (FY2025)', value: 'SAR 18K', raw: 18000, tone: 'alert-red' },
+]
+
+export const mgmtRealization = { rate: 86, target: 90, note: 'Billed vs. standard rate · FY2025' }
+
+// Revenue only — no cost/payroll/timesheet data exists in this system to derive
+// true profitability or margin, so these are billed-fee figures, not profit.
+// Broken down by department and by Front Office manager (business development) —
+// not by individual audit staff, which is operational detail owned by the Manager module.
+export const mgmtRevenueByDept = [
+  { dept: 'ABCPA', revenue: 742000, files: 89 },
+  { dept: 'MISCPA', revenue: 498000, files: 59 },
+]
+
+export const mgmtWipAging = [
+  { bucket: '0–30 days', value: 182000, color: '#059669' },
+  { bucket: '31–60 days', value: 96000, color: '#D97706' },
+  { bucket: '61–90 days', value: 54000, color: '#DC2626' },
+  { bucket: '90+ days', value: 20000, color: '#7C3AED' },
+]
+
+export const mgmtMonthlyRevenue = [
+  { month: 'Jun', value: 612000 },
+  { month: 'Jul', value: 648000 },
+  { month: 'Aug', value: 590000 },
+  { month: 'Sep', value: 705000 },
+  { month: 'Oct', value: 742000 },
+  { month: 'Nov', value: 690000 },
+]
+
+// ── Risk & Compliance (Management) ───────────────────────────────────────────
+export const mgmtRiskHeatmap = [
+  { dept: 'ABCPA', tier1: 56, tier2: 31, tier3: 2 },
+  { dept: 'MISCPA', tier1: 38, tier2: 20, tier3: 1 },
+]
+
+export const mgmtComplianceChecks = [
+  { id: 'cc-1', label: 'Independence Declarations Signed', status: 'ok', value: '96%', note: '142 of 148 files' },
+  { id: 'cc-2', label: 'QC Review Completed Pre-Issuance', status: 'warn', value: '88%', note: '6 files pending reviewer sign-off' },
+  { id: 'cc-3', label: 'Engagement Letters on File', status: 'ok', value: '100%', note: 'All 148 files' },
+  { id: 'cc-4', label: 'Conflict of Interest Checks', status: 'ok', value: '100%', note: 'Cleared at onboarding' },
+]
+
+export const mgmtDeadlineBreaches = [
+  { client: 'Al-Yamamah Steel Industries', code: 'ZK-011', dept: 'ABCPA', deadline: '05 Nov 2026', daysLeft: -4, severity: 'crit' },
+  { client: 'Saudi Petrochem Logistics', code: 'ZK-018', dept: 'MISCPA', deadline: '08 Nov 2026', daysLeft: -1, severity: 'crit' },
+  { client: 'Qassim Petrochemical Co.', code: 'ZK-009', dept: 'ABCPA', deadline: '10 Nov 2026', daysLeft: 2, severity: 'warn' },
+  { client: 'Najd Manufacturing Ltd.', code: 'ZK-002', dept: 'MISCPA', deadline: '15 Nov 2026', daysLeft: 5, severity: 'warn' },
+]
+
+export const mgmtIndependenceFlags = [
+  { client: 'Riyadh Fintech Group', dept: 'ABCPA', issue: 'Former audit manager now holds CFO role at client — cooling-off period required', status: 'Under Review' },
+  { client: 'Arabian Cloud Computing', dept: 'ABCPA', issue: 'Partner holds minor shareholding via family trust — materiality assessment pending', status: 'Cleared' },
+]
+
+// ── Firm & FO-Level Performance (Management) ──────────────────────────────────
+// Firm-wide execution quality — aggregate only, not attributed to named audit
+// staff (that detail lives in the Manager module's own performance view).
+export const mgmtFirmExecutionSummary = { avgTurnaround: 17.6, onTimeRate: 90, filesClosedThisPeriod: 34 }
+
+export const mgmtClientSatisfaction = { score: 4.5, responses: 92, note: 'Post-engagement client survey · FY2025' }
+
+export const mgmtFirmPerformanceTrend = [
+  { month: 'Jun', turnaround: 20.1, onTime: 81 },
+  { month: 'Jul', turnaround: 19.4, onTime: 83 },
+  { month: 'Aug', turnaround: 20.8, onTime: 79 },
+  { month: 'Sep', turnaround: 18.9, onTime: 86 },
+  { month: 'Oct', turnaround: 18.4, onTime: 88 },
+  { month: 'Nov', turnaround: 17.6, onTime: 90 },
 ]

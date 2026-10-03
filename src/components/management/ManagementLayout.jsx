@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutDashboard, BarChart3, ScrollText, Bell } from 'lucide-react'
+import { LayoutDashboard, BarChart3, Banknote, ShieldAlert, Trophy, ScrollText, Bell } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
@@ -9,11 +9,29 @@ import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import { mgmtUser, mgmtNotifications } from '../../data/sampleData'
 
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', href: '/management/dashboard', icon: LayoutDashboard },
-  { id: 'analytics', label: 'Firm Analytics', href: '/management/analytics', icon: BarChart3 },
-  { id: 'log', label: 'Audit Log', href: '/management/log', icon: ScrollText },
-  { id: 'notifications', label: 'Notifications', href: '/management/notifications', icon: Bell },
+const NAV_SECTIONS = [
+  {
+    label: 'Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', href: '/management/dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { id: 'analytics', label: 'Firm Analytics', href: '/management/analytics', icon: BarChart3 },
+      { id: 'financials', label: 'Financials', href: '/management/financials', icon: Banknote },
+      { id: 'risk', label: 'Risk & Compliance', href: '/management/risk', icon: ShieldAlert },
+      { id: 'performance', label: 'FO Performance', href: '/management/performance', icon: Trophy },
+    ],
+  },
+  {
+    label: 'Records',
+    items: [
+      { id: 'log', label: 'Audit Log', href: '/management/log', icon: ScrollText },
+      { id: 'notifications', label: 'Notifications', href: '/management/notifications', icon: Bell },
+    ],
+  },
 ]
 
 function ManagementSidebar() {
@@ -29,33 +47,38 @@ function ManagementSidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-2">
-        <ul className="space-y-1">
-          {NAV_ITEMS.map((item) => {
-            const active = location.pathname === item.href
-            const Icon = item.icon
-            return (
-              <li key={item.id} className="relative">
-                {active && (
-                  <motion.div
-                    layoutId="mgmt-sidebar-active-indicator"
-                    className="absolute left-0 top-0 h-full w-[3px] rounded-r bg-brand"
-                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                  />
-                )}
-                <Link
-                  to={item.href}
-                  className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${
-                    active ? 'bg-white/10 font-medium text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  {Icon && <Icon className="h-4 w-4 shrink-0" />}
-                  <span className="flex-1 truncate">{item.label}</span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+      <nav className="flex-1 space-y-4 px-3 py-2">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.label}>
+            <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/30">{section.label}</p>
+            <ul className="space-y-1">
+              {section.items.map((item) => {
+                const active = location.pathname === item.href
+                const Icon = item.icon
+                return (
+                  <li key={item.id} className="relative">
+                    {active && (
+                      <motion.div
+                        layoutId="mgmt-sidebar-active-indicator"
+                        className="absolute left-0 top-0 h-full w-[3px] rounded-r bg-brand"
+                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                      />
+                    )}
+                    <Link
+                      to={item.href}
+                      className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${
+                        active ? 'bg-white/10 font-medium text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      {Icon && <Icon className="h-4 w-4 shrink-0" />}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-white/10 px-4 py-4">
