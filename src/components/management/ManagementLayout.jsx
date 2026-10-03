@@ -5,6 +5,7 @@ import { LayoutDashboard, BarChart3, Banknote, ShieldAlert, Trophy, ScrollText, 
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
+import QuickChatWidget from '../shared/QuickChatWidget'
 import { useMgmtScope, MGMT_SCOPES } from '../../hooks/useMgmtScope'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
@@ -167,6 +168,20 @@ function NotificationsDropdown() {
   )
 }
 
+const MGMT_CHAT_MEMBERS = [
+  { id: 'mohammed', name: 'Mohammed Al-Rashid', role: 'Partner', initials: 'MR', color: '#E8323C' },
+  { id: 'tariq', name: 'Tariq Al-Ghamdi', role: 'ABCPA Manager', initials: 'TG', color: '#2563EB' },
+  { id: 'sarah', name: 'Sarah Al-Mansoor', role: 'ABCPA Asst. Manager', initials: 'SM', color: '#059669' },
+  { id: 'khalid', name: 'Khalid Al-Farsi', role: 'MISCPA Manager', initials: 'KF', color: '#D97706' },
+  { id: 'lina', name: 'Lina Al-Zahrani', role: 'MISCPA Asst. Manager', initials: 'LZ', color: '#7C3AED' },
+]
+
+const MGMT_CHAT_MESSAGES = [
+  { id: 'm1', senderId: 'tariq', text: 'Partner — 3 Tier-3 files flagged this week. Al-Yamamah bank confirmations are still outstanding.', ts: '09:14' },
+  { id: 'm2', senderId: 'khalid', text: 'Saudi Petrochem VAT reconciliation is with the reviewer today.', ts: '09:32' },
+  { id: 'm3', senderId: 'mohammed', text: 'Thanks both. Please share the escalation notes before the 2pm review.', ts: '09:40' },
+]
+
 function ManagementHeader({ title, headerSearch }) {
   const [scope, setScope] = useMgmtScope()
   return (
@@ -232,6 +247,7 @@ export default function ManagementLayout({ title, children, fullHeight = false, 
           {!fullHeight && <Footer />}
         </div>
       </div>
+      <QuickChatWidget members={MGMT_CHAT_MEMBERS} meId="mohammed" label="Quick Chat" initialMessages={MGMT_CHAT_MESSAGES} />
     </SidebarDrawerProvider>
   )
 }

@@ -1,18 +1,19 @@
-import { useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, X, TrendingUp, Briefcase, Banknote, Wallet,
-  ChevronRight, ExternalLink, AlertCircle, Clock, PauseCircle, ShieldAlert,
+  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
 import { useMgmtScope } from '../../hooks/useMgmtScope'
+import MeetingRequestModal from '../../components/client/MeetingRequestModal'
+import { useTheme } from '../../context/ThemeContext'
 import {
   mgmtUser,
   mgmtFOFiles,
   mgmtARPending,
   mgmtAllEscalations,
-  mgmtActionCards,
   mgmtRevenueTiles,
   mgmtTotalTurnover,
   mgmtClientDirectory,
@@ -23,8 +24,6 @@ import {
   mgmtRealization,
   mgmtDeadlineBreaches,
 } from '../../data/sampleData'
-
-const ACTION_ICON = { Clock, PauseCircle, Banknote }
 
 /* ─── helpers ─── */
 const STATUS_STYLE = {
@@ -396,36 +395,72 @@ function StatCard({ icon: Icon, iconColor, label, value, sub, onClick, delay = 0
   )
 }
 
-/* ─── Needs Your Attention strip ─── */
-function AttentionStrip({ navigate }) {
-  const TONE = {
-    'alert-red': { bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.25)', icon: '#DC2626' },
-    amber: { bg: 'rgba(217,119,6,0.08)', border: 'rgba(217,119,6,0.25)', icon: '#D97706' },
-  }
+/* ─── Auto-scrolling escalation ticker ─── */
+function EscalationTicker({ items, onOpen }) {
+  const { isDark } = useTheme()
+  const boxRef = useRef(null)
+  const trackRef = useRef(null)
+  const posRef = useRef(0)
+
+  useEffect(() => {
+    const track = trackRef.current
+    const box = boxRef.current
+    if (!track || !box) return undefined
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    posRef.current = 0
+    track.style.transform = 'translateY(0)'
+    const half = track.scrollHeight / 2
+    if (half <= box.clientHeight) return undefined
+    let raf
+    const step = () => {
+      if (!box.matches(':hover')) {
+        posRef.current += 0.4
+        if (posRef.current >= half) posRef.current = 0
+        track.style.transform = `translateY(-${posRef.current}px)`
+      }
+      raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [items])
+
+  const rows = [...items, ...items]
+  const fade = isDark ? '#0F1629' : '#FFFFFF'
+
   return (
-    <div className="shrink-0">
-      <h2 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Needs Your Attention</h2>
-      <div className="flex gap-3 overflow-x-auto pb-1">
-        {mgmtActionCards.map((card, i) => {
-          const Icon = ACTION_ICON[card.icon] || AlertCircle
-          const tn = TONE[card.tone] || TONE.amber
+    <div
+      ref={boxRef}
+      className="relative min-h-0 flex-1 overflow-hidden"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6" style={{ background: `linear-gradient(to bottom, ${fade}, transparent)` }} />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6" style={{ background: `linear-gradient(to top, ${fade}, transparent)` }} />
+      <div ref={trackRef} className="will-change-transform">
+        {rows.map((e, i) => {
+          const es = ESC_STATUS[e.status]
           return (
-            <motion.button
-              key={card.id}
+            <button
+              key={`${e.id}-${i}`}
               type="button"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.25 }}
-              onClick={() => card.route && navigate(card.route)}
-              className="flex min-w-[260px] shrink-0 items-start gap-3 rounded-xl p-3.5 text-left transition-transform hover:-translate-y-0.5"
-              style={{ background: tn.bg, border: `1px solid ${tn.border}` }}
+              onClick={onOpen}
+              className="flex w-full items-start gap-3 border-b border-slate-100 px-5 py-3.5 text-left transition-colors hover:bg-slate-500/10"
             >
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${tn.icon}20` }}>
-                <Icon className="h-4 w-4" style={{ color: tn.icon }} />
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white" style={{ background: TIER_COLOR[e.tier] }}>
+                T{e.tier}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold leading-snug text-navy">{card.title}</p>
-                <p className="mt-1 text-[10px] font-bold" style={{ color: tn.icon }}>{card.action} →</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate text-sm font-semibold text-navy">{e.client}</p>
+                  <span className="text-[10px] text-slate-400">{e.dept}</span>
+                </div>
+                <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{e.reason}</p>
+                <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+                  <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{e.daysOverdue}d overdue</span>
+                  <span>·</span>
+                  <span>{e.date}</span>
+                </div>
               </div>
-            </motion.button>
+              <span className="mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: es.bg, color: es.color }}>{e.status}</span>
+            </button>
           )
         })}
       </div>
@@ -441,9 +476,9 @@ export default function ManagementDashboard() {
   const navigate = useNavigate()
 
   const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
-  const escalations = mgmtAllEscalations.filter(e => scope === 'Combined' || e.dept === scope)
+  const escalations = useMemo(() => mgmtAllEscalations.filter(e => scope === 'Combined' || e.dept === scope), [scope])
   const openEscalations = escalations.filter(e => e.status === 'Open').length
-  const recent5 = escalations.slice(0, 5)
+  const [meetingOpen, setMeetingOpen] = useState(false)
   const breachCount = mgmtDeadlineBreaches.filter(b => b.daysLeft < 0).length
 
   return (
@@ -485,13 +520,9 @@ export default function ManagementDashboard() {
                 <span className="font-semibold text-navy">Urgent:</span>{' '}
                 {portfolio.urgentFiles.map((f) => `${f.client} (${f.days}d · ${f.status})`).join(' · ')}
               </p>
-              <p className="w-full text-[10px] text-slate-400">Files, escalations and client search follow the selected firm; turnover, billing and FO figures are firm-wide.</p>
             </div>
           </div>
         )}
-
-        {/* ── Needs Your Attention ── */}
-        <AttentionStrip navigate={navigate} />
 
         {/* ── 5 Stat Cards ── */}
         <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -533,40 +564,10 @@ export default function ManagementDashboard() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
-              {recent5.map((e, i) => {
-                const es = ESC_STATUS[e.status]
-                return (
-                  <motion.div key={e.id}
-                    initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06, duration: 0.25 }}
-                    className="flex items-start gap-3 border-b border-slate-50 px-5 py-3.5 last:border-0 hover:bg-slate-50/50 transition-colors"
-                  >
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white"
-                      style={{ background: TIER_COLOR[e.tier] }}>
-                      T{e.tier}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-navy truncate">{e.client}</p>
-                        <span className="text-[10px] text-slate-400">{e.dept}</span>
-                      </div>
-                      <p className="mt-0.5 text-xs text-slate-500 line-clamp-1">{e.reason}</p>
-                      <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
-                        <span className="font-semibold" style={{ color: TIER_COLOR[e.tier] }}>{e.daysOverdue}d overdue</span>
-                        <span>·</span>
-                        <span>{e.date}</span>
-                      </div>
-                    </div>
-                    <span className="shrink-0 mt-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: es.bg, color: es.color }}>
-                      {e.status}
-                    </span>
-                  </motion.div>
-                )
-              })}
-            </div>
+            <EscalationTicker items={escalations} onOpen={() => setModal('escalations')} />
 
-            <div className="shrink-0 border-t border-slate-100 px-5 py-3 flex items-center justify-between">
-              <p className="text-[11px] text-slate-400">Showing latest {recent5.length} of {escalations.length}</p>
+            <div className="flex shrink-0 items-center justify-between border-t border-slate-100 px-5 py-3">
+              <p className="text-[11px] text-slate-400">{escalations.length} escalation{escalations.length !== 1 ? 's' : ''} on record</p>
               <button onClick={() => setModal('escalations')}
                 className="flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline">
                 View all <ChevronRight className="h-3 w-3" />
@@ -574,8 +575,20 @@ export default function ManagementDashboard() {
             </div>
           </div>
 
-          {/* RIGHT — Revenue + FO + Lead funnel */}
+          {/* RIGHT — Meeting + Revenue + Lead funnel */}
           <div className="flex w-[272px] shrink-0 flex-col gap-3 min-h-0 overflow-y-auto">
+
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setMeetingOpen(true)}
+              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white"
+              style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
+            >
+              <Calendar className="h-4 w-4 text-indigo-400" />
+              Request a Meeting
+            </motion.button>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
               <h2 className="mb-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Revenue & Billing</h2>
@@ -589,27 +602,6 @@ export default function ManagementDashboard() {
                     </div>
                   )
                 })}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">FO Managers</h2>
-                <button onClick={() => setModal('files')} className="text-[10px] font-semibold text-brand hover:underline">Details</button>
-              </div>
-              <div className="space-y-2.5">
-                {mgmtFOFiles.map(fo => (
-                  <div key={fo.fo} className="flex items-center gap-2">
-                    <div className="h-6 w-6 shrink-0 rounded-full flex items-center justify-center text-white text-[9px] font-bold" style={{ background: fo.color }}>
-                      {fo.name[0]}
-                    </div>
-                    <p className="text-xs text-navy flex-1 truncate">{fo.name}</p>
-                    <span className="text-xs font-bold text-navy">{fo.total}</span>
-                    <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${(fo.total / 36) * 100}%`, background: fo.color }} />
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -640,6 +632,8 @@ export default function ManagementDashboard() {
           </div>
         </div>
       </div>
+
+      <MeetingRequestModal open={meetingOpen} onClose={() => setMeetingOpen(false)} />
 
       <AnimatePresence>
         {modal === 'files' && <FilesModal onClose={() => setModal(null)} />}
