@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Search, X, TrendingUp, Briefcase, Banknote,
-  ChevronRight, ExternalLink, AlertCircle,
+  Search, X, TrendingUp, Briefcase, Banknote, Wallet,
+  ChevronRight, ExternalLink, AlertCircle, Clock, UserCog, PauseCircle, ShieldAlert,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
 import {
@@ -10,12 +11,17 @@ import {
   mgmtFOFiles,
   mgmtARPending,
   mgmtAllEscalations,
+  mgmtActionCards,
   mgmtRevenueTiles,
   mgmtTotalTurnover,
   mgmtClientDirectory,
   mgmtLeadConversion,
   mgmtConversionRate,
+  mgmtRealization,
+  mgmtDeadlineBreaches,
 } from '../../data/sampleData'
+
+const ACTION_ICON = { Clock, UserCog, PauseCircle, Banknote }
 
 /* ─── helpers ─── */
 const STATUS_STYLE = {
@@ -387,26 +393,79 @@ function StatCard({ icon: Icon, iconColor, label, value, sub, onClick, delay = 0
   )
 }
 
+/* ─── Needs Your Attention strip ─── */
+function AttentionStrip({ navigate }) {
+  const TONE = {
+    'alert-red': { bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.25)', icon: '#DC2626' },
+    amber: { bg: 'rgba(217,119,6,0.08)', border: 'rgba(217,119,6,0.25)', icon: '#D97706' },
+  }
+  return (
+    <div className="shrink-0">
+      <h2 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Needs Your Attention</h2>
+      <div className="flex gap-3 overflow-x-auto pb-1">
+        {mgmtActionCards.map((card, i) => {
+          const Icon = ACTION_ICON[card.icon] || AlertCircle
+          const tn = TONE[card.tone] || TONE.amber
+          return (
+            <motion.button
+              key={card.id}
+              type="button"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.25 }}
+              onClick={() => card.route && navigate(card.route)}
+              className="flex min-w-[260px] shrink-0 items-start gap-3 rounded-xl p-3.5 text-left transition-transform hover:-translate-y-0.5"
+              style={{ background: tn.bg, border: `1px solid ${tn.border}` }}
+            >
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${tn.icon}20` }}>
+                <Icon className="h-4 w-4" style={{ color: tn.icon }} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold leading-snug text-navy">{card.title}</p>
+                <p className="mt-1 text-[10px] font-bold" style={{ color: tn.icon }}>{card.action} →</p>
+              </div>
+            </motion.button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /* ─── Main Dashboard ─── */
 export default function ManagementDashboard() {
   const [modal, setModal] = useState(null)
+  const navigate = useNavigate()
 
   const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
   const openEscalations = mgmtAllEscalations.filter(e => e.status === 'Open').length
   const recent5 = mgmtAllEscalations.slice(0, 5)
+  const breachCount = mgmtDeadlineBreaches.filter(b => b.daysLeft < 0).length
 
   return (
     <ManagementLayout title="Dashboard" fullHeight headerSearch={<ClientSearch />}>
       <div className="flex h-full flex-col gap-4 overflow-hidden">
 
         {/* ── Greeting ── */}
-        <div className="shrink-0">
-          <h1 className="text-lg font-bold text-navy">Good morning, {mgmtUser.name.split(' ')[0]}.</h1>
-          <p className="text-xs text-slate-400">Firm-Wide View — ABCPA + MISCPA · 25 Sep 2026</p>
+        <div className="shrink-0 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-lg font-bold text-navy">Good morning, {mgmtUser.name.split(' ')[0]}.</h1>
+            <p className="text-xs text-slate-400">Firm-Wide View — ABCPA + MISCPA · 25 Sep 2026</p>
+          </div>
+          {breachCount > 0 && (
+            <button
+              onClick={() => navigate('/management/risk')}
+              className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-alert-red"
+              style={{ background: 'rgba(220,38,38,0.1)' }}
+            >
+              <ShieldAlert className="h-3.5 w-3.5" /> {breachCount} deadline breach{breachCount !== 1 ? 'es' : ''}
+            </button>
+          )}
         </div>
 
-        {/* ── 4 Stat Cards ── */}
-        <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* ── Needs Your Attention ── */}
+        <AttentionStrip navigate={navigate} />
+
+        {/* ── 5 Stat Cards ── */}
+        <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <StatCard icon={Briefcase} iconColor="#0D1B2A"
             label="Total Files Engaged" value="148"
             sub="ABCPA: 89 · MISCPA: 59"
@@ -422,6 +481,10 @@ export default function ManagementDashboard() {
             label="Open Escalations" value={`${openEscalations} Open`}
             sub={`${mgmtAllEscalations.length} total on record`}
             onClick={() => setModal('escalations')} delay={0.18} />
+          <StatCard icon={Wallet} iconColor="#2563EB"
+            label="Fee Realization Rate" value={`${mgmtRealization.rate}%`}
+            sub={`Target ${mgmtRealization.target}% · View P&L`}
+            onClick={() => navigate('/management/financials')} delay={0.24} />
         </div>
 
         {/* ── Main content row ── */}

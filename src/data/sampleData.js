@@ -2365,3 +2365,85 @@ export const mgmtNotifications = [
   { id: 'mn-2', title: 'Tier-3 Escalation — Saudi Petrochem Logistics', message: '14 days overdue. VAT reconciliation discrepancy SAR 14.2M.', timestamp: '04 Nov 2024, 03:00 PM', route: '/manager/escalation?tier=3' },
   { id: 'mn-3', title: '2 Staff Transfers Pending Approval', message: 'Review department transfer requests.', timestamp: '04 Nov 2024, 01:00 PM', route: '/management/staff' },
 ]
+
+// ── Financials & Profitability (Management) ─────────────────────────────────
+export const mgmtPnlSummary = [
+  { label: 'Fees Contracted', value: 'SAR 1.24M', raw: 1240000, tone: 'navy' },
+  { label: 'Fees Collected', value: 'SAR 890K', raw: 890000, tone: 'emerald' },
+  { label: 'Fees Outstanding', value: 'SAR 352K', raw: 352000, tone: 'amber' },
+  { label: 'Written Off (FY2025)', value: 'SAR 18K', raw: 18000, tone: 'alert-red' },
+]
+
+export const mgmtRealization = { rate: 86, target: 90, note: 'Billed vs. standard rate · FY2025' }
+
+export const mgmtProfitabilityByDept = [
+  { dept: 'ABCPA', revenue: 742000, cost: 468000, margin: 37 },
+  { dept: 'MISCPA', revenue: 498000, cost: 329000, margin: 34 },
+]
+
+export const mgmtProfitabilityByLead = [
+  { lead: 'Rijin Philip', dept: 'ABCPA', files: 14, revenue: 176000, margin: 44 },
+  { lead: 'Tariq Al-Ghamdi', dept: 'ABCPA', files: 22, revenue: 312000, margin: 41 },
+  { lead: 'Khalid Al-Farsi', dept: 'MISCPA', files: 19, revenue: 268000, margin: 36 },
+  { lead: 'Majed Al-Subaie', dept: 'ABCPA', files: 12, revenue: 142000, margin: 33 },
+  { lead: 'Fahad Al-Otaibi', dept: 'ABCPA', files: 15, revenue: 198000, margin: 29 },
+]
+
+export const mgmtWipAging = [
+  { bucket: '0–30 days', value: 182000, color: '#059669' },
+  { bucket: '31–60 days', value: 96000, color: '#D97706' },
+  { bucket: '61–90 days', value: 54000, color: '#DC2626' },
+  { bucket: '90+ days', value: 20000, color: '#7C3AED' },
+]
+
+export const mgmtMonthlyRevenue = [
+  { month: 'Jun', value: 612000 },
+  { month: 'Jul', value: 648000 },
+  { month: 'Aug', value: 590000 },
+  { month: 'Sep', value: 705000 },
+  { month: 'Oct', value: 742000 },
+  { month: 'Nov', value: 690000 },
+]
+
+// ── Risk & Compliance (Management) ───────────────────────────────────────────
+export const mgmtRiskHeatmap = [
+  { dept: 'ABCPA', tier1: 56, tier2: 31, tier3: 2 },
+  { dept: 'MISCPA', tier1: 38, tier2: 20, tier3: 1 },
+]
+
+export const mgmtComplianceChecks = [
+  { id: 'cc-1', label: 'Independence Declarations Signed', status: 'ok', value: '96%', note: '142 of 148 files' },
+  { id: 'cc-2', label: 'QC Review Completed Pre-Issuance', status: 'warn', value: '88%', note: '6 files pending reviewer sign-off' },
+  { id: 'cc-3', label: 'Engagement Letters on File', status: 'ok', value: '100%', note: 'All 148 files' },
+  { id: 'cc-4', label: 'Conflict of Interest Checks', status: 'ok', value: '100%', note: 'Cleared at onboarding' },
+]
+
+export const mgmtDeadlineBreaches = [
+  { client: 'Al-Yamamah Steel Industries', code: 'ZK-011', dept: 'ABCPA', deadline: '05 Nov 2026', daysLeft: -4, severity: 'crit' },
+  { client: 'Saudi Petrochem Logistics', code: 'ZK-018', dept: 'MISCPA', deadline: '08 Nov 2026', daysLeft: -1, severity: 'crit' },
+  { client: 'Qassim Petrochemical Co.', code: 'ZK-009', dept: 'ABCPA', deadline: '10 Nov 2026', daysLeft: 2, severity: 'warn' },
+  { client: 'Najd Manufacturing Ltd.', code: 'ZK-002', dept: 'MISCPA', deadline: '15 Nov 2026', daysLeft: 5, severity: 'warn' },
+]
+
+export const mgmtIndependenceFlags = [
+  { client: 'Riyadh Fintech Group', dept: 'ABCPA', issue: 'Former audit manager now holds CFO role at client — cooling-off period required', status: 'Under Review' },
+  { client: 'Arabian Cloud Computing', dept: 'ABCPA', issue: 'Partner holds minor shareholding via family trust — materiality assessment pending', status: 'Cleared' },
+]
+
+// ── Partner / Team Performance (Management) ──────────────────────────────────
+export const mgmtLeadLeaderboard = [
+  { lead: 'Rijin Philip', dept: 'ABCPA', filesClosed: 14, avgTurnaround: 16.2, onTimeRate: 94, satisfaction: 4.8 },
+  { lead: 'Tariq Al-Ghamdi', dept: 'ABCPA', filesClosed: 22, avgTurnaround: 18.1, onTimeRate: 90, satisfaction: 4.6 },
+  { lead: 'Khalid Al-Farsi', dept: 'MISCPA', filesClosed: 19, avgTurnaround: 19.4, onTimeRate: 87, satisfaction: 4.5 },
+  { lead: 'Majed Al-Subaie', dept: 'ABCPA', filesClosed: 12, avgTurnaround: 20.6, onTimeRate: 83, satisfaction: 4.3 },
+  { lead: 'Fahad Al-Otaibi', dept: 'ABCPA', filesClosed: 15, avgTurnaround: 24.8, onTimeRate: 71, satisfaction: 4.1 },
+]
+
+export const mgmtFirmPerformanceTrend = [
+  { month: 'Jun', turnaround: 20.1, onTime: 81 },
+  { month: 'Jul', turnaround: 19.4, onTime: 83 },
+  { month: 'Aug', turnaround: 20.8, onTime: 79 },
+  { month: 'Sep', turnaround: 18.9, onTime: 86 },
+  { month: 'Oct', turnaround: 18.4, onTime: 88 },
+  { month: 'Nov', turnaround: 17.6, onTime: 90 },
+]
