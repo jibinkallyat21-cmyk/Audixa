@@ -25,34 +25,34 @@ const CSS = `
 #l360{background:#060b1a;color:#e9ecf5;font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:normal;min-height:100vh;-webkit-font-smoothing:auto}
 #l360 button{font:inherit;cursor:pointer;transition:none}
 #l360 button:not(:disabled):active{transform:none}
-#l360 .page{position:relative;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#l360 .page{position:relative;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 #l360 .bg{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:62% 50%;animation:l360-drift 30s ease-in-out infinite alternate}
 #l360 .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,9,22,.94) 0%,rgba(5,9,22,.78) 34%,rgba(5,9,22,.2) 68%,rgba(5,9,22,.35) 100%),linear-gradient(180deg,rgba(5,9,22,.55) 0%,rgba(5,9,22,0) 22%,rgba(5,9,22,0) 55%,rgba(5,9,22,.92) 100%)}
-#l360 header{position:relative;display:flex;align-items:center;gap:14px;padding:28px clamp(20px,5vw,72px)}
+#l360 header{position:relative;display:flex;align-items:center;gap:14px;padding:clamp(14px,3.2vh,28px) clamp(20px,5vw,72px)}
 #l360 header img{height:40px;width:auto;display:block}
 #l360 header span{font-size:18px;letter-spacing:.38em;font-weight:500;color:#fff}
-#l360 main{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px clamp(20px,5vw,72px) 64px}
+#l360 main{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:clamp(8px,5.4vh,48px) clamp(20px,5vw,72px) clamp(12px,7.2vh,64px)}
 #l360 .hero{max-width:720px;animation:l360-up .8s ease both}
-#l360 .kicker{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+#l360 .kicker{display:flex;align-items:center;gap:14px;margin-bottom:clamp(10px,2.9vh,26px)}
 #l360 .kicker i{width:36px;height:2px;background:#f2434f}
 #l360 .kicker span{font-size:13px;letter-spacing:.2em;color:#c9d0e4;white-space:nowrap}
-#l360 h1{margin:0;font-size:clamp(56px,9vw,128px);line-height:.95;font-weight:700;letter-spacing:-.035em;color:#fff}
+#l360 h1{margin:0;font-size:clamp(44px,min(9vw,14.5vh),128px);line-height:.95;font-weight:700;letter-spacing:-.035em;color:#fff}
 #l360 h1 em{font-style:normal;color:#f2434f}
-#l360 .tag{margin:28px 0 0;font-family:'Playfair Display',Georgia,serif;font-size:clamp(26px,3vw,42px);line-height:1.2;color:#eef1f9;max-width:520px}
-#l360 .cta{margin-top:44px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+#l360 .tag{margin:clamp(10px,3.1vh,28px) 0 0;font-family:'Playfair Display',Georgia,serif;font-size:clamp(20px,min(3vw,4.8vh),42px);line-height:1.2;color:#eef1f9;max-width:520px}
+#l360 .cta{margin-top:clamp(16px,4.9vh,44px);display:flex;align-items:center;gap:28px;flex-wrap:wrap}
 #l360 .btn-main{font-weight:600;font-size:17px;color:#fff;background:#e5303d;border:0;border-radius:10px;padding:16px 32px;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:12px;box-shadow:0 14px 40px rgba(229,48,61,.4)}
 #l360 .btn-main:hover{background:#f2434f}
 #l360 .link{font-size:16px;color:#dfe4f2;background:none;border:0;padding:8px 0;white-space:nowrap;flex-shrink:0;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(255,255,255,.35)}
 #l360 .link:hover{color:#fff}
 #l360 :focus-visible{outline:2px solid #ff6b7a;outline-offset:3px;box-shadow:none}
 #l360 .link:focus-visible,#l360 .tab:focus-visible,#l360 .quiet:focus-visible,#l360 .back:focus-visible,#l360 .row button:focus-visible{border-radius:0}
-#l360 .strip{position:relative;padding:0 clamp(20px,5vw,72px) 28px;animation:l360-up 1s .2s ease both}
-#l360 .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:24px 32px}
-#l360 .svc{border-top:1px solid rgba(255,255,255,.22);padding-top:16px}
+#l360 .strip{position:relative;padding:0 clamp(20px,5vw,72px) clamp(10px,3.1vh,28px);animation:l360-up 1s .2s ease both}
+#l360 .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:clamp(10px,2.7vh,24px) 32px}
+#l360 .svc{border-top:1px solid rgba(255,255,255,.22);padding-top:clamp(6px,1.8vh,16px)}
 #l360 .svc small{display:block;font-size:13px;letter-spacing:.16em;color:#ff6b7a}
 #l360 .svc b{display:block;margin-top:8px;font-size:17px;font-weight:600;color:#fff}
 #l360 .svc p{margin:4px 0 0;font-size:15px;color:#c3cadf;line-height:1.4}
-#l360 .presence{margin-top:28px;display:flex;align-items:center;gap:32px;font-size:14px;color:#aab3cc}
+#l360 .presence{margin-top:clamp(10px,3.1vh,28px);display:flex;align-items:center;gap:32px;font-size:14px;color:#aab3cc}
 #l360 .presence>span{flex-shrink:0;font-size:12px;letter-spacing:.22em;color:#c9d0e4;white-space:nowrap}
 #l360 .mqwrap{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 #l360 .mq{display:inline-flex;white-space:nowrap;animation:l360-marquee 32s linear infinite}
@@ -100,6 +100,12 @@ const CSS = `
 #l360 .done .ok{width:56px;height:56px;margin:0 auto 18px;border-radius:50%;border:2px solid #f2434f;display:flex;align-items:center;justify-content:center;font-size:26px;color:#f2434f}
 #l360 .done b{display:block;font-size:24px;font-weight:500;color:#fff}
 #l360 .done p{margin:6px 0 0;font-size:15px;color:#b4bbd0}
+@media (max-height:760px){#l360 .svc p{display:none}#l360 .svc b{margin-top:4px}}
+@media (max-width:760px){#l360 .kicker{gap:10px}#l360 .kicker i{flex-shrink:0;width:24px}#l360 .kicker span{font-size:11px;letter-spacing:.1em}#l360 .services{grid-template-columns:1fr 1fr;gap:10px 16px}#l360 .svc p,#l360 .svc small{display:none}#l360 .svc b{margin-top:0;font-size:14px}#l360 .presence{gap:14px}#l360 .btn-main{padding:14px 22px;font-size:16px}}
+@media (max-width:360px){#l360 .kicker span{font-size:10px;letter-spacing:.06em}}
+@media (max-height:520px){#l360 .services{display:none}}
+@media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 .tabs{margin-bottom:12px}#l360 .tab{padding:6px 0}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}}
+@media (max-height:430px){#l360 .secure{display:none}#l360 .card{padding:14px 22px}#l360 .tabs{margin-bottom:8px}#l360 .go{margin-top:8px;height:40px}}
 @keyframes l360-rise{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes l360-fade{from{opacity:0}to{opacity:1}}
 @keyframes l360-shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
