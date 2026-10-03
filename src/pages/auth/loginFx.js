@@ -8,7 +8,7 @@ export const FX = {
   reveal: true,       // staggered hero text reveal
   scramble: true,     // service numbers 01-05 scramble in
   glow: true,         // pulsing glow on "360"
-  sweep: true,        // glass reflection sweep + road light pulse
+  sweep: true,        // pulsing red road glow at the bottom right
   morph: true,        // dialog height animates between views
   dolly: true,        // camera zoom on successful sign-in
 }
@@ -40,11 +40,9 @@ const CSS = {
 @media (prefers-reduced-motion:reduce){#l360.fx-glow h1 em{animation:none}}`,
   sweep: `
 #l360 .fx-sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden;mix-blend-mode:screen}
-#l360 .fx-sweep::before{content:'';position:absolute;top:-20%;bottom:-20%;width:18%;left:-30%;background:linear-gradient(100deg,transparent,rgba(160,200,255,.12),transparent);transform:skewX(-14deg);animation:l360-sweep 9s ease-in-out 2s infinite}
 #l360 .fx-sweep::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 28% 9% at 85% 79%,rgba(255,50,70,.22),transparent 70%);animation:l360-road 3.2s ease-in-out infinite}
-@keyframes l360-sweep{0%{left:-30%}45%,100%{left:130%}}
 @keyframes l360-road{0%,100%{opacity:.25}50%{opacity:1}}
-@media (prefers-reduced-motion:reduce){#l360 .fx-sweep::before,#l360 .fx-sweep::after{animation:none}}`,
+@media (prefers-reduced-motion:reduce){#l360 .fx-sweep::after{animation:none}}`,
   morph: '',
   dolly: `
 #l360.fx-dolly .bg{transition:scale 1.1s cubic-bezier(.55,0,.25,1),filter 1.1s ease}
