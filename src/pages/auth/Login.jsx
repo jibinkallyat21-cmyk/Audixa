@@ -318,7 +318,7 @@ export default function Login() {
             <div dangerouslySetInnerHTML={{ __html: BG_SVG }} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
 
             {/* ── Text overlays ───────────────────────────────────── */}
-            <img src="/analytix-icon.png" alt="Analytix" style={{ position: 'absolute', left: 'calc(66*var(--u))', top: 'calc(28*var(--u))', height: 'calc(52*var(--u))', width: 'auto', pointerEvents: 'none' }} />
+            <img src="/analytix-icon.png" alt="Analytix" style={{ position: 'absolute', left: 'calc(60*var(--u))', top: 'calc(22*var(--u))', height: 'calc(72*var(--u))', width: 'auto', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', left: 'calc(60*var(--u))', top: 'calc(86*var(--u))', fontSize: 'calc(82*var(--u))', fontWeight: 700, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>
               AUDIT <span style={{ color: '#ff2a45' }}>360</span>
             </div>
