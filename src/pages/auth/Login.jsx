@@ -317,7 +317,11 @@ export default function Login() {
             <div dangerouslySetInnerHTML={{ __html: BG_SVG }} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
 
             {/* ── Text overlays ───────────────────────────────────── */}
-            <img src="/analytix-icon.png" alt="Analytix" style={{ position: 'absolute', left: 'calc(60*var(--u))', top: 'calc(22*var(--u))', height: 'calc(72*var(--u))', width: 'auto', pointerEvents: 'none' }} />
+            {/* Logo + company name row */}
+            <div style={{ position: 'absolute', left: 'calc(60*var(--u))', top: 'calc(22*var(--u))', height: 'calc(72*var(--u))', display: 'flex', alignItems: 'center', gap: 'calc(10*var(--u))' }}>
+              <img src="/analytix-icon.png" alt="Analytix" style={{ height: '100%', width: 'auto', pointerEvents: 'none' }} />
+              <span style={{ fontSize: 'calc(22*var(--u))', fontWeight: 700, letterSpacing: '.38em', color: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1, whiteSpace: 'nowrap' }}>ANALYTIX</span>
+            </div>
             <div style={{ position: 'absolute', left: 'calc(60*var(--u))', top: 'calc(86*var(--u))', fontSize: 'calc(82*var(--u))', fontWeight: 700, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>
               AUDIT <span style={{ color: '#ff2a45' }}>360</span>
             </div>
