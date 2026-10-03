@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '../../components/shared/PageTransition'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
+import { fxCss, fxClass, initFx, morph, dolly } from './loginFx'
 
 const PLACES = ['Kuwait', 'Bahrain', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Oman', 'India', 'Singapore', 'Hong Kong', 'China']
 
@@ -15,6 +16,10 @@ const DEMO_ROLES = ROLE_ORDER.map(id => ({
   label: id === 'managerial' ? 'Partner' : ROLES[id].label,
   route: ROLES[id].route,
 }))
+
+function Letters({ text, from = 0 }) {
+  return [...text].map((c, i) => <span key={i} className="ch" style={{ '--i': from + i }} aria-hidden="true">{c}</span>)
+}
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500&display=swap');
@@ -132,6 +137,8 @@ export default function Login() {
   const root = useRef(null)
   const timers = useRef([])
 
+  useEffect(() => initFx(root.current), [])
+
   useEffect(() => {
     const rootEl = root.current
     const $ = id => rootEl.querySelector('#' + id)
@@ -147,8 +154,10 @@ export default function Login() {
       return t
     }
     function view(name, focusId) {
-      ;['choose', 'signin', 'forgot', 'demo', 'done'].forEach(n => $('v-' + n).classList.toggle('on', n === name))
-      card.dataset.view = name
+      morph(card, () => {
+        ;['choose', 'signin', 'forgot', 'demo', 'done'].forEach(n => $('v-' + n).classList.toggle('on', n === name))
+        card.dataset.view = name
+      })
       $('err').classList.remove('on')
       if (focusId) later(() => { const el = $(focusId); if (el) el.focus() }, 80)
     }
@@ -183,6 +192,7 @@ export default function Login() {
     }
     function enter(route) {
       view('done')
+      dolly(rootEl)
       later(() => navigate(route), 1100)
     }
 
@@ -252,8 +262,8 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <style>{CSS}</style>
-      <div id="l360" ref={root}>
+      <style>{CSS + fxCss}</style>
+      <div id="l360" className={fxClass} ref={root}>
         <div className="page">
           <img className="bg" src="/arch-bg.webp" alt="" />
           <div className="shade"></div>
@@ -262,10 +272,10 @@ export default function Login() {
 
           <main>
             <div className="hero">
-              <div className="kicker"><i></i><span>AUDIT · ASSURANCE · RISK · COMPLIANCE</span></div>
-              <h1>AUDIT <em>360</em></h1>
-              <p className="tag">Clarity across every dimension of your audit.</p>
-              <div className="cta">
+              <div className="kicker rv" style={{ '--d': '.05s' }}><i></i><span>AUDIT · ASSURANCE · RISK · COMPLIANCE</span></div>
+              <h1 aria-label="AUDIT 360"><Letters text="AUDIT" /> <em><Letters text="360" from={6} /></em></h1>
+              <p className="tag rv" style={{ '--d': '.85s' }}>Clarity across every dimension of your audit.</p>
+              <div className="cta rv" style={{ '--d': '1.05s' }}>
                 <button className="btn-main" id="open-signin">Sign in to your workspace <span aria-hidden="true">→</span></button>
                 <button className="link" id="open-demo">Explore the demo</button>
               </div>
