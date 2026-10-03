@@ -318,7 +318,7 @@ export default function Login() {
             <div dangerouslySetInnerHTML={{ __html: BG_SVG }} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
 
             {/* ── Text overlays ───────────────────────────────────── */}
-            <div style={{ position: 'absolute', left: 'calc(128*var(--u))', top: 'calc(41*var(--u))', fontSize: 'calc(22*var(--u))', letterSpacing: '.38em', fontWeight: 500, lineHeight: 1 }}>ANALYTIX</div>
+            <img src="/analytix-icon.png" alt="Analytix" style={{ position: 'absolute', left: 'calc(66*var(--u))', top: 'calc(28*var(--u))', height: 'calc(52*var(--u))', width: 'auto', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', left: 'calc(60*var(--u))', top: 'calc(86*var(--u))', fontSize: 'calc(82*var(--u))', fontWeight: 700, letterSpacing: '-.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>
               AUDIT <span style={{ color: '#ff2a45' }}>360</span>
             </div>
@@ -335,7 +335,7 @@ export default function Login() {
 
             {/* Globe centre label */}
             <div style={{ position: 'absolute', left: 'calc(552*var(--u))', top: 'calc(430*var(--u))', width: 'calc(290*var(--u))', textAlign: 'center' }}>
-              <div style={{ fontSize: 'calc(34*var(--u))', letterSpacing: '.3em', fontWeight: 600, marginRight: '-.3em' }}>ANALYTIX</div>
+              <img src="/analytix-icon.png" alt="Analytix" style={{ height: 'calc(60*var(--u))', width: 'auto', margin: '0 auto calc(4*var(--u))', display: 'block' }} />
               <div style={{ fontSize: 'calc(12.5*var(--u))', letterSpacing: '.35em', color: '#c9d2ea', lineHeight: 1.55, marginTop: 'calc(4*var(--u))' }}>GLOBAL PROFESSIONAL SERVICES</div>
               <div style={{ width: 'calc(50*var(--u))', height: 'calc(2*var(--u))', background: '#ff2a45', margin: 'calc(10*var(--u)) auto calc(26*var(--u))' }} />
               <div style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 'calc(18*var(--u))', lineHeight: 1.3, color: '#e9e9ed' }}>
