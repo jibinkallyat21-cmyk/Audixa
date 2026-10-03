@@ -310,13 +310,6 @@ export default function Login() {
               fontFamily: "'Inter',system-ui,sans-serif", color: '#fff',
             }}
           >
-            {/* Background photo */}
-            <img
-              ref={bgRef}
-              src="/bg/audit360.webp"
-              alt=""
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', willChange: 'transform', pointerEvents: 'none' }}
-            />
 
             {/* Dark overlay */}
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(4,9,22,.8) 0%,rgba(4,9,22,.55) 30%,rgba(4,9,22,.25) 62%,rgba(4,9,22,.55) 100%),radial-gradient(ellipse 50% 60% at 40% 52%,rgba(4,9,22,.55),rgba(4,9,22,0) 100%)', pointerEvents: 'none' }} />
