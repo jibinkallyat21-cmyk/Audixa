@@ -2115,6 +2115,15 @@ export const foProposalDetail = {
 }
 
 // ── Module 6 — Management Portal ────────────────────────────────────────────
+// Front Office managers Management can message or call (sample addresses).
+export const mgmtFOContacts = {
+  Allen: { email: 'allen@analytix.sa' },
+  'M Ali': { email: 'm.ali@analytix.sa' },
+  Fayis: { email: 'fayis@analytix.sa' },
+  Uvais: { email: 'uvais@analytix.sa' },
+  Azhar: { email: 'azhar@analytix.sa' },
+}
+
 // Escalation level Management can see (client portal levels: 1 Audit Lead, 2 Audit Manager, 3 Front Office Manager).
 export const MGMT_VISIBLE_ESCALATION_TIER = 3
 

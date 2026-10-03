@@ -40,7 +40,7 @@ function MentionHighlight({ text }) {
   )
 }
 
-export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tariq', label = 'Quick Chat', initialMessages = DEFAULT_MESSAGES }) {
+export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tariq', label = 'Quick Chat', initialMessages = DEFAULT_MESSAGES, inbox = [] }) {
   const [open, setOpen] = useState(false)
   const [minimised, setMinimised] = useState(false)
   const [messages, setMessages] = useState(initialMessages)
@@ -48,6 +48,7 @@ export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tar
   const [mentionQuery, setMentionQuery] = useState(null)
   const [mentionIdx, setMentionIdx] = useState(0)
   const [unread, setUnread] = useState(2)
+  const [seenInbox, setSeenInbox] = useState(0)
   const inputRef = useRef(null)
   const bottomRef = useRef(null)
 
@@ -56,9 +57,10 @@ export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tar
   useEffect(() => {
     if (open && !minimised) {
       setUnread(0)
+      setSeenInbox(inbox.length)
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [open, minimised, messages])
+  }, [open, minimised, messages, inbox.length])
 
   const mentionMatches = mentionQuery !== null
     ? members.filter((m) => m.id !== me.id && m.name.toLowerCase().includes(mentionQuery.toLowerCase()))
@@ -163,7 +165,7 @@ export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tar
 
             {/* Messages */}
             <div className="flex h-[240px] flex-col gap-3 overflow-y-auto p-4">
-              {messages.map((msg) => {
+              {[...messages, ...inbox].map((msg) => {
                 const sender = getMember(msg.senderId)
                 const isMe = msg.senderId === me.id
                 const isDm = msg.mentions?.length > 0
@@ -256,9 +258,9 @@ export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tar
           className="relative flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-2xl shadow-brand/30 hover:bg-[#D12C35]"
         >
           <MessageSquare className="h-6 w-6" />
-          {unread > 0 && (
+          {unread + Math.max(0, inbox.length - seenInbox) > 0 && (
             <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber text-[10px] font-bold text-white">
-              {unread}
+              {unread + Math.max(0, inbox.length - seenInbox)}
             </span>
           )}
         </motion.button>

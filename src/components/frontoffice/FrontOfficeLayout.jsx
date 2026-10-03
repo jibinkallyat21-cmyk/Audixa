@@ -13,6 +13,7 @@ import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import QuickChatWidget from '../shared/QuickChatWidget'
+import { useFrontOfficeInbox } from '../../utils/directMessages'
 import { foUser, foNotifications } from '../../data/sampleData'
 
 const NAV_ITEMS = [
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
 
 const FO_CHAT_MEMBERS = [
   { id: 'layla', name: 'Layla Al-Khatib', role: 'FO Manager', initials: 'LK', color: '#E8323C' },
+  { id: 'mohammed', name: 'Mohammed Al-Rashid', role: 'Partner', initials: 'MR', color: '#0D1B2A' },
   { id: 'tariq', name: 'Tariq Al-Harbi', role: 'Audit Manager', initials: 'TH', color: '#2563EB' },
   { id: 'sara', name: 'Sara Abdulaziz', role: 'Back Office', initials: 'SA', color: '#059669' },
   { id: 'omar', name: 'Omar Faisal', role: 'Front Office', initials: 'OF', color: '#D97706' },
@@ -178,6 +180,7 @@ function FOHeader({ title }) {
 }
 
 export default function FrontOfficeLayout({ title, children, fullHeight = false }) {
+  const inbox = useFrontOfficeInbox('layla')
   return (
     <SidebarDrawerProvider>
       <div className={`flex w-full bg-background ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
@@ -190,7 +193,7 @@ export default function FrontOfficeLayout({ title, children, fullHeight = false 
           {!fullHeight && <Footer />}
         </div>
       </div>
-      <QuickChatWidget members={FO_CHAT_MEMBERS} meId="layla" label="Team Chat" />
+      <QuickChatWidget members={FO_CHAT_MEMBERS} meId="layla" label="Team Chat" inbox={inbox} />
     </SidebarDrawerProvider>
   )
 }

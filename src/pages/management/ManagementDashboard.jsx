@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, X, TrendingUp, Briefcase, Banknote, Wallet,
-  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar,
+  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
 import { useMgmtScope } from '../../hooks/useMgmtScope'
 import MeetingRequestModal from '../../components/client/MeetingRequestModal'
 import { useTheme } from '../../context/ThemeContext'
 import { useManagementRaisedEscalations } from '../../utils/escalations'
+import { sendDirectMessage } from '../../utils/directMessages'
+import { useToast } from '../../components/shared/Toast'
 import {
   mgmtUser,
   mgmtFOFiles,
@@ -21,6 +23,7 @@ import {
   mgmtAbcpaPortfolio,
   mgmtMiscpaPortfolio,
   auditors,
+  mgmtFOContacts,
   mgmtLeadConversion,
   mgmtConversionRate,
   mgmtRealization,
@@ -302,7 +305,7 @@ function ARModal({ onClose }) {
 }
 
 /* ─── Full Escalations modal ─── */
-function EscalationsModal({ onClose }) {
+function EscalationsModal({ onClose, onMessage }) {
   const [filter, setFilter] = useState('All')
   const [scope] = useMgmtScope()
   const raised = useManagementRaisedEscalations()
@@ -365,6 +368,7 @@ function EscalationsModal({ onClose }) {
                   <span>Auditor group: {auditorGroup(e.dept)}</span>
                   <span>·</span>
                   <span>FO manager: {e.fo}</span>
+                  <FoContactActions fo={e.fo} onMessage={() => onMessage(e)} />
                 </div>
               </motion.div>
             )
@@ -408,14 +412,45 @@ const auditorGroup = (code) => {
   return a ? `${a.code} — ${a.name}` : code
 }
 
+/* ─── Message / Teams-call icons for an FO manager ─── */
+function FoContactActions({ fo, onMessage }) {
+  const showToast = useToast()
+  const contact = mgmtFOContacts[fo]
+  const call = () => {
+    if (!contact) return
+    window.open(`https://teams.microsoft.com/l/call/0/0?users=${encodeURIComponent(contact.email)}`, '_blank', 'noopener,noreferrer')
+    showToast(`Starting Teams call with ${fo}…`)
+  }
+  const btn = 'flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-colors hover:border-brand hover:bg-brand/10 hover:text-brand'
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <button type="button" aria-label={`Message ${fo}`} title={`Message ${fo}`} onClick={onMessage} className={btn}>
+        <MessageSquare className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" aria-label={`Teams call ${fo}`} title={`Teams call ${fo}`} onClick={call} className={btn}>
+        <Phone className="h-3.5 w-3.5" />
+      </button>
+    </span>
+  )
+}
+
 /* ─── Escalation detail (what, which client, auditor group, responsible FO manager) ─── */
 function EscalationDetail({ escalation, onClose }) {
   const e = escalation
   const es = ESC_STATUS[e.status]
+  const showToast = useToast()
+  const [composing, setComposing] = useState(!!e.compose)
+  const [sent, setSent] = useState(false)
+  const [text, setText] = useState(`Re ${e.id} — ${e.client}: please update me on this escalation as soon as possible.`)
+  const send = () => {
+    if (!text.trim()) return
+    sendDirectMessage({ to: e.fo, text: text.trim(), ref: e.id })
+    setSent(true)
+    showToast(`Message sent to ${e.fo}`)
+  }
   const rows = [
     ['Client', e.client],
     ['Auditor group', auditorGroup(e.dept)],
-    ['Responsible FO manager', e.fo],
   ]
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -450,6 +485,36 @@ function EscalationDetail({ escalation, onClose }) {
                 <dd className="text-right text-sm font-semibold text-navy">{v}</dd>
               </div>
             ))}
+            <div className="border-t border-slate-100 pt-3">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-xs text-slate-400">Responsible FO manager</dt>
+                <dd className="flex items-center gap-3 text-sm font-semibold text-navy">
+                  {e.fo}
+                  <FoContactActions fo={e.fo} onMessage={() => { setComposing((v) => !v); setSent(false) }} />
+                </dd>
+              </div>
+              {composing && (
+                <div className="mt-3 rounded-xl border border-slate-200 p-3">
+                  {sent ? (
+                    <p className="flex items-center gap-2 text-xs font-semibold text-emerald">
+                      <CheckCircle2 className="h-4 w-4" /> Sent to {e.fo} — delivered to their inbox
+                    </p>
+                  ) : (
+                    <>
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400" htmlFor="fo-msg">Message to {e.fo}</label>
+                      <textarea
+                        id="fo-msg" rows={3} value={text} onChange={(ev) => setText(ev.target.value)}
+                        className="mt-1.5 w-full resize-none rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-xs text-navy outline-none focus:border-brand"
+                      />
+                      <div className="mt-2 flex justify-end gap-2">
+                        <button type="button" onClick={() => setComposing(false)} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-navy">Cancel</button>
+                        <button type="button" onClick={send} disabled={!text.trim()} className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">Send now</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </dl>
         </div>
       </motion.div>
@@ -705,7 +770,7 @@ export default function ManagementDashboard() {
       <AnimatePresence>
         {modal === 'files' && <FilesModal onClose={() => setModal(null)} />}
         {modal === 'ar' && <ARModal onClose={() => setModal(null)} />}
-        {modal === 'escalations' && <EscalationsModal onClose={() => setModal(null)} />}
+        {modal === 'escalations' && <EscalationsModal onClose={() => setModal(null)} onMessage={(e) => { setModal(null); setDetail({ ...e, compose: true }) }} />}
         {detail && <EscalationDetail escalation={detail} onClose={() => setDetail(null)} />}
       </AnimatePresence>
     </ManagementLayout>
