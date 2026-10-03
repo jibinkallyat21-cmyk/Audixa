@@ -1,23 +1,20 @@
 import { Fragment, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '../../components/shared/PageTransition'
-import { ROLES } from '../../data/sampleData'
+import { ROLES, ROLE_ORDER } from '../../data/sampleData'
 
 const PLACES = ['Kuwait', 'Bahrain', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Oman', 'India', 'Singapore', 'Hong Kong', 'China']
 
-// Sign-in tab → portal, and demo option → portal (the app has five portals).
+// Sign-in tab → portal. Demo options come from the app's role list.
 const TAB_ROUTES = {
   client: ROLES.client.route,
   team: ROLES['execution-team'].route,
 }
-const DEMO_ROUTES = {
-  partner: ROLES.managerial.route,
-  'engagement-manager': ROLES['audit-management'].route,
-  'senior-auditor': ROLES['execution-team'].route,
-  auditor: ROLES['execution-team'].route,
-  client: ROLES.client.route,
-  admin: ROLES['sales-fe'].route,
-}
+const DEMO_ROLES = ROLE_ORDER.map(id => ({
+  value: ROLES[id].id,
+  label: id === 'managerial' ? 'Partner' : ROLES[id].label,
+  route: ROLES[id].route,
+}))
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500&display=swap');
@@ -92,6 +89,10 @@ const CSS = `
 #l360 .go.ghost:hover{background:rgba(242,67,79,.2)}
 #l360 .spin{display:none;width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:l360-spin .7s linear infinite}
 #l360 .loading .spin{display:block}
+#l360 .create{display:none;align-items:center;justify-content:center;gap:6px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(180,195,235,.2);font-size:14px;color:#b4bbd0}
+#l360 .create.on{display:flex}
+#l360 .create a{color:#ff6b7a;font-weight:600;text-decoration:none}
+#l360 .create a:hover{color:#ffb3b8;text-decoration:underline}
 #l360 .quiet{margin-top:14px;width:100%;font-size:15px;color:#b4bbd0;background:none;border:0;padding:6px}
 #l360 .quiet:hover{color:#fff}
 #l360 .back{margin-top:16px;font-size:15px;color:#ff6b7a;background:none;border:0;padding:6px 0}
@@ -104,8 +105,9 @@ const CSS = `
 @media (max-width:760px){#l360 .kicker{gap:10px}#l360 .kicker i{flex-shrink:0;width:24px}#l360 .kicker span{font-size:11px;letter-spacing:.1em}#l360 .services{grid-template-columns:1fr 1fr;gap:10px 16px}#l360 .svc p,#l360 .svc small{display:none}#l360 .svc b{margin-top:0;font-size:14px}#l360 .presence{gap:14px}#l360 .btn-main{padding:14px 22px;font-size:16px}}
 @media (max-width:360px){#l360 .kicker span{font-size:10px;letter-spacing:.06em}}
 @media (max-height:520px){#l360 .services{display:none}}
-@media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 .tabs{margin-bottom:12px}#l360 .tab{padding:6px 0}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}}
-@media (max-height:430px){#l360 .secure{display:none}#l360 .card{padding:14px 22px}#l360 .tabs{margin-bottom:8px}#l360 .go{margin-top:8px;height:40px}}
+@media (max-height:680px){#l360 .card{padding:20px 24px}#l360 h2{font-size:24px}#l360 .sub{margin:2px 0 12px;font-size:14px}#l360 .tabs{margin-bottom:12px}#l360 .tab{padding:6px 0}#l360 label{margin-bottom:4px}#l360 .row{margin:8px 0 4px}#l360 input,#l360 select{height:40px}#l360 .show{top:2px}#l360 .go{margin-top:12px;height:44px}#l360 .create{margin-top:8px;padding-top:6px}#l360 .quiet{margin-top:6px;padding:4px}#l360 .secure{margin-top:4px}#l360 .err{margin-top:8px}#l360 .x{top:8px;right:8px}}
+@media (max-height:430px){#l360 .secure{display:none}#l360 .card{padding:10px 22px}#l360 h2{font-size:22px}#l360 input,#l360 select{height:36px}#l360 .show{top:0}#l360 .sub{margin-bottom:8px}#l360 .tabs{margin-bottom:8px}#l360 .go{margin-top:8px;height:40px}#l360 .create{margin-top:6px;padding-top:4px;font-size:13px}}
+@media (max-height:380px){#l360 .sub{display:none}#l360 h2{margin-bottom:8px}}
 @keyframes l360-rise{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes l360-fade{from{opacity:0}to{opacity:1}}
 @keyframes l360-shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
@@ -144,6 +146,7 @@ export default function Login() {
     function setTab(t) {
       tab = t
       rootEl.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t))
+      $('create').classList.toggle('on', t === 'team')
     }
     function open(name, t) {
       lastFocus = document.activeElement
@@ -223,7 +226,7 @@ export default function Login() {
     $('enter-demo').onclick = () => {
       const sel = $('dr')
       $('welcome').textContent = 'Welcome, ' + sel.options[sel.selectedIndex].text
-      enter(DEMO_ROUTES[sel.value])
+      enter(DEMO_ROLES.find(r => r.value === sel.value).route)
     }
 
     const pending = timers.current
@@ -297,6 +300,10 @@ export default function Login() {
                 </div>
                 <div className="err" id="err" role="alert"></div>
                 <button type="submit" className="go" id="go"><span className="spin"></span><span id="go-label">Sign in</span></button>
+                <div className="create" id="create">
+                  <span>New to Analytix Team?</span>
+                  <Link to="/signup">Create account <span aria-hidden="true">→</span></Link>
+                </div>
                 <button type="button" className="quiet" data-go="demo">Explore the demo</button>
                 <div className="secure">Secure encrypted connection</div>
               </form>
@@ -316,13 +323,8 @@ export default function Login() {
                 <h2 style={{ fontSize: 26 }}>Explore the demo</h2>
                 <p className="sub">Preview AUDIT 360 with sample data. No account needed.</p>
                 <label htmlFor="dr">Preview as role</label>
-                <select id="dr" defaultValue="partner">
-                  <option value="partner">Partner</option>
-                  <option value="engagement-manager">Engagement Manager</option>
-                  <option value="senior-auditor">Senior Auditor</option>
-                  <option value="auditor">Auditor</option>
-                  <option value="client">Client</option>
-                  <option value="admin">Admin</option>
+                <select id="dr" defaultValue={DEMO_ROLES[0].value}>
+                  {DEMO_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
                 <button type="button" className="go ghost" id="enter-demo">Enter demo →</button>
                 <button type="button" className="back" data-go="signin">← Back to sign in</button>
