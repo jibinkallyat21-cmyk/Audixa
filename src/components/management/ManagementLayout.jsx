@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutDashboard, BarChart3, Banknote, ShieldAlert, Trophy, ScrollText, Bell } from 'lucide-react'
+import { LayoutDashboard, BarChart3, Banknote, Trophy, ScrollText, Bell } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
 import ExitDemoButton from '../shared/ExitDemoButton'
@@ -23,7 +23,6 @@ const NAV_SECTIONS = [
     items: [
       { id: 'analytics', label: 'Firm Analytics', href: '/management/analytics', icon: BarChart3 },
       { id: 'financials', label: 'Financials', href: '/management/financials', icon: Banknote },
-      { id: 'risk', label: 'Risk & Compliance', href: '/management/risk', icon: ShieldAlert },
       { id: 'performance', label: 'FO Performance', href: '/management/performance', icon: Trophy },
     ],
   },

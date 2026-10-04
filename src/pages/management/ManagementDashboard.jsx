@@ -562,13 +562,12 @@ export default function ManagementDashboard() {
             </p>
           </div>
           {breachCount > 0 && (
-            <button
-              onClick={() => navigate('/management/risk')}
+            <span
               className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-alert-red"
               style={{ background: 'rgba(220,38,38,0.1)' }}
             >
               <ShieldAlert className="h-3.5 w-3.5" /> {breachCount} deadline breach{breachCount !== 1 ? 'es' : ''}
-            </button>
+            </span>
           )}
         </div>
 
@@ -596,7 +595,7 @@ export default function ManagementDashboard() {
 
         {/* ── 5 Stat Cards ── */}
         <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <StatCard icon={Users} iconColor="#0D1B2A"
+          <StatCard icon={Users} iconColor="#7C3AED"
             label="Clients in Scope" value={String(scopedClients.length)}
             sub={`${clientsOnTrack} currently on track`} delay={0} />
           <StatCard icon={Briefcase} iconColor="#2563EB"
@@ -609,7 +608,7 @@ export default function ManagementDashboard() {
           <StatCard icon={CalendarClock} iconColor="#DC2626"
             label="Critical Dates" value={String(scopedDeadlines.length)}
             sub={`${breachCount} breached · ${dueSoonCount} due within 7 days`}
-            onClick={() => navigate('/management/risk')} delay={0.18} />
+            delay={0.18} />
           <StatCard icon={AlertCircle} iconColor="#DC2626"
             label="Open Escalations" value={`${openEscalations} Open`}
             sub={`${escalations.length} total on record`}
@@ -666,7 +665,7 @@ export default function ManagementDashboard() {
               </div>
               <div className="space-y-2.5">
                 {[
-                  { label: 'Engagements past a critical date', value: breachCount, onClick: () => navigate('/management/risk') },
+                  { label: 'Engagements past a critical date', value: breachCount },
                   { label: 'Clients needing attention', value: clientsNeedingAttention },
                   { label: 'Open escalations', value: openEscalations, onClick: () => setModal('escalations') },
                 ].map((row) => (

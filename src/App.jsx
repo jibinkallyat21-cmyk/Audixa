@@ -78,7 +78,6 @@ import FOClientDocuments from './pages/frontoffice/FOClientDocuments'
 import ManagementDashboard from './pages/management/ManagementDashboard'
 import ManagementAnalytics from './pages/management/ManagementAnalytics'
 import ManagementFinancials from './pages/management/ManagementFinancials'
-import ManagementRisk from './pages/management/ManagementRisk'
 import ManagementPerformance from './pages/management/ManagementPerformance'
 import ManagementLog from './pages/management/ManagementLog'
 import ManagementNotifications from './pages/management/ManagementNotifications'
@@ -178,7 +177,6 @@ function AnimatedRoutes() {
         <Route path="/management/dashboard" element={<ManagementDashboard />} />
         <Route path="/management/analytics" element={<ManagementAnalytics />} />
         <Route path="/management/financials" element={<ManagementFinancials />} />
-        <Route path="/management/risk" element={<ManagementRisk />} />
         <Route path="/management/performance" element={<ManagementPerformance />} />
         <Route path="/management/log" element={<ManagementLog />} />
         <Route path="/management/notifications" element={<ManagementNotifications />} />
