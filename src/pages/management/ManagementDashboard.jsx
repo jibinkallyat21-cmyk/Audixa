@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Search, X, TrendingUp, Briefcase, Banknote, Wallet,
-  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2,
+  Search, X, TrendingUp, Briefcase, Banknote, Users, CalendarClock,
+  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2, ClipboardList,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
 import { useMgmtScope } from '../../hooks/useMgmtScope'
@@ -13,12 +13,8 @@ import { useManagementRaisedEscalations } from '../../utils/escalations'
 import { sendDirectMessage } from '../../utils/directMessages'
 import { useToast } from '../../components/shared/Toast'
 import {
-  mgmtUser,
   mgmtFOFiles,
-  mgmtARPending,
   mgmtAllEscalations,
-  mgmtRevenueTiles,
-  mgmtTotalTurnover,
   mgmtClientDirectory,
   mgmtAbcpaPortfolio,
   mgmtMiscpaPortfolio,
@@ -26,7 +22,6 @@ import {
   mgmtFOContacts,
   mgmtLeadConversion,
   mgmtConversionRate,
-  mgmtRealization,
   mgmtDeadlineBreaches,
 } from '../../data/sampleData'
 
@@ -233,71 +228,6 @@ function FilesModal({ onClose }) {
               </div>
             </div>
           ))}
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-/* ─── AR Pending modal ─── */
-function ARModal({ onClose }) {
-  const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div initial={{ scale: 0.95, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 16 }}
-        transition={{ duration: 0.22 }} onClick={e => e.stopPropagation()}
-        className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
-      >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
-          <div>
-            <h3 className="text-base font-bold text-navy">Accounts Receivable — Pending Payments</h3>
-            <p className="text-xs text-slate-400 mt-0.5">SAR {totalBalance.toLocaleString()} outstanding</p>
-          </div>
-          <button onClick={onClose} className="text-slate-300 hover:text-slate-600"><X className="h-5 w-5" /></button>
-        </div>
-        <div className="overflow-y-auto flex-1">
-          <table className="w-full text-xs">
-            <thead className="bg-slate-50 border-b border-slate-100 sticky top-0">
-              <tr>
-                {['Client', 'Dept', 'Fee', 'Paid', 'Balance', 'Status', 'Contact'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left font-semibold text-slate-500 whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mgmtARPending.map((row, i) => {
-                const st = row.status === 'Overdue'
-                  ? { bg: 'rgba(220,38,38,0.1)', color: '#DC2626' }
-                  : row.status === 'Due Today'
-                  ? { bg: 'rgba(217,119,6,0.12)', color: '#D97706' }
-                  : { bg: 'rgba(5,150,105,0.1)', color: '#059669' }
-                return (
-                  <tr key={row.code} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                    <td className="px-4 py-3">
-                      <p className="font-semibold text-navy">{row.client}</p>
-                      <p className="text-slate-400">{row.code}</p>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">{row.dept}</td>
-                    <td className="px-4 py-3 font-semibold text-navy">SAR {row.fee.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-emerald font-semibold">SAR {row.paid.toLocaleString()}</td>
-                    <td className="px-4 py-3 font-bold" style={{ color: st.color }}>SAR {row.balance.toLocaleString()}</td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full px-2 py-0.5 font-bold text-[10px]" style={{ background: st.bg, color: st.color }}>
-                        {row.status}{row.daysOverdue > 0 ? ` · ${row.daysOverdue}d` : ''}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{row.contact}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-        <div className="border-t border-slate-100 px-6 py-3 shrink-0 flex items-center justify-between bg-slate-50">
-          <p className="text-xs text-slate-500">Total outstanding: <span className="font-bold text-navy">SAR {totalBalance.toLocaleString()}</span></p>
         </div>
       </motion.div>
     </motion.div>
@@ -605,23 +535,31 @@ export default function ManagementDashboard() {
   const portfolio = scope === 'ABCPA' ? mgmtAbcpaPortfolio : scope === 'MISCPA' ? mgmtMiscpaPortfolio : null
   const navigate = useNavigate()
 
-  const totalBalance = mgmtARPending.reduce((s, c) => s + c.balance, 0)
   const raised = useManagementRaisedEscalations()
   const escalations = useMemo(() => [...raised, ...mgmtAllEscalations].filter(e => scope === 'Combined' || e.dept === scope), [scope, raised])
   const [detail, setDetail] = useState(null)
   const openEscalations = escalations.filter(e => e.status === 'Open').length
   const [meetingOpen, setMeetingOpen] = useState(false)
-  const breachCount = mgmtDeadlineBreaches.filter(b => b.daysLeft < 0).length
+
+  const scopedClients = useMemo(() => mgmtClientDirectory.filter(c => scope === 'Combined' || c.dept === scope), [scope])
+  const clientsOnTrack = scopedClients.filter(c => c.status === 'ok').length
+  const clientsNeedingAttention = scopedClients.filter(c => c.status === 'warn' || c.status === 'crit').length
+
+  const scopedDeadlines = useMemo(() => mgmtDeadlineBreaches.filter(b => scope === 'Combined' || b.dept === scope), [scope])
+  const breachCount = scopedDeadlines.filter(b => b.daysLeft < 0).length
+  const dueSoonCount = scopedDeadlines.filter(b => b.daysLeft >= 0 && b.daysLeft <= 7).length
 
   return (
     <ManagementLayout title="Dashboard" fullHeight headerSearch={<ClientSearch />}>
       <div className="flex h-full flex-col gap-4 overflow-hidden">
 
-        {/* ── Greeting ── */}
+        {/* ── Header ── */}
         <div className="shrink-0 flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-lg font-bold text-navy">Good morning, {mgmtUser.name.split(' ')[0]}.</h1>
-            <p className="text-xs text-slate-400">{portfolio ? `${scope} Department View` : 'Combined View — ABCPA + MISCPA'} · 25 Sep 2026</p>
+            <h1 className="text-lg font-bold text-navy">Executive Overview</h1>
+            <p className="text-xs text-slate-400">
+              {portfolio ? `${scope} Department View` : 'Combined View — ABCPA + MISCPA'} · Business status, attention items and critical dates
+            </p>
           </div>
           {breachCount > 0 && (
             <button
@@ -658,25 +596,24 @@ export default function ManagementDashboard() {
 
         {/* ── 5 Stat Cards ── */}
         <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <StatCard icon={Briefcase} iconColor="#0D1B2A"
-            label="Total Files Engaged" value={portfolio ? String(portfolio.total) : '148'}
-            sub={portfolio ? `${scope} Department` : 'ABCPA: 89 · MISCPA: 59'}
-            onClick={() => setModal('files')} delay={0} />
-          <StatCard icon={TrendingUp} iconColor="#059669"
-            label="Total Client Turnover" value={mgmtTotalTurnover.value}
-            sub={portfolio ? 'Firm-wide · FY2025' : mgmtTotalTurnover.note} delay={0.06} />
-          <StatCard icon={Banknote} iconColor="#DC2626"
-            label="AR — Pending Payments" value={`SAR ${(totalBalance / 1000).toFixed(0)}K`}
-            sub={`${mgmtARPending.filter(c => c.daysOverdue > 0).length} clients overdue`}
-            onClick={() => setModal('ar')} delay={0.12} />
-          <StatCard icon={AlertCircle} iconColor="#D97706"
+          <StatCard icon={Users} iconColor="#0D1B2A"
+            label="Clients in Scope" value={String(scopedClients.length)}
+            sub={`${clientsOnTrack} currently on track`} delay={0} />
+          <StatCard icon={Briefcase} iconColor="#2563EB"
+            label="Active Engagements" value={portfolio ? String(portfolio.total) : '148'}
+            sub={portfolio ? `${scope} Department` : 'Combined portfolio'}
+            onClick={() => setModal('files')} delay={0.06} />
+          <StatCard icon={TrendingUp} iconColor="#D97706"
+            label="Portfolio Needs Attention" value={String(clientsNeedingAttention)}
+            sub="Derived from current client status" delay={0.12} />
+          <StatCard icon={CalendarClock} iconColor="#DC2626"
+            label="Critical Dates" value={String(scopedDeadlines.length)}
+            sub={`${breachCount} breached · ${dueSoonCount} due within 7 days`}
+            onClick={() => navigate('/management/risk')} delay={0.18} />
+          <StatCard icon={AlertCircle} iconColor="#DC2626"
             label="Open Escalations" value={`${openEscalations} Open`}
             sub={`${escalations.length} total on record`}
-            onClick={() => setModal('escalations')} delay={0.18} />
-          <StatCard icon={Wallet} iconColor="#2563EB"
-            label="Fee Realization Rate" value={`${mgmtRealization.rate}%`}
-            sub={`Target ${mgmtRealization.target}% · View P&L`}
-            onClick={() => navigate('/management/financials')} delay={0.24} />
+            onClick={() => setModal('escalations')} delay={0.24} />
         </div>
 
         {/* ── Main content row ── */}
@@ -723,24 +660,34 @@ export default function ManagementDashboard() {
             </motion.button>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
-              <h2 className="mb-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Revenue & Billing</h2>
-              <div className="space-y-2">
-                {mgmtRevenueTiles.map(tile => {
-                  const TONE = { navy: '#0D1B2A', emerald: '#059669', amber: '#D97706', 'alert-red': '#DC2626' }
-                  return (
-                    <div key={tile.label} className="flex items-center justify-between">
-                      <p className="text-xs text-slate-500 truncate">{tile.label}</p>
-                      <p className="text-xs font-bold ml-2 shrink-0" style={{ color: TONE[tile.tone] }}>{tile.display}</p>
-                    </div>
-                  )
-                })}
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Management Attention</h2>
+                <ClipboardList className="h-3.5 w-3.5 text-slate-300" />
+              </div>
+              <div className="space-y-2.5">
+                {[
+                  { label: 'Engagements past a critical date', value: breachCount, onClick: () => navigate('/management/risk') },
+                  { label: 'Clients needing attention', value: clientsNeedingAttention },
+                  { label: 'Open escalations', value: openEscalations, onClick: () => setModal('escalations') },
+                ].map((row) => (
+                  <button
+                    key={row.label}
+                    type="button"
+                    onClick={row.onClick}
+                    disabled={!row.onClick}
+                    className={`flex w-full items-center justify-between text-left ${row.onClick ? 'cursor-pointer hover:opacity-70' : 'cursor-default'}`}
+                  >
+                    <p className="text-xs text-slate-500">{row.label}</p>
+                    <p className="text-xs font-bold text-navy">{row.value}</p>
+                  </button>
+                ))}
               </div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Lead Funnel</h2>
-                <span className="text-[10px] font-bold text-amber">{mgmtConversionRate}% Conv.</span>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">Business Dev.</h2>
+                <span className="shrink-0 text-[10px] font-bold text-amber">{mgmtConversionRate}% Conv.</span>
               </div>
               <div className="space-y-1.5">
                 {mgmtLeadConversion.map((stage, i) => {
@@ -769,7 +716,6 @@ export default function ManagementDashboard() {
 
       <AnimatePresence>
         {modal === 'files' && <FilesModal onClose={() => setModal(null)} />}
-        {modal === 'ar' && <ARModal onClose={() => setModal(null)} />}
         {modal === 'escalations' && <EscalationsModal onClose={() => setModal(null)} onMessage={(e) => { setModal(null); setDetail({ ...e, compose: true }) }} />}
         {detail && <EscalationDetail escalation={detail} onClose={() => setDetail(null)} />}
       </AnimatePresence>
