@@ -365,7 +365,7 @@ function ClientSidebar() {
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto" style={{ background: D.sidebarBg, borderRight: `1px solid ${D.border}` }}>
       {/* Brand */}
-      <div className="flex items-center gap-3 px-5 py-6">
+      <div className="flex h-16 shrink-0 items-center gap-3 px-5">
         <AnalytixMark size={30} className="shrink-0" />
         <div className="leading-tight">
           <p className="text-base font-black tracking-[0.12em] text-white">
@@ -550,7 +550,7 @@ function ClientHeader({ title }) {
   const avatarTx = isDark ? 'text-white' : 'text-[#0D1B2A]'
   return (
     <header
-      className="client-header flex h-[54px] w-full shrink-0 items-center gap-3 px-6"
+      className="client-header flex h-16 w-full shrink-0 items-center gap-3 px-6"
       style={{ background: D.headerBg, borderBottom: `1px solid ${D.border}` }}
     >
       {/* Left — hamburger + client name + page title + partner badge */}

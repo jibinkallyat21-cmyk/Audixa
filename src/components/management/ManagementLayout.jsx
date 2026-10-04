@@ -40,7 +40,7 @@ function ManagementSidebar() {
 
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-navy text-white">
-      <div className="flex items-center gap-2 px-5 py-6">
+      <div className="flex h-16 shrink-0 items-center gap-2 px-5">
         <AnalytixMark size={26} className="shrink-0" />
         <div className="leading-tight">
           <p className="text-sm font-bold tracking-wide text-white">AUDIT <span className="text-brand">360</span></p>
@@ -184,7 +184,7 @@ const MGMT_CHAT_MESSAGES = [
 function ManagementHeader({ title, headerSearch }) {
   const [scope, setScope] = useMgmtScope()
   return (
-    <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
+    <header className="relative flex h-16 w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
       <div className="flex items-center gap-2">
         <HamburgerButton />
         <AnalytixMark size={22} className="shrink-0" />
@@ -236,14 +236,16 @@ function ManagementHeader({ title, headerSearch }) {
 export default function ManagementLayout({ title, children, fullHeight = false, headerSearch }) {
   return (
     <SidebarDrawerProvider>
-      <div className={`flex w-full bg-background ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
+      <div className="flex h-screen w-full overflow-hidden bg-background">
         <MobileSidebarWrap>
           <ManagementSidebar />
         </MobileSidebarWrap>
-        <div className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
+        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
           <ManagementHeader title={title} headerSearch={headerSearch} />
-          <main className={`min-w-0 flex-1 ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'} px-4 py-5 sm:px-6 sm:py-6`}>{children}</main>
-          {!fullHeight && <Footer />}
+          <main className={`flex min-w-0 flex-1 flex-col ${fullHeight ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+            <div className={fullHeight ? 'min-h-0 flex-1 overflow-hidden px-4 py-5 sm:px-6 sm:py-6' : 'px-4 py-5 sm:px-6 sm:py-6'}>{children}</div>
+            {!fullHeight && <Footer />}
+          </main>
         </div>
       </div>
       <QuickChatWidget members={MGMT_CHAT_MEMBERS} meId="mohammed" label="Quick Chat" initialMessages={MGMT_CHAT_MESSAGES} />

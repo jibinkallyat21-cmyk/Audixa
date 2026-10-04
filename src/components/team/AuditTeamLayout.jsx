@@ -52,7 +52,7 @@ function TeamSidebar() {
 
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-navy text-white">
-      <div className="flex items-center gap-2 px-5 py-6">
+      <div className="flex h-16 shrink-0 items-center gap-2 px-5">
         <AnalytixMark size={26} className="shrink-0" />
         <div className="leading-tight">
           <p className="text-sm font-bold tracking-wide text-white">AUDIT <span className="text-brand">360</span></p>
@@ -188,7 +188,7 @@ function TeamHeader({ title }) {
   const [role, setRole] = useTeamRole()
 
   return (
-    <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
+    <header className="relative flex h-16 w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
       <div className="flex items-center gap-2">
         <HamburgerButton />
         <AnalytixMark size={22} className="shrink-0" />
@@ -236,14 +236,16 @@ function TeamHeader({ title }) {
 export default function AuditTeamLayout({ title, children }) {
   return (
     <SidebarDrawerProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex h-screen w-full overflow-hidden bg-background">
         <MobileSidebarWrap>
           <TeamSidebar />
         </MobileSidebarWrap>
-        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
           <TeamHeader title={title} />
-          <main className="relative min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">{children}</main>
-          <Footer />
+          <main className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
+            <div className="px-4 py-6 sm:px-8 sm:py-8">{children}</div>
+            <Footer />
+          </main>
         </div>
       </div>
       <QuickChatWidget members={TEAM_CHAT_MEMBERS} meId="nora" label="Team Chat" />
