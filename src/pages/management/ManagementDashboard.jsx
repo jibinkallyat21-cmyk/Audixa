@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import {
   Search, X, TrendingUp, Briefcase, Banknote, Users, CalendarClock,
   ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2, ClipboardList,
@@ -309,6 +310,55 @@ function EscalationsModal({ onClose, onMessage }) {
   )
 }
 
+/* ─── Portfolio Health — status banner + progress ring ─── */
+function PortfolioHealthCard({ total, onTrack, needsAttention, onViewAttention }) {
+  const pct = total > 0 ? Math.round((onTrack / total) * 100) : 0
+  const healthy = needsAttention === 0
+  const accent = healthy ? '#059669' : '#D97706'
+  const data = [
+    { name: 'On Track', value: onTrack || 0, color: '#059669' },
+    { name: 'Needs Attention', value: needsAttention || 0, color: '#D97706' },
+  ]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.3 }}
+      className="flex shrink-0 flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center"
+    >
+      <div className="flex flex-1 items-start gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${accent}1F` }}>
+          {healthy
+            ? <CheckCircle2 className="h-6 w-6" style={{ color: accent }} />
+            : <AlertCircle className="h-6 w-6" style={{ color: accent }} />}
+        </div>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>Portfolio Health</p>
+          <p className="mt-1 text-base font-bold text-navy">
+            {healthy ? `All ${total} clients in scope are on track` : `${needsAttention} of ${total} clients need attention`}
+          </p>
+          <p className="mt-1 text-xs text-slate-400">Derived from current engagement status across the portfolio.</p>
+          <button type="button" onClick={onViewAttention} className="mt-2 text-xs font-semibold text-brand hover:underline">
+            View Escalation Centre →
+          </button>
+        </div>
+      </div>
+      <div className="relative mx-auto h-28 w-28 shrink-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey="value" innerRadius={38} outerRadius={54} startAngle={90} endAngle={450} stroke="none" animationDuration={700}>
+              {data.map((d) => <Cell key={d.name} fill={d.color} />)}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <p className="text-xl font-black text-navy">{pct}%</p>
+          <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">On Track</p>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 /* ─── Stat Card ─── */
 function StatCard({ icon: Icon, iconColor, label, value, sub, onClick, delay = 0 }) {
   const [hov, setHov] = useState(false)
@@ -318,20 +368,20 @@ function StatCard({ icon: Icon, iconColor, label, value, sub, onClick, delay = 0
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.3 }}
       onHoverStart={() => setHov(true)} onHoverEnd={() => setHov(false)}
       onClick={onClick}
-      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-left w-full transition-all"
+      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-left w-full transition-all"
       style={{ transform: hov && onClick ? 'translateY(-2px)' : 'none', boxShadow: hov && onClick ? '0 8px 24px rgba(0,0,0,0.1)' : undefined }}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: `${iconColor}15` }}>
-          <Icon className="h-5 w-5" style={{ color: iconColor }} />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${iconColor}15` }}>
+          <Icon className="h-6 w-6" style={{ color: iconColor }} />
         </div>
         {onClick && (
-          <ChevronRight className="h-3.5 w-3.5 mt-0.5 text-slate-300 transition-transform" style={{ transform: hov ? 'translateX(2px)' : 'none' }} />
+          <ChevronRight className="h-4 w-4 mt-0.5 text-slate-300 transition-transform" style={{ transform: hov ? 'translateX(2px)' : 'none' }} />
         )}
       </div>
-      <p className="mt-3 text-xl font-black text-navy">{value}</p>
-      <p className="text-xs font-semibold text-slate-500">{label}</p>
-      {sub && <p className="mt-0.5 text-[10px] text-slate-400">{sub}</p>}
+      <p className="mt-4 text-3xl font-black text-navy">{value}</p>
+      <p className="mt-1 text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+      {sub && <p className="mt-1.5 text-xs text-slate-400">{sub}</p>}
     </motion.button>
   )
 }
@@ -615,6 +665,14 @@ export default function ManagementDashboard() {
             onClick={() => setModal('escalations')} delay={0.24} />
         </div>
 
+        {/* ── Portfolio Health ── */}
+        <PortfolioHealthCard
+          total={scopedClients.length}
+          onTrack={clientsOnTrack}
+          needsAttention={clientsNeedingAttention}
+          onViewAttention={() => setModal('escalations')}
+        />
+
         {/* ── Main content row ── */}
         <div className="flex min-h-0 flex-1 gap-4">
 
@@ -644,26 +702,28 @@ export default function ManagementDashboard() {
           </div>
 
           {/* RIGHT — Meeting + Revenue + Lead funnel */}
-          <div className="flex w-[272px] shrink-0 flex-col gap-3 min-h-0 overflow-y-auto">
+          <div className="flex w-[300px] shrink-0 flex-col gap-4 min-h-0 overflow-y-auto">
 
             <motion.button
               type="button"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setMeetingOpen(true)}
-              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white"
+              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white"
               style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
             >
               <Calendar className="h-4 w-4 text-indigo-400" />
               Request a Meeting
             </motion.button>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
-              <div className="flex items-center justify-between mb-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shrink-0">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Management Attention</h2>
-                <ClipboardList className="h-3.5 w-3.5 text-slate-300" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100">
+                  <ClipboardList className="h-3.5 w-3.5 text-slate-400" />
+                </div>
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {[
                   { label: 'Engagements past a critical date', value: breachCount },
                   { label: 'Clients needing attention', value: clientsNeedingAttention },
@@ -677,16 +737,16 @@ export default function ManagementDashboard() {
                     className={`flex w-full items-center justify-between text-left ${row.onClick ? 'cursor-pointer hover:opacity-70' : 'cursor-default'}`}
                   >
                     <p className="text-xs text-slate-500">{row.label}</p>
-                    <p className="text-xs font-bold text-navy">{row.value}</p>
+                    <p className="text-sm font-black text-navy">{row.value}</p>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shrink-0">
-              <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shrink-0">
+              <div className="flex items-center justify-between gap-2 mb-4">
                 <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">Business Dev.</h2>
-                <span className="shrink-0 text-[10px] font-bold text-amber">{mgmtConversionRate}% Conv.</span>
+                <span className="shrink-0 rounded-full bg-amber/10 px-2 py-1 text-[10px] font-bold text-amber">{mgmtConversionRate}% Conv.</span>
               </div>
               <div className="space-y-1.5">
                 {mgmtLeadConversion.map((stage, i) => {
