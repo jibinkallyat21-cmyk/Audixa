@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import {
-  Search, X, TrendingUp, Briefcase, Banknote, Users, CalendarClock,
-  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2, ClipboardList,
+  Search, X, Briefcase, Banknote, Users, CalendarClock,
+  ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
 import { useMgmtScope } from '../../hooks/useMgmtScope'
@@ -643,23 +643,20 @@ export default function ManagementDashboard() {
           </div>
         )}
 
-        {/* ── 5 Stat Cards ── */}
-        <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {/* ── Stat Cards ── */}
+        <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard icon={Users} iconColor="#7C3AED"
             label="Clients in Scope" value={String(scopedClients.length)}
             sub={`${clientsOnTrack} currently on track`} delay={0} />
           <StatCard icon={Briefcase} iconColor="#2563EB"
             label="Active Engagements" value={portfolio ? String(portfolio.total) : '148'}
             sub={portfolio ? `${scope} Department` : 'Combined portfolio'}
-            onClick={() => setModal('files')} delay={0.06} />
-          <StatCard icon={TrendingUp} iconColor="#D97706"
-            label="Portfolio Needs Attention" value={String(clientsNeedingAttention)}
-            sub="Derived from current client status" delay={0.12} />
+            onClick={() => setModal('files')} delay={0.08} />
           <StatCard icon={CalendarClock} iconColor="#DC2626"
             label="Critical Dates" value={String(scopedDeadlines.length)}
             sub={`${breachCount} breached · ${dueSoonCount} due within 7 days`}
-            delay={0.18} />
-          <StatCard icon={AlertCircle} iconColor="#DC2626"
+            delay={0.16} />
+          <StatCard icon={AlertCircle} iconColor="#D97706"
             label="Open Escalations" value={`${openEscalations} Open`}
             sub={`${escalations.length} total on record`}
             onClick={() => setModal('escalations')} delay={0.24} />
@@ -715,33 +712,6 @@ export default function ManagementDashboard() {
               <Calendar className="h-4 w-4 text-indigo-400" />
               Request a Meeting
             </motion.button>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shrink-0">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Management Attention</h2>
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100">
-                  <ClipboardList className="h-3.5 w-3.5 text-slate-400" />
-                </div>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { label: 'Engagements past a critical date', value: breachCount },
-                  { label: 'Clients needing attention', value: clientsNeedingAttention },
-                  { label: 'Open escalations', value: openEscalations, onClick: () => setModal('escalations') },
-                ].map((row) => (
-                  <button
-                    key={row.label}
-                    type="button"
-                    onClick={row.onClick}
-                    disabled={!row.onClick}
-                    className={`flex w-full items-center justify-between text-left ${row.onClick ? 'cursor-pointer hover:opacity-70' : 'cursor-default'}`}
-                  >
-                    <p className="text-xs text-slate-500">{row.label}</p>
-                    <p className="text-sm font-black text-navy">{row.value}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shrink-0">
               <div className="flex items-center justify-between gap-2 mb-4">
