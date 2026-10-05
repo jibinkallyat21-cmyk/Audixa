@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import {
-  Search, X, Briefcase, Banknote, Users, CalendarClock,
+  Search, X, Briefcase, Banknote, Users,
   ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
@@ -24,7 +24,13 @@ import {
   mgmtLeadConversion,
   mgmtConversionRate,
   mgmtDeadlineBreaches,
+  mgmtRevenueByDept,
 } from '../../data/sampleData'
+
+function formatSAR(value) {
+  if (value >= 1_000_000) return `SAR ${(value / 1_000_000).toFixed(2)}M`
+  return `SAR ${Math.round(value / 1000)}K`
+}
 
 /* ─── helpers ─── */
 const STATUS_STYLE = {
@@ -597,7 +603,9 @@ export default function ManagementDashboard() {
 
   const scopedDeadlines = useMemo(() => mgmtDeadlineBreaches.filter(b => scope === 'Combined' || b.dept === scope), [scope])
   const breachCount = scopedDeadlines.filter(b => b.daysLeft < 0).length
-  const dueSoonCount = scopedDeadlines.filter(b => b.daysLeft >= 0 && b.daysLeft <= 7).length
+
+  const scopedRevenue = useMemo(() => mgmtRevenueByDept.filter(d => scope === 'Combined' || d.dept === scope), [scope])
+  const totalRevenue = scopedRevenue.reduce((s, d) => s + d.revenue, 0)
 
   return (
     <ManagementLayout title="Dashboard" fullHeight headerSearch={<ClientSearch />}>
@@ -652,10 +660,10 @@ export default function ManagementDashboard() {
             label="Active Engagements" value={portfolio ? String(portfolio.total) : '148'}
             sub={portfolio ? `${scope} Department` : 'Combined portfolio'}
             onClick={() => setModal('files')} delay={0.08} />
-          <StatCard icon={CalendarClock} iconColor="#DC2626"
-            label="Critical Dates" value={String(scopedDeadlines.length)}
-            sub={`${breachCount} breached · ${dueSoonCount} due within 7 days`}
-            delay={0.16} />
+          <StatCard icon={Banknote} iconColor="#059669"
+            label="Total Revenue" value={formatSAR(totalRevenue)}
+            sub={portfolio ? `${scope} Department · FY2025` : 'Billed to date · FY2025'}
+            onClick={() => navigate('/management/financials')} delay={0.16} />
           <StatCard icon={AlertCircle} iconColor="#D97706"
             label="Open Escalations" value={`${openEscalations} Open`}
             sub={`${escalations.length} total on record`}
