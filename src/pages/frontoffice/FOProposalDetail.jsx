@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Download, AlertTriangle } from 'lucide-react'
 import FrontOfficeLayout from '../../components/frontoffice/FrontOfficeLayout'
 import PageTransition from '../../components/shared/PageTransition'
@@ -8,10 +8,19 @@ import AuditorChip from '../../components/shared/AuditorChip'
 import { useToast } from '../../components/shared/Toast'
 import { useModal } from '../../components/shared/Modal'
 import { foProposalDetail } from '../../data/sampleData'
-
-const d = foProposalDetail
+import { getGeneratedProposal, pdfBlobUrl } from '../../utils/proposals'
 
 export default function FOProposalDetail() {
+  const { id } = useParams()
+  const generated = useMemo(() => getGeneratedProposal(id), [id])
+  const d = useMemo(() => (generated ? {
+    reference: generated.reference, client: generated.client, crNumber: generated.crNumber || '—',
+    city: generated.city || '—', contact: `${generated.contactName} — ${generated.contactEmail}`,
+    auditType: generated.auditType, auditor: generated.auditor, fee: generated.fee, createdBy: generated.createdBy,
+    createdDate: generated.createdDate, pulledDate: generated.createdDate, expiryDate: generated.expiryDate,
+  } : foProposalDetail), [generated])
+  const pdfUrl = useMemo(() => (generated?.pdfBase64 ? pdfBlobUrl(generated.pdfBase64) : null), [generated])
+  const isOdoo = !generated || generated.source === 'odoo'
   const navigate = useNavigate()
   const showToast = useToast()
   const { openModal, closeModal } = useModal()
@@ -77,7 +86,9 @@ export default function FOProposalDetail() {
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Audit Engagement Proposal</p>
                 <h1 className="mt-1 text-xl font-bold text-navy">{d.reference}</h1>
               </div>
-              <span className="rounded-md bg-teal-100 px-2.5 py-1 text-[11px] font-bold text-teal-700">Odoo Generated</span>
+              <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold ${isOdoo ? 'bg-teal-100 text-teal-700' : 'bg-amber/10 text-amber'}`}>
+                {isOdoo ? 'Odoo Generated' : 'Demo Document'}
+              </span>
             </div>
 
             <div className="grid grid-cols-2 gap-6 border-y border-slate-100 py-6 text-sm">
@@ -123,12 +134,31 @@ export default function FOProposalDetail() {
               </p>
             </div>
 
-            <button
-              onClick={() => showToast('Downloading proposal PDF...')}
-              className="mt-8 flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50"
-            >
-              <Download className="h-4 w-4" /> Download PDF
-            </button>
+            {pdfUrl && (
+              <object data={pdfUrl} type="application/pdf" aria-label="Proposal PDF preview" className="mt-8 h-[520px] w-full rounded-lg border border-slate-200">
+                <p className="p-4 text-xs text-slate-500">PDF preview is not supported in this browser — use Download PDF.</p>
+              </object>
+            )}
+            {generated?.pdfError && <p className="mt-4 text-[11px] text-amber">{generated.pdfError}</p>}
+
+            <div className="mt-8 flex flex-wrap gap-2">
+              {pdfUrl ? (
+                <a
+                  href={pdfUrl}
+                  download={`${d.reference}.pdf`}
+                  className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-navy hover:bg-slate-500/10"
+                >
+                  <Download className="h-4 w-4" /> Download PDF
+                </a>
+              ) : (
+                <button
+                  onClick={() => (generated?.portalUrl ? window.open(generated.portalUrl, '_blank', 'noopener,noreferrer') : showToast('Downloading proposal PDF...'))}
+                  className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-navy hover:bg-slate-500/10"
+                >
+                  <Download className="h-4 w-4" /> {generated?.portalUrl ? 'Open in Odoo' : 'Download PDF'}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -148,7 +178,7 @@ export default function FOProposalDetail() {
               </div>
               <div className="space-y-2 text-xs text-slate-500">
                 <div className="flex justify-between">
-                  <span>Pulled from Odoo</span>
+                  <span>{isOdoo ? 'Generated in Odoo' : 'Generated (demo)'}</span>
                   <span className="font-medium text-navy">{d.pulledDate}</span>
                 </div>
                 <div className="flex justify-between">

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, ChevronUp, Mail, MessageSquare, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Mail, MessageSquare, Plus, X } from 'lucide-react'
 import FrontOfficeLayout from '../../components/frontoffice/FrontOfficeLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
@@ -9,14 +9,8 @@ import AuditTypeChip from '../../components/shared/AuditTypeChip'
 import { useToast } from '../../components/shared/Toast'
 import { useModal } from '../../components/shared/Modal'
 import { foProposals, foProposalFilterCounts, foSentProposals } from '../../data/sampleData'
-
-const AUDITORS = ['ABCPA', 'MISCPA']
-const AUDIT_TYPES = ['Proper Audit', 'Disclaimer of Opinion', 'Special Purpose Audit', 'Liquidation Audit', 'Agreed-Upon Procedures']
-const SERVICES = [
-  { key: 'zakat', label: 'Zakat Filing' },
-  { key: 'accounts', label: 'Accounts Finalisation' },
-  { key: 'translation', label: 'English Translation' },
-]
+import { AUDITORS, AUDIT_TYPES, SERVICES, useGeneratedProposals } from '../../utils/proposals'
+import NewProposalModal from './NewProposalModal'
 
 export default function FOProposals() {
   const navigate = useNavigate()
@@ -26,14 +20,22 @@ export default function FOProposals() {
   const [statuses, setStatuses] = useState({})
   const [expanded, setExpanded] = useState(true)
   const [sendProposal, setSendProposal] = useState(null)
+  const [creating, setCreating] = useState(false)
+  const generated = useGeneratedProposals()
+  const allProposals = useMemo(() => [...generated, ...foProposals], [generated])
+  const counts = useMemo(() => ({
+    ...foProposalFilterCounts,
+    All: foProposalFilterCounts.All + generated.length,
+    'Awaiting Approval': foProposalFilterCounts['Awaiting Approval'] + generated.length,
+  }), [generated])
 
   const visible = useMemo(() => {
-    return foProposals.filter((p) => {
+    return allProposals.filter((p) => {
       const status = statuses[p.id] || p.status
       if (filter === 'All') return true
       return status === filter
     })
-  }, [filter, statuses])
+  }, [filter, statuses, allProposals])
 
   const handleApprove = (proposal) => {
     setSendProposal(proposal)
@@ -50,8 +52,14 @@ export default function FOProposals() {
       <PageTransition>
         <div className="space-y-5">
           {/* ── Filter pills ── */}
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(foProposalFilterCounts).map(([label, count]) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setCreating(true)}
+              className="order-last ml-auto flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
+            >
+              <Plus className="h-3.5 w-3.5" /> New Proposal
+            </button>
+            {Object.entries(counts).map(([label, count]) => (
               <button
                 key={label}
                 onClick={() => setFilter(label)}
@@ -77,7 +85,14 @@ export default function FOProposals() {
                   className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-bold text-navy">{p.client}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-navy">{p.client}</p>
+                      {p.source && (
+                        <span className={`mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold ${p.source === 'odoo' ? 'bg-teal-100 text-teal-700' : 'bg-amber/10 text-amber'}`}>
+                          {p.source === 'odoo' ? `Odoo · ${p.reference}` : `Demo · ${p.reference}`}
+                        </span>
+                      )}
+                    </div>
                     <motion.span
                       key={status}
                       initial={{ scale: 0.9, opacity: 0 }}
@@ -155,6 +170,16 @@ export default function FOProposals() {
           </div>
         </div>
 
+        {/* ── New Proposal Modal ── */}
+        <AnimatePresence>
+          {creating && (
+            <NewProposalModal
+              onClose={() => setCreating(false)}
+              onView={(rec) => { setCreating(false); navigate(`/fo/proposal/${rec.id}`) }}
+            />
+          )}
+        </AnimatePresence>
+
         {/* ── Send Proposal Modal ── */}
         <AnimatePresence>
           {sendProposal && (
@@ -175,7 +200,7 @@ export default function FOProposals() {
 ───────────────────────────────────────────── */
 function SendProposalModal({ proposal, onClose, onSent }) {
   const [auditor, setAuditor] = useState(proposal.auditor || '')
-  const [auditType, setAuditType] = useState(proposal.auditType ? `${proposal.auditType} Audit` : '')
+  const [auditType, setAuditType] = useState(AUDIT_TYPES.includes(proposal.auditType) ? proposal.auditType : proposal.auditType ? `${proposal.auditType} Audit` : '')
   const [auditFee, setAuditFee] = useState(proposal.fee ? String(proposal.fee) : '')
   const [services, setServices] = useState({})
   const [sendVia, setSendVia] = useState('email')
