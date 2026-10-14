@@ -27,12 +27,13 @@ Answers given by the audit lead while going through `docs/execution-gap-list.md`
 | 18 | Revenue category on proposals | Six categories: Zero turnover; Less than 1 Million; 1 to 5 Million; 5 to 10 Million; 10 to 50 Million; 50 Million & above. Choosing one sets the audit fee automatically (still editable). Fee numbers are PLACEHOLDERS in `src/data/feeSchedule.js` until the FO confirms them |
 | 19 | Discount on proposals | "Apply discount" checkbox shows the discount amount. Provisional rule: 10% of the Zakat filing fee, sent as a negative line. Real logic to come from the audit lead after the FO is asked |
 | 20 | EL request fee | Request to the auditor carries audit fee + translation fee only; every opted proposal service stays visible on the page |
+| 21 | Client profile | Everything entered when a proposal is created (client, contact, CR number, city, auditor, audit type, revenue category, audit fee, opted services with fees, discount) is stored in a client profile (`src/utils/clientProfiles.js`). The EL request fetches the proposal details from it; services can be added to the profile later. Revenue in the EL request is the profile's revenue category unless an exact figure is entered |
 
 ## Open items to ask later
 
 - **Revenue category and fee allocation.** The audit lead will give the final categories and the fee for each (placeholders in `src/data/feeSchedule.js`), after asking the Front Office. Also confirm whether fees differ by firm (ABCPA / MISCPA).
 - **Discount logic.** Final rule to come (provisional: 10% of Zakat filing fee, `src/data/feeSchedule.js`).
-- **Revenue in the EL request.** The EL request needs a Revenue amount from the proposal; proposals now carry only a revenue category. Ask whether the EL should show the category range or an exact figure.
+- **Revenue in the EL request.** Now shows the revenue category from the client profile (e.g. "1 Million to 5 Million (SR)"); an exact figure can still be entered. Confirm this is what the auditor needs.
 
 - **ABCPA vouching.** The audit lead will supply documents. Not built until received. MISCPA vouching follows the Vouching Rule Book.
 - **Liquidation audit, second extra document.** The Rule Book calls it "Osama letter". It is a letter received from the Ministry. Ask for the exact name and what it states (which date feeds the audit period end date).

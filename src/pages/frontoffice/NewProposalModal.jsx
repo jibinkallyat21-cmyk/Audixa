@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, FileText, Loader2, X, AlertTriangle } from 'lucide-react'
 import { AUDITORS, AUDIT_TYPES, SERVICES, ProposalError, addGeneratedProposal, generateProposal } from '../../utils/proposals'
 import { foUser } from '../../data/sampleData'
+import { saveClientProfile, profileFromProposal } from '../../utils/clientProfiles'
 import { RevenueCategorySelect, DiscountControl } from '../../components/frontoffice/ProposalFeeControls'
 import { feeForCategory, discountAmount } from '../../data/feeSchedule'
 
@@ -60,6 +61,7 @@ export default function NewProposalModal({ onClose, onView }) {
         { demo },
       )
       addGeneratedProposal(record)
+      saveClientProfile(profileFromProposal({ ...form, client: form.client.trim(), contactName: form.contactName.trim(), contactEmail: form.contactEmail.trim(), crNumber: form.crNumber.trim(), city: form.city.trim() }, record))
       setResult(record); setPhase('done')
     } catch (err) {
       setFailure(err instanceof ProposalError ? err.message : 'Could not reach the proposal service. Please try again.')

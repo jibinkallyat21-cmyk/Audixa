@@ -90,7 +90,7 @@ export function requiredDocs(auditType) {
 
 export const emptyFields = () => ({
   proposal: {
-    companyName: '', auditType: '', yearEnd: '', revenue: '', signed: false,
+    companyName: '', auditType: '', yearEnd: '', revenue: '', revenueCategoryLabel: '', signed: false,
     auditFee: '', auditFeeUnclear: false,
     translationOpted: false, translationFee: '',
     zakatOpted: false, zakatFee: '', accountsOpted: false, accountsFee: '',
@@ -184,9 +184,11 @@ export function evaluateELRequest(req) {
   } else flags.push(flag('capital', 'missing', 'Capital missing', 'The capital amount is missing or could not be identified in the AOA.', [inp('aoa.capital', 'Capital (as stated in the AOA)')]))
 
   // 3.6 Revenue
+  // An exact figure wins; otherwise the revenue category stored in the client profile is used.
   const revenue = num(p.revenue)
-  if (revenue !== null) { values.revenue = sar(revenue); sources.push({ field: 'Revenue', value: values.revenue, source: 'Proposal' }) }
-  else flags.push(flag('revenue', 'missing', 'Revenue missing', 'The revenue amount is not in the proposal. FO to provide it.', [inp('proposal.revenue', 'Revenue (SR)', 'number')]))
+  if (revenue !== null) { values.revenue = sar(revenue); sources.push({ field: 'Revenue', value: values.revenue, source: 'Exact figure entered' }) }
+  else if (String(p.revenueCategoryLabel || '').trim()) { values.revenue = `${p.revenueCategoryLabel.trim()} (SR)`; sources.push({ field: 'Revenue', value: values.revenue, source: 'Client profile (revenue category)' }) }
+  else flags.push(flag('revenue', 'missing', 'Revenue missing', 'There is no revenue category in the client profile and no figure in the proposal. FO to provide it.', [inp('proposal.revenue', 'Revenue (SR)', 'number')]))
 
   // 3.7 Fee: audit fee + translation fee only
   const auditFee = num(p.auditFee)

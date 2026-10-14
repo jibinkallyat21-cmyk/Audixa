@@ -6,8 +6,8 @@ import { useToast } from '../../components/shared/Toast'
 import { FieldInput, FlagCard, readDocument } from '../../components/execution/elShared'
 import { evaluateELRequest, setPath, requiredDocs, DOC_LABEL, normalizeAuditType, fmtDate, fmtAmount } from '../../utils/elRequest.js'
 import { newELRequest, useCoordinators, useELRequests } from '../../utils/elStore'
-import { useGeneratedProposals } from '../../utils/proposals'
-import { foProposals, teamUser } from '../../data/sampleData'
+import { applyProfile, getClientProfile, saveClientProfile, SERVICE_KEYS, SERVICE_LABEL, useClientProfiles } from '../../utils/clientProfiles'
+import { teamUser } from '../../data/sampleData'
 import { FIRMS } from '../../data/firms.js'
 
 const DOC_FIELDS = {
@@ -117,18 +117,64 @@ function DocCard({ type, req, canEdit, onUpdate }) {
   )
 }
 
+function ProfileCard({ req, canEdit, onUpdate }) {
+  const showToast = useToast()
+  const [svc, setSvc] = useState('')
+  const [fee, setFee] = useState('')
+  const profile = getClientProfile(req.profileId)
+  if (!profile) return null
+  const notOpted = SERVICE_KEYS.filter((k) => !profile.services?.[k]?.opted)
+  const refresh = () => { onUpdate({ ...req, fields: applyProfile(req.fields, profile) }, 'Proposal details refreshed from the client profile'); showToast('Refreshed from the client profile') }
+  const addService = () => {
+    const next = { ...profile, services: { ...profile.services, [svc]: { opted: true, fee: Number(fee) } } }
+    saveClientProfile(next)
+    onUpdate({ ...req, fields: applyProfile(req.fields, next) }, `${SERVICE_LABEL[svc]} added to the client profile (SR ${fmtAmount(Number(fee))})`)
+    showToast(`${SERVICE_LABEL[svc]} added to the client profile`); setSvc(''); setFee('')
+  }
+  const rows = [
+    ['Client', profile.client], ['Auditor', profile.auditor], ['Audit type', profile.auditType], ['Revenue category', profile.revenueCategoryLabel],
+    ['Contact', [profile.contactName, profile.contactEmail].filter(Boolean).join(' · ')], ['CR number', profile.crNumber], ['City', profile.city],
+    ['Proposal', profile.proposalReference], ['Discount', profile.discount?.applied ? `SR ${fmtAmount(profile.discount.amount)}` : ''],
+  ]
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-navy">Client profile</h2>
+        <button onClick={refresh} disabled={!canEdit} className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50 disabled:opacity-40">Refresh from client profile</button>
+      </div>
+      <p className="mt-1 text-xs text-slate-500">Everything entered when the proposal was created is stored here and fetched into this request.</p>
+      <dl className="mt-3 grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+        {rows.map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-3 border-b border-slate-50 py-1 text-sm"><dt className="text-xs font-semibold text-slate-500">{k}</dt><dd className="text-right text-navy">{v || <span className="text-slate-300">not set</span>}</dd></div>
+        ))}
+      </dl>
+      {notOpted.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
+          <div>
+            <label htmlFor="add-svc" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">Add a service to the client profile</label>
+            <select id="add-svc" value={svc} onChange={(e) => setSvc(e.target.value)} disabled={!canEdit} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-navy">
+              <option value="">Select service</option>
+              {notOpted.map((k) => <option key={k} value={k}>{SERVICE_LABEL[k]}</option>)}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="add-fee" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">Fee (SR, excl. VAT)</label>
+            <input id="add-fee" type="number" value={fee} onChange={(e) => setFee(e.target.value)} disabled={!canEdit} className="w-40 rounded-lg border border-slate-200 px-3 py-2 text-sm text-navy outline-none focus:border-navy" />
+          </div>
+          <button onClick={addService} disabled={!canEdit || !svc || !(Number(fee) > 0)} className="rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy/90 disabled:opacity-40">Add to profile</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function TeamELRequest() {
   const showToast = useToast()
   const { requests, upsert } = useELRequests()
   const { coordinators } = useCoordinators()
-  const generated = useGeneratedProposals()
+  const profiles = useClientProfiles()
   const [selectedId, setSelectedId] = useState(null)
   const [picking, setPicking] = useState(false)
-
-  const proposals = useMemo(() => [
-    ...generated.map((p) => ({ id: p.id, client: p.client, auditor: p.auditor, auditType: p.auditType })),
-    ...foProposals.map((p) => ({ id: p.id, client: p.client, auditor: p.auditor, auditType: p.auditType })),
-  ], [generated])
 
   const req = requests.find((r) => r.id === selectedId) || null
   const result = useMemo(() => (req ? evaluateELRequest({ ...req, requestedBy: teamUser.name }) : null), [req])
@@ -145,7 +191,11 @@ export default function TeamELRequest() {
       proposalId: p.id, client: p.client, firm: p.auditor, requestedBy: teamUser.name,
       clientProfile: { auditType: normalizeAuditType(p.auditType) || undefined },
     })
-    r.log = [{ at: r.createdAt, by: teamUser.name, text: 'EL request started' }]
+    // Everything entered on the proposal is fetched from the client profile.
+    r.profileId = p.id
+    r.fields = applyProfile(r.fields, p)
+    r.docs = { proposal: { fileName: p.proposalReference ? `Proposal ${p.proposalReference} (from client profile)` : 'Proposal (from client profile)', size: 0, uploadedAt: r.createdAt, read: 'profile' } }
+    r.log = [{ at: r.createdAt, by: teamUser.name, text: 'EL request started; proposal details fetched from the client profile' }]
     upsert(r); setSelectedId(r.id); setPicking(false)
   }
 
@@ -153,7 +203,14 @@ export default function TeamELRequest() {
     const type = normalizeAuditType(req.clientProfile?.auditType) || 'Proper Audit'
     const docs = {}
     ;[...new Set([...requiredDocs(type), 'proposal', 'cr', 'aoa'])].forEach((d) => { docs[d] = { fileName: `sample-${d}.pdf`, size: 0, uploadedAt: new Date().toISOString(), read: 'manual', demo: true } })
-    update({ ...req, docs, fields: sampleFields(req.client, type, withIssues) }, `Demo sample data loaded${withIssues ? ' (with issues)' : ''}`)
+    const profile = getClientProfile(req.profileId)
+    let fields = sampleFields(req.client, type, withIssues)
+    if (profile) {
+      fields = applyProfile(fields, profile)   // the profile stays the source of the proposal details
+      if (profile.revenueCategoryLabel) fields = setPath(fields, 'proposal.revenue', '')   // revenue stays the profile's category
+    }
+    docs.proposal = req.docs?.proposal || docs.proposal
+    update({ ...req, docs, fields }, `Demo sample data loaded${withIssues ? ' (with issues)' : ''}`)
   }
 
   const send = () => {
@@ -181,12 +238,12 @@ export default function TeamELRequest() {
 
           {picking && (
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="mb-2 text-sm font-semibold text-navy">Choose the proposal</p>
+              <p className="mb-2 text-sm font-semibold text-navy">Choose the client (from the client profiles)</p>
               <div className="grid gap-2 sm:grid-cols-2">
-                {proposals.map((p) => (
+                {profiles.map((p) => (
                   <button key={p.id} onClick={() => start(p)} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-navy">
                     <span className="font-medium text-navy">{p.client}</span>
-                    <span className="text-xs text-slate-500">{p.auditor} · {p.auditType}</span>
+                    <span className="text-xs text-slate-500">{p.auditor} · {p.auditType || 'audit type not set'}</span>
                   </button>
                 ))}
               </div>
@@ -230,6 +287,8 @@ export default function TeamELRequest() {
                     </p>
                   )}
                 </div>
+
+                <ProfileCard req={req} canEdit={canEdit} onUpdate={update} />
 
                 <div className="grid gap-4 xl:grid-cols-2">
                   {docTypes.map((t) => <DocCard key={t} type={t} req={req} canEdit={canEdit} onUpdate={update} />)}

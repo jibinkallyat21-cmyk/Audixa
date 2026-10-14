@@ -12,7 +12,8 @@ import { foProposals, foProposalFilterCounts, foSentProposals } from '../../data
 import { AUDITORS, AUDIT_TYPES, SERVICES, emailProposal, useGeneratedProposals } from '../../utils/proposals'
 import NewProposalModal from './NewProposalModal'
 import { RevenueCategorySelect, DiscountControl } from '../../components/frontoffice/ProposalFeeControls'
-import { feeForCategory, discountAmount } from '../../data/feeSchedule'
+import { feeForCategory, discountAmount, categoryById } from '../../data/feeSchedule'
+import { getClientProfile, saveClientProfile } from '../../utils/clientProfiles'
 
 export default function FOProposals() {
   const navigate = useNavigate()
@@ -217,10 +218,13 @@ export default function FOProposals() {
 function SendProposalModal({ proposal, onClose, onSent }) {
   const [auditor, setAuditor] = useState(proposal.auditor || '')
   const [auditType, setAuditType] = useState(AUDIT_TYPES.includes(proposal.auditType) ? proposal.auditType : proposal.auditType ? `${proposal.auditType} Audit` : '')
-  const [auditFee, setAuditFee] = useState(proposal.fee ? String(proposal.fee) : '')
-  const [services, setServices] = useState({})
-  const [revenueCategory, setRevenueCategory] = useState('')
-  const [applyDiscount, setApplyDiscount] = useState(false)
+  const profile = getClientProfile(proposal.id)
+  const [auditFee, setAuditFee] = useState(profile?.services?.audit?.fee != null ? String(profile.services.audit.fee) : proposal.fee ? String(proposal.fee) : '')
+  const [services, setServices] = useState(() => Object.fromEntries(SERVICES
+    .filter((x) => profile?.services?.[x.key]?.opted)
+    .map((x) => [x.key, { enabled: true, fee: profile.services[x.key].fee != null ? String(profile.services[x.key].fee) : '' }])))
+  const [revenueCategory, setRevenueCategory] = useState(profile?.revenueCategory || '')
+  const [applyDiscount, setApplyDiscount] = useState(!!profile?.discount?.applied)
   const [sendVia, setSendVia] = useState('email')
   const [errors, setErrors] = useState({})
   const [sending, setSending] = useState(false)
@@ -374,6 +378,17 @@ function SendProposalModal({ proposal, onClose, onSent }) {
             onClick={async () => {
               if (!validate()) return
               proposal._sendVia = sendVia
+              // keep the client profile in step with what is being sent
+              const feeOf = (v) => (v === '' || v == null ? null : Number(v))
+              const prev = getClientProfile(proposal.id) || { id: proposal.id, proposalId: proposal.id, client: proposal.client, source: 'proposal' }
+              saveClientProfile({
+                ...prev, auditor, auditType, revenueCategory, revenueCategoryLabel: categoryById(revenueCategory)?.label || prev.revenueCategoryLabel || '',
+                services: {
+                  audit: { opted: true, fee: feeOf(auditFee) },
+                  ...Object.fromEntries(SERVICES.map((x) => [x.key, { opted: !!services[x.key], fee: services[x.key] ? feeOf(services[x.key].fee) : null }])),
+                },
+                discount: { applied: discount > 0, amount: discount },
+              })
               setSending(true)
               try { await onSent(proposal) } finally { setSending(false) }
             }}

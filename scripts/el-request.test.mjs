@@ -76,6 +76,13 @@ test('audit type falls back to the client profile; missing everywhere is flagged
   assert.ok(keys(r).includes('auditType'))
 })
 
+test('revenue comes from the client profile category when no exact figure is given', () => {
+  let r = evaluateELRequest({ docs: docs(), fields: base({ 'proposal.revenue': '', 'proposal.revenueCategoryLabel': '1 Million to 5 Million' }) })
+  assert.deepEqual(keys(r), []); assert.equal(r.values.revenue, '1 Million to 5 Million (SR)')
+  r = evaluateELRequest({ docs: docs(), fields: base({ 'proposal.revenueCategoryLabel': '1 Million to 5 Million' }) })
+  assert.equal(r.values.revenue, 'SR. 2,500,000') // an exact figure wins
+})
+
 test('missing capital, entity and revenue each raise their own flag', () => {
   const r = evaluateELRequest({ docs: docs(), fields: base({ 'aoa.capital': '', 'cr.entityType': '', 'proposal.revenue': '' }) })
   assert.deepEqual(keys(r).sort(), ['capital', 'entity', 'revenue'])
