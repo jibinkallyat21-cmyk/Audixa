@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import {
-  Search, X, Briefcase, Banknote, Users,
+  Search, X, Briefcase, Banknote, Users, CalendarClock,
   ChevronRight, ExternalLink, AlertCircle, ShieldAlert, Calendar, MessageSquare, Phone, CheckCircle2,
 } from 'lucide-react'
 import ManagementLayout from '../../components/management/ManagementLayout'
@@ -316,51 +315,51 @@ function EscalationsModal({ onClose, onMessage }) {
   )
 }
 
-/* ─── Portfolio Health — status banner + progress ring ─── */
-function PortfolioHealthCard({ total, onTrack, needsAttention, onViewAttention }) {
-  const pct = total > 0 ? Math.round((onTrack / total) * 100) : 0
-  const healthy = needsAttention === 0
-  const accent = healthy ? '#059669' : '#D97706'
-  const data = [
-    { name: 'On Track', value: onTrack || 0, color: '#059669' },
-    { name: 'Needs Attention', value: needsAttention || 0, color: '#D97706' },
-  ]
+/* ─── Critical Deadlines — concrete, actionable list ─── */
+function CriticalDeadlinesCard({ deadlines }) {
+  const healthy = deadlines.length === 0
+  const sorted = useMemo(() => [...deadlines].sort((a, b) => a.daysLeft - b.daysLeft), [deadlines])
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.3 }}
-      className="flex shrink-0 flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center"
+      className="shrink-0 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
     >
-      <div className="flex flex-1 items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${accent}1F` }}>
-          {healthy
-            ? <CheckCircle2 className="h-6 w-6" style={{ color: accent }} />
-            : <AlertCircle className="h-6 w-6" style={{ color: accent }} />}
-        </div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>Portfolio Health</p>
-          <p className="mt-1 text-base font-bold text-navy">
-            {healthy ? `All ${total} clients in scope are on track` : `${needsAttention} of ${total} clients need attention`}
-          </p>
-          <p className="mt-1 text-xs text-slate-400">Derived from current engagement status across the portfolio.</p>
-          <button type="button" onClick={onViewAttention} className="mt-2 text-xs font-semibold text-brand hover:underline">
-            View Escalation Centre →
-          </button>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: healthy ? 'rgba(5,150,105,0.12)' : 'rgba(220,38,38,0.12)' }}>
+            {healthy
+              ? <CheckCircle2 className="h-5 w-5" style={{ color: '#059669' }} />
+              : <CalendarClock className="h-5 w-5" style={{ color: '#DC2626' }} />}
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Critical Deadlines</p>
+            <p className="text-sm font-bold text-navy">
+              {healthy ? 'No statutory deadlines at risk' : `${sorted.length} engagement${sorted.length !== 1 ? 's' : ''} with a filing deadline due or overdue`}
+            </p>
+          </div>
         </div>
       </div>
-      <div className="relative mx-auto h-28 w-28 shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={data} dataKey="value" innerRadius={38} outerRadius={54} startAngle={90} endAngle={450} stroke="none" animationDuration={700}>
-              {data.map((d) => <Cell key={d.name} fill={d.color} />)}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-xl font-black text-navy">{pct}%</p>
-          <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">On Track</p>
+
+      {!healthy && (
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {sorted.map((d) => {
+            const overdue = d.daysLeft < 0
+            const tone = overdue ? { bg: 'rgba(220,38,38,0.1)', color: '#DC2626' } : { bg: 'rgba(217,119,6,0.12)', color: '#D97706' }
+            return (
+              <div key={d.code} className="rounded-xl bg-slate-50 p-3.5">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-xs font-bold text-navy leading-snug">{d.client}</p>
+                  <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: tone.bg, color: tone.color }}>
+                    {overdue ? `${Math.abs(d.daysLeft)}d overdue` : `${d.daysLeft}d left`}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[11px] text-slate-400">{d.dept} · Due {d.deadline}</p>
+              </div>
+            )
+          })}
         </div>
-      </div>
+      )}
     </motion.div>
   )
 }
@@ -599,7 +598,6 @@ export default function ManagementDashboard() {
 
   const scopedClients = useMemo(() => mgmtClientDirectory.filter(c => scope === 'Combined' || c.dept === scope), [scope])
   const clientsOnTrack = scopedClients.filter(c => c.status === 'ok').length
-  const clientsNeedingAttention = scopedClients.filter(c => c.status === 'warn' || c.status === 'crit').length
 
   const scopedDeadlines = useMemo(() => mgmtDeadlineBreaches.filter(b => scope === 'Combined' || b.dept === scope), [scope])
   const breachCount = scopedDeadlines.filter(b => b.daysLeft < 0).length
@@ -670,13 +668,8 @@ export default function ManagementDashboard() {
             onClick={() => setModal('escalations')} delay={0.24} />
         </div>
 
-        {/* ── Portfolio Health ── */}
-        <PortfolioHealthCard
-          total={scopedClients.length}
-          onTrack={clientsOnTrack}
-          needsAttention={clientsNeedingAttention}
-          onViewAttention={() => setModal('escalations')}
-        />
+        {/* ── Critical Deadlines ── */}
+        <CriticalDeadlinesCard deadlines={scopedDeadlines} />
 
         {/* ── Main content row ── */}
         <div className="flex min-h-0 flex-1 gap-4">
