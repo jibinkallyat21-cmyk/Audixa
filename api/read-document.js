@@ -17,6 +17,9 @@ const numOrNull = { type: ['number', 'null'] }
 const obj = (properties) => ({ type: 'object', properties, required: Object.keys(properties), additionalProperties: false })
 const notes = { type: 'array', items: { type: 'string' } }
 
+const intOrNull = { type: ['integer', 'null'] }
+const nullableBool = { type: ['boolean', 'null'] }
+
 const DOCS = {
   proposal: {
     describe: 'a signed or unsigned audit engagement proposal',
@@ -37,6 +40,17 @@ const DOCS = {
     describe: 'Articles of Association (AOA) of a Saudi company',
     fields: 'companyName (English; translate if only Arabic); capital exactly as written in the document including currency (for example "SR 500,000"); yearEndDay and yearEndMonth (numbers) of the financial year-end; startsFromCR (true if the AOA says the first financial year runs from the CR date instead of giving a start date).',
     schema: obj({ companyName: str, capital: str, yearEndDay: numOrNull, yearEndMonth: numOrNull, startsFromCR: bool, notes }),
+  },
+  elReceived: {
+    describe: 'an engagement letter (EL) issued by an audit firm to its client',
+    fields: 'companyName (the client named in the EL, English); periodStart and periodEnd (the audit period, ISO yyyy-mm-dd); auditFee, translationFee, zakatFee and accountsFee (fee for each service as a number, EXCLUDING VAT; null when the service is not in the EL); feesIncludeVat (true if the EL states its fees include VAT); auditorName (the audit firm named as the auditor, exactly as written); letterheadPresent (true if the EL is printed on a firm letterhead with logo, address or contact details, false if it is plain, null if you cannot tell); letterheadFirmName (the firm name shown in the letterhead, if any); and for companyName, period, fees, auditorName and letterhead the page number (companyNamePage, periodPage, feePage, auditorPage, letterheadPage) where each was found. Do not judge signatures or stamps.',
+    schema: obj({
+      companyName: str, periodStart: str, periodEnd: str,
+      auditFee: numOrNull, translationFee: numOrNull, zakatFee: numOrNull, accountsFee: numOrNull, feesIncludeVat: bool,
+      auditorName: str, letterheadPresent: nullableBool, letterheadFirmName: str,
+      companyNamePage: intOrNull, periodPage: intOrNull, feePage: intOrNull, auditorPage: intOrNull, letterheadPage: intOrNull,
+      notes,
+    }),
   },
   misaClosure: {
     describe: 'a MISA (Ministry of Investment) closure letter for a company in liquidation',

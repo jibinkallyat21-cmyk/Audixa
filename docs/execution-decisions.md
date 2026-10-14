@@ -28,6 +28,7 @@ Answers given by the audit lead while going through `docs/execution-gap-list.md`
 | 19 | Discount on proposals | "Apply discount" checkbox shows the discount amount. Provisional rule: 10% of the Zakat filing fee, sent as a negative line. Real logic to come from the audit lead after the FO is asked |
 | 20 | EL request fee | Request to the auditor carries audit fee + translation fee only; every opted proposal service stays visible on the page |
 | 21 | Client profile | Everything entered when a proposal is created (client, contact, CR number, city, auditor, audit type, revenue category, audit fee, opted services with fees, discount) is stored in a client profile (`src/utils/clientProfiles.js`). The EL request fetches the proposal details from it; services can be added to the profile later. Revenue in the EL request is the profile's revenue category unless an exact figure is entered |
+| 22 | Step 2 build | Five checks (company name, audit period, audit fee by service excl. VAT, auditor identity, letterhead), each PASS / FAIL / NEEDS REVIEW with expected value, value found and page. Letterhead is never passed by the system (no reference letterhead stored); a reviewer decides, with a note. Overall: VERIFIED only when all pass, a reviewer has signed off and no auditor query is open; NOT VERIFIED if any fails; otherwise PENDING. A fee difference equal to the proposal discount goes to review, not fail |
 
 ## Open items to ask later
 
@@ -37,6 +38,8 @@ Answers given by the audit lead while going through `docs/execution-gap-list.md`
 
 - **ABCPA vouching.** The audit lead will supply documents. Not built until received. MISCPA vouching follows the Vouching Rule Book.
 - **Liquidation audit, second extra document.** The Rule Book calls it "Osama letter". It is a letter received from the Ministry. Ask for the exact name and what it states (which date feeds the audit period end date).
+- **Reference letterheads.** Step 2 cannot pass the letterhead check on its own. If the firms' approved letterheads can be uploaded, the check could compare against them.
+- **Discount in the EL.** Unknown whether the EL shows the Zakat fee before or after the proposal discount. Step 2 sends a difference equal to the discount to reviewer decision.
 - **Monday.com details.** API token (integration user), board and group for EL requests, how a client's item is found, whether auditors reply with file columns or updates, where the request text goes.
 - **Company server storage details** (see decision 2).
 - **Step 4 for ABCPA.** Confirm whether the Rule Book's shareholder / parent-company GM / authorisation-letter checks also apply (assumed yes).
