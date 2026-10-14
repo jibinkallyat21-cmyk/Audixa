@@ -11,6 +11,8 @@ import { useModal } from '../../components/shared/Modal'
 import { foProposals, foProposalFilterCounts, foSentProposals } from '../../data/sampleData'
 import { AUDITORS, AUDIT_TYPES, SERVICES, emailProposal, useGeneratedProposals } from '../../utils/proposals'
 import NewProposalModal from './NewProposalModal'
+import { RevenueCategorySelect, DiscountControl } from '../../components/frontoffice/ProposalFeeControls'
+import { feeForCategory, discountAmount } from '../../data/feeSchedule'
 
 export default function FOProposals() {
   const navigate = useNavigate()
@@ -217,6 +219,8 @@ function SendProposalModal({ proposal, onClose, onSent }) {
   const [auditType, setAuditType] = useState(AUDIT_TYPES.includes(proposal.auditType) ? proposal.auditType : proposal.auditType ? `${proposal.auditType} Audit` : '')
   const [auditFee, setAuditFee] = useState(proposal.fee ? String(proposal.fee) : '')
   const [services, setServices] = useState({})
+  const [revenueCategory, setRevenueCategory] = useState('')
+  const [applyDiscount, setApplyDiscount] = useState(false)
   const [sendVia, setSendVia] = useState('email')
   const [errors, setErrors] = useState({})
   const [sending, setSending] = useState(false)
@@ -229,7 +233,8 @@ function SendProposalModal({ proposal, onClose, onSent }) {
     setServices((prev) => ({ ...prev, [key]: { ...prev[key], fee } }))
   }
 
-  const totalFee = [Number(auditFee) || 0, ...SERVICES.map((s) => (services[s.key] ? Number(services[s.key].fee) || 0 : 0))].reduce((a, b) => a + b, 0)
+  const discount = discountAmount(applyDiscount, services.zakat?.fee)
+  const totalFee = [Number(auditFee) || 0, ...SERVICES.map((s) => (services[s.key] ? Number(services[s.key].fee) || 0 : 0))].reduce((a, b) => a + b, 0) - discount
 
   const validate = () => {
     const next = {}
@@ -286,6 +291,8 @@ function SendProposalModal({ proposal, onClose, onSent }) {
             {errors.auditType && <p className="mt-1 text-[10px] text-alert-red">{errors.auditType}</p>}
           </div>
 
+          <RevenueCategorySelect required={false} value={revenueCategory} onChange={(id) => { setRevenueCategory(id); if (id) setAuditFee(String(feeForCategory(id))) }} />
+
           {/* Audit Fee */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-600">Audit Fee (SAR) *</label>
@@ -327,10 +334,12 @@ function SendProposalModal({ proposal, onClose, onSent }) {
             </div>
           </div>
 
+          <DiscountControl apply={applyDiscount} onToggle={setApplyDiscount} amount={discount} hasZakat={!!services.zakat} />
+
           {/* Total */}
           {totalFee > 0 && (
             <div className="flex items-center justify-between rounded-lg bg-navy/5 px-4 py-2.5">
-              <span className="text-xs font-semibold text-slate-500">Total Engagement Fee</span>
+              <span className="text-xs font-semibold text-slate-500">Total Engagement Fee{discount > 0 ? ' (after discount)' : ''}</span>
               <span className="text-sm font-bold text-navy">SAR {totalFee.toLocaleString()}</span>
             </div>
           )}

@@ -37,10 +37,12 @@ function validate(b = {}) {
   const lines = Array.isArray(b.lines) ? b.lines.slice(0, 6) : []
   for (const l of lines) {
     const amount = Number(l?.amount)
-    if (!clean(l?.name, 120) || !(amount > 0) || amount >= 1e9) return { error: 'Each fee line needs a name and a positive amount' }
+    const isDiscount = l?.discount === true && amount < 0 && amount > -1e9
+    if (!clean(l?.name, 120) || !(amount > 0 || isDiscount) || amount >= 1e9) return { error: 'Each fee line needs a name and a positive amount' }
     input.lines.push({ name: clean(l.name, 120), amount: Math.round(amount * 100) / 100 })
   }
   if (input.lines.length === 0) return { error: 'At least one fee line is required' }
+  if (!(input.lines.reduce((t, l) => t + l.amount, 0) > 0)) return { error: 'The total after discount must be positive' }
   return { input }
 }
 
