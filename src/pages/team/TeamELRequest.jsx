@@ -5,6 +5,7 @@ import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
 import { FieldInput, FlagCard, readDocument } from '../../components/execution/elShared'
 import ELVerificationPanel from '../../components/execution/ELVerificationPanel'
+import SignedELPanel from '../../components/execution/SignedELPanel'
 import { evaluateELRequest, setPath, requiredDocs, DOC_LABEL, normalizeAuditType, fmtDate, fmtAmount } from '../../utils/elRequest.js'
 import { newELRequest, useCoordinators, useELRequests } from '../../utils/elStore'
 import { applyProfile, getClientProfile, saveClientProfile, SERVICE_KEYS, SERVICE_LABEL, useClientProfiles } from '../../utils/clientProfiles'
@@ -260,7 +261,7 @@ export default function TeamELRequest() {
                 return (
                   <button key={r.id} onClick={() => setSelectedId(r.id)} className={`w-full rounded-xl border p-3 text-left shadow-sm ${r.id === selectedId ? 'border-navy bg-white' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                     <p className="text-sm font-semibold text-navy">{r.client}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">{r.firm} · {r.elStatus ? `EL ${r.elStatus.toLowerCase()}` : r.sentAt ? 'Sent to auditor, awaiting EL' : n ? `${n} open ${n === 1 ? 'flag' : 'flags'}` : r.docs && Object.keys(r.docs).length ? 'Ready to send' : 'Draft'}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">{r.firm} · {r.signedStatus ? `Signed EL ${r.signedStatus.toLowerCase()}` : r.elStatus ? `EL ${r.elStatus.toLowerCase()}` : r.sentAt ? 'Sent to auditor, awaiting EL' : n ? `${n} open ${n === 1 ? 'flag' : 'flags'}` : r.docs && Object.keys(r.docs).length ? 'Ready to send' : 'Draft'}</p>
                   </button>
                 )
               })}
@@ -372,6 +373,7 @@ export default function TeamELRequest() {
                 </div>
 
                 {req.sentAt && <ELVerificationPanel req={req} canAct={isCoord} onUpdate={update} />}
+                {req.elStatus === 'VERIFIED' && <SignedELPanel req={req} canAct={isCoord} onUpdate={update} />}
 
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                   <h2 className="mb-2 text-sm font-semibold text-navy">Activity</h2>

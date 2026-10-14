@@ -52,6 +52,15 @@ const DOCS = {
       notes,
     }),
   },
+  signedEL: {
+    describe: 'a signed engagement letter (EL) returned by the client, with company stamps and signatures',
+    fields: 'totalPages (number of pages in the EL); pagesWithStamp (list of page numbers that carry a company stamp or seal); lastPageStamp (true if the last page carries a company stamp, false if not, null if you cannot tell); lastPageSignature (true if a handwritten or digital signature is visible on the last page, false if none, null if you cannot tell or it is unclear); signedBy (the printed name of the signatory next to the signature, if shown); signatoryCapacity (the capacity stated, for example shareholder, manager, general manager of the parent company). Never decide whether the signature is genuine; only report what is visible.',
+    schema: obj({
+      totalPages: { type: ['integer', 'null'] }, pagesWithStamp: { type: 'array', items: { type: 'integer' } },
+      lastPageStamp: nullableBool, lastPageSignature: nullableBool, signedBy: str, signatoryCapacity: str,
+      notes,
+    }),
+  },
   misaClosure: {
     describe: 'a MISA (Ministry of Investment) closure letter for a company in liquidation',
     fields: 'date (the date of the letter, ISO yyyy-mm-dd; convert Hijri to Gregorian).',
