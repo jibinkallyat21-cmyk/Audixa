@@ -41,6 +41,7 @@ function validate(b = {}) {
   return { input }
 }
 
+const html = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
 const isoDate = (d) => d.toISOString().slice(0, 10)
 const longDate = (d) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 
@@ -83,13 +84,13 @@ async function odooProposal(cfg, input) {
   const orderId = await call('sale.order', 'create', [{
     partner_id: partnerId,
     validity_date: isoDate(expiry),
-    note: `Attention: ${input.contactName} (${input.contactEmail})\nAuditor: ${input.auditor}\nAudit type: ${input.auditType}\nPrepared by: ${input.preparedBy}`,
+    note: `<p>Attention: ${html(input.contactName)} (${html(input.contactEmail)})<br/>Auditor: ${html(input.auditor)}<br/>Audit type: ${html(input.auditType)}<br/>Prepared by: ${html(input.preparedBy)}</p>`,
     order_line: input.lines.map((l) => [0, 0, { product_id: productId, name: l.name, product_uom_qty: 1, price_unit: l.amount }]),
   }])
-  const [order] = await call('sale.order', 'read', [[orderId], ['name', 'amount_total']])
+  const [order] = await call('sale.order', 'read', [[orderId], ['name', 'amount_total', 'amount_untaxed']])
 
   const out = {
-    ok: true, source: 'odoo', reference: order.name, odooId: orderId, total: order.amount_total,
+    ok: true, source: 'odoo', reference: order.name, odooId: orderId, fee: order.amount_untaxed, total: order.amount_total,
     createdDate: longDate(new Date()), expiryDate: longDate(expiry),
   }
   try {
@@ -117,7 +118,7 @@ function demoProposal(input) {
     ...input, total, createdDate: longDate(now), expiryDate: longDate(expiry),
   }
   return {
-    ok: true, source: 'demo', reference: doc.reference, total, createdDate: doc.createdDate, expiryDate: doc.expiryDate,
+    ok: true, source: 'demo', reference: doc.reference, fee: total, total, createdDate: doc.createdDate, expiryDate: doc.expiryDate,
     pdfBase64: bytesToBase64(buildProposalPdf(doc)),
   }
 }

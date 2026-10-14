@@ -131,6 +131,9 @@ export default function FOProposalDetail() {
               <div>
                 <p className="text-[11px] font-semibold uppercase text-slate-400">Proposed Fee</p>
                 <p className="mt-0.5 font-semibold text-navy">SAR {d.fee.toLocaleString()}</p>
+                {generated?.totalInclTax > d.fee && (
+                  <p className="text-[11px] text-slate-500">SAR {generated.totalInclTax.toLocaleString()} incl. VAT</p>
+                )}
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase text-slate-400">Prepared By</p>

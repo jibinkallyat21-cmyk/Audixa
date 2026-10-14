@@ -58,7 +58,7 @@ export async function emailProposal(p) {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(45000),
       body: JSON.stringify({
         to: p.contactEmail, contactName: p.contactName, client: p.client, reference: p.reference,
-        auditor: p.auditor, auditType: p.auditType, fee: p.fee, expiryDate: p.expiryDate,
+        auditor: p.auditor, auditType: p.auditType, fee: p.fee, totalInclTax: p.totalInclTax, expiryDate: p.expiryDate,
         preparedBy: p.createdBy, pdfBase64: p.pdfBase64 || '',
       }),
     })
@@ -113,7 +113,7 @@ export async function generateProposal(form, preparedBy) {
       ...payload, total, createdDate: fmt(now), expiryDate: fmt(expiry),
     }
     data = {
-      ok: true, source: 'demo', reference: doc.reference, total, createdDate: doc.createdDate,
+      ok: true, source: 'demo', reference: doc.reference, fee: total, total, createdDate: doc.createdDate,
       expiryDate: doc.expiryDate, pdfBase64: bytesToBase64(buildProposalPdf(doc)),
     }
   }
@@ -124,7 +124,7 @@ export async function generateProposal(form, preparedBy) {
     portalUrl: data.portalUrl || null, pdfBase64: data.pdfBase64 || null, pdfError: data.pdfError || null,
     client: form.client, contactName: form.contactName, contactEmail: form.contactEmail,
     crNumber: form.crNumber, city: form.city, auditor: form.auditor, auditType: form.auditType,
-    fee: data.total, createdBy: preparedBy, createdDate: data.createdDate, expiryDate: data.expiryDate,
+    fee: data.fee ?? data.total, totalInclTax: data.total, createdBy: preparedBy, createdDate: data.createdDate, expiryDate: data.expiryDate,
     status: 'Awaiting Approval',
   }
 }

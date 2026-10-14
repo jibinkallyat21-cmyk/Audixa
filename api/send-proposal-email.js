@@ -18,7 +18,7 @@ function validate(b = {}) {
   const input = {
     to: clean(b.to, 120), contactName: clean(b.contactName, 80), client: clean(b.client, 120),
     reference: clean(b.reference, 40), auditor: clean(b.auditor, 20), auditType: clean(b.auditType, 40),
-    fee: Number(b.fee), expiryDate: clean(b.expiryDate, 30), preparedBy: clean(b.preparedBy, 80) || 'Front Office',
+    fee: Number(b.fee), totalInclTax: Number(b.totalInclTax) || 0, expiryDate: clean(b.expiryDate, 30), preparedBy: clean(b.preparedBy, 80) || 'Front Office',
     pdfBase64: typeof b.pdfBase64 === 'string' ? b.pdfBase64 : '',
   }
   if (!/^\S+@\S+\.\S+$/.test(input.to)) return { error: 'A valid recipient email is required' }
@@ -29,7 +29,7 @@ function validate(b = {}) {
 }
 
 function buildMessage(i) {
-  const fee = `SAR ${i.fee.toLocaleString('en-US')}`
+  const fee = `SAR ${i.fee.toLocaleString('en-US')}${i.totalInclTax > i.fee ? ` (SAR ${i.totalInclTax.toLocaleString('en-US')} incl. VAT)` : ''}`
   const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#0D1B2A">
 <p>Dear ${esc(i.contactName)},</p>
 <p>Thank you for your interest. Please find attached our audit engagement proposal <strong>${esc(i.reference)}</strong> for <strong>${esc(i.client)}</strong>.</p>
