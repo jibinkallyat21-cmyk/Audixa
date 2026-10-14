@@ -214,9 +214,18 @@ export function evaluateELRequest(req) {
   const period = resolvePeriod({ auditType, p, cr, aoa, liq, res, docs, flags, sources })
   if (period) values.period = period
 
+  // Every service in the proposal stays visible; only audit and translation go into the request.
+  const services = [
+    { key: 'audit', label: 'Audit', opted: true, fee: num(p.auditFee), inRequest: true },
+    { key: 'translation', label: 'Translation', opted: !!p.translationOpted, fee: num(p.translationFee), inRequest: true },
+    { key: 'zakat', label: 'Zakat filing', opted: !!p.zakatOpted, fee: num(p.zakatFee), inRequest: false },
+    { key: 'accounts', label: 'Account finalisation', opted: !!p.accountsOpted, fee: num(p.accountsFee), inRequest: false },
+  ]
+  const proposalTotal = services.reduce((n, x) => n + (x.opted && x.fee !== null ? x.fee : 0), 0)
+
   const ready = flags.length === 0 && Object.keys(values).length >= 7 && !!values.period
   const draft = ready ? buildDraft(req.requestedBy, values) : null
-  return { flags, values, sources, ready, draft }
+  return { flags, values, sources, services, proposalTotal, ready, draft }
 }
 
 function resolvePeriod({ auditType, p, cr, aoa, liq, res, flags, sources }) {

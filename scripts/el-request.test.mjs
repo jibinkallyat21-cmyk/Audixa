@@ -29,6 +29,14 @@ test('happy path: all values, fee = audit + translation only, draft produced', (
   assert.match(r.draft, /Revenue : SR\. 2,500,000/)
 })
 
+test('every opted service stays visible; only audit and translation are in the request', () => {
+  const r = evaluateELRequest({ docs: docs(), fields: base() })
+  assert.deepEqual(r.services.map((x) => [x.key, x.opted, x.fee, x.inRequest]),
+    [['audit', true, 18500, true], ['translation', true, 1500, true], ['zakat', true, 3000, false], ['accounts', true, 4000, false]])
+  assert.equal(r.proposalTotal, 27000); assert.equal(r.values.fee, 'SR. 20,000')
+  assert.equal(evaluateELRequest({ docs: docs(), fields: base({ 'proposal.zakatOpted': false }) }).proposalTotal, 24000)
+})
+
 test('translation not opted: fee is the audit fee only', () => {
   const r = evaluateELRequest({ docs: docs(), fields: base({ 'proposal.translationOpted': false }) })
   assert.equal(r.values.fee, 'SR. 18,500')

@@ -4,7 +4,7 @@ import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
 import { FieldInput, FlagCard, readDocument } from '../../components/execution/elShared'
-import { evaluateELRequest, setPath, requiredDocs, DOC_LABEL, normalizeAuditType, fmtDate } from '../../utils/elRequest.js'
+import { evaluateELRequest, setPath, requiredDocs, DOC_LABEL, normalizeAuditType, fmtDate, fmtAmount } from '../../utils/elRequest.js'
 import { newELRequest, useCoordinators, useELRequests } from '../../utils/elStore'
 import { useGeneratedProposals } from '../../utils/proposals'
 import { foProposals, teamUser } from '../../data/sampleData'
@@ -257,6 +257,33 @@ export default function TeamELRequest() {
                     </tbody>
                   </table>
                   {result.sources.length === 0 && <p className="text-xs text-slate-400">Nothing verified yet.</p>}
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <h2 className="mb-1 text-sm font-semibold text-navy">Services in the proposal</h2>
+                  <p className="mb-2 text-xs text-slate-500">Fees exclude VAT. Only audit and translation go into the EL request to the auditor.</p>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
+                        <th className="py-1.5 pr-3 font-medium">Service</th><th className="py-1.5 pr-3 font-medium">Opted</th>
+                        <th className="py-1.5 pr-3 text-right font-medium">Fee (SR)</th><th className="py-1.5 pl-3 font-medium">In EL request</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.services.map((x) => (
+                        <tr key={x.key} className="border-b border-slate-50 last:border-0">
+                          <td className="py-1.5 pr-3 text-navy">{x.label}</td>
+                          <td className="py-1.5 pr-3 text-xs">{x.opted ? 'Yes' : <span className="text-slate-400">No</span>}</td>
+                          <td className="py-1.5 pr-3 text-right text-navy">{x.opted && x.fee !== null ? fmtAmount(x.fee) : '—'}</td>
+                          <td className="py-1.5 pl-3 text-xs">{x.opted && x.inRequest ? <span className="font-semibold text-emerald">Yes</span> : <span className="text-slate-400">No</span>}</td>
+                        </tr>
+                      ))}
+                      <tr className="border-t border-slate-200">
+                        <td className="py-1.5 pr-3 text-xs font-semibold text-slate-500" colSpan={2}>Total of the proposal</td>
+                        <td className="py-1.5 pr-3 text-right font-semibold text-navy">{fmtAmount(result.proposalTotal)}</td><td />
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
