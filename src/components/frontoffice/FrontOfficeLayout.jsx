@@ -6,6 +6,7 @@ import {
   Filter,
   FileText,
   Bell,
+  FileSignature,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -13,6 +14,7 @@ import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import QuickChatWidget from '../shared/QuickChatWidget'
+import { useOpenELFlagCount } from '../../utils/elStore'
 import { useFrontOfficeInbox } from '../../utils/directMessages'
 import { foUser, foNotifications } from '../../data/sampleData'
 
@@ -20,6 +22,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/fo/dashboard', icon: LayoutDashboard },
   { id: 'leads', label: 'Lead Pipeline', href: '/fo/leads', icon: Filter },
   { id: 'proposals', label: 'Proposals', href: '/fo/proposals', icon: FileText },
+  { id: 'el-queries', label: 'EL Queries', href: '/fo/el-queries', icon: FileSignature },
   { id: 'notifications', label: 'Notifications', href: '/fo/notifications', icon: Bell },
 ]
 
@@ -36,6 +39,7 @@ const NAV_BADGES = { notifications: { count: 4, tone: 'bg-brand text-white' } }
 
 function FOSidebar() {
   const location = useLocation()
+  const elFlags = useOpenELFlagCount()
 
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-navy text-white">
@@ -51,7 +55,7 @@ function FOSidebar() {
         <ul className="space-y-1">
           {NAV_ITEMS.map((item) => {
             const active = location.pathname === item.href
-            const badge = NAV_BADGES[item.id]
+            const badge = item.id === 'el-queries' ? (elFlags > 0 ? { count: elFlags, tone: 'bg-brand text-white' } : null) : NAV_BADGES[item.id]
             const Icon = item.icon
             return (
               <li key={item.id} className="relative">

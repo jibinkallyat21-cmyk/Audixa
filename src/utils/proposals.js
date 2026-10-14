@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { buildProposalPdf, bytesToBase64 } from './simplePdf'
 
 export const AUDITORS = ['ABCPA', 'MISCPA']
-export const AUDIT_TYPES = ['Proper Audit', 'Disclaimer of Opinion', 'Special Purpose Audit', 'Liquidation Audit', 'Agreed-Upon Procedures']
+export const AUDIT_TYPES = ['Proper Audit', 'Disclaimer Audit', 'Liquidation Audit', 'Special Audit', 'Agreed-Upon Procedures']
 export const SERVICES = [
   { key: 'zakat', label: 'Zakat Filing' },
   { key: 'accounts', label: 'Accounts Finalisation' },

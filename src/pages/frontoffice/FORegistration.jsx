@@ -8,9 +8,9 @@ import { useToast } from '../../components/shared/Toast'
 
 const AUDIT_TYPES = [
   'Proper Audit',
-  'Disclaimer of Opinion',
-  'Special Purpose Audit',
+  'Disclaimer Audit',
   'Liquidation Audit',
+  'Special Audit',
   'Agreed-Upon Procedures',
 ]
 

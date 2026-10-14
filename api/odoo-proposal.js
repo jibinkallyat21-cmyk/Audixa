@@ -13,7 +13,7 @@
 import { buildProposalPdf, bytesToBase64 } from '../src/utils/simplePdf.js'
 
 const AUDITORS = ['ABCPA', 'MISCPA']
-const AUDIT_TYPES = ['Proper Audit', 'Disclaimer of Opinion', 'Special Purpose Audit', 'Liquidation Audit', 'Agreed-Upon Procedures']
+const AUDIT_TYPES = ['Proper Audit', 'Disclaimer Audit', 'Liquidation Audit', 'Special Audit', 'Agreed-Upon Procedures']
 
 const clean = (v, max) => String(v ?? '').trim().slice(0, max)
 

@@ -577,7 +577,7 @@ function ImportClientsModal({ onClose, showToast }) {
 /* ─────────────────────────────────────────────
    Send Proposal Modal (with auditor, type, fees, extra services)
 ───────────────────────────────────────────── */
-const AUDIT_TYPES = ['Proper Audit', 'Disclaimer of Opinion', 'Special Purpose Audit', 'Liquidation Audit', 'Agreed-Upon Procedures']
+const AUDIT_TYPES = ['Proper Audit', 'Disclaimer Audit', 'Liquidation Audit', 'Special Audit', 'Agreed-Upon Procedures']
 
 function SendProposalModal({ lead, onClose, onSent }) {
   const [auditor, setAuditor] = useState('')

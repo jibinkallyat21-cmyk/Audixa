@@ -51,6 +51,7 @@ import TeamWorkspaceProcedures from './pages/team/workspace/TeamWorkspaceProcedu
 import TeamWorkspaceDeliverables from './pages/team/workspace/TeamWorkspaceDeliverables'
 import TeamWorkspaceAuditTrail from './pages/team/workspace/TeamWorkspaceAuditTrail'
 import TeamWorkspaceWorkingTB from './pages/team/workspace/TeamWorkspaceWorkingTB'
+import TeamELRequest from './pages/team/TeamELRequest'
 import TeamTasks from './pages/team/TeamTasks'
 import TeamNotifications from './pages/team/TeamNotifications'
 import TeamClientDashboard from './pages/team/TeamClientDashboard'
@@ -72,6 +73,7 @@ import FOLeads from './pages/frontoffice/FOLeads'
 import FOProposals from './pages/frontoffice/FOProposals'
 import FORegistration from './pages/frontoffice/FORegistration'
 import FOProposalDetail from './pages/frontoffice/FOProposalDetail'
+import FOELQueries from './pages/frontoffice/FOELQueries'
 import FONotifications from './pages/frontoffice/FONotifications'
 import FOClientDocuments from './pages/frontoffice/FOClientDocuments'
 
@@ -134,6 +136,7 @@ function AnimatedRoutes() {
         <Route path="/team/workspace/working-tb" element={<TeamWorkspaceWorkingTB />} />
         <Route path="/team/workspace/deliverables" element={<TeamWorkspaceDeliverables />} />
         <Route path="/team/workspace/audit-trail" element={<TeamWorkspaceAuditTrail />} />
+        <Route path="/team/el-request" element={<TeamELRequest />} />
         <Route path="/team/tasks" element={<TeamTasks />} />
         <Route path="/team/notifications" element={<TeamNotifications />} />
         <Route path="/team/client/al-marai" element={<TeamClientDashboard />} />
@@ -167,6 +170,7 @@ function AnimatedRoutes() {
         <Route path="/fo/registration" element={<FORegistration />} />
         <Route path="/fo/chat" element={<Navigate to="/fo/dashboard" replace />} />
         <Route path="/fo/client-documents" element={<FOClientDocuments />} />
+        <Route path="/fo/el-queries" element={<FOELQueries />} />
         <Route path="/fo/notifications" element={<FONotifications />} />
 
         

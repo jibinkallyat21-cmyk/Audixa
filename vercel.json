@@ -5,6 +5,9 @@
     },
     "api/send-proposal-email.js": {
       "maxDuration": 30
+    },
+    "api/read-document.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
