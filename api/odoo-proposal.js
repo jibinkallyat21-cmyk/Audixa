@@ -55,10 +55,15 @@ async function odooProposal(cfg, input) {
   const rpc = async (service, method, args) => {
     const r = await timedFetch(`${cfg.url}/jsonrpc`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': 'Audixa-Proposals/1.0' },
       body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { service, method, args }, id: Date.now() }),
     })
-    const j = await r.json()
+    const text = await r.text()
+    let j
+    try { j = JSON.parse(text) } catch {
+      const snippet = text.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+      throw new Error(`Odoo answered HTTP ${r.status} (${r.headers.get('content-type') || 'no content-type'}) instead of JSON${snippet ? `: "${snippet}"` : ''} - the server may be blocking requests from Vercel, or ODOO_URL is wrong`)
+    }
     if (j.error) throw new Error(j.error.data?.message || j.error.message || 'Odoo error')
     return j.result
   }
