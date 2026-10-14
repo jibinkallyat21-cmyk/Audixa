@@ -76,7 +76,7 @@ export async function emailProposal(p) {
 // Asks the server to have Odoo generate the proposal. If there is no server
 // (e.g. local dev) a clearly labelled demo document is produced instead; a real
 // Odoo failure is surfaced, never silently replaced by a demo.
-export async function generateProposal(form, preparedBy) {
+export async function generateProposal(form, preparedBy, { demo = false } = {}) {
   const lines = [{ name: `${form.auditType} — ${form.client}`, amount: Number(form.auditFee) }]
   SERVICES.forEach((s) => {
     const sv = form.services[s.key]
@@ -89,7 +89,7 @@ export async function generateProposal(form, preparedBy) {
   }
 
   let data = null
-  try {
+  if (!demo) try {
     const r = await fetch('/api/odoo-proposal', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload), signal: AbortSignal.timeout(45000),
