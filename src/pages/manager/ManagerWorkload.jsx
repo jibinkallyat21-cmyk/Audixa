@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Download, UserPlus, X, Sparkles, ChevronDown, ChevronRight, Pencil, Trash2, Check } from 'lucide-react'
 import ManagerLayout from '../../components/manager/ManagerLayout'
 import PageTransition from '../../components/shared/PageTransition'
+import CoordinatorCard from '../../components/execution/CoordinatorCard'
 import AuditTypeChip from '../../components/shared/AuditTypeChip'
 import { useToast } from '../../components/shared/Toast'
 import { useModal } from '../../components/shared/Modal'
@@ -260,6 +261,8 @@ export default function ManagerWorkload() {
                     ))}
                   </div>
                 )}
+
+                <CoordinatorCard />
 
                 {/* Team structure — expand on hover */}
                 <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

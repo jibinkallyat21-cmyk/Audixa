@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { buildProposalPdf, bytesToBase64 } from './simplePdf'
+import { discountAmount, categoryById } from '../data/feeSchedule'
 
 export const AUDITORS = ['ABCPA', 'MISCPA']
-export const AUDIT_TYPES = ['Proper Audit', 'Disclaimer of Opinion', 'Special Purpose Audit', 'Liquidation Audit', 'Agreed-Upon Procedures']
+export const AUDIT_TYPES = ['Proper Audit', 'Disclaimer Audit', 'Liquidation Audit', 'Special Audit', 'Agreed-Upon Procedures']
 export const SERVICES = [
   { key: 'zakat', label: 'Zakat Filing' },
   { key: 'accounts', label: 'Accounts Finalisation' },
@@ -82,10 +83,12 @@ export async function generateProposal(form, preparedBy, { demo = false } = {}) 
     const sv = form.services[s.key]
     if (sv) lines.push({ name: s.label, amount: Number(sv.fee) })
   })
+  const discount = discountAmount(form.applyDiscount, form.services.zakat?.fee)
+  if (discount > 0) lines.push({ name: 'Discount (10% of Zakat filing fee)', amount: -discount, discount: true })
   const payload = {
     client: form.client, contactName: form.contactName, contactEmail: form.contactEmail,
     crNumber: form.crNumber, city: form.city, auditor: form.auditor, auditType: form.auditType,
-    preparedBy, lines,
+    revenueCategory: form.revenueCategory || '', preparedBy, lines,
   }
 
   let data = null
@@ -124,6 +127,7 @@ export async function generateProposal(form, preparedBy, { demo = false } = {}) 
     portalUrl: data.portalUrl || null, pdfBase64: data.pdfBase64 || null, pdfError: data.pdfError || null,
     client: form.client, contactName: form.contactName, contactEmail: form.contactEmail,
     crNumber: form.crNumber, city: form.city, auditor: form.auditor, auditType: form.auditType,
+    revenueCategory: form.revenueCategory || '', revenueCategoryLabel: categoryById(form.revenueCategory)?.label || '', discount,
     fee: data.fee ?? data.total, totalInclTax: data.total, createdBy: preparedBy, createdDate: data.createdDate, expiryDate: data.expiryDate,
     status: 'Awaiting Approval',
   }

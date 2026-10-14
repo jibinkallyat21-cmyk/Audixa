@@ -210,6 +210,10 @@ button:not(:disabled):active {
 html.dark {
   color-scheme: dark;
 }
+/* Dropdown lists keep a white popup in dark mode while the text turns light: give them a dark popup */
+html.dark select { color-scheme: dark; }
+html.dark select option { background-color: #0F1629; color: #F1F5F9; }
+
 html.dark body {
   background-color: #080C18;
   color: #CBD5E1;

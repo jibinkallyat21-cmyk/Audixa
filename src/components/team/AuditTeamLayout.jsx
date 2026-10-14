@@ -10,6 +10,7 @@ import {
   CalendarDays,
   MessagesSquare,
   Bell,
+  FileSignature,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/team/dashboard', icon: LayoutDashboard },
   { id: 'workspace', label: 'My Workspace', href: '/team/workspace', icon: FileStack },
   { id: 'tasks', label: 'My Tasks', href: '/team/tasks', icon: ListChecks },
+  { id: 'el-request', label: 'EL Requests', href: '/team/el-request', icon: FileSignature },
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries', icon: MessageSquare },
   { id: 'deliverables', label: 'Deliverables', href: '/team/workspace/deliverables', icon: PackageCheck },
   { id: 'meetings', label: 'Meetings', href: '/team/meetings', icon: CalendarDays },

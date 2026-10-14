@@ -3,11 +3,14 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, FileText, Loader2, X, AlertTriangle } from 'lucide-react'
 import { AUDITORS, AUDIT_TYPES, SERVICES, ProposalError, addGeneratedProposal, generateProposal } from '../../utils/proposals'
 import { foUser } from '../../data/sampleData'
+import { saveClientProfile, profileFromProposal } from '../../utils/clientProfiles'
+import { RevenueCategorySelect, DiscountControl } from '../../components/frontoffice/ProposalFeeControls'
+import { feeForCategory, discountAmount } from '../../data/feeSchedule'
 
 const STEPS = ['Sending the request to Odoo…', 'Odoo is generating the proposal…', 'Retrieving the proposal PDF…']
 const emptyForm = {
   client: '', contactName: '', contactEmail: '', crNumber: '', city: '',
-  auditor: '', auditType: '', auditFee: '', services: {},
+  auditor: '', auditType: '', revenueCategory: '', auditFee: '', services: {}, applyDiscount: false,
 }
 const inputCls = (bad) => `w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-navy ${bad ? 'border-alert-red' : 'border-slate-300'}`
 
@@ -30,7 +33,9 @@ export default function NewProposalModal({ onClose, onView }) {
   const toggleService = (key) => { setForm((f) => ({ ...f, services: { ...f.services, [key]: f.services[key] ? null : { fee: '' } } })); clearError(key) }
   const setServiceFee = (key, fee) => { setForm((f) => ({ ...f, services: { ...f.services, [key]: { fee } } })); clearError(key) }
 
-  const total = (Number(form.auditFee) || 0) + SERVICES.reduce((s, x) => s + (form.services[x.key] ? Number(form.services[x.key].fee) || 0 : 0), 0)
+  const setCategory = (id) => { setForm((f) => ({ ...f, revenueCategory: id, auditFee: id ? String(feeForCategory(id)) : f.auditFee })); clearError('revenueCategory'); clearError('auditFee') }
+  const discount = discountAmount(form.applyDiscount, form.services.zakat?.fee)
+  const total = (Number(form.auditFee) || 0) + SERVICES.reduce((s, x) => s + (form.services[x.key] ? Number(form.services[x.key].fee) || 0 : 0), 0) - discount
 
   const validate = () => {
     const e = {}
@@ -39,6 +44,7 @@ export default function NewProposalModal({ onClose, onView }) {
     if (!/^\S+@\S+\.\S+$/.test(form.contactEmail.trim())) e.contactEmail = 'Enter a valid email'
     if (!form.auditor) e.auditor = 'Select the auditor'
     if (!form.auditType) e.auditType = 'Select the audit type'
+    if (!form.revenueCategory) e.revenueCategory = 'Select the revenue category'
     if (!(Number(form.auditFee) > 0)) e.auditFee = 'Enter a valid fee'
     SERVICES.forEach((s) => { if (form.services[s.key] && !(Number(form.services[s.key].fee) > 0)) e[s.key] = 'Enter a valid fee' })
     setErrors(e)
@@ -55,6 +61,7 @@ export default function NewProposalModal({ onClose, onView }) {
         { demo },
       )
       addGeneratedProposal(record)
+      saveClientProfile(profileFromProposal({ ...form, client: form.client.trim(), contactName: form.contactName.trim(), contactEmail: form.contactEmail.trim(), crNumber: form.crNumber.trim(), city: form.city.trim() }, record))
       setResult(record); setPhase('done')
     } catch (err) {
       setFailure(err instanceof ProposalError ? err.message : 'Could not reach the proposal service. Please try again.')
@@ -122,6 +129,8 @@ export default function NewProposalModal({ onClose, onView }) {
                 {errors.auditor && <p className="mt-1 text-[10px] text-alert-red">{errors.auditor}</p>}
               </div>
 
+              <RevenueCategorySelect value={form.revenueCategory} onChange={setCategory} error={errors.revenueCategory} />
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-slate-600" htmlFor="np-type">Audit type *</label>
@@ -159,9 +168,11 @@ export default function NewProposalModal({ onClose, onView }) {
                 </div>
               </div>
 
+              <DiscountControl apply={form.applyDiscount} onToggle={(v) => setForm((f) => ({ ...f, applyDiscount: v }))} amount={discount} hasZakat={!!form.services.zakat} />
+
               {total > 0 && (
                 <div className="flex items-center justify-between rounded-lg bg-navy/5 px-4 py-2.5">
-                  <span className="text-xs font-semibold text-slate-500">Total engagement fee</span>
+                  <span className="text-xs font-semibold text-slate-500">Total engagement fee{discount > 0 ? ' (after discount)' : ''}</span>
                   <span className="text-sm font-bold text-navy">SAR {total.toLocaleString()}</span>
                 </div>
               )}
