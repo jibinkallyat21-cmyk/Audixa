@@ -3,6 +3,7 @@ import FrontOfficeLayout from '../../components/frontoffice/FrontOfficeLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { FlagCard } from '../../components/execution/elShared'
 import { evaluateELRequest, setPath } from '../../utils/elRequest.js'
+import { verificationForRequest } from '../../utils/elVerification.js'
 import { useELRequests } from '../../utils/elStore'
 import { FIRMS } from '../../data/firms.js'
 
@@ -15,6 +16,9 @@ export default function FOELQueries() {
     .map((r) => ({ r, flags: evaluateELRequest({ ...r, requestedBy: r.requestedBy }).flags }))
     .filter((x) => x.flags.length > 0)
 
+  // Low-priority notes from checking the EL received from the auditor (never blocking).
+  const notes = requests.flatMap((r) => (verificationForRequest(r)?.notices || []).map((n) => ({ ...n, client: r.client, firm: r.firm, id: `${r.id}-${n.key}` })))
+
   return (
     <FrontOfficeLayout title="EL Queries">
       <PageTransition>
@@ -23,7 +27,7 @@ export default function FOELQueries() {
             <h1 className="text-2xl font-bold text-navy">EL Queries</h1>
             <p className="mt-1 text-sm text-slate-500">Issues flagged while preparing engagement letter requests. Enter the missing information or resolve the difference; the request updates automatically.</p>
           </div>
-          {withFlags.length === 0 && (
+          {withFlags.length === 0 && notes.length === 0 && (
             <p className="flex items-center gap-2 rounded-xl border border-emerald/30 bg-emerald/5 px-4 py-3 text-sm text-emerald"><CheckCircle2 className="h-4 w-4" />No open EL queries.</p>
           )}
           {withFlags.map(({ r, flags }) => (
@@ -35,6 +39,18 @@ export default function FOELQueries() {
               ))}
             </div>
           ))}
+          {notes.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-navy">Low priority notes</h2>
+              {notes.map((n) => (
+                <div key={n.id} className="rounded-xl border border-slate-300 bg-slate-50 p-4">
+                  <p className="text-sm font-semibold text-navy">{n.title} <span className="ml-1 text-xs font-normal text-slate-500">{n.client} · {FIRMS[n.firm]?.legalName}</span></p>
+                  <p className="mt-1 text-xs text-slate-600">{n.detail}</p>
+                  <p className="mt-1 text-[11px] text-slate-400">Seen by the FO and the project coordinator. Does not block the EL.</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </PageTransition>
     </FrontOfficeLayout>

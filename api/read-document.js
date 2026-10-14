@@ -43,10 +43,10 @@ const DOCS = {
   },
   elReceived: {
     describe: 'an engagement letter (EL) issued by an audit firm to its client',
-    fields: 'companyName (the client named in the EL, English); periodStart and periodEnd (the audit period, ISO yyyy-mm-dd); auditFee, translationFee, zakatFee and accountsFee (fee for each service as a number, EXCLUDING VAT; null when the service is not in the EL); feesIncludeVat (true if the EL states its fees include VAT); auditorName (the audit firm named as the auditor, exactly as written); letterheadPresent (true if the EL is printed on a firm letterhead with logo, address or contact details, false if it is plain, null if you cannot tell); letterheadFirmName (the firm name shown in the letterhead, if any); and for companyName, period, fees, auditorName and letterhead the page number (companyNamePage, periodPage, feePage, auditorPage, letterheadPage) where each was found. Do not judge signatures or stamps.',
+    fields: 'companyName (the client named in the EL, English); periodStart and periodEnd (the audit period, ISO yyyy-mm-dd); auditFee and translationFee (as numbers, EXCLUDING VAT; null when not shown in the EL; do not report Zakat or account finalisation fees); feesIncludeVat (true if the EL states its fees include VAT); auditorName (the audit firm named as the auditor, exactly as written); letterheadPresent (true if the EL is printed on a firm letterhead with logo, address or contact details, false if it is plain, null if you cannot tell); letterheadFirmName (the firm name shown in the letterhead, if any); and for companyName, period, fees, auditorName and letterhead the page number (companyNamePage, periodPage, feePage, auditorPage, letterheadPage) where each was found. Do not judge signatures or stamps.',
     schema: obj({
       companyName: str, periodStart: str, periodEnd: str,
-      auditFee: numOrNull, translationFee: numOrNull, zakatFee: numOrNull, accountsFee: numOrNull, feesIncludeVat: bool,
+      auditFee: numOrNull, translationFee: numOrNull, feesIncludeVat: bool,
       auditorName: str, letterheadPresent: nullableBool, letterheadFirmName: str,
       companyNamePage: intOrNull, periodPage: intOrNull, feePage: intOrNull, auditorPage: intOrNull, letterheadPage: intOrNull,
       notes,

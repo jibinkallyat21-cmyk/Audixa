@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { CheckCircle2, Loader2, MessageSquarePlus, Upload } from 'lucide-react'
 import { FieldInput, readDocument } from './elShared'
-import { evaluateELRequest, fmtDate, fmtAmount, setPath } from '../../utils/elRequest.js'
-import { evaluateELVerification, emptyELData, PASS, FAIL, REVIEW } from '../../utils/elVerification.js'
+import { fmtDate, fmtAmount, setPath } from '../../utils/elRequest.js'
+import { evaluateELVerification, expectedFromRequest, emptyELData, PASS, FAIL, REVIEW } from '../../utils/elVerification.js'
 import { getClientProfile } from '../../utils/clientProfiles'
 import { FIRMS } from '../../data/firms.js'
 import { teamUser } from '../../data/sampleData'
@@ -28,9 +28,7 @@ const EL_FIELDS = [
   { path: 'periodStart', label: 'Audit period start', type: 'date' },
   { path: 'periodEnd', label: 'Audit period end', type: 'date' },
   { path: 'fees.audit', label: 'Audit fee (SR, excl. VAT)', type: 'number' },
-  { path: 'fees.translation', label: 'Translation fee (SR)', type: 'number' },
-  { path: 'fees.zakat', label: 'Zakat filing fee (SR)', type: 'number' },
-  { path: 'fees.accounts', label: 'Account finalisation fee (SR)', type: 'number' },
+  { path: 'fees.translation', label: 'Translation fee (SR, if shown)', type: 'number' },
   { path: 'feesIncludeVat', label: 'EL fees include VAT', type: 'checkbox' },
   { path: 'auditorName', label: 'Auditor named in the EL' },
   { path: 'letterheadFirmName', label: 'Firm name on the letterhead' },
@@ -42,7 +40,7 @@ function applyExtraction(el, f) {
   return {
     ...el,
     companyName: s(f.companyName) || el.companyName, periodStart: s(f.periodStart) || el.periodStart, periodEnd: s(f.periodEnd) || el.periodEnd,
-    fees: { audit: s(f.auditFee), translation: s(f.translationFee), zakat: s(f.zakatFee), accounts: s(f.accountsFee) },
+    fees: { audit: s(f.auditFee), translation: s(f.translationFee) },
     feesIncludeVat: !!f.feesIncludeVat, auditorName: s(f.auditorName) || el.auditorName,
     letterheadPresent: f.letterheadPresent ?? el.letterheadPresent, letterheadFirmName: s(f.letterheadFirmName) || el.letterheadFirmName,
     pages: { companyName: s(f.companyNamePage), period: s(f.periodPage), fee: s(f.feePage), auditor: s(f.auditorPage), letterhead: s(f.letterheadPage) },
@@ -51,8 +49,8 @@ function applyExtraction(el, f) {
 
 // Demo EL built from what the request approved, with or without deliberate discrepancies.
 function sampleEL(expected, firm, withIssues) {
-  const fees = { audit: '', translation: '', zakat: '', accounts: '' }
-  expected.services.forEach((x) => { if (x.opted && x.fee !== null) fees[x.key] = String(x.fee) })
+  const fees = { audit: '', translation: '' }
+  expected.services.forEach((x) => { if ((x.key === 'audit' || x.key === 'translation') && x.opted && x.fee !== null) fees[x.key] = String(x.fee) })
   const el = {
     ...emptyELData(), companyName: expected.companyName || '', periodStart: expected.period?.start || '', periodEnd: expected.period?.end || '',
     fees, auditorName: FIRMS[firm].legalName, letterheadPresent: true, letterheadFirmName: FIRMS[firm].legalName,
@@ -60,7 +58,7 @@ function sampleEL(expected, firm, withIssues) {
   }
   if (withIssues) {
     el.periodEnd = '2025-06-30'
-    if (fees.zakat) el.fees = { ...fees, zakat: String(Number(fees.zakat) - 500) }
+    if (fees.audit) el.fees = { ...fees, audit: String(Number(fees.audit) - 500) }
     el.auditorName = firm === 'ABCPA' ? FIRMS.MISCPA.legalName : FIRMS.ABCPA.legalName
   }
   return el
@@ -74,10 +72,7 @@ export default function ELVerificationPanel({ req, canAct, onUpdate }) {
   const elr = req.elReceived || { doc: null, data: emptyELData(), overrides: {}, review: {}, queries: [] }
   const data = useMemo(() => ({ ...emptyELData(), ...elr.data }), [elr.data])
 
-  const expected = useMemo(() => {
-    const ev = evaluateELRequest({ ...req, requestedBy: req.requestedBy })
-    return { companyName: ev.values.companyName, period: ev.values.period, services: ev.services, discount: profile?.discount?.amount || 0 }
-  }, [req, profile])
+  const expected = useMemo(() => expectedFromRequest(req), [req])
   const openQueries = (elr.queries || []).filter((q) => !q.resolved).length
   const v = useMemo(() => evaluateELVerification({ firm: req.firm, expected, el: data, overrides: elr.overrides, review: elr.review, openQueries }), [req.firm, expected, data, elr.overrides, elr.review, openQueries])
 
@@ -148,6 +143,14 @@ export default function ELVerificationPanel({ req, canAct, onUpdate }) {
         </div>
       </div>
 
+      {v.notices.map((n) => (
+        <div key={n.key} className="rounded-xl border border-slate-300 bg-slate-50 p-3">
+          <p className="flex items-center gap-2 text-sm font-semibold text-navy"><span className="rounded-full border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500">Low priority</span>{n.title}</p>
+          <p className="mt-1 text-xs text-slate-600">{n.detail}</p>
+          <p className="mt-1 text-[11px] text-slate-400">Shown on the FO dashboard (EL Queries) and to the project coordinator. Does not block verification.</p>
+        </div>
+      ))}
+
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h3 className="mb-2 text-sm font-semibold text-navy">Verification checklist</h3>
         <div className="space-y-3">
@@ -168,9 +171,9 @@ export default function ELVerificationPanel({ req, canAct, onUpdate }) {
                   <tbody>{c.lines.map((l) => (
                     <tr key={l.key} className="border-t border-slate-50">
                       <td className="py-1 text-navy">{l.label}</td>
-                      <td className="py-1 text-right text-navy">{l.opted && l.expected !== null ? fmtAmount(l.expected) : '—'}</td>
+                      <td className="py-1 text-right text-navy">{l.expected !== null ? fmtAmount(l.expected) : '—'}</td>
                       <td className="py-1 text-right text-navy">{l.found !== null ? fmtAmount(l.found) : '—'}</td>
-                      <td className="py-1 pl-3"><span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${CHIP[l.status]}`}>{l.status}</span></td>
+                      <td className="py-1 pl-3"><span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${CHIP[l.status] || 'border-slate-300 bg-slate-100 text-slate-500'}`}>{l.status}</span>{l.status === 'N/A' && <span className="ml-1 text-[10px] text-slate-400">proposal only</span>}</td>
                     </tr>))}</tbody>
                 </table>
               )}
