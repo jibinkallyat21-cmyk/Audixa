@@ -19,29 +19,40 @@ const goodEL = () => ({
 const run = (el, extra = {}) => evaluateELVerification({ firm: 'ABCPA', expected, el, ...extra })
 const res = (r) => Object.fromEntries(r.checks.map((c) => [c.key, c.result]))
 
-test('a matching EL passes four checks; letterhead always needs a human', () => {
+test('a matching EL passes all five checks but still needs the reviewer', () => {
   const r = run(goodEL())
-  assert.deepEqual(res(r), { companyName: 'PASS', period: 'PASS', fee: 'PASS', auditor: 'PASS', letterhead: 'NEEDS REVIEW' })
-  assert.equal(r.overall, 'PENDING')
+  assert.deepEqual(res(r), { companyName: 'PASS', period: 'PASS', fee: 'PASS', auditor: 'PASS', letterhead: 'PASS' })
+  assert.equal(r.overall, 'PENDING') // an AI result alone never verifies the EL
 })
 
-test('VERIFIED only after the reviewer settles the letterhead and signs off', () => {
-  const overrides = { letterhead: { result: 'PASS', note: 'Logo and address match the firm letterhead.' } }
-  assert.equal(run(goodEL(), { overrides }).overall, 'PENDING') // all pass, no sign-off yet
-  assert.equal(run(goodEL(), { overrides, review: { confirmed: true, reviewedBy: 'Fahad' } }).overall, 'VERIFIED')
-  assert.equal(run(goodEL(), { overrides, review: { confirmed: true, reviewedBy: '' } }).overall, 'PENDING')
+test('VERIFIED only after the reviewer signs off', () => {
+  assert.equal(run(goodEL(), { review: { confirmed: true, reviewedBy: 'Fahad' } }).overall, 'VERIFIED')
+  assert.equal(run(goodEL(), { review: { confirmed: true, reviewedBy: '' } }).overall, 'PENDING')
+  assert.equal(run(goodEL(), { review: { confirmed: false, reviewedBy: 'Fahad' } }).overall, 'PENDING')
+})
+
+test('letterhead passes when the auditor firm name is on it', () => {
+  const lh = (name, present = true) => res(run({ ...goodEL(), letterheadPresent: present, letterheadFirmName: name })).letterhead
+  assert.equal(lh('Ashraf Bassas CPA Firm'), 'PASS')
+  assert.equal(lh('ASHRAF BASSAS CPA FIRM  |  Riyadh  |  +966 11 000 0000'), 'PASS') // firm name inside the letterhead text
+  assert.equal(lh('Ashraf Basas CPA Firm'), 'NEEDS REVIEW')                        // spelling variant
+  assert.equal(lh('MAAN Ibrahim Alshinkity CPA firm'), 'FAIL')                    // another firm's letterhead
+  assert.equal(lh('', true), 'NEEDS REVIEW')                                       // present, name unreadable
+  assert.equal(lh('', null), 'NEEDS REVIEW')                                       // not assessed
+  assert.equal(lh('Ashraf Bassas CPA Firm', false), 'FAIL')                        // no letterhead at all
 })
 
 test('open auditor queries hold the EL at PENDING even when everything else is settled', () => {
-  const overrides = { letterhead: { result: 'PASS', note: 'Checked.' } }
   const review = { confirmed: true, reviewedBy: 'Fahad' }
-  assert.equal(run(goodEL(), { overrides, review, openQueries: 1 }).overall, 'PENDING')
-  assert.equal(run(goodEL(), { overrides, review, openQueries: 0 }).overall, 'VERIFIED')
+  assert.equal(run(goodEL(), { review, openQueries: 1 }).overall, 'PENDING')
+  assert.equal(run(goodEL(), { review, openQueries: 0 }).overall, 'VERIFIED')
 })
 
-test('an override without a note is ignored', () => {
-  const r = run(goodEL(), { overrides: { letterhead: { result: 'PASS', note: '  ' } } })
-  assert.equal(res(r).letterhead, 'NEEDS REVIEW')
+test('a reviewer decision counts only with a note', () => {
+  const bad = { ...goodEL(), companyName: 'Al Basheer Trading' }
+  assert.equal(res(run(bad, { overrides: { companyName: { result: 'PASS', note: '  ' } } })).companyName, 'FAIL')
+  const r = run(bad, { overrides: { companyName: { result: 'PASS', note: 'Trade name used by the client.' } } })
+  assert.equal(res(r).companyName, 'PASS'); assert.equal(r.checks[0].overridden, true)
 })
 
 test('company name or period difference fails', () => {
@@ -73,7 +84,7 @@ test('translation opted but not in the EL is a low-priority note, not a failure'
   assert.equal(res(r).fee, 'PASS')
   assert.equal(r.notices.length, 1)
   assert.deepEqual([r.notices[0].key, r.notices[0].priority, r.notices[0].owner, r.notices[0].notify], ['translation-not-in-el', 'low', 'FO', 'Project coordinator'])
-  assert.equal(r.discrepancies.length, 1) // only the letterhead still needs a person
+  assert.equal(r.discrepancies.length, 0) // the note is not a discrepancy
   assert.equal(run(goodEL()).notices.length, 0)
   assert.equal(run({ ...goodEL(), fees: { audit: '', translation: '' } }).notices.length, 0) // nothing read: not a translation note
 })
@@ -89,8 +100,7 @@ test('auditor identity is checked against the engagement firm', () => {
   assert.equal(res(run({ ...goodEL(), auditorName: '' })).auditor, 'NEEDS REVIEW')
 })
 
-test('no letterhead fails; unreadable fields need review; page and evidence are kept', () => {
-  assert.equal(res(run({ ...goodEL(), letterheadPresent: false })).letterhead, 'FAIL')
+test('unreadable fields need review; page and evidence are kept', () => {
   const r = run({ ...emptyELData(), pages: { ...emptyELData().pages, companyName: '1' } })
   assert.deepEqual(Object.values(res(r)), ['NEEDS REVIEW', 'NEEDS REVIEW', 'NEEDS REVIEW', 'NEEDS REVIEW', 'NEEDS REVIEW'])
   assert.equal(r.checks[0].page, '1'); assert.equal(r.discrepancies.length, 5)

@@ -31,7 +31,7 @@ const EL_FIELDS = [
   { path: 'fees.translation', label: 'Translation fee (SR, if shown)', type: 'number' },
   { path: 'feesIncludeVat', label: 'EL fees include VAT', type: 'checkbox' },
   { path: 'auditorName', label: 'Auditor named in the EL' },
-  { path: 'letterheadFirmName', label: 'Firm name on the letterhead' },
+  { path: 'letterheadFirmName', label: 'Firm name found on the letterhead' },
 ]
 const PAGE_FIELDS = [['companyName', 'Name page'], ['period', 'Period page'], ['fee', 'Fee page'], ['auditor', 'Auditor page'], ['letterhead', 'Letterhead page']]
 

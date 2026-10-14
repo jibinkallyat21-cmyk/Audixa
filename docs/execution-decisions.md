@@ -29,7 +29,7 @@ Answers given by the audit lead while going through `docs/execution-gap-list.md`
 | 20 | EL request fee | Request to the auditor carries audit fee + translation fee only; every opted proposal service stays visible on the page |
 | 21 | Client profile | Everything entered when a proposal is created (client, contact, CR number, city, auditor, audit type, revenue category, audit fee, opted services with fees, discount) is stored in a client profile (`src/utils/clientProfiles.js`). The EL request fetches the proposal details from it; services can be added to the profile later. Revenue in the EL request is the profile's revenue category unless an exact figure is entered |
 | 23 | EL fees | The EL shows only the audit fee (and possibly the translation fee). Zakat filing and account finalisation fees are in the proposal only and are not compared. A translation fee opted in the proposal but not found in the EL is a low-priority note (non-blocking) shown to the project coordinator and on the FO EL Queries page. A wrong audit fee or translation fee is a FAIL |
-| 22 | Step 2 build | Five checks (company name, audit period, audit fee by service excl. VAT, auditor identity, letterhead), each PASS / FAIL / NEEDS REVIEW with expected value, value found and page. Letterhead is never passed by the system (no reference letterhead stored); a reviewer decides, with a note. Overall: VERIFIED only when all pass, a reviewer has signed off and no auditor query is open; NOT VERIFIED if any fails; otherwise PENDING. |
+| 22 | Step 2 build | Five checks (company name, audit period, audit fee by service excl. VAT, auditor identity, letterhead), each PASS / FAIL / NEEDS REVIEW with expected value, value found and page. Letterhead: the approved letterhead is the auditor firm's own, so it passes when the firm's legal name is found on it (a different firm's name fails; a spelling variant or unreadable name goes to review). Overall: VERIFIED only when all pass, a reviewer has signed off and no auditor query is open; NOT VERIFIED if any fails; otherwise PENDING. |
 
 ## Open items to ask later
 
@@ -39,7 +39,6 @@ Answers given by the audit lead while going through `docs/execution-gap-list.md`
 
 - **ABCPA vouching.** The audit lead will supply documents. Not built until received. MISCPA vouching follows the Vouching Rule Book.
 - **Liquidation audit, second extra document.** The Rule Book calls it "Osama letter". It is a letter received from the Ministry. Ask for the exact name and what it states (which date feeds the audit period end date).
-- **Reference letterheads.** Step 2 cannot pass the letterhead check on its own. If the firms' approved letterheads can be uploaded, the check could compare against them.
 - **Translation in the EL.** Audit lead is not sure whether the translation fee appears in the EL; for now its absence is only a low-priority note. Confirm later.
 - **Monday.com details.** API token (integration user), board and group for EL requests, how a client's item is found, whether auditors reply with file columns or updates, where the request text goes.
 - **Company server storage details** (see decision 2).

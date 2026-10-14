@@ -2,7 +2,7 @@
 // Five checks, each PASS / FAIL / NEEDS REVIEW with the value found and the page it was found on.
 // The client's signature and stamp are NOT checked here; that is Step 4, after the client signs.
 // AI reading does not prove authenticity: the EL is only VERIFIED once every check passes AND a human
-// reviewer has confirmed the checklist.
+// reviewer has confirmed the checklist. The letterhead passes when the auditor firm's own name is on it.
 import { FIRMS } from '../data/firms.js'
 import { normalizeName, fmtDate, fmtAmount, parseDate, evaluateELRequest } from './elRequest.js'
 
@@ -123,15 +123,19 @@ export function evaluateELVerification({ firm, expected, el = emptyELData(), ove
     else auto.auditor = out(FAIL, found, exp, `EL names "${found}"; the engagement's firm is "${exp}".`)
   }
 
-  // 5. Letterhead — never passed by the system alone: there is no approved reference letterhead to compare with.
+  // 5. Letterhead — the approved letterhead is the auditor firm's own. If the firm's name is found on it, the check passes.
   {
-    const exp = `${FIRMS[firm]?.legalName || 'the firm'} letterhead`
+    const legal = FIRMS[firm]?.legalName || ''
+    const exp = `${legal || 'the firm'} letterhead`
+    const shown = String(e.letterheadFirmName || '').trim()
+    const lh = normalizeName(shown), want = normalizeName(legal)
     if (e.letterheadPresent === false) auto.letterhead = out(FAIL, 'No CPA firm letterhead seen', exp, 'The EL does not appear to be on the firm\'s letterhead.')
-    else if (e.letterheadPresent === true) {
-      const same = e.letterheadFirmName && normalizeName(e.letterheadFirmName) === normalizeName(FIRMS[firm]?.legalName || '')
-      auto.letterhead = out(REVIEW, e.letterheadFirmName || 'Letterhead present', exp,
-        `${same ? 'The letterhead shows the firm\'s name.' : 'A letterhead is present.'} No approved reference letterhead is stored, so a reviewer must confirm the logo, address and contact details.`)
-    } else auto.letterhead = out(REVIEW, '—', exp, 'The letterhead could not be assessed from the EL.')
+    else if (!want) auto.letterhead = out(REVIEW, shown || '—', exp, 'The engagement has no firm set.')
+    else if (lh && lh.includes(want)) auto.letterhead = out(PASS, shown, exp, 'The firm\'s name is shown on the letterhead.')
+    else if (lh && similarity(lh, want) >= 0.8) auto.letterhead = out(REVIEW, shown, exp, 'The name on the letterhead is close to the firm\'s legal name but not identical (spelling).')
+    else if (lh) auto.letterhead = out(FAIL, shown, exp, `The letterhead shows "${shown}", not "${legal}".`)
+    else if (e.letterheadPresent === true) auto.letterhead = out(REVIEW, 'Letterhead present', exp, 'A letterhead is present but the firm name on it could not be read.')
+    else auto.letterhead = out(REVIEW, '—', exp, 'The letterhead could not be assessed from the EL.')
   }
 
   // Reviewer overrides replace the automatic result. They need a note.
