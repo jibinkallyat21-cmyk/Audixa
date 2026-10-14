@@ -52,6 +52,7 @@ import TeamWorkspaceDeliverables from './pages/team/workspace/TeamWorkspaceDeliv
 import TeamWorkspaceAuditTrail from './pages/team/workspace/TeamWorkspaceAuditTrail'
 import TeamWorkspaceWorkingTB from './pages/team/workspace/TeamWorkspaceWorkingTB'
 import TeamELRequest from './pages/team/TeamELRequest'
+import TeamBasicDocuments from './pages/team/TeamBasicDocuments'
 import TeamTasks from './pages/team/TeamTasks'
 import TeamNotifications from './pages/team/TeamNotifications'
 import TeamClientDashboard from './pages/team/TeamClientDashboard'
@@ -137,6 +138,7 @@ function AnimatedRoutes() {
         <Route path="/team/workspace/deliverables" element={<TeamWorkspaceDeliverables />} />
         <Route path="/team/workspace/audit-trail" element={<TeamWorkspaceAuditTrail />} />
         <Route path="/team/el-request" element={<TeamELRequest />} />
+        <Route path="/team/basic-documents" element={<TeamBasicDocuments />} />
         <Route path="/team/tasks" element={<TeamTasks />} />
         <Route path="/team/notifications" element={<TeamNotifications />} />
         <Route path="/team/client/al-marai" element={<TeamClientDashboard />} />
