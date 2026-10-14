@@ -48,6 +48,31 @@ export function pdfBlobUrl(base64) {
 
 export class ProposalError extends Error {}
 
+// Emails a generated proposal (PDF attached) to its contact. Resolves with
+// { delivered, reason }: delivered=false means email is not configured or not
+// reachable (nothing was sent); a real sending failure throws ProposalError.
+export async function emailProposal(p) {
+  let r
+  try {
+    r = await fetch('/api/send-proposal-email', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(45000),
+      body: JSON.stringify({
+        to: p.contactEmail, contactName: p.contactName, client: p.client, reference: p.reference,
+        auditor: p.auditor, auditType: p.auditType, fee: p.fee, expiryDate: p.expiryDate,
+        preparedBy: p.createdBy, pdfBase64: p.pdfBase64 || '',
+      }),
+    })
+  } catch {
+    return { delivered: false, reason: 'the email service could not be reached' }
+  }
+  if (!(r.headers.get('content-type') || '').includes('application/json')) {
+    return { delivered: false, reason: 'the email service is not available here' }
+  }
+  const d = await r.json()
+  if (!d.ok) throw new ProposalError(d.error || 'Email could not be sent')
+  return { delivered: !!d.delivered, reason: d.reason || '' }
+}
+
 // Asks the server to have Odoo generate the proposal. If there is no server
 // (e.g. local dev) a clearly labelled demo document is produced instead; a real
 // Odoo failure is surfaced, never silently replaced by a demo.

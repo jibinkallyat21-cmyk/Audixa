@@ -1,6 +1,11 @@
 {
   "functions": {
-    "api/odoo-proposal.js": { "maxDuration": 30 }
+    "api/odoo-proposal.js": {
+      "maxDuration": 30
+    },
+    "api/send-proposal-email.js": {
+      "maxDuration": 30
+    }
   },
   "rewrites": [
     {

@@ -9,7 +9,7 @@ import AuditTypeChip from '../../components/shared/AuditTypeChip'
 import { useToast } from '../../components/shared/Toast'
 import { useModal } from '../../components/shared/Modal'
 import { foProposals, foProposalFilterCounts, foSentProposals } from '../../data/sampleData'
-import { AUDITORS, AUDIT_TYPES, SERVICES, useGeneratedProposals } from '../../utils/proposals'
+import { AUDITORS, AUDIT_TYPES, SERVICES, emailProposal, useGeneratedProposals } from '../../utils/proposals'
 import NewProposalModal from './NewProposalModal'
 
 export default function FOProposals() {
@@ -41,10 +41,24 @@ export default function FOProposals() {
     setSendProposal(proposal)
   }
 
-  const handleSent = (proposal) => {
+  const handleSent = async (proposal) => {
+    const via = proposal._sendVia || 'email'
+    if (proposal.contactEmail && via === 'email') {
+      try {
+        const r = await emailProposal(proposal)
+        setStatuses((prev) => ({ ...prev, [proposal.id]: 'Sent to Client' }))
+        setSendProposal(null)
+        showToast(r.delivered
+          ? `Proposal emailed to ${proposal.contactEmail}`
+          : `Marked as sent — nothing was emailed because ${r.reason || 'email is not configured'}`, r.delivered ? undefined : 6000)
+      } catch (e) {
+        showToast(`Not sent — ${e.message}`, 6000)
+      }
+      return
+    }
     setStatuses((prev) => ({ ...prev, [proposal.id]: 'Sent to Client' }))
     setSendProposal(null)
-    showToast(`Proposal sent to ${proposal.client} — login credentials shared via ${proposal._sendVia || 'email'}`)
+    showToast(`Proposal sent to ${proposal.client} — login credentials shared via ${via}`)
   }
 
   return (
@@ -205,6 +219,7 @@ function SendProposalModal({ proposal, onClose, onSent }) {
   const [services, setServices] = useState({})
   const [sendVia, setSendVia] = useState('email')
   const [errors, setErrors] = useState({})
+  const [sending, setSending] = useState(false)
 
   const toggleService = (key) => {
     setServices((prev) => prev[key] ? { ...prev, [key]: null } : { ...prev, [key]: { enabled: true, fee: '' } })
@@ -346,14 +361,16 @@ function SendProposalModal({ proposal, onClose, onSent }) {
             Cancel
           </button>
           <button
-            onClick={() => {
+            disabled={sending}
+            onClick={async () => {
               if (!validate()) return
               proposal._sendVia = sendVia
-              onSent(proposal)
+              setSending(true)
+              try { await onSent(proposal) } finally { setSending(false) }
             }}
-            className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]"
+            className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35] disabled:opacity-60"
           >
-            Send Proposal
+            {sending ? 'Sending…' : 'Send Proposal'}
           </button>
         </div>
       </motion.div>

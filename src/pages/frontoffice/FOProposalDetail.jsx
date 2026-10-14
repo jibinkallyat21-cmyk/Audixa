@@ -8,7 +8,7 @@ import AuditorChip from '../../components/shared/AuditorChip'
 import { useToast } from '../../components/shared/Toast'
 import { useModal } from '../../components/shared/Modal'
 import { foProposalDetail } from '../../data/sampleData'
-import { getGeneratedProposal, pdfBlobUrl } from '../../utils/proposals'
+import { emailProposal, getGeneratedProposal, pdfBlobUrl } from '../../utils/proposals'
 
 export default function FOProposalDetail() {
   const { id } = useParams()
@@ -37,7 +37,20 @@ export default function FOProposalDetail() {
         </p>
       ),
       confirmLabel: 'Approve & Send',
-      onConfirm: () => {
+      onConfirm: async () => {
+        if (generated?.contactEmail) {
+          try {
+            const r = await emailProposal(generated)
+            setStatus('Sent to Client')
+            showToast(r.delivered
+              ? `Proposal emailed to ${generated.contactEmail}`
+              : `Marked as sent — nothing was emailed because ${r.reason || 'email is not configured'}`, r.delivered ? undefined : 6000)
+          } catch (e) {
+            showToast(`Not sent — ${e.message}`, 6000)
+          }
+          closeModal()
+          return
+        }
         setStatus('Sent to Client')
         showToast(`Proposal sent to ${d.client}`)
         closeModal()
