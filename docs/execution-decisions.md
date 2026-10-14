@@ -19,6 +19,11 @@ Answers given by the audit lead while going through `docs/execution-gap-list.md`
 | 10 | EL request header | First line is the logged-in user's name followed by "Analytix _BO Audit" |
 | 11 | Framework by firm | The auditor chosen on the proposal decides the whole framework; nothing is mixed. MISCPA: 50% rule books (sampling). ABCPA: materiality method (above materiality 100%, random below). Applies from proposal creation onward |
 | 12 | Vouching ref numbers (MISCPA) | Sales 6002.02, COGS 10002.02, Expense 10001.02. Cash 5001.xx, Bank 5002.xx. ABCPA numbering open until its documents arrive |
+| 13 | Year-end dates | Taken from each engagement's audit period (set in the EL request); 31-12-2025 is only the default for FY2025 files |
+| 14 | Process 3.3 Steps 2-3 | Step 1's build instructions are the full rule set; Steps 2-3 are example outputs |
+| 15 | Templates for 3.5 | Audit lead uploads the prepaid template and FA_NEW_SHEET.xlsx before 3.5 is built |
+| 16 | File complexity (6.1) | Points score from the 11 factors, mapped to Low / Medium / High; manager can override with a reason |
+| 17 | Process 6 order | 6.1 allocation, 6.2 queries, 6.3 audit log, 6.4 archiving (document order) |
 
 ## Open items to ask later
 
@@ -27,4 +32,4 @@ Answers given by the audit lead while going through `docs/execution-gap-list.md`
 - **Monday.com details.** API token (integration user), board and group for EL requests, how a client's item is found, whether auditors reply with file columns or updates, where the request text goes.
 - **Company server storage details** (see decision 2).
 - **Step 4 for ABCPA.** Confirm whether the Rule Book's shareholder / parent-company GM / authorisation-letter checks also apply (assumed yes).
-- Remaining questions 10 to 16 in `docs/execution-gap-list.md` section 8.
+- Sampling files uploaded on 14 Oct (AR/AP workbook, Revenue/COGS/Expenses workbook, setup docs, process flow, SAMPLING.docx) are identical in content to the Rule Book. Use the two workbooks as layout references for ABCPA sampling.
