@@ -5,6 +5,9 @@
 //   ODOO_USER     login (email) of an Odoo user allowed to create quotations
 //   ODOO_API_KEY  API key for that user (Odoo > Preferences > Account Security)
 //   ODOO_PRODUCT_ID (optional) product.product id used for proposal lines
+//   ODOO_GATEWAY_TOKEN (optional) secret sent as a header so a firewall (e.g. Cloudflare) can
+//                      recognise these requests; header name defaults to x-audixa-gateway
+//   ODOO_GATEWAY_HEADER (optional) custom name for that header
 //   ALLOWED_ORIGIN  (optional) e.g. https://audixa-ruby.vercel.app
 // Without the Odoo variables the endpoint returns a clearly labelled demo document.
 import { buildProposalPdf, bytesToBase64 } from '../src/utils/simplePdf.js'
@@ -51,11 +54,13 @@ async function timedFetch(url, opts = {}, ms = 20000) {
   try { return await fetch(url, { ...opts, signal: ctl.signal }) } finally { clearTimeout(t) }
 }
 
+const gatewayHeaders = (cfg) => (cfg.gatewayToken ? { [cfg.gatewayHeader || 'x-audixa-gateway']: cfg.gatewayToken } : {})
+
 async function odooProposal(cfg, input) {
   const rpc = async (service, method, args) => {
     const r = await timedFetch(`${cfg.url}/jsonrpc`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': 'Audixa-Proposals/1.0' },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': 'Audixa-Proposals/1.0', ...gatewayHeaders(cfg) },
       body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { service, method, args }, id: Date.now() }),
     })
     const text = await r.text()
@@ -102,7 +107,7 @@ async function odooProposal(cfg, input) {
     const act = await call('sale.order', 'action_preview_sale_order', [[orderId]])
     const link = `${cfg.url}${act.url}`
     out.portalUrl = link
-    const pdf = await timedFetch(`${link}${link.includes('?') ? '&' : '?'}report_type=pdf&download=true`, {}, 25000)
+    const pdf = await timedFetch(`${link}${link.includes('?') ? '&' : '?'}report_type=pdf&download=true`, { headers: { 'User-Agent': 'Audixa-Proposals/1.0', ...gatewayHeaders(cfg) } }, 25000)
     if (pdf.ok && (pdf.headers.get('content-type') || '').includes('pdf')) {
       out.pdfBase64 = Buffer.from(await pdf.arrayBuffer()).toString('base64')
     } else {
@@ -140,6 +145,7 @@ export default async function handler(req, res) {
   const cfg = {
     url: (process.env.ODOO_URL || '').replace(/\/+$/, ''), db: process.env.ODOO_DB,
     user: process.env.ODOO_USER, key: process.env.ODOO_API_KEY, productId: process.env.ODOO_PRODUCT_ID,
+    gatewayToken: process.env.ODOO_GATEWAY_TOKEN, gatewayHeader: process.env.ODOO_GATEWAY_HEADER,
   }
   if (!cfg.url || !cfg.db || !cfg.user || !cfg.key) return res.status(200).json(demoProposal(input))
 

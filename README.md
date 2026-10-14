@@ -29,6 +29,7 @@ Set these in Vercel (Project > Settings > Environment Variables), then redeploy:
 | `ODOO_DB` | Odoo database name |
 | `ODOO_USER` | Login (email) of an Odoo user who can create quotations |
 | `ODOO_API_KEY` | API key for that user (Odoo > Preferences > Account Security) |
+| `ODOO_GATEWAY_TOKEN` | Optional. Secret sent as the `x-audixa-gateway` header (name via `ODOO_GATEWAY_HEADER`). Use with a Cloudflare/firewall rule that lets requests carrying this header reach `/jsonrpc` and `/my/orders/` without a bot challenge |
 | `ODOO_PRODUCT_ID` | Optional. `product.product` id used for proposal lines (default: an "Audit Services" product is found/created) |
 | `ALLOWED_ORIGIN` | Optional. Only accept requests from this origin, e.g. `https://audixa-ruby.vercel.app` |
 
