@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Download, FileSpreadsheet, Loader2, Upload } from 'lucide-react'
-import AuditTeamLayout from '../../components/team/AuditTeamLayout'
-import PageTransition from '../../components/shared/PageTransition'
+import Shell from '../../components/execution/Shell'
 import { useToast } from '../../components/shared/Toast'
 import { FieldInput, readDocument } from '../../components/execution/elShared'
 import { Card, Chip, DataTable, Flags, ListEditor } from '../../components/execution/ReviewParts'
@@ -240,7 +239,7 @@ function EosbTab({ period: initialPeriod }) {
 }
 
 // ── page ───────────────────────────────────────────────────────────────────
-export default function TeamBasicDocuments() {
+export default function TeamBasicDocuments({ embedded = false }) {
   const profiles = useClientProfiles()
   const { requests } = useELRequests()
   const [all, setAll] = useStore('basic-docs', {})
@@ -271,8 +270,7 @@ export default function TeamBasicDocuments() {
   }
 
   return (
-    <AuditTeamLayout title="Basic Documents">
-      <PageTransition>
+    <Shell embedded={embedded} title="Basic Documents">
         <div className="space-y-5">
           <div>
             <h1 className="text-xl font-bold text-navy">Basic Documents Review</h1>
@@ -357,8 +355,7 @@ export default function TeamBasicDocuments() {
             </>
           )}
         </div>
-      </PageTransition>
-    </AuditTeamLayout>
+    </Shell>
   )
 }
 

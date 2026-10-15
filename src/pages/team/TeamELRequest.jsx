@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CheckCircle2, ClipboardCopy, FileText, Loader2, Plus, Send, Sparkles, Upload } from 'lucide-react'
-import AuditTeamLayout from '../../components/team/AuditTeamLayout'
-import PageTransition from '../../components/shared/PageTransition'
+import Shell from '../../components/execution/Shell'
 import { useToast } from '../../components/shared/Toast'
 import { FieldInput, FlagCard, readDocument } from '../../components/execution/elShared'
 import ELVerificationPanel from '../../components/execution/ELVerificationPanel'
@@ -171,7 +170,7 @@ function ProfileCard({ req, canEdit, onUpdate }) {
   )
 }
 
-export default function TeamELRequest() {
+export default function TeamELRequest({ embedded = false }) {
   const showToast = useToast()
   const { requests, upsert } = useELRequests()
   const { coordinators } = useCoordinators()
@@ -230,8 +229,7 @@ export default function TeamELRequest() {
   const openFlags = result?.flags || []
 
   return (
-    <AuditTeamLayout title="EL Requests">
-      <PageTransition>
+    <Shell embedded={embedded} title="EL Requests">
         <div className="space-y-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -389,7 +387,6 @@ export default function TeamELRequest() {
             )}
           </div>
         </div>
-      </PageTransition>
-    </AuditTeamLayout>
+    </Shell>
   )
 }
