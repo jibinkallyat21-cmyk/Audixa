@@ -61,6 +61,7 @@ import ManagerAllocation from './pages/manager/ManagerAllocation'
 import TeamArchive from './pages/team/TeamArchive'
 import TeamTBReview from './pages/team/TeamTBReview'
 import TeamSampling from './pages/team/TeamSampling'
+import TeamPayroll from './pages/team/TeamPayroll'
 import ManagerArchive from './pages/manager/ManagerArchive'
 import TeamTasks from './pages/team/TeamTasks'
 import TeamNotifications from './pages/team/TeamNotifications'
@@ -153,6 +154,7 @@ function AnimatedRoutes() {
         <Route path="/team/archive" element={<TeamArchive />} />
         <Route path="/team/tb-review" element={<TeamTBReview />} />
         <Route path="/team/sampling" element={<TeamSampling />} />
+        <Route path="/team/payroll" element={<TeamPayroll />} />
         <Route path="/team/tasks" element={<TeamTasks />} />
         <Route path="/team/notifications" element={<TeamNotifications />} />
         <Route path="/team/client/al-marai" element={<TeamClientDashboard />} />

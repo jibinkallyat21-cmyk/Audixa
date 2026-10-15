@@ -16,6 +16,7 @@ import {
   ClipboardList,
   Archive,
   Scale,
+  Banknote,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -45,6 +46,7 @@ const NAV_ITEMS = [
   { id: 'basic-docs', label: 'Basic Documents', href: '/team/basic-documents', icon: FileCheck2 },
   { id: 'tb-review', label: 'TB Review', href: '/team/tb-review', icon: Scale },
   { id: 'sampling', label: 'Sampling & Vouching', href: '/team/sampling', icon: ListChecks },
+  { id: 'payroll', label: 'Payroll & Assets', href: '/team/payroll', icon: Banknote },
   { id: 'audit-log', label: 'Audit Log', href: '/team/audit-log', icon: History },
   { id: 'query-tracker', label: 'Query Tracker', href: '/team/query-tracker', icon: ClipboardList },
   { id: 'archive', label: 'Archive and Closure', href: '/team/archive', icon: Archive },
