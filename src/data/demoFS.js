@@ -8,5 +8,5 @@ export const demoClientTB = () => [
   L('4001', 'Sales - local', 0, 5000, 990000), L('5001', 'Opening stock', 0, 0, 0), L('5002', 'Local purchases', 0, 540000, 5000), L('5003', 'Freight and customs', 0, 25000, 0),
   L('6001', 'Salaries and wages', 0, 168000, 0), L('6002', 'Rent expense', 0, 48000, 0), L('6003', 'Bank charges', 0, 1800, 0), L('6004', 'Advertising', 0, 14000, 0), L('6005', 'Depreciation expense', 0, 9500, 0), L('6006', 'Utilities', 0, 11200, 0),
 ].map((l, i, all) => ({ ...l }))
-export const demoPYAFS = { bs: { cash: 55000, ar: 176000, inventory: 90000, prepaid: 29500, tangible: 36000, relRecCur: 45000, ap: 137500, accrued: 60000, eosb: 48000, capital: 100000, re: 83500 }, pl: {} }
+export const demoPYAFS = { bs: { cash: 55000, ar: 176000, inventory: 90000, prepaid: 6000, tangible: 35500, relRecCur: 45000, ap: 137500, accrued: 39000, eosb: 48000, capital: 100000, re: 83000 }, pl: {} }
 export const demoBIS = [['Cash and bank', 24000, 'Dr'], ['Trade receivables', 61000, 'Dr'], ['Inventory', 30000, 'Dr'], ['Furniture and equipment', 18000, 'Dr'], ['Trade payables', 41000, 'Cr'], ['Share capital', 50000, 'Cr'], ['Sales', 220000, 'Cr'], ['Purchases', 120000, 'Dr'], ['Salaries', 36000, 'Dr'], ['Rent expense', 12000, 'Dr']]

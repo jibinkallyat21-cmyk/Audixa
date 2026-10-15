@@ -14,7 +14,7 @@ export default function ExitDemoButton() {
   }
 
   return (
-    <button
+    <button aria-label="Exit demo"
       type="button"
       onClick={handleExit}
       className="flex items-center rounded-[20px] border font-medium text-white transition-colors"
@@ -40,7 +40,7 @@ export default function ExitDemoButton() {
       }}
     >
       <LogOut size={13} />
-      Exit Demo
+      <span className="hidden sm:inline">Exit Demo</span>
     </button>
   )
 }

@@ -191,11 +191,11 @@ function TeamHeader({ title }) {
     <header className="relative flex h-16 w-full shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy px-6 text-white">
       <div className="flex items-center gap-2">
         <HamburgerButton />
-        <AnalytixMark size={22} className="shrink-0" />
+        <AnalytixMark size={22} className="hidden shrink-0 sm:block" />
         <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIT 360</span>
       </div>
 
-      <h1 className="absolute left-1/2 max-w-[150px] -translate-x-1/2 truncate text-center text-sm font-semibold text-white lg:max-w-none lg:text-base">{title}</h1>
+      <h1 className="min-w-0 flex-1 truncate px-2 text-center sm:px-4 text-sm font-semibold text-white lg:text-base">{title}</h1>
 
       <div className="flex items-center gap-4">
         <div
