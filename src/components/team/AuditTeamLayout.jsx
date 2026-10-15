@@ -12,6 +12,8 @@ import {
   Bell,
   FileSignature,
   FileCheck2,
+  History,
+  ClipboardList,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -39,6 +41,8 @@ const NAV_ITEMS = [
   { id: 'tasks', label: 'My Tasks', href: '/team/tasks', icon: ListChecks },
   { id: 'el-request', label: 'EL Requests', href: '/team/el-request', icon: FileSignature },
   { id: 'basic-docs', label: 'Basic Documents', href: '/team/basic-documents', icon: FileCheck2 },
+  { id: 'audit-log', label: 'Audit Log', href: '/team/audit-log', icon: History },
+  { id: 'query-tracker', label: 'Query Tracker', href: '/team/query-tracker', icon: ClipboardList },
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries', icon: MessageSquare },
   { id: 'deliverables', label: 'Deliverables', href: '/team/workspace/deliverables', icon: PackageCheck },
   { id: 'meetings', label: 'Meetings', href: '/team/meetings', icon: CalendarDays },

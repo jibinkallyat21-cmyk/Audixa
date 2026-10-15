@@ -53,6 +53,10 @@ import TeamWorkspaceAuditTrail from './pages/team/workspace/TeamWorkspaceAuditTr
 import TeamWorkspaceWorkingTB from './pages/team/workspace/TeamWorkspaceWorkingTB'
 import TeamELRequest from './pages/team/TeamELRequest'
 import TeamBasicDocuments from './pages/team/TeamBasicDocuments'
+import TeamAuditLog from './pages/team/TeamAuditLog'
+import ManagerAuditLog from './pages/manager/ManagerAuditLog'
+import TeamQueryTracker from './pages/team/TeamQueryTracker'
+import ManagerQueryTracker from './pages/manager/ManagerQueryTracker'
 import TeamTasks from './pages/team/TeamTasks'
 import TeamNotifications from './pages/team/TeamNotifications'
 import TeamClientDashboard from './pages/team/TeamClientDashboard'
@@ -139,6 +143,8 @@ function AnimatedRoutes() {
         <Route path="/team/workspace/audit-trail" element={<TeamWorkspaceAuditTrail />} />
         <Route path="/team/el-request" element={<TeamELRequest />} />
         <Route path="/team/basic-documents" element={<TeamBasicDocuments />} />
+        <Route path="/team/audit-log" element={<TeamAuditLog />} />
+        <Route path="/team/query-tracker" element={<TeamQueryTracker />} />
         <Route path="/team/tasks" element={<TeamTasks />} />
         <Route path="/team/notifications" element={<TeamNotifications />} />
         <Route path="/team/client/al-marai" element={<TeamClientDashboard />} />
@@ -156,6 +162,8 @@ function AnimatedRoutes() {
         <Route path="/manager/workload" element={<ManagerWorkload />} />
         <Route path="/manager/team-plan" element={<Navigate to="/manager/workload" replace />} />
         <Route path="/manager/escalation" element={<ManagerEscalation />} />
+        <Route path="/manager/audit-log" element={<ManagerAuditLog />} />
+        <Route path="/manager/queries" element={<ManagerQueryTracker />} />
         <Route path="/manager/performance" element={<ManagerPerformance />} />
         <Route path="/manager/meetings" element={<ManagerMeetings />} />
         <Route path="/manager/notifications" element={<ManagerNotifications />} />

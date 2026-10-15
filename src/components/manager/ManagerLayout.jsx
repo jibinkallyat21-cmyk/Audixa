@@ -8,6 +8,8 @@ import {
   LineChart,
   CalendarDays,
   Bell,
+  History,
+  ClipboardList,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -24,6 +26,8 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/manager/dashboard', icon: LayoutDashboard },
   { id: 'workload', label: 'Team & Workload', href: '/manager/workload', icon: Users2 },
   { id: 'escalation', label: 'Escalation', href: '/manager/escalation', icon: AlertTriangle },
+  { id: 'queries', label: 'Query Tracker', href: '/manager/queries', icon: ClipboardList },
+  { id: 'audit-log', label: 'Audit Log', href: '/manager/audit-log', icon: History },
   { id: 'performance', label: 'Performance', href: '/manager/performance', icon: LineChart },
   { id: 'meetings', label: 'Meetings', href: '/manager/meetings', icon: CalendarDays },
   { id: 'notifications', label: 'Notifications', href: '/manager/notifications', icon: Bell },

@@ -10,6 +10,7 @@ import { evaluateELRequest, setPath, requiredDocs, DOC_LABEL, normalizeAuditType
 import { newELRequest, useCoordinators, useELRequests } from '../../utils/elStore'
 import { applyProfile, getClientProfile, saveClientProfile, SERVICE_KEYS, SERVICE_LABEL, useClientProfiles } from '../../utils/clientProfiles'
 import { teamUser } from '../../data/sampleData'
+import { logEvent } from '../../utils/auditLog'
 import { FIRMS } from '../../data/firms.js'
 
 const DOC_FIELDS = {
@@ -185,6 +186,7 @@ export default function TeamELRequest() {
   const canEdit = isCoord && !req.sentAt
 
   const update = (next, logText) => {
+    if (logText) logEvent({ client: next.profileId || '', clientName: next.client, category: 'general', title: logText, description: `EL request, ${next.client}`, user: { name: teamUser.name, role: teamUser.role } })
     const log = logText ? [{ at: new Date().toISOString(), by: teamUser.name, text: logText }, ...(next.log || [])] : next.log
     upsert({ ...next, log })
   }
@@ -199,6 +201,7 @@ export default function TeamELRequest() {
     r.fields = applyProfile(r.fields, p)
     r.docs = { proposal: { fileName: p.proposalReference ? `Proposal ${p.proposalReference} (from client profile)` : 'Proposal (from client profile)', size: 0, uploadedAt: r.createdAt, read: 'profile' } }
     r.log = [{ at: r.createdAt, by: teamUser.name, text: 'EL request started; proposal details fetched from the client profile' }]
+    logEvent({ client: p.id, clientName: p.client, category: 'general', title: 'EL request started', description: 'Proposal details fetched from the client profile', user: { name: teamUser.name, role: teamUser.role } })
     upsert(r); setSelectedId(r.id); setPicking(false)
   }
 
@@ -219,6 +222,7 @@ export default function TeamELRequest() {
   const send = () => {
     upsert({ ...req, sentAt: new Date().toISOString(), draft: result.draft, status: 'Sent to auditor, awaiting EL',
       log: [{ at: new Date().toISOString(), by: teamUser.name, text: 'EL request sent to the auditor through Monday.com (demo: nothing was posted)' }, ...(req.log || [])] })
+    logEvent({ client: req.profileId || '', clientName: req.client, category: 'general', title: 'EL request sent to the auditor', description: 'Through Monday.com (demo: nothing was posted)', user: { name: teamUser.name, role: teamUser.role } })
     showToast('EL request recorded as sent (Monday.com demo mode)')
   }
 
