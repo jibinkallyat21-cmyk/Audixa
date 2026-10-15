@@ -101,6 +101,14 @@ const DOCS = {
     fields: 'contributors[]: for every row its employeeId (exactly as printed, keep leading zeros) and name (exactly as printed). Names only: do not report wages or dates.',
     schema: obj({ contributors: arr(obj({ employeeId: str, name: str })), notes }),
   },
+  afsPy: {
+    describe: 'prior-year audited financial statements (statement of financial position and statement of profit or loss) of a company; translate any Arabic into English and keep every number unchanged',
+    fields: 'lines[]: one entry per line item of the statement of financial position and of profit or loss, with name (as shown), amount (as PRESENTED in the AFS, positive unless the AFS shows brackets or a negative; use the closing / current-year column), and line: the best match from this list of ids: cash, receivables, prepayments, inventory, ppe (property plant and equipment, net), intangibles, vat, payables, accruals, related (related party balances), borrowings, eosb (employee end of service benefits), capital, reserves, re (retained earnings / accumulated losses), revenue, cogs (cost of revenue / sales), opex (administrative, selling, general expenses), finance (finance costs), otherIncome, tax (zakat and income tax); use null when no id fits. Also periodEnd (ISO yyyy-mm-dd), months (length of the period, usually 12), currency, and distributions (dividends or distributions paid in the year, a positive number, or null). Do not total or recompute anything.',
+    schema: obj({
+      lines: arr(obj({ name: str, amount: numOrNull, line: str })), periodEnd: str, months: intOrNull, currency: str, distributions: numOrNull,
+      notes,
+    }),
+  },
   signedEL: {
     describe: 'a signed engagement letter (EL) returned by the client, with company stamps and signatures',
     fields: 'totalPages (number of pages in the EL); pagesWithStamp (list of page numbers that carry a company stamp or seal); lastPageStamp (true if the last page carries a company stamp, false if not, null if you cannot tell); lastPageSignature (true if a handwritten or digital signature is visible on the last page, false if none, null if you cannot tell or it is unclear); signedBy (the printed name of the signatory next to the signature, if shown); signatoryCapacity (the capacity stated, for example shareholder, manager, general manager of the parent company). Never decide whether the signature is genuine; only report what is visible.',
