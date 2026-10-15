@@ -17,6 +17,12 @@ const numOrNull = { type: ['number', 'null'] }
 const obj = (properties) => ({ type: 'object', properties, required: Object.keys(properties), additionalProperties: false })
 const notes = { type: 'array', items: { type: 'string' } }
 
+const intOrNull = { type: ['integer', 'null'] }
+const nullableBool = { type: ['boolean', 'null'] }
+
+const arr = (item) => ({ type: 'array', items: item })
+const REF = { type: ['string', 'null'] }
+
 const DOCS = {
   proposal: {
     describe: 'a signed or unsigned audit engagement proposal',
@@ -37,6 +43,80 @@ const DOCS = {
     describe: 'Articles of Association (AOA) of a Saudi company',
     fields: 'companyName (English; translate if only Arabic); capital exactly as written in the document including currency (for example "SR 500,000"); yearEndDay and yearEndMonth (numbers) of the financial year-end; startsFromCR (true if the AOA says the first financial year runs from the CR date instead of giving a start date).',
     schema: obj({ companyName: str, capital: str, yearEndDay: numOrNull, yearEndMonth: numOrNull, startsFromCR: bool, notes }),
+  },
+  elReceived: {
+    describe: 'an engagement letter (EL) issued by an audit firm to its client',
+    fields: 'companyName (the client named in the EL, English); periodStart and periodEnd (the audit period, ISO yyyy-mm-dd); auditFee and translationFee (as numbers, EXCLUDING VAT; null when not shown in the EL; do not report Zakat or account finalisation fees); feesIncludeVat (true if the EL states its fees include VAT); auditorName (the audit firm named as the auditor, exactly as written); letterheadPresent (true if the EL is printed on a firm letterhead with logo, address or contact details, false if it is plain, null if you cannot tell); letterheadFirmName (the firm name shown in the letterhead, if any); and for companyName, period, fees, auditorName and letterhead the page number (companyNamePage, periodPage, feePage, auditorPage, letterheadPage) where each was found. Do not judge signatures or stamps.',
+    schema: obj({
+      companyName: str, periodStart: str, periodEnd: str,
+      auditFee: numOrNull, translationFee: numOrNull, feesIncludeVat: bool,
+      auditorName: str, letterheadPresent: nullableBool, letterheadFirmName: str,
+      companyNamePage: intOrNull, periodPage: intOrNull, feePage: intOrNull, auditorPage: intOrNull, letterheadPage: intOrNull,
+      notes,
+    }),
+  },
+  aoaReview: {
+    describe: 'Articles of Association (AOA) of a company in Saudi Arabia; translate any Arabic content into English',
+    fields: 'companyName (English); crNumber if shown; capital exactly as written with currency, and capitalAmount as a number; registeredAddress; the financial year: fiscalYearStartDay/Month and fiscalYearEndDay/Month (numbers) with fiscalYearRef (clause or page), and whether the FIRST financial year differs in length from the standard one (firstYearDiffers, with firstYearNote); every shareholder/partner as shareholders[] with name, nationality (for a corporate shareholder leave nationality null and give countryOfIncorporation), shares (number), percent (number), isCorporate (true for a company), and ref (clause or page); managers[] (names) with managersRef; and amendmentHeaderNumber: the number shown in the HEADER of page 1 of the AOA (1 means never amended, 2 or more means amended), with amendmentRef. Quote the clause or page for each finding.',
+    schema: obj({
+      companyName: str, crNumber: str, capital: str, capitalAmount: numOrNull, registeredAddress: str,
+      fiscalYearStartDay: intOrNull, fiscalYearStartMonth: intOrNull, fiscalYearEndDay: intOrNull, fiscalYearEndMonth: intOrNull, fiscalYearRef: str,
+      firstYearDiffers: nullableBool, firstYearNote: str,
+      shareholders: arr(obj({ name: str, nationality: str, countryOfIncorporation: str, shares: numOrNull, percent: numOrNull, isCorporate: bool, ref: REF })),
+      managers: arr(obj({ name: str })), managersRef: str, amendmentHeaderNumber: intOrNull, amendmentRef: str,
+      notes,
+    }),
+  },
+  misaReview: {
+    describe: 'a MISA (Ministry of Investment) license; translate any Arabic content into English',
+    fields: 'licenseNumber; licenseType (for example services or trade); issueDate and expiryDate in Gregorian ISO yyyy-mm-dd, with issueDateHijri and expiryDateHijri as written when shown; status (Active, Expired, Suspended) if shown; companyNameEn and companyNameAr as shown; unifiedNumber; capitalAmount (number) and currency; shareholders[] with name, nationality and percent (ownership) if shown; ref (page).',
+    schema: obj({
+      licenseNumber: str, licenseType: str, issueDate: str, issueDateHijri: str, expiryDate: str, expiryDateHijri: str, status: str,
+      companyNameEn: str, companyNameAr: str, unifiedNumber: str, capitalAmount: numOrNull, currency: str,
+      shareholders: arr(obj({ name: str, nationality: str, percent: numOrNull })), ref: REF,
+      notes,
+    }),
+  },
+  vatReview: {
+    describe: 'a VAT registration certificate (Saudi Arabia)',
+    fields: 'companyName as shown; crNumber (Commercial Registration number); address; taxFrequency (monthly or quarterly) and taxPeriodText (the period stated); trn (VAT registration number exactly as printed); effectiveDate (effective registration date, ISO yyyy-mm-dd); hasBranches (true if the certificate lists branches, false if it lists none, null if unclear) and branches[] with name, crNumber, licenseNumber, contractNumber and address. If a field is not visible or unclear return null; never guess.',
+    schema: obj({
+      companyName: str, crNumber: str, address: str, taxFrequency: str, taxPeriodText: str, trn: str, effectiveDate: str, hasBranches: nullableBool,
+      branches: arr(obj({ name: str, crNumber: str, licenseNumber: str, contractNumber: str, address: str })),
+      notes,
+    }),
+  },
+  elBasic: {
+    describe: 'a signed engagement letter (EL) from an audit firm; check it page by page',
+    fields: 'companyName (the client, English); auditPeriodStart and auditPeriodEnd (ISO yyyy-mm-dd); totalPages and pages[]: for EVERY page its number, whether a company seal is visible on it (seal) and whether an authorised signature is visible on it (signature): true, false, or null if you cannot tell; auditFee (number), currency, and vatIncluded (true if the fee includes VAT, false if it excludes VAT, null if not stated). Never judge whether a signature is genuine.',
+    schema: obj({
+      companyName: str, auditPeriodStart: str, auditPeriodEnd: str, totalPages: intOrNull,
+      pages: arr(obj({ page: { type: 'integer' }, seal: nullableBool, signature: nullableBool })),
+      auditFee: numOrNull, currency: str, vatIncluded: nullableBool,
+      notes,
+    }),
+  },
+  contributorPdf: {
+    describe: 'a GOSI Active or Inactive Contributors list in PDF form',
+    fields: 'contributors[]: for every row its employeeId (exactly as printed, keep leading zeros) and name (exactly as printed). Names only: do not report wages or dates.',
+    schema: obj({ contributors: arr(obj({ employeeId: str, name: str })), notes }),
+  },
+  afsPy: {
+    describe: 'prior-year audited financial statements (statement of financial position and statement of profit or loss) of a company; translate any Arabic into English and keep every number unchanged',
+    fields: 'lines[]: one entry per line item of the statement of financial position and of profit or loss, with name (as shown), amount (as PRESENTED in the AFS, positive unless the AFS shows brackets or a negative; use the closing / current-year column), and line: the best match from this list of ids: cash, receivables, prepayments, inventory, ppe (property plant and equipment, net), intangibles, vat, payables, accruals, related (related party balances), borrowings, eosb (employee end of service benefits), capital, reserves, re (retained earnings / accumulated losses), revenue, cogs (cost of revenue / sales), opex (administrative, selling, general expenses), finance (finance costs), otherIncome, tax (zakat and income tax); use null when no id fits. Also periodEnd (ISO yyyy-mm-dd), months (length of the period, usually 12), currency, and distributions (dividends or distributions paid in the year, a positive number, or null). Do not total or recompute anything.',
+    schema: obj({
+      lines: arr(obj({ name: str, amount: numOrNull, line: str })), periodEnd: str, months: intOrNull, currency: str, distributions: numOrNull,
+      notes,
+    }),
+  },
+  signedEL: {
+    describe: 'a signed engagement letter (EL) returned by the client, with company stamps and signatures',
+    fields: 'totalPages (number of pages in the EL); pagesWithStamp (list of page numbers that carry a company stamp or seal); lastPageStamp (true if the last page carries a company stamp, false if not, null if you cannot tell); lastPageSignature (true if a handwritten or digital signature is visible on the last page, false if none, null if you cannot tell or it is unclear); signedBy (the printed name of the signatory next to the signature, if shown); signatoryCapacity (the capacity stated, for example shareholder, manager, general manager of the parent company). Never decide whether the signature is genuine; only report what is visible.',
+    schema: obj({
+      totalPages: { type: ['integer', 'null'] }, pagesWithStamp: { type: 'array', items: { type: 'integer' } },
+      lastPageStamp: nullableBool, lastPageSignature: nullableBool, signedBy: str, signatoryCapacity: str,
+      notes,
+    }),
   },
   misaClosure: {
     describe: 'a MISA (Ministry of Investment) closure letter for a company in liquidation',

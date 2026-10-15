@@ -4,10 +4,13 @@ import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
 import { FieldInput, FlagCard, readDocument } from '../../components/execution/elShared'
+import ELVerificationPanel from '../../components/execution/ELVerificationPanel'
+import SignedELPanel from '../../components/execution/SignedELPanel'
 import { evaluateELRequest, setPath, requiredDocs, DOC_LABEL, normalizeAuditType, fmtDate, fmtAmount } from '../../utils/elRequest.js'
 import { newELRequest, useCoordinators, useELRequests } from '../../utils/elStore'
 import { applyProfile, getClientProfile, saveClientProfile, SERVICE_KEYS, SERVICE_LABEL, useClientProfiles } from '../../utils/clientProfiles'
 import { teamUser } from '../../data/sampleData'
+import { logEvent } from '../../utils/auditLog'
 import { FIRMS } from '../../data/firms.js'
 
 const DOC_FIELDS = {
@@ -179,9 +182,11 @@ export default function TeamELRequest() {
   const req = requests.find((r) => r.id === selectedId) || null
   const result = useMemo(() => (req ? evaluateELRequest({ ...req, requestedBy: teamUser.name }) : null), [req])
   const coordinator = req ? coordinators[req.firm] : null
-  const canEdit = !!req && coordinator === teamUser.name && !req.sentAt
+  const isCoord = !!req && coordinator === teamUser.name
+  const canEdit = isCoord && !req.sentAt
 
   const update = (next, logText) => {
+    if (logText) logEvent({ client: next.profileId || '', clientName: next.client, category: 'general', title: logText, description: `EL request, ${next.client}`, user: { name: teamUser.name, role: teamUser.role } })
     const log = logText ? [{ at: new Date().toISOString(), by: teamUser.name, text: logText }, ...(next.log || [])] : next.log
     upsert({ ...next, log })
   }
@@ -196,6 +201,7 @@ export default function TeamELRequest() {
     r.fields = applyProfile(r.fields, p)
     r.docs = { proposal: { fileName: p.proposalReference ? `Proposal ${p.proposalReference} (from client profile)` : 'Proposal (from client profile)', size: 0, uploadedAt: r.createdAt, read: 'profile' } }
     r.log = [{ at: r.createdAt, by: teamUser.name, text: 'EL request started; proposal details fetched from the client profile' }]
+    logEvent({ client: p.id, clientName: p.client, category: 'general', title: 'EL request started', description: 'Proposal details fetched from the client profile', user: { name: teamUser.name, role: teamUser.role } })
     upsert(r); setSelectedId(r.id); setPicking(false)
   }
 
@@ -216,6 +222,7 @@ export default function TeamELRequest() {
   const send = () => {
     upsert({ ...req, sentAt: new Date().toISOString(), draft: result.draft, status: 'Sent to auditor, awaiting EL',
       log: [{ at: new Date().toISOString(), by: teamUser.name, text: 'EL request sent to the auditor through Monday.com (demo: nothing was posted)' }, ...(req.log || [])] })
+    logEvent({ client: req.profileId || '', clientName: req.client, category: 'general', title: 'EL request sent to the auditor', description: 'Through Monday.com (demo: nothing was posted)', user: { name: teamUser.name, role: teamUser.role } })
     showToast('EL request recorded as sent (Monday.com demo mode)')
   }
 
@@ -258,7 +265,7 @@ export default function TeamELRequest() {
                 return (
                   <button key={r.id} onClick={() => setSelectedId(r.id)} className={`w-full rounded-xl border p-3 text-left shadow-sm ${r.id === selectedId ? 'border-navy bg-white' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                     <p className="text-sm font-semibold text-navy">{r.client}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">{r.firm} · {r.sentAt ? 'Sent to auditor' : n ? `${n} open ${n === 1 ? 'flag' : 'flags'}` : r.docs && Object.keys(r.docs).length ? 'Ready to send' : 'Draft'}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">{r.firm} · {r.signedStatus ? `Signed EL ${r.signedStatus.toLowerCase()}` : r.elStatus ? `EL ${r.elStatus.toLowerCase()}` : r.sentAt ? 'Sent to auditor, awaiting EL' : n ? `${n} open ${n === 1 ? 'flag' : 'flags'}` : r.docs && Object.keys(r.docs).length ? 'Ready to send' : 'Draft'}</p>
                   </button>
                 )
               })}
@@ -368,6 +375,9 @@ export default function TeamELRequest() {
                     <p className="text-sm text-slate-400">The draft is generated once every document is in and every flag is resolved. The request cannot be finalised while a mandatory field is missing or a flag is open.</p>
                   )}
                 </div>
+
+                {req.sentAt && <ELVerificationPanel req={req} canAct={isCoord} onUpdate={update} />}
+                {req.elStatus === 'VERIFIED' && <SignedELPanel req={req} canAct={isCoord} onUpdate={update} />}
 
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                   <h2 className="mb-2 text-sm font-semibold text-navy">Activity</h2>

@@ -11,6 +11,13 @@ import {
   MessagesSquare,
   Bell,
   FileSignature,
+  FileCheck2,
+  History,
+  ClipboardList,
+  Archive,
+  Scale,
+  Banknote,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -37,6 +44,14 @@ const NAV_ITEMS = [
   { id: 'workspace', label: 'My Workspace', href: '/team/workspace', icon: FileStack },
   { id: 'tasks', label: 'My Tasks', href: '/team/tasks', icon: ListChecks },
   { id: 'el-request', label: 'EL Requests', href: '/team/el-request', icon: FileSignature },
+  { id: 'basic-docs', label: 'Basic Documents', href: '/team/basic-documents', icon: FileCheck2 },
+  { id: 'tb-review', label: 'TB Review', href: '/team/tb-review', icon: Scale },
+  { id: 'sampling', label: 'Sampling & Vouching', href: '/team/sampling', icon: ListChecks },
+  { id: 'payroll', label: 'Payroll & Assets', href: '/team/payroll', icon: Banknote },
+  { id: 'financials', label: 'Financial Statements', href: '/team/financials', icon: FileSpreadsheet },
+  { id: 'audit-log', label: 'Audit Log', href: '/team/audit-log', icon: History },
+  { id: 'query-tracker', label: 'Query Tracker', href: '/team/query-tracker', icon: ClipboardList },
+  { id: 'archive', label: 'Archive and Closure', href: '/team/archive', icon: Archive },
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries', icon: MessageSquare },
   { id: 'deliverables', label: 'Deliverables', href: '/team/workspace/deliverables', icon: PackageCheck },
   { id: 'meetings', label: 'Meetings', href: '/team/meetings', icon: CalendarDays },

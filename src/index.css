@@ -214,6 +214,11 @@ html.dark {
 html.dark select { color-scheme: dark; }
 html.dark select option { background-color: #0F1629; color: #F1F5F9; }
 
+/* Light-grey hover backgrounds turned buttons white-on-white in dark mode: use a subtle light tint instead */
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover { background-color: rgba(255,255,255,0.07) !important; }
+html.dark .hover\:bg-slate-200:hover { background-color: rgba(255,255,255,0.12) !important; }
+
 html.dark body {
   background-color: #080C18;
   color: #CBD5E1;

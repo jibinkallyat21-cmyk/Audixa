@@ -4,6 +4,7 @@ import { CheckCircle2, FileText, Loader2, X, AlertTriangle } from 'lucide-react'
 import { AUDITORS, AUDIT_TYPES, SERVICES, ProposalError, addGeneratedProposal, generateProposal } from '../../utils/proposals'
 import { foUser } from '../../data/sampleData'
 import { saveClientProfile, profileFromProposal } from '../../utils/clientProfiles'
+import { logEvent } from '../../utils/auditLog'
 import { RevenueCategorySelect, DiscountControl } from '../../components/frontoffice/ProposalFeeControls'
 import { feeForCategory, discountAmount } from '../../data/feeSchedule'
 
@@ -62,6 +63,7 @@ export default function NewProposalModal({ onClose, onView }) {
       )
       addGeneratedProposal(record)
       saveClientProfile(profileFromProposal({ ...form, client: form.client.trim(), contactName: form.contactName.trim(), contactEmail: form.contactEmail.trim(), crNumber: form.crNumber.trim(), city: form.city.trim() }, record))
+      logEvent({ client: record.id, clientName: form.client.trim(), category: 'general', title: `Proposal ${record.reference} generated`, description: `${form.auditor} · ${form.auditType}`, user: { name: foUser.name, role: foUser.role } })
       setResult(record); setPhase('done')
     } catch (err) {
       setFailure(err instanceof ProposalError ? err.message : 'Could not reach the proposal service. Please try again.')
