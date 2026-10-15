@@ -6,6 +6,58 @@ import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { useToast } from '../../../components/shared/Toast'
 import { useTeamRole } from '../../../hooks/useTeamRole'
+import TBReviewView from '../../../components/execution/TBReviewView'
+import SamplingVouchingView from '../../../components/execution/SamplingVouchingView'
+import PayrollAssetsView from '../../../components/execution/PayrollAssetsView'
+import FinancialStatementsView from '../../../components/execution/FinancialStatementsView'
+import AuditLogView from '../../../components/execution/AuditLogView'
+import QueryTrackerView from '../../../components/execution/QueryTrackerView'
+import ArchiveView from '../../../components/execution/ArchiveView'
+import TeamELRequest from '../TeamELRequest'
+import TeamBasicDocuments from '../TeamBasicDocuments'
+
+/* ── Working tools: each opens inside its own audit procedure ── */
+const TOOLS = {
+  obv: [{ id: 'tb', label: 'Opening balances and TB review', C: () => <TBReviewView /> }],
+  area: [{ id: 'payroll', label: 'Payroll, prepaid and depreciation', C: () => <PayrollAssetsView /> }],
+  sampling: [{ id: 'sv', label: 'Sampling, vouching and confirmations', C: () => <SamplingVouchingView /> }],
+}
+const EXTRA_PROCEDURES = [
+  { id: 'engagement', name: 'Engagement Letter and Basic Documents', description: 'EL request and verification, AOA, MISA, VAT certificate, EL review and the EOSB contributor lists.', tools: [{ id: 'el', label: 'EL requests', C: () => <TeamELRequest embedded /> }, { id: 'basic', label: 'Basic documents', C: () => <TeamBasicDocuments embedded /> }] },
+  { id: 'fs', name: 'Financial Statement Preparation', description: 'Client TB to IFRS TB (proper and disclaimer audits) and the financial statements from the TB and the prior-year audited AFS.', tools: [{ id: 'fs', label: 'IFRS TB and financial statements', C: () => <FinancialStatementsView /> }] },
+  { id: 'closure', name: 'Queries, Audit Log and File Closure', description: 'Client query follow-up, the audit log and trail, and archiving and closure of the audit file.', tools: [{ id: 'q', label: 'Query tracker', C: () => <QueryTrackerView /> }, { id: 'log', label: 'Audit log', C: () => <AuditLogView /> }, { id: 'arch', label: 'Archive and closure', C: () => <ArchiveView /> }] },
+]
+
+function ToolPanel({ tools }) {
+  const [open, setOpen] = useState(null)
+  const cur = tools.find((t) => t.id === open)
+  return (
+    <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-4">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Working tools</p>
+      <div className="flex flex-wrap gap-2">
+        {tools.map((t) => (
+          <button key={t.id} onClick={() => setOpen(open === t.id ? null : t.id)} className={`rounded-lg border px-3.5 py-2 text-xs font-semibold ${open === t.id ? 'border-navy bg-navy text-white' : 'border-slate-300 bg-white text-navy hover:bg-slate-50'}`}>{open === t.id ? 'Close: ' : 'Open: '}{t.label}</button>
+        ))}
+      </div>
+      {cur && <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4"><cur.C /></div>}
+    </div>
+  )
+}
+
+/* A procedure that is only a working tool (no sub-task sequence). */
+function ToolSection({ proc }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <button onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-4 px-5 py-4 text-left hover:bg-slate-50">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-xs font-bold text-white"><FlaskConical className="h-3.5 w-3.5" /></div>
+        <div className="min-w-0 flex-1"><p className="text-sm font-semibold text-navy">{proc.name}</p><p className="mt-0.5 text-[11px] text-slate-400">{proc.description}</p></div>
+        <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && <ToolPanel tools={proc.tools} />}
+    </div>
+  )
+}
 
 /* ── Sample data ── */
 const MAIN_PROCEDURES = [
@@ -340,6 +392,7 @@ function ProcedureSection({ proc, seqIndex, allStatuses, onStatusChange, isLead 
                 locked={false}
               />
             ))}
+            {TOOLS[proc.id] && <ToolPanel tools={TOOLS[proc.id]} />}
           </motion.div>
         )}
       </AnimatePresence>
@@ -423,6 +476,11 @@ export default function TeamWorkspaceProcedures() {
                 isLead={isLead}
               />
             ))}
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Other audit procedures</p>
+            {EXTRA_PROCEDURES.map((p) => <ToolSection key={p.id} proc={p} />)}
           </div>
 
           {/* Pending AI query drafts summary */}
