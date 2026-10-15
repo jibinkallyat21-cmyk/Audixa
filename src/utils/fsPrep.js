@@ -40,7 +40,9 @@ export function tbValidate(rows, tol = 1) {
 export function pyVsOpening(py, mappedRows) {
   return PY_BS_LINES.map(([key, label, sign]) => {
     const ifrsCodes = IFRS.filter((a) => a.line === key).map((a) => a.code)
-    const open = r2(mappedRows.filter((m) => ifrsCodes.includes(m.ifrs)).reduce((n, m) => n + nz(m.opening), 0)) * sign
+    const vatOpen = r2(mappedRows.filter((m) => m.ifrs === 'A108').reduce((n, m) => n + nz(m.opening), 0))     // net VAT sits in prepaid (debit) or accrued (credit)
+    const vatPart = key === 'prepaid' ? Math.max(0, vatOpen) : key === 'accrued' ? Math.max(0, -vatOpen) : 0
+    const open = r2(r2(mappedRows.filter((m) => ifrsCodes.includes(m.ifrs)).reduce((n, m) => n + nz(m.opening), 0)) * sign + vatPart)
     const pyVal = num(py?.bs?.[key]); const tbOpen = r2(open)
     if (pyVal === null) return { key, label, py: null, tbOpening: tbOpen, diff: null, status: tbOpen === 0 ? 'Nil' : 'FLAG', reason: tbOpen === 0 ? '' : 'The PY AFS has no amount for this line but the TB has an opening balance.', action: tbOpen === 0 ? '' : 'Obtain the PY AFS line or explain.' }
     const diff = r2(pyVal - tbOpen)

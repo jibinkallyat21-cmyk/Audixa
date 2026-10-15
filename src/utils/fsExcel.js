@@ -17,6 +17,7 @@ const LABEL = Object.fromEntries([...PY_BS_LINES.map((l) => [l[0], l[1]]), ...PY
 function effective(m) {
   if (!m.ifrs) return { line: null }
   const a = ifrsByCode(m.ifrs); let line = a.line; let moved = null
+  if (m.ifrs === 'A108') { line = m.final < 0 ? 'accrued' : 'prepaid'; moved = line === 'accrued' ? 'Net VAT payable (credit balance): shown in accrued expenses and other liabilities.' : null }
   if (m.ifrs === 'A102' && m.final < 0) { line = 'accrued'; moved = 'Customer account with a credit balance: shown in accrued expenses and other liabilities, not netted against receivables.' }
   if (m.ifrs === 'L101' && m.final > 0) { line = 'prepaid'; moved = 'Supplier account with a debit balance: shown in prepaid expenses and other receivable (advances to suppliers), not netted against payables.' }
   return { line, moved, from: a.line, st: ifrsByCode(line === 'accrued' ? 'L102' : line === 'prepaid' ? 'A107' : m.ifrs).st }
@@ -55,7 +56,7 @@ export async function buildFSWorkbook({ fs, ledgers, client = 'Company Name', pe
     nt.getCell(nr, 2).value = 'Total'; nt.getCell(nr, 3).value = { formula: nr > first ? `SUM(C${first}:C${nr - 1})` : '0' }; nt.getCell(nr, 4).value = { formula: `IF('PY AFS Extraction'!C${pyRow[line]}="","",'PY AFS Extraction'!C${pyRow[line]})` }
     nt.getCell(nr, 3).numFmt = NUM; nt.getCell(nr, 4).numFmt = NUM; nt.getCell(nr, 4).font = GRN; nt.getRow(nr).font = { ...TNR, bold: true }; noteTotal[line] = { row: nr, no: noteNo }; nr += 2 })
   finish(nt, [7, 62, 18, 18, 18])
-  const ref = (line, col = 'C') => (noteTotal[line] ? `Notes!${col}${noteTotal[line].row}` : '0')
+  const ref = (line, col = 'C') => (noteTotal[line] ? `N(Notes!${col}${noteTotal[line].row})` : '0')       // N() so a missing comparative reads as nothing, never as an error
 
   // SOFP
   const sf = S.SOFP; title(sf, `Statement of Financial Position as at 31 December ${cy}`, 4); sf.getRow(4).values = ['', 'Note', cy, pyY]; head(sf.getRow(4), 4)

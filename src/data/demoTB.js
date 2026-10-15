@@ -1,5 +1,6 @@
+import { groupOf } from '../utils/tbCore.js'
 // Demo trial balances and prior-year AFS for the TB review (clearly labelled demo data).
-const row = (code, name, opening, debit, credit, branch) => ({ code, name, opening, debit, credit, closing: opening + debit - credit, closingSupplied: true, branch: branch || '', sourceRow: 0, fileName: 'demo' })
+const row = (code, name, opening, debit, credit, branch) => ({ code, name, opening, debit, credit, closing: opening + debit - credit, closingSupplied: true, branch: branch || '', sourceRow: 0, fileName: 'demo', group: groupOf(name) })
 export function demoPY() {
   const base = [
     ['1001', 'Cash at Bank - SNB', 85000], ['1100', 'Trade Receivables', 410000], ['1200', 'Inventory', 230000], ['1300', 'Prepaid Expenses', 18000],

@@ -32,7 +32,7 @@ function ToolPanel({ tools }) {
   const [open, setOpen] = useState(null)
   const cur = tools.find((t) => t.id === open)
   return (
-    <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-4">
+    <div className="border-t border-slate-100 px-5 py-4">
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Working tools</p>
       <div className="flex flex-wrap gap-2">
         {tools.map((t) => (

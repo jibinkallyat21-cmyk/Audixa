@@ -54,3 +54,11 @@ test('FS workbook: direct links, no lookups on statements or notes, checks sheet
   assert.match(wb.getWorksheet('Client TB').getCell('I2').value.formula, /D2\+E2-F2\+G2-H2/)
   await wb.xlsx.writeBuffer()
 })
+
+import { demoClientTB, demoPYAFS } from '../src/data/demoFS.js'
+test('FS demo data: PY AFS balances; only the two deliberate opening differences are flagged; VAT credit goes to accrued', () => {
+  const fs = buildFS({ ledgers: demoClientTB(), py: demoPYAFS, inputs: { depreciation: 9500 } })
+  assert.equal(fs.py.assets, fs.py.liabilitiesEquity); assert.deepEqual(fs.opening.filter((o) => o.status === 'FLAG').map((o) => o.key).sort(), ['re', 'tangible'])
+  assert.equal(fs.st.cy.difference, 0); assert.equal(fs.cyEquity - fs.sce.closing, 500)   // the deliberate PY difference carries into the SCE and is reported, not hidden
+  assert.ok(fs.st.py.cur.prepaid === 6000 && fs.st.py.cl.accrued === 39000)
+})

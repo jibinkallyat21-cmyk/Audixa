@@ -172,3 +172,12 @@ test('notes are ranked High first and cover differences, failed checks and conso
   assert.ok(notes.some((n) => n.area === 'Opening balances' && /Trade receivables/i.test(n.ledger)))
   assert.ok(notes.some((n) => n.area === 'Mapping')); assert.equal(afsSigned({ line: 'payables', amount: 5 }), -5)
 })
+
+import { demoPY as dPY, demoCY as dCY, demoAFS as dAFS } from '../src/data/demoTB.js'
+import { compareOpening as cmp } from '../src/utils/tbChecks.js'
+test('demo data: opening agrees except the deliberate receivables difference', () => {
+  const py = dPY(); const cy = dCY(py); const r = cmp({ py, cy, afs: dAFS, tolerance: 1, distributions: 0 })
+  const bad = r.rows.filter((x) => x.status === 'Difference').map((x) => x.label)
+  assert.ok(r.rows.find((x) => x.label === 'Cash and bank').pyTb !== 0)
+  assert.ok(bad.length >= 1 && bad.length <= 3, bad.join(','))
+})

@@ -131,9 +131,10 @@ export function statements(tb, { comparative = 'opening' } = {}) {
   const fin = {}
   for (const [key, k] of [['cy', 'final'], ['py', 'opening']]) {
     const assets = (cs) => bs(cs, k); const liab = (cs) => r2(-bs(cs, k))
-    const cur = { cash: assets(['A101']), ar: assets(['A102']), termDep: assets(['A103']), tradingInv: assets(['A104']), inventory: assets(['A105']), relRecCur: assets(['A106']), prepaid: assets(['A107', 'A108']) }
+    const vatNet = bs(['A108'], k)                                     // net VAT: a debit balance is an asset, a credit balance a liability
+    const cur = { cash: assets(['A101']), ar: assets(['A102']), termDep: assets(['A103']), tradingInv: assets(['A104']), inventory: assets(['A105']), relRecCur: assets(['A106']), prepaid: r2(assets(['A107']) + Math.max(0, vatNet)) }
     const nc = { tangible: assets(['A201', 'A202']), intangible: assets(['A203']), biological: assets(['A204']), ltInv: assets(['A205']), relRecNc: assets(['A206']), ltRec: assets(['A207']) }
-    const cl = { ap: liab(['L101']), accrued: liab(['L102']), relPayCur: liab(['L103']), divPay: liab(['L104']) }; const ncl = { loans: liab(['L201']), relPayNc: liab(['L202']), eosb: liab(['L203']) }
+    const cl = { ap: liab(['L101']), accrued: r2(liab(['L102']) + Math.max(0, -vatNet)), relPayCur: liab(['L103']), divPay: liab(['L104']) }; const ncl = { loans: liab(['L201']), relPayNc: liab(['L202']), eosb: liab(['L203']) }
     const profit = key === 'cy' ? prof('final') : 0                            // P&L balances are not carried in the opening column
     const eq = { capital: liab(['E101']), statRes: liab(['E102']), otherRes: liab(['E103']), re: r2(liab(['E104']) + profit) }
     const sum = (o) => r2(Object.values(o).reduce((n, v) => n + v, 0))

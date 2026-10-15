@@ -133,8 +133,8 @@ export async function buildPartyWorkbook({ result, inputs, client = '' }) {
   sm.addRow(['Needs Review', { formula: `COUNTIF(Sheet1!$F$2:$F$${items.length + 1},"Needs Review")` }, { formula: `SUMIF(Sheet1!$F$2:$F$${items.length + 1},"Needs Review",Sheet1!$E$2:$E$${items.length + 1})` }])
   sm.addRow(['Total', { formula: `SUM(B${startRow}:B${nr})` }, { formula: `SUM(C${startRow}:C${nr})` }, { formula: `SUM(D${startRow}:D${nr})` }, { formula: `SUM(E${startRow}:E${nr})` }, { formula: `SUM(F${startRow}:F${nr})` }, '', { formula: `SUM(H${startRow}:H${nr})` }]).font = { ...ARIAL, bold: true }
   sm.addRow([]); sm.addRow(['Reconciliation to the ledger']).font = { ...ARIAL, bold: true }
-  sm.addRow(['Grand total per the ledger', { formula: `SUM(Sheet1!E2:E${items.length + 1})` }]); sm.addRow(['Total per categories', { formula: `C${nr + 1}` }]); sm.addRow(['Difference', { formula: `B${nr + 5}-B${nr + 6}` }])
-  sm.addRow(['Item count per the ledger', items.length]); sm.addRow(['Item count per categories', { formula: `B${nr + 1}` }]); sm.addRow(['Difference', { formula: `B${nr + 8}-B${nr + 9}` }])
+  sm.addRow(['Grand total per the ledger', { formula: `SUM(Sheet1!E2:E${items.length + 1})` }]); sm.addRow(['Total per categories', { formula: `C${nr + 1}` }]); sm.addRow(['Difference', { formula: `B${nr + 4}-B${nr + 5}` }])
+  sm.addRow(['Item count per the ledger', items.length]); sm.addRow(['Item count per categories', { formula: `B${nr + 1}` }]); sm.addRow(['Difference', { formula: `B${nr + 7}-B${nr + 8}` }])
   const noData = ['Trade Payable', 'Advance to Supplier', 'Trade Receivable', 'Advance from Customer'].filter((c) => !result.categories[c] && (inputs.customerLedger ? ['Trade Receivable', 'Advance from Customer'] : ['Trade Payable', 'Advance to Supplier']).includes(c))
   if (noData.length) sm.addRow(['Categories with no entries (no sheet created)', noData.join(', ')])
   for (let r = startRow; r <= sm.rowCount; r++) [3, 4, 5, 6].forEach((c) => { sm.getCell(r, c).numFmt = NUM }); for (let r = startRow; r < nr + 1; r++) sm.getCell(r, 7).numFmt = '0.00%'

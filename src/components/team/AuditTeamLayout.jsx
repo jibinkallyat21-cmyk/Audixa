@@ -195,7 +195,7 @@ function TeamHeader({ title }) {
         <span className="hidden text-sm font-bold tracking-wide sm:inline">AUDIT 360</span>
       </div>
 
-      <h1 className="absolute left-1/2 max-w-[150px] -translate-x-1/2 truncate text-center text-sm font-semibold text-white lg:max-w-none lg:text-base">{title}</h1>
+      <h1 className="min-w-0 flex-1 truncate px-4 text-center text-sm font-semibold text-white lg:text-base">{title}</h1>
 
       <div className="flex items-center gap-4">
         <div
