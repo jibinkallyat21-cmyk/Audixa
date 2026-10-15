@@ -58,6 +58,8 @@ import ManagerAuditLog from './pages/manager/ManagerAuditLog'
 import TeamQueryTracker from './pages/team/TeamQueryTracker'
 import ManagerQueryTracker from './pages/manager/ManagerQueryTracker'
 import ManagerAllocation from './pages/manager/ManagerAllocation'
+import TeamArchive from './pages/team/TeamArchive'
+import ManagerArchive from './pages/manager/ManagerArchive'
 import TeamTasks from './pages/team/TeamTasks'
 import TeamNotifications from './pages/team/TeamNotifications'
 import TeamClientDashboard from './pages/team/TeamClientDashboard'
@@ -146,6 +148,7 @@ function AnimatedRoutes() {
         <Route path="/team/basic-documents" element={<TeamBasicDocuments />} />
         <Route path="/team/audit-log" element={<TeamAuditLog />} />
         <Route path="/team/query-tracker" element={<TeamQueryTracker />} />
+        <Route path="/team/archive" element={<TeamArchive />} />
         <Route path="/team/tasks" element={<TeamTasks />} />
         <Route path="/team/notifications" element={<TeamNotifications />} />
         <Route path="/team/client/al-marai" element={<TeamClientDashboard />} />
@@ -166,6 +169,7 @@ function AnimatedRoutes() {
         <Route path="/manager/audit-log" element={<ManagerAuditLog />} />
         <Route path="/manager/queries" element={<ManagerQueryTracker />} />
         <Route path="/manager/allocation" element={<ManagerAllocation />} />
+        <Route path="/manager/archive" element={<ManagerArchive />} />
         <Route path="/manager/performance" element={<ManagerPerformance />} />
         <Route path="/manager/meetings" element={<ManagerMeetings />} />
         <Route path="/manager/notifications" element={<ManagerNotifications />} />

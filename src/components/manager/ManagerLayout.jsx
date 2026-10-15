@@ -11,6 +11,7 @@ import {
   History,
   ClipboardList,
   UserCheck,
+  Archive,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { id: 'escalation', label: 'Escalation', href: '/manager/escalation', icon: AlertTriangle },
   { id: 'allocation', label: 'File Allocation', href: '/manager/allocation', icon: UserCheck },
   { id: 'queries', label: 'Query Tracker', href: '/manager/queries', icon: ClipboardList },
+  { id: 'archive', label: 'Archive and Closure', href: '/manager/archive', icon: Archive },
   { id: 'audit-log', label: 'Audit Log', href: '/manager/audit-log', icon: History },
   { id: 'performance', label: 'Performance', href: '/manager/performance', icon: LineChart },
   { id: 'meetings', label: 'Meetings', href: '/manager/meetings', icon: CalendarDays },
