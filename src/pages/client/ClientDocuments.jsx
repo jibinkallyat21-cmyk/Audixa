@@ -137,7 +137,7 @@ function TableRow({ row, highlighted }) {
             </button>
           ) : canUpload ? (
             <label className={`${btnBase} cursor-pointer bg-brand text-white hover:bg-[#D12C35]`}>
-              <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) { setItemStatus(PORTAL_CLIENT.slug, row.ref, { status: 'Uploaded Processing', filename: f.name }); showToast(`${f.name} uploaded`) } }} />
+              <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) { setItemStatus(PORTAL_CLIENT.slug, row.ref, { status: 'Uploaded Processing', filename: f.name, alert: '' }); showToast(`${f.name} uploaded`) } }} />
               <Upload className="h-3 w-3" />
               {isRejected ? 'Re-upload' : 'Upload'}
             </label>

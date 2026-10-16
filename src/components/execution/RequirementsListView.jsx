@@ -43,7 +43,7 @@ function Cat({ title, count, note, tone, right, children, open: o0 = false }) {
   )
 }
 
-function MisList({ file }) {
+function MisList({ file, renderIssued }) {
   const showToast = useToast()
   const issuedAll = useIssuedLists()
   const issued = issuedAll[file.slug]
@@ -56,6 +56,7 @@ function MisList({ file }) {
   const sub = useTBSubmissions()[file.slug]
   const clientTB = sub && ['Submitted', 'Approved'].includes(sub.status) && sub.ledgers?.length ? sub : null
   const [reason, setReason] = useState('')
+  const [adjust, setAdjust] = useState(false)
 
   const useDemo = () => { setLedgers(demoCY(demoPY())); setSrc('Demo trial balance'); setOverrides({}); setErr(''); setMulti(false) }
   const onFile = async (f) => {
@@ -124,14 +125,17 @@ function MisList({ file }) {
         </div>
       )}
 
-      {!built && (
+      {issued && renderIssued && renderIssued(issued)}
+      {issued && renderIssued && <button onClick={() => setAdjust(!adjust)} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>{adjust ? 'Hide category changes' : 'Change categories (re-issuing resets review progress)'}</button>}
+
+      {(!issued || !renderIssued || adjust) && !built && (
         <>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Preset list · {preset.reduce((n, c) => n + c.items.length, 0)} items in {preset.length} categories (not yet filtered)</p>
           {preset.map((c) => <Cat key={c.id} title={c.title} count={c.items.length}><Items items={c.items} /></Cat>)}
         </>
       )}
 
-      {built && (
+      {built && (!issued || !renderIssued || adjust) && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-navy">{built.itemCount} requirements in {built.categories.length} of {built.analysis.length} categories apply to this client</p>
@@ -163,7 +167,7 @@ function MisList({ file }) {
   )
 }
 
-export default function RequirementsListView({ file }) {
+export default function RequirementsListView({ file, renderIssued }) {
   if (file.auditor !== 'MISCPA') {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -172,5 +176,5 @@ export default function RequirementsListView({ file }) {
       </div>
     )
   }
-  return <MisList key={file.slug} file={file} />
+  return <MisList key={file.slug} file={file} renderIssued={renderIssued} />
 }

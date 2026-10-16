@@ -11,7 +11,7 @@ import { useTeamRole } from '../../../hooks/useTeamRole'
 import { useSearchParams } from 'react-router-dom'
 import { teamRequirementCategories, teamAuditTrail, getTeamFile, teamFiles } from '../../../data/sampleData'
 import RequirementsListView from '../../../components/execution/RequirementsListView'
-import { PORTAL_CLIENT } from '../../../utils/requirementsStore'
+import { PORTAL_CLIENT, setItemStatus } from '../../../utils/requirementsStore'
 
 function AIHintBox({ text }) {
   const showToast = useToast()
@@ -337,7 +337,8 @@ function RequirementRow({ item, index, onUpdateItem }) {
   const handleGenericAction = () => showToast(`${action} — ${item.name}`)
 
   const hasFlag = !!item.aiFlag
-  const hasDetail = hasFlag || !!item.rejectReason || !!item.fileInfo
+  const longName = item.name.length > 60
+  const hasDetail = hasFlag || !!item.rejectReason || !!item.fileInfo || longName
   const toggle = () => setOpen((v) => !v)
 
   return (
@@ -428,6 +429,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
           >
             <div className="space-y-3 border-t border-slate-100 px-4 pb-4 pt-3 pl-12">
               <dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-xs sm:grid-cols-[8rem_1fr]">
+                {longName && (<><dt className="font-semibold uppercase tracking-wide text-slate-400">Requirement</dt><dd className="text-navy">{item.name}</dd></>)}
                 <dt className="font-semibold uppercase tracking-wide text-slate-400">Submitted file</dt>
                 <dd className="text-navy">{item.fileInfo || 'Not yet uploaded'}</dd>
                 {item.rejectReason && (<><dt className="font-semibold uppercase tracking-wide text-slate-400">Rejection reason</dt><dd className="text-navy">{item.rejectReason}</dd></>)}
@@ -441,7 +443,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
   )
 }
 
-function CategorySection({ category, onUpdateItem, statusFilter, searchQuery }) {
+export function CategorySection({ category, onUpdateItem, statusFilter, searchQuery }) {
   const [open, setOpen] = useState(category.defaultOpen)
 
   const visibleItems = category.items.filter((item) => {
@@ -799,6 +801,40 @@ function ReviewPointsSection({ canRaise }) {
   )
 }
 
+
+// The issued list for one client, reviewed with the same row layout as every other file: Accept, Reject with a reason, view file.
+function IssuedReview({ rec, slug }) {
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const categories = rec.categories.map((c) => {
+    const done = c.items.filter((i) => i.status === 'Accepted').length
+    const statusColor = done === c.items.length ? 'emerald' : c.items.some((i) => ['Under Review', 'Uploaded Processing', 'Rejected'].includes(i.status)) ? 'amber' : 'grey'
+    return {
+      id: c.id, title: c.title, completed: done, total: c.items.length, percent: Math.round((done / c.items.length) * 100), statusColor,
+      status: done === c.items.length ? 'Complete' : statusColor === 'amber' ? 'In review' : 'Awaiting client', defaultOpen: false,
+      items: c.items.map((i) => ({ ref: i.ref, name: i.text, status: i.status, fileInfo: i.filename ? `${i.filename} · ${i.status === 'Accepted' ? 'Accepted' : i.status === 'Rejected' ? 'Rejected' : 'Uploaded'}` : '', action: i.filename ? 'View File' : null, rejectReason: i.alert || '' })),
+    }
+  })
+  const onUpdate = (_cat, ref, patch) => {
+    const out = {}
+    if (patch.status) out.status = patch.status
+    if (patch.status === 'Rejected') out.alert = patch.rejectReason || ''
+    if (patch.status === 'Accepted') out.alert = ''
+    setItemStatus(slug, ref, out)
+  }
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requirements..." className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />
+        <select aria-label="Status filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-navy outline-none focus:border-navy">
+          {STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o === 'all' ? 'Status — all' : o}</option>)}
+        </select>
+      </div>
+      {categories.map((c) => <CategorySection key={c.id} category={c} onUpdateItem={onUpdate} statusFilter={statusFilter} searchQuery={search} />)}
+    </div>
+  )
+}
+
 export default function TeamWorkspaceRequirements() {
   const [params, setParams] = useSearchParams()
   const fileOptions = teamFiles.filter((f) => f.isDemo)
@@ -856,7 +892,7 @@ export default function TeamWorkspaceRequirements() {
           <p className="text-xs text-slate-500">The requirement list follows the auditor the client is allocated to.</p>
         </div>
 
-        {isMis ? <RequirementsListView file={selected} /> : (<>
+        {isMis ? <RequirementsListView file={selected} renderIssued={(rec) => <IssuedReview rec={rec} slug={selected.slug} />} /> : (<>
         <RequirementsListView file={selected} />
 
         <div className="space-y-6">
