@@ -13,20 +13,20 @@ export default function TBUploadStep({ D }) {
   const showToast = useToast()
   const sub = useTBSubmissions()[DEMO_FILE.slug]
   const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState('')
+  const [err, setErr] = useState([])
   const card = { background: D.card, border: `1px solid ${D.border}` }
 
   const onFile = async (f) => {
     if (!f) return
-    setBusy(true); setErr('')
+    setBusy(true); setErr([])
     try {
       const r = checkTBFormat(await readTBWorkbook(await f.arrayBuffer()))
-      if (!r.ok) setErr(`${r.reason} Please use the prescribed format and upload again.`)
+      if (!r.ok) setErr(r.errors)
       else { submitTB(DEMO_FILE, { fileName: f.name, ledgers: compactLedgers(r.ledgers), warnings: r.warnings, sheetName: r.sheetName }); showToast('Trial balance sent to the audit team') }
-    } catch { setErr('This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.') }
+    } catch { setErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']) }
     setBusy(false)
   }
-  const useDemo = () => { submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers: compactLedgers(demoCY(demoPY())), sheetName: 'Trial Balance' }); showToast('Demo trial balance sent to the audit team') }
+  const useDemo = () => { submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers: compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit }))), sheetName: 'Trial Balance' }); showToast('Demo trial balance sent to the audit team') }
   const template = async () => { const url = URL.createObjectURL(await buildTBTemplate()); const a = document.createElement('a'); a.href = url; a.download = 'Trial_Balance_Format.xlsx'; a.click(); URL.revokeObjectURL(url) }
 
   if (sub?.status === 'Submitted') return (
@@ -39,14 +39,19 @@ export default function TBUploadStep({ D }) {
   return (
     <div className="rounded-xl p-6" style={card}>
       <p className="text-base font-bold" style={{ color: D.text }}>Step 1: Upload your trial balance</p>
-      <p className="mt-1 text-xs" style={{ color: D.muted }}>Your audit requirement list is prepared from your trial balance, so only the documents relevant to you are requested. Please upload it in the prescribed format. The audit team reviews it before your list is released.</p>
+      <p className="mt-1 text-xs" style={{ color: D.muted }}>Your audit requirement list is prepared from your trial balance, so only the documents relevant to you are requested. Please upload it in the prescribed format. It must be at ledger level, without group or sub-group balances. The audit team reviews it before your list is released.</p>
       {sub?.status === 'Returned' && (
         <p className="mt-3 flex items-start gap-2 rounded-lg px-3 py-2 text-xs text-alert-red" style={{ background: 'rgba(230,57,70,0.08)' }}><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />Returned by the audit team: {sub.returnReason}. Please correct it and upload again.</p>
       )}
       <ul className="mt-4 grid gap-1 text-xs sm:grid-cols-2" style={{ color: D.muted }}>
         {PRESCRIBED_COLUMNS.map((c) => <li key={c.key} className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald" />{c.label}{c.required ? '' : ' (recommended)'}</li>)}
       </ul>
-      {err && <p className="mt-3 flex items-start gap-2 text-xs text-alert-red"><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{err}</p>}
+      {err.length > 0 && (
+        <div className="mt-3 rounded-lg px-3 py-2 text-xs text-alert-red" style={{ background: 'rgba(230,57,70,0.08)' }} role="alert">
+          <p className="flex items-center gap-2 font-semibold"><AlertCircle className="h-3.5 w-3.5 shrink-0" />This file was not accepted. Please correct the following and upload again.</p>
+          <ul className="mt-1 list-disc space-y-1 pl-6">{err.map((e) => <li key={e} className="break-words">{e}</li>)}</ul>
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap gap-2">
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#D12C35]">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}Upload trial balance (Excel)

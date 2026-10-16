@@ -3,12 +3,12 @@ import { loadExcelJS, workbookToBlob } from './eosbExcel.js'
 export async function buildTBTemplate() {
   const ExcelJS = await loadExcelJS()
   const wb = new ExcelJS.Workbook(); const ws = wb.addWorksheet('Trial Balance')
-  ws.addRow(['Ledger Code', 'Ledger Name', 'Opening', 'Debit', 'Credit', 'Closing']).font = { bold: true }
-  ws.addRow(['1001', 'Cash at Bank - Example Bank', 85000, 2350000, 2180000, 255000])
-  ws.addRow(['1100', 'Trade Receivables', 410000, 2300000, 2210000, 500000])
-  ;[12, 40, 16, 16, 16, 16].forEach((w, i) => { ws.getColumn(i + 1).width = w })
+  ws.addRow(['Ledger Name', 'Account Code', 'Opening Balance', 'Current Year Debit', 'Current Year Credit', 'Closing Balance']).font = { bold: true }
+  ws.addRow(['Cash at Bank - Example Bank', '1001', 85000, 2350000, 2180000, 255000])
+  ws.addRow(['Trade Receivables', '1100', 410000, 2300000, 2210000, 500000])
+  ;[40, 14, 18, 20, 20, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w })
   const n = wb.addWorksheet('Notes')
-  ;['Debit balances are positive and credit balances are negative in the Opening and Closing columns.', 'Debit and Credit are the current-year movements, both entered as positive amounts.', 'Closing = Opening + Debit - Credit.', 'Opening balances must agree with the previous year audit report.', 'Replace the two example rows with your ledgers. One row per ledger, no total row needed.'].forEach((t) => n.addRow([t]))
+  ;['One row per ledger. The trial balance must be at ledger level: no group, sub-group or total rows.', 'Only trade receivables, trade payables, advances from customers and advances to suppliers may be a single line. The party-wise balances are taken from the general ledger you provide.', 'Debit balances are positive and credit balances are negative in the Opening and Closing columns. Current Year Debit and Credit are entered as positive amounts.', 'Closing Balance = Opening Balance + Current Year Debit - Current Year Credit. A file where this does not hold is rejected.', 'Opening balances must agree with the previous year audit report.', 'Replace the two example rows with your ledgers.'].forEach((t) => n.addRow([t]))
   n.getColumn(1).width = 110
   return workbookToBlob(wb)
 }
