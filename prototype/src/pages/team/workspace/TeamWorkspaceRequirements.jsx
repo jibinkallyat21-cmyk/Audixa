@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ChevronRight, Download, Check, X, Info } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -10,6 +10,7 @@ import { useToast } from '../../../components/shared/Toast'
 import { useModal } from '../../../components/shared/Modal'
 import { useSearchParams } from 'react-router-dom'
 import { groupRequirements } from '../../../utils/requirementAreas'
+import RemarkThread from '../../../components/shared/RemarkThread'
 import { teamAuditTrail, teamFiles } from '../../../data/sampleData'
 import RequirementsListView from '../../../components/execution/RequirementsListView'
 import { PORTAL_CLIENT, setItemStatus } from '../../../utils/requirementsStore'
@@ -211,7 +212,7 @@ function AIFlagPanel({ item, onApprove }) {
   )
 }
 
-function RequirementRow({ item, index, onUpdateItem }) {
+function RequirementRow({ item, index, onUpdateItem, slug }) {
   const showToast = useToast()
   const { openModal, closeModal } = useModal()
   const [flash, setFlash] = useState(false)
@@ -254,7 +255,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
 
   const hasFlag = !!item.aiFlag
   const longName = item.name.length > 60
-  const hasDetail = hasFlag || !!item.rejectReason || !!item.fileInfo || longName
+  const hasDetail = hasFlag || !!item.rejectReason || !!item.fileInfo || longName || !!slug
   const toggle = () => setOpen((v) => !v)
 
   return (
@@ -351,6 +352,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
                 {item.rejectReason && (<><dt className="font-semibold uppercase tracking-wide text-slate-400">Rejection reason</dt><dd className="text-navy">{item.rejectReason}</dd></>)}
               </dl>
               {hasFlag && <AIFlagPanel item={item} onApprove={(text) => onUpdateItem({ rejectReason: text })} />}
+              {slug && <RemarkThread slug={slug} item={{ ref: item.ref, status: item.status, remarks: item.remarks, explanationOnly: item.explanationOnly }} by="Audit team" />}
             </div>
           </motion.div>
         )}
@@ -359,7 +361,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
   )
 }
 
-export function CategorySection({ category, onUpdateItem, statusFilter, searchQuery }) {
+export function CategorySection({ category, onUpdateItem, statusFilter, searchQuery, slug }) {
   const [open, setOpen] = useState(category.defaultOpen)
 
   const visibleItems = category.items.filter((item) => {
@@ -421,6 +423,7 @@ export function CategorySection({ category, onUpdateItem, statusFilter, searchQu
                   item={item}
                   index={idx}
                   onUpdateItem={(patch) => onUpdateItem(category.id, item.ref, patch)}
+                  slug={slug}
                 />
               ))
             ) : (
@@ -438,21 +441,24 @@ export function CategorySection({ category, onUpdateItem, statusFilter, searchQu
 /* ── TB Status & AI Analysis (simulated) ── */
 const STATUS_OPTIONS = ['all', 'Accepted', 'Under Review', 'Rejected', 'Pending Client', 'Uploaded Processing']
 
-// The issued list for one client, reviewed with the same row layout as every other file: Accept, Reject with a reason, view file.
+// The issued list for one client, grouped by audit area exactly as the client sees it: each area holds its documents, samples and cut-off items, reviewed
+// with the same row layout (Accept, Reject with a reason, remarks).
 function IssuedReview({ rec, slug }) {
   const [qp] = useSearchParams(); const focus = qp.get('item') || ''
-  const [view, setView] = useState(['samples', 'cutoff'].includes(qp.get('tab')) ? qp.get('tab') : 'documents')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const categories = groupRequirements(rec).filter((g) => g.docs.length).map((g) => ({ id: g.id, title: g.label, items: g.docs.flatMap((c) => c.items) })).map((c) => {
+  const groups = useMemo(() => groupRequirements(rec), [rec])
+  const [open, setOpen] = useState(() => new Set(focus ? groups.filter((g) => [...g.docs, ...g.samples, ...g.cutoff].some((c) => c.items.some((i) => i.ref === focus))).map((g) => g.id) : []))
+  const toggle = (id) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const catOf = (c) => {
     const done = c.items.filter((i) => i.status === 'Accepted').length
     const statusColor = done === c.items.length ? 'emerald' : c.items.some((i) => ['Under Review', 'Uploaded Processing', 'Rejected'].includes(i.status)) ? 'amber' : 'grey'
     return {
       id: c.id, title: c.title, completed: done, total: c.items.length, percent: Math.round((done / c.items.length) * 100), statusColor,
       status: done === c.items.length ? 'Complete' : statusColor === 'amber' ? 'In review' : 'Awaiting client', defaultOpen: false,
-      items: c.items.map((i) => ({ ref: i.ref, name: i.text, status: i.status, fileInfo: i.filename ? `${i.filename} · ${i.status === 'Accepted' ? 'Accepted' : i.status === 'Rejected' ? 'Rejected' : 'Uploaded'}` : '', action: i.filename ? 'View File' : null, rejectReason: i.alert || '' })),
+      items: c.items.map((i) => ({ ref: i.ref, name: i.text, status: i.status, fileInfo: i.explanationOnly ? 'Explanation only, no document' : i.filename ? `${i.filename} · ${i.status === 'Accepted' ? 'Accepted' : i.status === 'Rejected' ? 'Rejected' : 'Uploaded'}` : '', action: i.filename ? 'View File' : null, rejectReason: i.alert || '', remarks: i.remarks, explanationOnly: i.explanationOnly })),
     }
-  })
+  }
   const onUpdate = (_cat, ref, patch) => {
     const out = {}
     if (patch.status) out.status = patch.status
@@ -460,19 +466,34 @@ function IssuedReview({ rec, slug }) {
     if (patch.status === 'Accepted') out.alert = ''
     setItemStatus(slug, ref, out)
   }
-  const nSamples = rec.categories.filter((c) => c.group === 'samples').reduce((n, c) => n + c.items.length, 0), nCut = rec.categories.filter((c) => c.group === 'cutoff').reduce((n, c) => n + c.items.length, 0)
+  const q = search.trim().toLowerCase()
+  const shown = groups.filter((g) => !q || g.label.toLowerCase().includes(q) || [...g.docs, ...g.samples, ...g.cutoff].some((c) => c.items.some((i) => `${i.ref} ${i.text}`.toLowerCase().includes(q))))
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2" role="tablist">{[['documents', 'Documents', rec.categories.filter((c) => !c.group).reduce((n, c) => n + c.items.length, 0)], ['samples', 'Samples sent', nSamples], ['cutoff', 'Cut-off sent', nCut]].map(([id, l, n]) => <button key={id} role="tab" aria-selected={view === id} onClick={() => setView(id)} className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${view === id ? 'bg-navy text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{l} <span className={`ml-1.5 rounded-full px-2 py-0.5 text-xs ${view === id ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{n}</span></button>)}</div>
-      {view !== 'documents' ? <SamplesSent rec={rec} slug={slug} group={view} focus={focus} /> : <>
+      <SamplesSent rec={rec} slug={slug} view="summary" />
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requirements..." className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search an area or a requirement..." className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />
         <select aria-label="Status filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-navy outline-none focus:border-navy">
           {STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o === 'all' ? 'Status — all' : o}</option>)}
         </select>
       </div>
-      {categories.map((c) => <CategorySection key={c.id} category={c} onUpdateItem={onUpdate} statusFilter={statusFilter} searchQuery={search} />)}
-      </>}
+      {shown.map((g) => { const isOpen = q ? true : open.has(g.id); const pct = g.counts.total ? Math.round((g.counts.accepted / g.counts.total) * 100) : 0; return (
+        <section key={g.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <button onClick={() => toggle(g.id)} aria-expanded={isOpen} className="flex w-full flex-wrap items-center gap-4 px-6 py-4 text-left">
+            <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
+            <span className="min-w-[200px] flex-1 text-base font-bold text-navy">{g.label}</span>
+            <span className="text-xs text-slate-500">{g.docs.length ? `${g.docs.reduce((n, c) => n + c.items.length, 0)} documents` : ''}{g.samples.length ? ` · ${g.samples.reduce((n, c) => n + c.items.length, 0)} samples` : ''}{g.cutoff.length ? ` · ${g.cutoff.reduce((n, c) => n + c.items.length, 0)} cut-off items` : ''}</span>
+            <span className="text-sm font-semibold text-navy">{g.counts.accepted} of {g.counts.total} accepted</span>
+            <span className="h-2 w-28 overflow-hidden rounded-full bg-slate-100"><span className="block h-full rounded-full bg-emerald" style={{ width: `${pct}%` }} /></span>
+          </button>
+          {isOpen && (
+            <div className="space-y-5 border-t border-slate-100 px-6 pb-6 pt-5">
+              {g.docs.length > 0 && <div className="space-y-3"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Documents</p>{g.docs.map((c) => <CategorySection key={c.id} category={catOf(c)} onUpdateItem={onUpdate} statusFilter={statusFilter} searchQuery={search} slug={slug} />)}</div>}
+              {g.samples.length > 0 && <div className="space-y-3"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Samples</p><SamplesSent rec={{ categories: g.samples }} slug={slug} group="samples" focus={focus} view="blocks" /></div>}
+              {g.cutoff.length > 0 && <div className="space-y-3"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cut-off</p><SamplesSent rec={{ categories: g.cutoff }} slug={slug} group="cutoff" focus={focus} view="blocks" /></div>}
+            </div>)}
+        </section>) })}
+      {!shown.length && <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">Nothing matches.</p>}
     </div>
   )
 }

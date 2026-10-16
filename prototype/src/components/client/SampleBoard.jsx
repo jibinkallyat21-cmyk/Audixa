@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Upload, ChevronDown, Check, Clock } from 'lucide-react'
 import StatusPill from '../shared/StatusPill'
+import RemarkThread from '../shared/RemarkThread'
 import { useToast } from '../shared/Toast'
 import { PORTAL_CLIENT, setItemStatus } from '../../utils/requirementsStore'
 
@@ -30,11 +31,11 @@ function ItemRow({ it, wide }) {
                 <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) { setItemStatus(PORTAL_CLIENT.slug, it.ref, { status: 'Uploaded Processing', filename: f.name, alert: '' }); showToast(`${f.name} uploaded`) } }} />
                 <Upload className="h-3.5 w-3.5" />{it.status === 'Rejected' ? 'Re-upload' : 'Upload'}
               </label>
-            ) : <span className="inline-flex items-center gap-1 text-xs" style={{ color: D.muted }}>{it.status === 'Accepted' ? <Check className="h-3.5 w-3.5 text-emerald" /> : <Clock className="h-3.5 w-3.5" />}{it.filename || 'Received'}</span>}
+            ) : <span className="inline-flex items-center gap-1 text-xs" style={{ color: D.muted }}>{it.status === 'Accepted' ? <Check className="h-3.5 w-3.5 text-emerald" /> : <Clock className="h-3.5 w-3.5" />}{it.explanationOnly ? 'Explanation sent' : it.filename || 'Received'}</span>}
           </div>
         </td>
       </tr>
-      {open && <tr style={{ background: D.page }}><td colSpan={wide ? 7 : 8} className="px-4 py-4 text-sm leading-relaxed" style={{ color: D.text }}><b>What is needed: </b>{it.text.replace(/^(Sample|Item) \d+: /, '')}{it.alert ? <p className="mt-2 text-alert-red">Rejected: {it.alert}</p> : null}</td></tr>}
+      {open && <tr style={{ background: D.page }}><td colSpan={wide ? 7 : 8} className="px-4 py-4 text-sm leading-relaxed" style={{ color: D.text }}><b>What is needed: </b>{it.text.replace(/^(Sample|Item) \d+: /, '')}{it.alert ? <p className="mt-2 text-alert-red">Rejected: {it.alert}</p> : null}<div className="mt-4"><RemarkThread slug={PORTAL_CLIENT.slug} item={it} by="Client" /></div></td></tr>}
     </>
   )
 }

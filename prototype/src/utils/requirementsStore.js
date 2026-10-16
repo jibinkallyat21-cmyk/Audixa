@@ -39,6 +39,21 @@ export function sendReminders(slug, refs) {
   if (count) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Reminder sent to the client', `${count} item${count === 1 ? '' : 's'} still waiting for the client`, 'doc-request') }
   return count
 }
+// A remark on one requirement: the client explains a transaction, the audit team replies. A thread per item. explanationOnly = the client answers with
+// an explanation and no document (mandatory when there is none); the item then goes to the team for review.
+export function postRemark(slug, ref, text, { by = 'Client', explanationOnly = false } = {}) {
+  const all = readStore(KEY, {}); const rec = all[slug]; const body = String(text || '').trim(); if (!rec || !body) return false
+  let found = false
+  const categories = rec.categories.map((c) => ({ ...c, items: c.items.map((i) => {
+    if (i.ref !== ref) return i; found = true
+    const next = { ...i, remarks: [...(i.remarks || []), { by, at: new Date().toISOString(), text: body }] }
+    return explanationOnly ? { ...next, status: 'Uploaded Processing', explanationOnly: true, alert: '' } : next
+  }) }))
+  if (!found) return false
+  writeStore(KEY, { ...all, [slug]: { ...rec, categories } })
+  log(rec.client, by === 'Client' ? (explanationOnly ? 'Explanation sent' : 'Client remark') : 'Audit team remark', `${ref}: ${body.slice(0, 120)}`, by === 'Client' ? 'client-response' : 'doc-request')
+  return true
+}
 // The team asks for the documents of each cash and bank account (and, only when a statement differs from the books, its reconciliation).
 export function requestBankDocuments(slug, accounts, yearEnd) {
   const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return -1

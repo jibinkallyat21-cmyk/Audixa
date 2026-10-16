@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, Navigate } from 'react-router-dom'
+import { useLiveMateriality } from '../../../utils/materialityStore'
 import { ChevronRight, ArrowRight, Wrench, Scissors, FileText, PenLine, CheckCircle2 } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
@@ -172,7 +173,7 @@ function ProcView({ area, proc, dc, statuses, issued }) {
 }
 
 export default function TeamWorkspaceAreas() {
-  const dc = useDemoClient(); const [params] = useSearchParams()
+  const dc = useDemoClient(); const [params] = useSearchParams(); const mat = useLiveMateriality(dc)
   const statuses = useProcedureStatuses(dc.slug); const issued = useIssuedLists()[dc.slug]
   const area = findArea(params.get('area')); const proc = area?.procedures.find((p) => p.id === params.get('proc'))
   const body = useMemo(() => {
@@ -181,6 +182,8 @@ export default function TeamWorkspaceAreas() {
     if (area) return <AreaView area={area} dc={dc} statuses={statuses} issued={issued} />
     return <AreaList dc={dc} statuses={statuses} issued={issued} />
   }, [dc, area, proc, statuses, issued])
+  // ABCPA files work from materiality: the audit areas stay closed until it is set.
+  if (dc.ready && dc.auditor === 'ABCPA' && !mat) return <Navigate to="/team/workspace/summary?setMateriality=1" replace />
   return (
     <AuditTeamLayout title="File Workspace">
       <PageTransition>

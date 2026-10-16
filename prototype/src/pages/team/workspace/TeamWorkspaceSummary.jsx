@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { Printer, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
@@ -42,7 +42,10 @@ function AreaTable({ title, ids, sum }) {
 export default function TeamWorkspaceSummary() {
   const dc = useDemoClient(); const statuses = useProcedureStatuses(dc.slug); const issued = useIssuedLists()[dc.slug]; const { queries } = useQueries()
   const sum = useMemo(() => (dc.ready ? fileSummary({ areas: AREAS, ledgers: dc.ledgers, rec: issued, statuses, queries: queries.filter((q) => q.client === dc.slug), tb: dc.tb }) : null), [dc, issued, statuses, queries])
-  const mat = useLiveMateriality(dc); const [matOpen, setMatOpen] = useState(false)
+  const mat = useLiveMateriality(dc); const [params, setParams] = useSearchParams(); const navigate = useNavigate()
+  const needed = dc.auditor === 'ABCPA' && !mat; const forced = params.get('setMateriality') === '1'
+  const [matOpen, setMatOpen] = useState(forced)
+  const closeMat = () => { setMatOpen(false); if (forced) setParams({}, { replace: true }) }
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
   return (
     <AuditTeamLayout title="File Workspace">
@@ -64,12 +67,13 @@ export default function TeamWorkspaceSummary() {
 
             {dc.auditor === 'ABCPA' && (
               <Card title="Materiality" subtitle="ABCPA files: the threshold the sampling and related party tools work from.">
+                {needed && <div role="alert" className="mb-3 rounded-xl border-2 border-brand bg-brand/5 px-5 py-4 text-sm font-semibold text-brand">{forced ? 'Set the materiality first. The audit areas stay closed until it is set.' : 'Materiality is not set. Set it now: the audit areas cannot be opened without it.'}</div>}
                 <div className="flex flex-wrap items-center gap-4">
                   {mat ? <p className="min-w-[260px] flex-1 text-sm text-slate-600">Materiality <b className="text-lg text-navy">SR {money(mat.materiality)}</b> · {BASES.find((b) => b.id === mat.basis)?.label} at {mat.pct}% of {money(mat.benchmark)} · sampling tools use 80%: SR {money(sampleMateriality(mat.materiality))}<span className="block text-xs text-slate-400">Set by {mat.setBy}</span></p>
                     : <p className="min-w-[260px] flex-1 text-sm text-amber">Materiality is not set yet. Set it before picking samples above and below materiality.</p>}
-                  <SecondaryButton onClick={() => setMatOpen(true)}>{mat ? 'Change materiality' : 'Set materiality'}</SecondaryButton>
+                  {needed ? <button onClick={() => setMatOpen(true)} className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#D12C35]">Set materiality</button> : <SecondaryButton onClick={() => setMatOpen(true)}>Change materiality</SecondaryButton>}
                 </div>
-                {matOpen && <MaterialityDialog dc={dc} current={mat} onClose={() => setMatOpen(false)} />}
+                {matOpen && <MaterialityDialog dc={dc} current={mat} onClose={closeMat} onSaved={() => { if (forced) navigate('/team/workspace/areas') }} />}
               </Card>)}
 
             <Card title="Needs your attention">
