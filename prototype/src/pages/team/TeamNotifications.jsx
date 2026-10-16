@@ -5,7 +5,7 @@ import { ShieldAlert, FileText, Clock, MessageCircle, Plus, Calendar, User, Sett
 import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
-import { teamNotifications, teamStatusNotifications, teamLongPendingItems } from '../../data/sampleData'
+import { useTeamScope } from '../../utils/teamScopeHook'
 
 const ICONS = { ShieldAlert, FileText, Clock, MessageCircle, Plus, Calendar, User }
 
@@ -24,6 +24,7 @@ export default function TeamNotifications() {
   const navigate = useNavigate()
   const showToast = useToast()
   const [tab, setTab] = useState('action')
+  const { notifications: teamNotifications, statusNotifications: teamStatusNotifications, longPending: teamLongPendingItems, demo } = useTeamScope()
   const [items, setItems] = useState(teamNotifications)
   const [showAllFyi, setShowAllFyi] = useState(false)
 
@@ -61,7 +62,7 @@ export default function TeamNotifications() {
                   tab === t.id ? 'border-navy bg-navy text-white' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                 }`}
               >
-                {t.label} ({t.count})
+                {t.label} ({demo ? ({ action: teamNotifications.length, status: teamStatusNotifications.length, all: teamNotifications.length + teamStatusNotifications.length }[t.id]) : t.count})
               </button>
             ))}
           </div>

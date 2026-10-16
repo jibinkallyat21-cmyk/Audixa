@@ -5,7 +5,7 @@ import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { useToast } from '../../../components/shared/Toast'
-import { teamAuditTrail } from '../../../data/sampleData'
+import { useTeamScope } from '../../../utils/teamScopeHook'
 
 const TYPE_STYLE = {
   ai: { icon: ShieldAlert, color: 'bg-amber/10 text-amber' },
@@ -31,6 +31,7 @@ export default function TeamWorkspaceAuditTrail() {
   const [filter, setFilter] = useState('All Events')
   const showToast = useToast()
   const activeFilter = FILTERS.find((f) => f.label === filter) || FILTERS[0]
+  const { auditTrail: teamAuditTrail, demo } = useTeamScope()
   const visibleEvents = teamAuditTrail.filter(activeFilter.match)
 
   return (
@@ -112,7 +113,7 @@ export default function TeamWorkspaceAuditTrail() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs text-slate-500">Showing 1–{visibleEvents.length} of 47 events</p>
+            <p className="text-xs text-slate-500">Showing 1–{visibleEvents.length} of {demo ? teamAuditTrail.length : 47} events</p>
             <div className="flex gap-1.5">
               <button
                 onClick={() => showToast('You are on the first page')}

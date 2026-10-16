@@ -40,14 +40,14 @@ function MentionHighlight({ text }) {
   )
 }
 
-export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tariq', label = 'Quick Chat', initialMessages = DEFAULT_MESSAGES, inbox = [] }) {
+export default function QuickChatWidget({ members = DEFAULT_MEMBERS, meId = 'tariq', label = 'Quick Chat', initialMessages = DEFAULT_MESSAGES, inbox = [], initialUnread = 2 }) {
   const [open, setOpen] = useState(false)
   const [minimised, setMinimised] = useState(false)
   const [messages, setMessages] = useState(initialMessages)
   const [input, setInput] = useState('')
   const [mentionQuery, setMentionQuery] = useState(null)
   const [mentionIdx, setMentionIdx] = useState(0)
-  const [unread, setUnread] = useState(2)
+  const [unread, setUnread] = useState(initialUnread)
   const [seenInbox, setSeenInbox] = useState(0)
   const inputRef = useRef(null)
   const bottomRef = useRef(null)

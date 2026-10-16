@@ -11,6 +11,9 @@ import {
   teamConversations,
 } from '../../data/sampleData'
 import { useTB } from '../../context/TBContext'
+import { useTeamScope } from '../../utils/teamScopeHook'
+import { useIssuedLists } from '../../utils/requirementsStore'
+import { useAuditLog } from '../../utils/auditLog'
 
 const TABS_BASE = [
   { id: 'requirements', label: 'Requirements', href: '/team/workspace/requirements' },
@@ -171,21 +174,25 @@ function ChatFloatButton() {
 }
 
 export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
-  const file = getTeamFile(fileSlug)
+  const scope = useTeamScope()
+  const issued = useIssuedLists(), log = useAuditLog()
+  const file = scope.demo ? scope.files[0] : getTeamFile(fileSlug)
   const location = useLocation()
   const { pendingAdjustments } = useTB()
 
-  const openQueries = teamQueries.filter((q) => q.status === 'Open').length
-  const inProgressProcedures = teamProcedures.filter((p) => p.status === 'In Progress').length
+  const openQueries = scope.demo ? scope.counts.openQueries : teamQueries.filter((q) => q.status === 'Open').length
+  const inProgressProcedures = scope.demo ? 0 : teamProcedures.filter((p) => p.status === 'In Progress').length
+  const pbcTotal = scope.demo ? (issued[file.slug]?.itemCount || 0) : file.pbcTotal
+  const trailCount = scope.demo ? log.filter((e) => e.clientName === file.client).length : 47
 
   const inRequirements = REQUIREMENT_TABS.some((id) => location.pathname === `/team/workspace/${id}`)
   const tabs = TABS_BASE.filter((tab) => REQUIREMENT_TABS.includes(tab.id) === inRequirements).map((tab) => {
-    if (tab.id === 'requirements') return { ...tab, badge: `${file.pbcTotal}`, badgeTone: 'grey' }
+    if (tab.id === 'requirements') return { ...tab, badge: `${pbcTotal}`, badgeTone: 'grey' }
     if (tab.id === 'queries') return { ...tab, badge: `${openQueries} open`, badgeTone: openQueries > 0 ? 'red' : 'grey' }
     if (tab.id === 'procedures') return { ...tab, badge: `${inProgressProcedures} in progress`, badgeTone: 'amber' }
     if (tab.id === 'working-tb') return { ...tab, badge: pendingAdjustments.length > 0 ? `${pendingAdjustments.length} pending` : 'TB', badgeTone: pendingAdjustments.length > 0 ? 'amber' : 'grey' }
     if (tab.id === 'deliverables') return { ...tab, badge: 'pending', badgeTone: 'grey' }
-    if (tab.id === 'audit-trail') return { ...tab, badge: '47', badgeTone: 'grey' }
+    if (tab.id === 'audit-trail') return { ...tab, badge: `${trailCount}`, badgeTone: 'grey' }
     return tab
   })
 
@@ -242,7 +249,7 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
         </div>
       </div>
 
-      <ChatFloatButton />
+      {!scope.demo && <ChatFloatButton />}
     </>
   )
 }

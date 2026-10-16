@@ -6,7 +6,7 @@ import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
 import { useToast } from '../../components/shared/Toast'
-import { teamMeetings, teamMeetingsCompletedCount } from '../../data/sampleData'
+import { useTeamScope } from '../../utils/teamScopeHook'
 
 const FILTERS = [
   { id: 'all', label: 'All', count: 12 },
@@ -20,6 +20,7 @@ export default function TeamMeetings() {
   const showToast = useToast()
   const [filter, setFilter] = useState('upcoming')
   const [showCompleted, setShowCompleted] = useState(false)
+  const { meetings: teamMeetings, completedMeetings: teamMeetingsCompletedCount, demo } = useTeamScope()
 
   const pendingMeetings = teamMeetings.filter((m) => m.status === 'Pending')
   const visibleMeetings =
@@ -54,7 +55,7 @@ export default function TeamMeetings() {
                   filter === f.id ? 'border-navy bg-navy text-white' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                 }`}
               >
-                {f.label} ({f.count})
+                {f.label} ({demo ? ({ all: teamMeetings.length, upcoming: teamMeetings.length, pending: pendingMeetings.length, completed: teamMeetingsCompletedCount }[f.id]) : f.count})
               </button>
             ))}
           </div>

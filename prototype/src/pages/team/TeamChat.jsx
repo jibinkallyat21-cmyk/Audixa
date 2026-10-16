@@ -7,13 +7,14 @@ import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
 import AuditTypeChip from '../../components/shared/AuditTypeChip'
 import { useToast } from '../../components/shared/Toast'
-import { teamConversations } from '../../data/sampleData'
+import { useTeamScope } from '../../utils/teamScopeHook'
 
 const CHAT_FILTERS = ['All', 'Unread', 'Clients', 'Team']
 
 export default function TeamChat() {
   const navigate = useNavigate()
   const showToast = useToast()
+  const { conversations: teamConversations } = useTeamScope()
   const [conversations, setConversations] = useState(() => teamConversations.map((c) => ({ ...c, messages: [...c.messages] })))
   const [activeId, setActiveId] = useState('al-marai')
   const [filter, setFilter] = useState('All')
@@ -45,6 +46,14 @@ export default function TeamChat() {
     )
     setDraft('')
   }
+
+  if (conversations.length === 0) return (
+    <AuditTeamLayout title="Messages">
+      <PageTransition>
+        <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 shadow-sm">No messages yet for this client file.</div>
+      </PageTransition>
+    </AuditTeamLayout>
+  )
 
   return (
     <AuditTeamLayout title="Messages">

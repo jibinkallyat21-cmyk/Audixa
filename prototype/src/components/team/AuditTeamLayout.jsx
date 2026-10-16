@@ -19,7 +19,9 @@ import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../sh
 import QuickChatWidget from '../shared/QuickChatWidget'
 import DemoGate from '../shared/DemoGate'
 import { useTeamRole } from '../../hooks/useTeamRole'
-import { teamUser, teamNotifications } from '../../data/sampleData'
+import { teamUser } from '../../data/sampleData'
+import { useTeamScope } from '../../utils/teamScopeHook'
+import { useDemoLoaded, useDemoAuditor } from '../../utils/demoData'
 
 const TEAM_CHAT_MEMBERS = [
   { id: 'nora', name: 'Nora Hassan', role: 'Audit Lead', initials: 'NH', color: '#7C3AED' },
@@ -29,7 +31,8 @@ const TEAM_CHAT_MEMBERS = [
   { id: 'reem', name: 'Reem Al-Zahrani', role: 'Associate', initials: 'RZ', color: '#D97706' },
 ]
 
-const NAV_BADGES = { notifications: { count: 8, tone: 'red' }, messages: { count: 3, tone: 'red' }, meetings: { count: 3, tone: 'amber' } }
+const BADGE_TONES = { notifications: 'red', messages: 'red', meetings: 'amber' }
+function useDepartment() { const demo = useDemoLoaded(), auditor = useDemoAuditor(); return demo ? auditor : teamUser.department }
 const BADGE_TONE = { red: 'bg-brand text-white', amber: 'bg-amber text-white' }
 
 const NAV_ITEMS = [
@@ -50,6 +53,8 @@ function isActive(pathname, href) {
 
 function TeamSidebar() {
   const location = useLocation()
+  const { navBadges } = useTeamScope()
+  const department = useDepartment()
 
   return (
     <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-navy text-white">
@@ -66,7 +71,7 @@ function TeamSidebar() {
           {NAV_ITEMS.map((item) => {
             const active = isActive(location.pathname, item.href)
             const Icon = item.icon
-            const badge = NAV_BADGES[item.id]
+            const badge = navBadges[item.id] > 0 ? { count: navBadges[item.id], tone: BADGE_TONES[item.id] } : null
             return (
               <li key={item.id} className="relative">
                 {active && (
@@ -99,7 +104,7 @@ function TeamSidebar() {
       <div className="border-t border-white/10 px-4 py-4">
         <p className="truncate text-sm font-medium text-white">{teamUser.name}</p>
         <span className="mt-1.5 inline-block rounded-full bg-brand/20 px-2 py-0.5 text-[10px] font-semibold text-brand">
-          {teamUser.role} — {teamUser.department}
+          {teamUser.role} — {department}
         </span>
       </div>
     </aside>
@@ -110,6 +115,7 @@ function NotificationsDropdown() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const containerRef = useRef(null)
+  const { notifications: teamNotifications } = useTeamScope()
   const unreadCount = teamNotifications.filter((n) => n.unread).length
   const topFive = teamNotifications.slice(0, 5)
 
@@ -217,7 +223,7 @@ function TeamHeader({ title }) {
         </div>
 
         <span className="hidden md:inline-flex rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80">
-          {teamUser.department} Department
+          {useDepartment()} Department
         </span>
 
         <NotificationsDropdown />
@@ -235,6 +241,7 @@ function TeamHeader({ title }) {
 }
 
 export default function AuditTeamLayout({ title, children }) {
+  const demo = useDemoLoaded()
   return (
     <SidebarDrawerProvider>
       <div className="flex h-screen w-full overflow-hidden bg-background">
@@ -249,7 +256,7 @@ export default function AuditTeamLayout({ title, children }) {
           </main>
         </div>
       </div>
-      <QuickChatWidget members={TEAM_CHAT_MEMBERS} meId="nora" label="Team Chat" />
+      <QuickChatWidget members={TEAM_CHAT_MEMBERS} meId="nora" label="Team Chat" {...(demo ? { initialMessages: [], initialUnread: 0 } : {})} />
     </SidebarDrawerProvider>
   )
 }

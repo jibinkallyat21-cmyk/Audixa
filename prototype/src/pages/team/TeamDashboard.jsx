@@ -6,14 +6,8 @@ import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
 import AuditTypeChip from '../../components/shared/AuditTypeChip'
-import {
-  teamUser,
-  teamPortfolioStats,
-  teamActionCards,
-  teamFiles,
-  teamTasks,
-  teamRecentActivity,
-} from '../../data/sampleData'
+import { teamUser } from '../../data/sampleData'
+import { useTeamScope } from '../../utils/teamScopeHook'
 
 const ICONS = { FileText, MessageCircle, ShieldAlert, Clock }
 
@@ -243,9 +237,12 @@ export default function TeamDashboard() {
   const [escalationOpen, setEscalationOpen] = useState(false)
   const [meetOpen, setMeetOpen] = useState(false)
   const [escalWidgetExpanded, setEscalWidgetExpanded] = useState(false)
-  const demoFiles = teamFiles.filter((f) => f.isDemo)
-  const urgentFiles = demoFiles.slice(0, 5)
-  const topTasks = teamTasks.slice(0, 4)
+  const scope = useTeamScope()
+  const { stats: teamPortfolioStats, actionCards: teamActionCards, activity: teamRecentActivity } = scope
+  const urgentFiles = scope.files.slice(0, 5)
+  const topTasks = scope.tasks.slice(0, 4)
+  const escalations = scope.demo ? [] : RECENT_CLIENT_ESCALATIONS
+  const todayLabel = scope.demo ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '05 Nov 2024'
 
   return (
     <AuditTeamLayout title="Dashboard">
@@ -255,7 +252,7 @@ export default function TeamDashboard() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl font-bold text-navy">Good morning, {teamUser.name.split(' ')[0]}.</h1>
-              <p className="text-sm text-slate-500">05 Nov 2024</p>
+              <p className="text-sm text-slate-500">{todayLabel}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -271,14 +268,14 @@ export default function TeamDashboard() {
                 <AlertTriangle className="h-3.5 w-3.5" /> Escalate
               </button>
               <span className="rounded-full bg-navy/10 px-3 py-1.5 text-xs font-semibold text-navy">
-                {teamPortfolioStats.totalActive} Active Files
+                {teamPortfolioStats.totalActive} Active {teamPortfolioStats.totalActive === 1 ? 'File' : 'Files'}
               </span>
               <motion.span
                 animate={{ opacity: [1, 0.6, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                 className="rounded-full bg-alert-red/10 px-3 py-1.5 text-xs font-semibold text-alert-red"
               >
-                {teamPortfolioStats.pendingActionsToday} Pending Actions Today
+                {teamPortfolioStats.pendingActionsToday} Pending {teamPortfolioStats.pendingActionsToday === 1 ? 'Action' : 'Actions'} Today
               </motion.span>
               <span className="rounded-full bg-emerald/10 px-3 py-1.5 text-xs font-semibold text-emerald">
                 Avg Turnaround: {teamPortfolioStats.avgTurnaround}
@@ -314,12 +311,12 @@ export default function TeamDashboard() {
                         transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
                         className="rounded-full bg-alert-red px-2.5 py-1 text-[11px] font-bold text-white"
                       >
-                        3 Flags
+                        {scope.demo ? card.count : 3} {(scope.demo ? card.count : 3) === 1 ? 'Flag' : 'Flags'}
                       </motion.span>
                     </div>
-                    <p className="mt-4 text-base font-bold">AI Verification Flags — Awaiting Your Approval</p>
+                    <p className="mt-4 text-base font-bold">{scope.demo ? 'Flags — Awaiting Your Approval' : 'AI Verification Flags — Awaiting Your Approval'}</p>
                     <p className="mt-2 text-sm leading-relaxed text-white/60">
-                      AI has drafted rejections awaiting your approval. Nothing is sent until you approve.
+                      {scope.demo ? card.note : 'AI has drafted rejections awaiting your approval. Nothing is sent until you approve.'}
                     </p>
                     <button
                       onClick={() => navigate(card.route)}
@@ -419,6 +416,7 @@ export default function TeamDashboard() {
               </button>
             </div>
             <div className="space-y-3">
+              {topTasks.length === 0 && <p className="text-xs text-slate-400">No tasks right now.</p>}
               {topTasks.map((task) => (
                 <div key={task.id} className="rounded-lg border border-slate-100 p-3">
                   <div className="flex items-center gap-2">
@@ -450,6 +448,7 @@ export default function TeamDashboard() {
                 </button>
               </div>
               <div className="space-y-3">
+                {teamRecentActivity.length === 0 && <p className="text-xs text-slate-400">No activity yet.</p>}
                 {teamRecentActivity.map((a) => (
                   <div key={a.id} className="border-b border-slate-50 pb-3 last:border-0 last:pb-0">
                     <p className="text-xs font-semibold text-navy">{a.client}</p>
@@ -465,10 +464,12 @@ export default function TeamDashboard() {
                 <p className="text-lg font-bold leading-none">{teamPortfolioStats.avgTurnaround}</p>
                 <p className="mt-1 text-[11px] text-white/50">Avg Turnaround</p>
               </div>
-              <div>
-                <p className="text-lg font-bold leading-none">92%</p>
-                <p className="mt-1 text-[11px] text-white/50">Firm Accuracy</p>
-              </div>
+              {!scope.demo && (
+                <div>
+                  <p className="text-lg font-bold leading-none">92%</p>
+                  <p className="mt-1 text-[11px] text-white/50">Firm Accuracy</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -482,7 +483,7 @@ export default function TeamDashboard() {
                 <AlertTriangle className="h-4 w-4 text-alert-red" />
                 <h2 className="text-sm font-semibold text-navy">Client Escalations</h2>
                 <span className="rounded-full bg-alert-red text-white text-[10px] font-bold px-1.5 py-0.5">
-                  {RECENT_CLIENT_ESCALATIONS.filter((e) => e.unread).length}
+                  {escalations.filter((e) => e.unread).length}
                 </span>
               </div>
               {escalWidgetExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
@@ -492,7 +493,8 @@ export default function TeamDashboard() {
               {escalWidgetExpanded && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                   <div className="divide-y divide-slate-50">
-                    {RECENT_CLIENT_ESCALATIONS.map((e) => (
+                    {escalations.length === 0 && <p className="px-5 py-4 text-xs text-slate-400">No client escalations on this file.</p>}
+                    {escalations.map((e) => (
                       <div key={e.id} className={`flex items-center justify-between gap-3 px-5 py-3 ${e.unread ? 'bg-alert-red/[0.02]' : ''}`}>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
