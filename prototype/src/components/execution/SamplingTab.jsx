@@ -194,7 +194,7 @@ function Materiality({ ctx, initialArea = 'Revenue', lockArea = false }) {
   return (
     <div className="space-y-6">
       <SentItems slug={dc.slug} area={p.area} group="samples" />
-      <Card title="Materiality method" subtitle="Everything above materiality is tested. Below it, a sample is chosen by the sample size."
+      <Card title="Materiality method" subtitle={useStored ? `Everything above materiality (SR ${money(stored.materiality)}, set in the file summary) is tested. Below it, a sample is chosen by the sample size.` : 'Everything above materiality is tested. Below it, a sample is chosen by the sample size.'}
         right={<SecondaryButton onClick={loadClient}>{dc.ready ? "Use the client's data" : 'Use demo data'}</SecondaryButton>}><AutoDemo run={loadClient} />
         <Section title="1. What are you testing?">
           {lockArea && <p className="text-sm text-navy">Testing <b>{p.area}</b>: only the accounts of this area are used{isParty ? ' (party list: debit balances for receivables, credit balances for payables)' : ''}.</p>}
@@ -202,16 +202,15 @@ function Materiality({ ctx, initialArea = 'Revenue', lockArea = false }) {
             <Field label="Test area" hint={isParty ? 'Uses the party list: debit balances for receivables, credit balances for payables' : 'Only the accounts of this area are used'}><select aria-label="Test area" value={p.area} onChange={(e) => set('area', e.target.value)} className={`${SEL} w-full`}>{AREAS.map((a) => <option key={a[0]}>{a[0]}</option>)}</select></Field>
           </FieldGrid>}
         </Section>
-        <Section title="2. Materiality" hint={calc ? `Calculated materiality ${money(calc.calculated)}; used for sampling (80%) ${money(calc.used)}.` : 'Enter the revenue, or type the materiality directly.'}>
-          {useStored && <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">Materiality was set in the <Link to="/team/workspace/summary" className="font-semibold text-navy hover:underline">file summary</Link>: SR {money(stored.materiality)} ({stored.pct}% of the chosen basis).</p>}
+        {!useStored && <Section title="2. Materiality" hint={calc ? `Calculated materiality ${money(calc.calculated)}; used for sampling (80%) ${money(calc.used)}.` : 'Enter the revenue, or type the materiality directly.'}>
           {!useStored && dc.ready && <p className="mb-3 rounded-lg bg-amber/5 px-3 py-2 text-sm text-amber">Materiality is not set for this file. Set it in the <Link to="/team/workspace/summary" className="font-semibold underline">file summary</Link>, or type it here.</p>}
           {!useStored && <FieldGrid>
             <Field label="Revenue (this period)"><input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} w-full`} /></Field>
             <Field label="Materiality as % of revenue"><input aria-label="Materiality percent" type="number" step="0.1" value={p.matPct} onChange={(e) => set('matPct', e.target.value)} className={`${SEL} w-full`} /></Field>
             <Field label="Or type the materiality"><input aria-label="Materiality used" type="number" value={p.manual} onChange={(e) => set('manual', e.target.value)} className={`${SEL} w-full`} /></Field>
           </FieldGrid>}
-        </Section>
-        <Section title="3. How many below materiality?">
+        </Section>}
+        <Section title={`${useStored ? 2 : 3}. How many below materiality?`}>
           <FieldGrid cols={4}>
             <Field label="Risk level"><select aria-label="Risk level" value={p.risk} onChange={(e) => set('risk', e.target.value)} className={`${SEL} w-full`}>{Object.keys(MAX_SAMPLE).map((k) => <option key={k}>{k}</option>)}</select></Field>
             <Field label="Entity size"><select aria-label="Entity size" value={p.size} onChange={(e) => set('size', e.target.value)} className={`${SEL} w-full`}><option>Small</option><option>Medium</option><option>Large</option></select></Field>
@@ -219,7 +218,7 @@ function Materiality({ ctx, initialArea = 'Revenue', lockArea = false }) {
             <Field label="Sample size override" hint="Leave empty to use the table"><input aria-label="Sample size override" type="number" value={p.override} onChange={(e) => set('override', e.target.value)} className={`${SEL} w-full`} /></Field>
           </FieldGrid>
         </Section>
-        <Section title={isParty ? '4. The party list' : '4. The ledger'}>
+        <Section title={`${useStored ? 3 : 4}. ${isParty ? 'The party list' : 'The ledger'}`}>
           <Upload label={isParty ? 'Choose the party list (Excel)' : 'Choose the ledger (Excel)'} onFile={(f) => f && (isParty ? loadParty(f) : load(f))} busy={busy} file={active} />
           {isParty ? <Mapping file={pfile} setFile={setPfile} keys={['code', 'name', 'debit', 'credit', 'closing']} /> : <Mapping file={file} setFile={setFile} keys={['ref', 'date', 'account', 'description', 'debit', 'credit']} />}
           {!isParty && file?.rows?.length > 0 && <p className="mt-3 text-sm text-slate-600">{ledgerItems.length} of {all.length} ledger entries belong to {p.area}.</p>}
