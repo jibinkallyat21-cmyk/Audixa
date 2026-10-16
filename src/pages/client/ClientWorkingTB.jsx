@@ -4,7 +4,7 @@ import { Upload, Download, CheckCircle2, XCircle, ChevronDown, ChevronUp, AlertT
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
-import { useTB } from '../../context/TBContext'
+import { useTB, formatUpdated } from '../../context/TBContext'
 import { useClientFY } from '../../context/ClientFYContext'
 import { useTheme } from '../../context/ThemeContext'
 
@@ -312,7 +312,7 @@ function AdjustmentCard({ adj, onApprove, onReject }) {
 
 export default function ClientWorkingTB() {
   const showToast = useToast()
-  const { tbLines: fy2024Lines, adjustments, pendingAdjustments, approveAdjustment, rejectAdjustment } = useTB()
+  const { lastUpdated, tbLines: fy2024Lines, adjustments, pendingAdjustments, approveAdjustment, rejectAdjustment } = useTB()
   const { selectedFY } = useClientFY()
   const [reviewedExpanded, setReviewedExpanded] = useState(false)
   const { isDark } = useTheme()
@@ -345,7 +345,7 @@ export default function ClientWorkingTB() {
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium" style={{ color: D.muted }}>Kingdom Retail Holdings LLC — {selectedFY}</span>
               {isCurrentFY ? (
-                <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: D.subtle }}>Last updated: Today 09:15 AM</span>
+                <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: D.subtle }}>{lastUpdated ? `Last updated: ${formatUpdated(lastUpdated)}` : 'Not yet approved'}</span>
               ) : (
                 <span className="flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-semibold text-emerald" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)' }}>
                   <CheckCircle2 className="h-3 w-3" /> Finalised — {selectedFY}
