@@ -10,8 +10,6 @@ import { clientBankTxns } from '../../utils/clientCutoffData'
 import { CONF_TESTS, confirmationTests, confirmationOverall, bankStatementRecon } from '../../utils/vouching'
 import { standardName } from '../../utils/evidence'
 import { useToast } from '../shared/Toast'
-import { logEvent } from '../../utils/auditLog'
-import { currentUser } from '../../utils/currentUser'
 
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const r2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100
@@ -24,14 +22,14 @@ const overallTone = (t) => (t === 'Agreed' || t === 'Reconciled' ? 'green' : /ne
 // Every cash and bank account on one page: what the client has sent for it (confirmation, statement for the year, statement for the subsequent period),
 // the trial balance against the statement, a reconciliation only where they differ, and the cut-off for that account.
 export default function CashBankTool({ dc, mode = 'accounts' }) {
-  const showToast = useToast(); const me = currentUser(); const rec = useIssuedLists()[dc.slug]
+  const showToast = useToast(); const rec = useIssuedLists()[dc.slug]
   const accounts = useMemo(() => bankAccountsFrom(dc.ledgers), [dc.ledgers]); const txns = useMemo(() => clientBankTxns(dc.ledgers).byCode, [dc.ledgers])
   const [yearEnd, setYearEnd] = useState('2025-12-31'); const [open, setOpen] = useState(accounts.length === 1 ? accounts[0].code : null); const [tabs, setTabs] = useState({}); const [view, setView] = useState({}); const [edit, setEdit] = useState({}); const [rejecting, setRejecting] = useState(''); const [reason, setReason] = useState('')
   const patch = (code, p) => setEdit((e) => ({ ...e, [code]: { ...e[code], ...p } }))
   const requested = (rec?.categories || []).some((c) => c.id === 'BANKACC')
   // Once the per-account documents are requested, any general bank request left over from before is folded into them (nothing is asked twice).
   const leftover = (rec?.categories || []).some((c) => c.id === 'BANK' && c.items.some((i) => /bank statements|bank confirmations|bank reconc/i.test(i.text)))
-  useEffect(() => { if (requested && leftover) requestBankDocuments(dc.slug, accounts, '2025-12-31') }, [requested, leftover, dc.slug, accounts])
+  useEffect(() => { if (rec && (leftover || !requested)) requestBankDocuments(dc.slug, accounts, '2025-12-31') }, [rec, requested, leftover, dc.slug, accounts])
 
   const rows = accounts.map((a, idx) => {
     const e = edit[a.code] || {}; const docs = bankDocs(rec, a.code)
@@ -45,7 +43,6 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
     const cut = (rec?.categories || []).filter((c) => c.group === 'cutoff').flatMap((c) => c.items).filter((i) => i.row?.ledger === a.name)
     return { ...a, idx, e, docs, stmt, closing, diff, conf, t, overall, status, cut }
   })
-  const request = () => { const n = requestBankDocuments(dc.slug, accounts, yearEnd); showToast(n < 0 ? 'The requirement list has not been issued yet. Approve the trial balance first.' : n ? `${n} documents requested from the client, account by account` : 'These documents were already requested.'); if (n > 0) logEvent({ client: dc.slug, clientName: dc.client, category: 'doc-request', title: 'Bank documents requested', description: `${n} documents for ${accounts.length} accounts`, user: me }) }
   const decide = (it, status) => { setItemStatus(dc.slug, it.ref, status === 'Accepted' ? { status, alert: '' } : { status, alert: reason }); setRejecting(''); setReason(''); showToast(`${it.ref} ${status === 'Accepted' ? 'accepted' : 'rejected'}`) }
 
   if (!accounts.length) return <Empty>This trial balance has no cash or bank balance.</Empty>
@@ -59,7 +56,7 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
   return (
     <div className="space-y-6">
       <Card title="Cash and bank accounts" subtitle="Every account in one list: its documents, the trial balance against the statement, and its cut-off. Open an account to work on it."
-        right={requested ? <span className="rounded-full bg-emerald/10 px-3 py-1.5 text-xs font-semibold text-emerald">Documents requested</span> : <PrimaryButton onClick={request}>Ask the client for the documents</PrimaryButton>}>
+        right={<span className="rounded-full bg-emerald/10 px-3 py-1.5 text-xs font-semibold text-emerald">{requested ? 'Requested from the client automatically' : 'Waiting for the requirement list'}</span>}>
         <div className="grid gap-3 sm:grid-cols-4"><Stat label="Accounts" value={accounts.length} /><Stat label="Agreed" value={agreed} tone="green" /><Stat label="Need attention" value={rows.filter((r) => r.diff !== null && r.diff !== 0).length} tone={rows.some((r) => r.diff) ? 'red' : 'green'} /><Stat label="Year-end" value={yearEnd.split('-').reverse().join('-')} /></div>
         <div className="max-w-xs"><Field label="Year-end"><input aria-label="Year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={INPUT} /></Field></div>
         <div className="overflow-x-auto rounded-xl border border-slate-200">
@@ -81,7 +78,7 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
                 </tr>) })}</tbody>
           </table>
         </div>
-        {!requested && <p className="text-xs text-slate-500">The client has not been asked for these documents yet. Press the button to ask for them account by account; a bank reconciliation is asked for only where a statement differs from the books.</p>}
+        <p className="text-xs text-slate-500">Every account in the trial balance is requested from the client when the requirement list is issued. A bank reconciliation is asked for only where a statement differs from the books.</p>
       </Card>
 
       {rows.filter((r) => open === r.code).map((r) => {

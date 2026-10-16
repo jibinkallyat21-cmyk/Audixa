@@ -147,7 +147,9 @@ function MisList({ file, renderIssued }) {
             <button onClick={issue} disabled={!openingOk} title={openingOk ? '' : 'Confirm the opening balance check first'} className={`${BTN} bg-brand text-white shadow-sm hover:bg-[#D12C35] disabled:opacity-40`}><Send className="h-3.5 w-3.5" />{clientTB?.status === 'Submitted' ? 'Approve trial balance and issue list' : issued ? 'Re-issue to client' : 'Issue to client'}</button>
           </div>
           {built.analysis.filter((c) => c.include).map((c) => {
-            const items = built.categories.find((x) => x.id === c.id).items
+            const found = built.categories.find((x) => x.id === c.id)
+            // The general bank and cash requests are replaced by one set of documents per account (shown under Bank).
+            const items = found ? found.items : c.id === 'BANK' || (c.id === 'CASH' && !built.analysis.some((x) => x.id === 'BANK' && x.include)) ? (built.categories.find((x) => x.id === 'BANKACC')?.items || []) : []
             return (
               <Cat key={c.id} title={c.title} count={items.length} note={c.overridden ? 'Added by the auditor.' : c.reason}
                 right={c.id !== 'TB' && <button onClick={() => toggle(c)} className={`${BTN} border border-slate-300 text-slate-600 hover:bg-slate-50`}><Minus className="h-3.5 w-3.5" />Not needed</button>}>

@@ -13,6 +13,7 @@ import SalaryTab from '../../../components/execution/SalaryTab'
 import GosiEosbTab from '../../../components/execution/GosiEosbTab'
 import PrepaidTab from '../../../components/execution/PrepaidTab'
 import DepreciationTab from '../../../components/execution/DepreciationTab'
+import EvidenceSchedule from '../../../components/execution/EvidenceSchedule'
 import AccrualsTab from '../../../components/execution/AccrualsTab'
 import RelatedPartyTool from '../../../components/execution/RelatedPartyTool'
 import { useDemoClient } from '../../../utils/useDemoClient'
@@ -59,6 +60,7 @@ function ToolBody({ proc, dc }) {
     case 'gosi': return <GosiEosbTab clientName={dc.client} />
     case 'prepaid': return <PrepaidTab {...common} />
     case 'depreciation': return <DepreciationTab {...common} />
+    case 'evidence': return <EvidenceSchedule dc={dc} areaId={proc.evidence} />
     case 'accruals': return <AccrualsTab {...common} />
     case 'related-tx': return <RelatedPartyTool dc={dc} />
     default: return null

@@ -37,3 +37,12 @@ test('sales invoice without a payment receipt is still supported', () => {
   assert.equal(checkEvidence(line, docs[1], 'Co', vouchingParts('sales')).status, 'Supported')
   assert.equal(checkEvidence(line, docs[0], 'Co', vouchingParts('sales')).status, 'Supported and paid')
 })
+import { evidenceLines, demoEvidenceFor, EVIDENCE_AREAS } from '../src/utils/evidenceSchedules.js'
+test('evidence schedules: lines from the trial balance, part payments allowed, statuses visible', () => {
+  for (const a of Object.keys(EVIDENCE_AREAS)) {
+    const lines = evidenceLines(a, led); const docs = demoEvidenceFor(lines, 'Co')
+    lines.forEach((l, i) => { const r = checkEvidence(l, docs[i], 'Co', l.parts); assert.ok(['Supported and paid', 'Supported', 'Supported, payment not shown', 'Mismatch'].includes(r.status)) })
+  }
+  const ar = evidenceLines('receivables', led); assert.ok(ar.length > 0); assert.ok(ar.every((l) => l.amount > 0))
+  const docs = demoEvidenceFor(ar, 'Co'); assert.equal(checkEvidence(ar[0], docs[0], 'Co', ar[0].parts).status, 'Supported and paid')   // the demo receipt is a part payment
+})

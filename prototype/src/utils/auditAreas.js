@@ -7,6 +7,7 @@ export const AREAS = [
     { id: 'cash-cutoff', label: 'Cash and bank cut-off', kind: 'tool', tool: 'cash-cutoff', desc: 'For each account, say how many items you want, pick them from the transactions around the year end, and send them to the client.' },
   ] },
   { id: 'receivables', section: 'Assets', label: 'Trade receivables', groups: ['receivables'], sampleAreas: ['ARAP', 'Trade receivables'], subMatch: /receiv|customer/i, blurb: 'Customers and what they owe', procedures: [
+    { id: 'receivables-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'receivables', desc: 'Statement of account or confirmation for each customer, and receipts after the year end.' },
     { id: 'ar-sample', label: 'Sample and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade receivables', desc: 'Select the customer balances to confirm and send them to the client.' },
     { id: 'ar-vouching', label: 'Vouching', kind: 'tool', tool: 'vouching', vouch: 'party', desc: 'Check the confirmations and support received for the selected balances.' },
   ] },
@@ -26,6 +27,7 @@ export const AREAS = [
     { id: 'exp-cutoff', label: 'Expense cut-off', kind: 'cutoff', area: 'expenses', desc: 'Pick expenses around the year end; the client supports each one.' },
   ] },
   { id: 'payables', section: 'Liabilities', label: 'Trade payables', groups: ['payables'], sampleAreas: ['ARAP', 'Trade payables'], subMatch: /payab|supplier/i, blurb: 'Suppliers and what is owed to them', procedures: [
+    { id: 'payables-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'payables', desc: 'Supplier statement or confirmation for each supplier, and payments after the year end.' },
     { id: 'ap-sample', label: 'Sample and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade payables', desc: 'Select the supplier balances to confirm and send them to the client.' },
     { id: 'ap-vouching', label: 'Vouching', kind: 'tool', tool: 'vouching', vouch: 'party', desc: 'Check the confirmations and support received for the selected balances.' },
   ] },
@@ -36,6 +38,7 @@ export const AREAS = [
     { id: 'depreciation', label: 'Depreciation schedule', kind: 'tool', tool: 'depreciation', desc: 'Depreciation by asset, compared with the trial balance.' },
   ] },
   { id: 'payroll', section: 'Liabilities', label: 'Payroll and employee benefits', groups: ['eosb'], blurb: 'Salaries, GOSI and end of service', procedures: [
+    { id: 'payroll-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'payroll', desc: 'End of service computation, employment contracts and payments to leavers.' },
     { id: 'salary', label: 'Salary schedule', kind: 'tool', tool: 'salary', desc: 'Build the salary schedule and compare it with the trial balance.' },
     { id: 'gosi-eosb', label: 'GOSI and end of service', kind: 'tool', tool: 'gosi', desc: 'GOSI against MUDAD and the end of service provision.' },
   ] },
@@ -44,6 +47,7 @@ export const AREAS = [
     { id: 'accr-notes', label: 'Accruals work', kind: 'notes', desc: 'Cut-off and unrecorded liabilities. Record your work and conclusion.' },
   ] },
   { id: 'borrowings', section: 'Liabilities', label: 'Borrowings', groups: ['borrowings'], blurb: 'Loans and finance', procedures: [
+    { id: 'borrowings-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'borrowings', desc: 'Loan agreement, lender statement and repayment proof for each loan.' },
     { id: 'loan-notes', label: 'Borrowings work', kind: 'notes', desc: 'Loan confirmations, terms, repayments and finance cost. Record your work and conclusion.' },
   ] },
   { id: 'tax', section: 'Income and expenses', label: 'Zakat and tax', groups: ['tax'], blurb: 'Zakat, income tax and the ZATCA position', procedures: [
@@ -53,13 +57,16 @@ export const AREAS = [
     { id: 'unc-notes', label: 'Place these accounts', kind: 'notes', desc: 'Decide which area each account belongs to and record why.' },
   ] },
   { id: 'inventory', section: 'Assets', label: 'Inventory', groups: ['inventory'], blurb: 'Stock', procedures: [
+    { id: 'inventory-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'inventory', desc: 'Stock count sheets and any third-party stock confirmation.' },
     { id: 'inv-notes', label: 'Inventory work', kind: 'notes', desc: 'Physical count attendance, obsolescence, NRV and cost. Record your work and conclusion; there is no separate tool yet.' },
   ] },
   { id: 'related', section: 'Liabilities', label: 'Related parties', groups: ['related'], blurb: 'Partners, shareholders and group', procedures: [
+    { id: 'related-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'related', desc: 'Agreement, confirmation and payment or receipt proof for each related party balance.' },
     { id: 'rp-transactions', label: 'Related party transactions', kind: 'tool', tool: 'related-tx', desc: 'ABCPA: you choose how many transactions above and below materiality; flagged ones are picked first, and anything already tested elsewhere is shown with a link.' },
     { id: 'rp-notes', label: 'Related party work', kind: 'notes', desc: 'Confirmations and your conclusion on related parties. Record your work.' },
   ] },
   { id: 'equity', section: 'Equity', label: 'Equity', groups: ['capital', 're', 'reserves'], blurb: 'Capital and reserves', procedures: [
+    { id: 'equity-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'equity', desc: 'Registration or articles for capital, resolutions for reserves, and proof of capital paid in.' },
     { id: 'eq-notes', label: 'Equity work', kind: 'notes', desc: 'Capital against the AOA and CR, and the movement in reserves and retained earnings. Record your work.' },
   ] },
 ]
