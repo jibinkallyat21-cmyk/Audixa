@@ -28,8 +28,7 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
   const patch = (code, p) => setEdit((e) => ({ ...e, [code]: { ...e[code], ...p } }))
   const requested = (rec?.categories || []).some((c) => c.id === 'BANKACC')
   // Once the per-account documents are requested, any general bank request left over from before is folded into them (nothing is asked twice).
-  const leftover = (rec?.categories || []).some((c) => c.id === 'BANK' && c.items.some((i) => /bank statements|bank confirmations|bank reconc/i.test(i.text)))
-  useEffect(() => { if (rec && (leftover || !requested)) requestBankDocuments(dc.slug, accounts, '2025-12-31') }, [rec, requested, leftover, dc.slug, accounts])
+  useEffect(() => { if (rec) requestBankDocuments(dc.slug, accounts, '2025-12-31') }, [rec, dc.slug, accounts])
 
   const rows = accounts.map((a, idx) => {
     const e = edit[a.code] || {}; const docs = bankDocs(rec, a.code)

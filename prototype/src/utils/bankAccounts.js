@@ -1,3 +1,4 @@
+import { slugOf } from './sampleRequests.js'
 // Cash and bank accounts on one page: for every account, the documents the client sends (confirmation, bank statement for the year, bank statement for the
 // subsequent period), the trial balance figure against the statement closing balance, and a bank reconciliation only when the two differ. Pure functions.
 const RECEIVED = ['Uploaded Processing', 'Under Review', 'Accepted']
@@ -61,4 +62,23 @@ export function accountStatus({ docs, diff, confOverall, reconOk }) {
   if (need.some((k) => docs[k].status !== 'Accepted')) return 'Documents to review'
   if (confOverall && confOverall !== 'Confirmed / Matched') return 'Confirmation needs attention'
   return 'Agreed'
+}
+
+// Cut-off items requested before the cut-off was done account by account sit in one block for all banks. They are moved to their own account's block, and an
+// item asked twice (same transaction) is kept once, keeping the copy the client has progressed furthest.
+const rank = (i) => (i.status === 'Accepted' ? 3 : ['Uploaded Processing', 'Under Review'].includes(i.status) ? 2 : i.status === 'Rejected' ? 1 : 0)
+export function withCutoffMigration(rec, accounts) {
+  let changed = false; let cats = (rec.categories || []).map((c) => ({ ...c, items: [...c.items] }))
+  for (const a of accounts) {
+    const area = a.type === 'Cash' ? 'cash' : 'bank'; const legacy = cats.find((c) => c.id === `cut-${area}`); if (!legacy) continue
+    const mine = legacy.items.filter((i) => i.row?.ledger === a.name); if (!mine.length) continue
+    const id = `cut-${slugOf(`${a.type} ${a.code}`).toLowerCase()}`
+    let target = cats.find((c) => c.id === id)
+    if (!target) { target = { id, title: `Cut-off: ${a.type}: ${a.name}`, reason: legacy.reason, group: 'cutoff', area, items: [] }; cats = [...cats, target] }
+    for (const it of mine) { const k = target.items.findIndex((t) => t.sampleKey === it.sampleKey); if (k < 0) target.items.push(it); else if (rank(it) > rank(target.items[k])) target.items[k] = it }
+    legacy.items = legacy.items.filter((i) => !mine.includes(i)); changed = true
+  }
+  cats = cats.filter((c) => c.items.length)
+  for (const c of cats) if (c.group) { const seen = new Map(); c.items.forEach((i) => { const k = i.sampleKey; if (k === undefined) return; if (!seen.has(k) || rank(i) > rank(seen.get(k))) seen.set(k, i) }); const keep = c.items.filter((i) => i.sampleKey === undefined || seen.get(i.sampleKey) === i); if (keep.length !== c.items.length) { c.items = keep; changed = true } }
+  return changed ? { rec: { ...rec, categories: cats, itemCount: cats.reduce((k, c) => k + c.items.length, 0) }, changed } : { rec, changed: false }
 }

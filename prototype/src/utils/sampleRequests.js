@@ -1,7 +1,7 @@
 // Samples and cut-off items raised by the tools become requirements for the client, once a person has approved them: one requirement per item, so the
 // client uploads the supporting document against each one. They sit in their own category on the issued list, grouped by area and, inside it, by
 // sub-group (for example "Above materiality", or "Debits" and "Credits"). Each item carries the fields shown in the client's table. Pure functions.
-const slugOf = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 14)
+export const slugOf = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 14)
 
 // samples: [{ key, text, data?, row?: { ref, date, ledger, description, amount }, subgroup? }]
 // key = a stable identifier of the item (invoice number, ledger line), so approving the same item twice does not duplicate it.

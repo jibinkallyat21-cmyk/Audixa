@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ChevronRight, Download, Check, X, Info } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -13,7 +13,9 @@ import { groupRequirements } from '../../../utils/requirementAreas'
 import RemarkThread from '../../../components/shared/RemarkThread'
 import { teamAuditTrail, teamFiles } from '../../../data/sampleData'
 import RequirementsListView from '../../../components/execution/RequirementsListView'
-import { PORTAL_CLIENT, setItemStatus } from '../../../utils/requirementsStore'
+import { PORTAL_CLIENT, setItemStatus, requestBankDocuments } from '../../../utils/requirementsStore'
+import { useDemoClient } from '../../../utils/useDemoClient'
+import { bankAccountsFrom } from '../../../utils/bankAccounts'
 
 function AIHintBox({ text }) {
   const showToast = useToast()
@@ -447,6 +449,9 @@ function IssuedReview({ rec, slug }) {
   const [qp] = useSearchParams(); const focus = qp.get('item') || ''
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  // A list issued before the bank documents and cut-off were done account by account is brought up to date (nothing is asked twice).
+  const dcl = useDemoClient()
+  useEffect(() => { if (dcl.ready && slug === dcl.slug) requestBankDocuments(slug, bankAccountsFrom(dcl.ledgers), '2025-12-31') }, [rec, slug, dcl.ready, dcl.slug, dcl.ledgers])
   const groups = useMemo(() => groupRequirements(rec), [rec])
   const [open, setOpen] = useState(() => new Set(focus ? groups.filter((g) => [...g.docs, ...g.samples, ...g.cutoff].some((c) => c.items.some((i) => i.ref === focus))).map((g) => g.id) : []))
   const toggle = (id) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
