@@ -203,13 +203,13 @@ function Materiality({ ctx, initialArea = 'Revenue', lockArea = false }) {
           </FieldGrid>}
         </Section>
         <Section title="2. Materiality" hint={calc ? `Calculated materiality ${money(calc.calculated)}; used for sampling (80%) ${money(calc.used)}.` : 'Enter the revenue, or type the materiality directly.'}>
-          {useStored && <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">Materiality was set in the <Link to="/team/workspace/summary" className="font-semibold text-navy hover:underline">file summary</Link>: SR {money(stored.materiality)} ({stored.pct}% of the chosen basis). Type a figure below only to override it for this test.</p>}
+          {useStored && <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">Materiality was set in the <Link to="/team/workspace/summary" className="font-semibold text-navy hover:underline">file summary</Link>: SR {money(stored.materiality)} ({stored.pct}% of the chosen basis).</p>}
           {!useStored && dc.ready && <p className="mb-3 rounded-lg bg-amber/5 px-3 py-2 text-sm text-amber">Materiality is not set for this file. Set it in the <Link to="/team/workspace/summary" className="font-semibold underline">file summary</Link>, or type it here.</p>}
-          <FieldGrid>
-            {!useStored && <Field label="Revenue (this period)"><input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} w-full`} /></Field>}
-            {!useStored && <Field label="Materiality as % of revenue"><input aria-label="Materiality percent" type="number" step="0.1" value={p.matPct} onChange={(e) => set('matPct', e.target.value)} className={`${SEL} w-full`} /></Field>}
+          {!useStored && <FieldGrid>
+            <Field label="Revenue (this period)"><input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} w-full`} /></Field>
+            <Field label="Materiality as % of revenue"><input aria-label="Materiality percent" type="number" step="0.1" value={p.matPct} onChange={(e) => set('matPct', e.target.value)} className={`${SEL} w-full`} /></Field>
             <Field label="Or type the materiality"><input aria-label="Materiality used" type="number" value={p.manual} onChange={(e) => set('manual', e.target.value)} className={`${SEL} w-full`} /></Field>
-          </FieldGrid>
+          </FieldGrid>}
         </Section>
         <Section title="3. How many below materiality?">
           <FieldGrid cols={4}>
