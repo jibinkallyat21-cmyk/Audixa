@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Download, AlertCircle, Check, X, Info, Upload as UploadIcon, Plus, Sparkles, TableProperties } from 'lucide-react'
+import { ChevronDown, ChevronRight, Download, AlertCircle, Check, X, Info, Upload as UploadIcon, Plus, Sparkles, TableProperties } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
@@ -53,7 +53,7 @@ function UploadDropzone({ onUploaded }) {
           e.preventDefault()
           handleFiles(e.dataTransfer.files)
         }}
-        className={`flex cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors ${
+        className={`flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors ${
           success ? 'border-emerald bg-emerald/10 text-emerald' : 'border-slate-300 text-navy hover:bg-slate-50'
         }`}
       >
@@ -285,18 +285,7 @@ function AIFlagPanel({ item, onApprove }) {
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="mt-4 overflow-hidden"
         >
-          <motion.div
-            className="relative overflow-hidden rounded-xl p-5"
-            style={{
-              background: 'linear-gradient(135deg, rgba(254,242,242,0.95) 0%, rgba(255,247,237,0.90) 100%)',
-              boxShadow: '0 0 0 1px rgba(232,50,60,0.08), 0 4px 16px rgba(232,50,60,0.12), 0 16px 48px rgba(232,50,60,0.08)',
-            }}
-            animate={{
-              borderColor: ['rgba(232,50,60,0.3)', 'rgba(245,158,11,0.4)', 'rgba(232,50,60,0.3)'],
-            }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            initial={{ borderWidth: '1.5px', borderStyle: 'solid' }}
-          >
+          <motion.div className="relative overflow-hidden rounded-xl border border-amber/30 bg-amber/5 p-5">
               <div className="flex items-center gap-2">
                 <motion.span
                   animate={{ opacity: [1, 0.3, 1] }}
@@ -377,6 +366,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
   const showToast = useToast()
   const { openModal, closeModal } = useModal()
   const [flash, setFlash] = useState(false)
+  const [open, setOpen] = useState(false)
   const filename = item.fileInfo?.split(' · ')[0] || ''
   const canReview = item.status === 'Under Review' || item.status === 'Pending Client' || item.status === 'Uploaded Processing'
 
@@ -410,35 +400,49 @@ function RequirementRow({ item, index, onUpdateItem }) {
 
   const handleGenericAction = () => showToast(`${item.action} — ${item.name}`)
 
+  const hasFlag = !!item.aiFlag
+  const hasDetail = hasFlag || !!item.rejectReason || !!item.fileInfo
+  const toggle = () => setOpen((v) => !v)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.06, duration: 0.3 }}
-      className="border-b border-slate-100 px-5 py-4 last:border-0"
+      transition={{ delay: index * 0.04, duration: 0.3 }}
+      className="border-b border-slate-100 last:border-0"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        onClick={toggle}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle() } }}
+        className={`flex min-h-[52px] cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50 ${open ? 'bg-slate-50' : ''}`}
+      >
+        <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.18 }} className="shrink-0">
+          <ChevronRight className="h-4 w-4 text-slate-400" />
+        </motion.span>
+        <span className="w-16 shrink-0 font-mono text-xs text-slate-400">{item.ref}</span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400">{item.ref}</span>
-            <p className="text-sm font-semibold text-navy">{item.name}</p>
-            <motion.span
-              animate={flash ? { backgroundColor: ['rgba(5,150,105,0)', 'rgba(5,150,105,0.25)', 'rgba(5,150,105,0)'] } : {}}
-              transition={{ duration: 0.55 }}
-              className="rounded-full"
-            >
-              <StatusPill status={item.status} />
-            </motion.span>
-            {item.tag && (
-              <span className="inline-flex items-center rounded-full border border-amber/40 bg-amber/10 px-2 py-0.5 text-[10px] font-semibold text-amber">
-                {item.tag}
-              </span>
+          <p className="truncate text-sm font-semibold text-navy">{item.name}</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {item.tag && <span className="text-[10px] font-semibold text-amber">{item.tag}</span>}
+            {hasFlag && (
+              <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1.4, repeat: Infinity }} className="rounded-full border border-amber/40 bg-amber/10 px-2 py-0.5 text-[10px] font-bold text-amber">
+                AI flag – awaiting approval
+              </motion.span>
             )}
           </div>
-          <p className="mt-1 text-xs text-slate-500">{item.fileInfo}</p>
         </div>
-
-        <div className="flex shrink-0 items-center gap-2">
+        <motion.div
+          animate={flash ? { backgroundColor: ['rgba(5,150,105,0)', 'rgba(5,150,105,0.25)', 'rgba(5,150,105,0)'] } : {}}
+          transition={{ duration: 0.55 }}
+          className="flex w-40 shrink-0 items-center rounded-full"
+        >
+          <StatusPill status={item.status} />
+        </motion.div>
+        <p className="hidden w-44 shrink-0 truncate text-xs text-slate-500 xl:block" title={item.fileInfo}>{item.fileInfo || '—'}</p>
+        <div className="flex w-[25rem] shrink-0 items-center justify-end gap-2" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
           {canReview && (
             <>
               <button
@@ -487,7 +491,26 @@ function RequirementRow({ item, index, onUpdateItem }) {
         </div>
       </div>
 
-      {item.aiFlag && <AIFlagPanel item={item} onApprove={(text) => onUpdateItem({ rejectReason: text })} />}
+      <AnimatePresence initial={false}>
+        {open && hasDetail && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 border-t border-slate-100 px-4 pb-4 pt-3 pl-12">
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-xs sm:grid-cols-[8rem_1fr]">
+                <dt className="font-semibold uppercase tracking-wide text-slate-400">Submitted file</dt>
+                <dd className="text-navy">{item.fileInfo || 'Not yet uploaded'}</dd>
+                {item.rejectReason && (<><dt className="font-semibold uppercase tracking-wide text-slate-400">Rejection reason</dt><dd className="text-navy">{item.rejectReason}</dd></>)}
+              </dl>
+              {hasFlag && <AIFlagPanel item={item} onApprove={(text) => onUpdateItem({ rejectReason: text })} />}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
@@ -537,6 +560,16 @@ function CategorySection({ category, onUpdateItem, statusFilter, searchQuery }) 
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden border-t border-slate-100"
           >
+            {visibleItems.length > 0 && (
+              <div className="hidden items-center gap-3 border-b border-slate-100 bg-slate-50 px-4 py-2 md:flex">
+                <span className="w-4 shrink-0" />
+                <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Ref #</span>
+                <span className="flex-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Document name</span>
+                <span className="w-40 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Status</span>
+                <span className="hidden w-44 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 xl:block">Submitted file</span>
+                <span className="w-[25rem] shrink-0 text-right text-[10px] font-semibold uppercase tracking-wide text-slate-400">Action</span>
+              </div>
+            )}
             {visibleItems.length > 0 ? (
               visibleItems.map((item, idx) => (
                 <RequirementRow
