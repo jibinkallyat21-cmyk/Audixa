@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -60,7 +61,7 @@ export default function SalaryTab({ client, clientName }) {
   const months = [...new Set(sources.flatMap((s) => buildAllMonths([s]).records.map((r) => r.month).filter(Boolean)))].sort()
   return (
     <div className="space-y-4">
-      <Card title="1. Audit period and TB" right={<button onClick={useDemo} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+      <Card title="1. Audit period and TB" right={<button onClick={useDemo} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={useDemo} />
         <div className="grid gap-2 sm:grid-cols-4">
           <label className="text-[11px] font-semibold uppercase text-slate-500">Audit period start<input aria-label="Audit period start" type="date" value={p.auditStart} onChange={(e) => setP({ ...p, auditStart: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
           <label className="text-[11px] font-semibold uppercase text-slate-500">Audit period end<input aria-label="Audit period end" type="date" value={p.auditEnd} onChange={(e) => setP({ ...p, auditEnd: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>

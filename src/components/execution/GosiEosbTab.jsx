@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download, FileSpreadsheet } from 'lucide-react'
 import { Card, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -32,7 +33,7 @@ export default function GosiEosbTab({ clientName }) {
   const up = (kind, label) => <label key={kind} className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"><FileSpreadsheet className="h-3.5 w-3.5" />{label}<input type="file" accept=".xlsx" className="hidden" onChange={(e) => { load(kind, e.target.files?.[0]); e.target.value = '' }} /></label>
   return (
     <div className="space-y-4">
-      <Card title="GOSI – from the detailed bill and the MUDAD journal report" right={<button onClick={() => { setBill(DEMO_BILL); setMud(DEMO_MUD); setEmps(DEMO_EMP) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+      <Card title="GOSI – from the detailed bill and the MUDAD journal report" right={<button onClick={() => { setBill(DEMO_BILL); setMud(DEMO_MUD); setEmps(DEMO_EMP) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => { setBill(DEMO_BILL); setMud(DEMO_MUD); setEmps(DEMO_EMP) }} />
         <div className="flex flex-wrap items-center gap-3">{up('bill', 'Detailed bill (contribution sheet)')}{up('mudad', 'MUDAD journal report')}<span className="text-xs text-slate-500">{bill.length} bill lines · {mud.length} MUDAD lines</span></div>
         <p className="mt-2 text-xs text-slate-500">GOSI expense = January to November (GOSI expense plus late payment fee). GOSI payable = December. Debit adjustments are shown on their own row. Any mismatch with MUDAD is noted against the month.</p>
         {err && <p className="mt-1 text-xs text-alert-red">{err}</p>}

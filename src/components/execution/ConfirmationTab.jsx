@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, Chip, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -53,7 +54,7 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
           <label className="text-[11px] font-semibold uppercase text-slate-500">Year-end (from the TB, or the engagement letter)<input aria-label="Year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
         </div>
       </Card>
-      <Card title="Confirmations" right={<div className="flex gap-3"><button onClick={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button><button onClick={() => setItems((l) => [...l, blank('Bank')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Bank</button><button onClick={() => setItems((l) => [...l, blank('Cash')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Cash</button></div>}>
+      <Card title="Confirmations" right={<div className="flex gap-3"><button onClick={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button><button onClick={() => setItems((l) => [...l, blank('Bank')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Bank</button><button onClick={() => setItems((l) => [...l, blank('Cash')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Cash</button></div>}><AutoDemo run={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         {rows.length === 0 && <p className="text-xs text-slate-400">No confirmations yet. Ref. Nos. are assigned in the order they are added: 5001.xx for cash, 5002.xx for bank.</p>}
         <div className="space-y-3">
           {rows.map((c) => (
