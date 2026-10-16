@@ -46,3 +46,19 @@ test('expense samples and the default route', () => {
   const items = expenseItems(sampleExpense(rows)); assert.ok(items.length > 0 && items.every((i) => i.data.kind === 'expense'))
   assert.equal(defaultRoute(items), 'requirement'); assert.equal(defaultRoute([{ nature: 'explanation' }]), 'query')
 })
+
+import { groupOf } from '../src/utils/tbCore.js'
+import { materialityItems } from '../src/utils/sampleItems.js'
+test('each test area only takes its own accounts, so a sales sample holds no cost of sales or expenses', () => {
+  const v = clientLedger(L); const accounts = [...new Set(v.rows.map((r) => r[2]))]
+  const g = (a) => groupOf(a)
+  assert.deepEqual(accounts.filter((a) => g(a) === 'revenue'), ['Sales'])
+  assert.deepEqual(accounts.filter((a) => g(a) === 'cogs'), ['Cost of Sales'])
+  assert.ok(accounts.filter((a) => g(a) === 'opex').length >= 3); assert.equal(accounts.filter((a) => g(a) === 'unmapped').length, 0)
+})
+test('materiality samples are routed by area: balances go as party items, entries as invoices', () => {
+  const res = { above: [{ ref: 'C001', description: 'Al Noor Trading', account: 'Trade receivables', amount: 250000 }], below: [] }
+  const ar = materialityItems(res, 'Trade receivables')[0]; assert.equal(ar.data.kind, 'party'); assert.match(ar.text, /^Trade receivables: Al Noor Trading, balance SAR 250,000.00/)
+  const rev = materialityItems({ above: [{ ref: 'INV-1', account: 'Sales', description: 'Sales invoice X', amount: -5000, date: '2025-03-01' }], below: [] }, 'Revenue')[0]; assert.equal(rev.data.kind, 'sales')
+  assert.equal(materialityItems({ above: [{ ref: 'E1', account: 'Rent', description: 'Rent', amount: 100 }], below: [] }, 'Expenses')[0].data.kind, 'expense')
+})

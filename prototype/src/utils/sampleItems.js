@@ -28,7 +28,10 @@ export function partyItems(result) {
 }
 // ABCPA materiality method: result.above and result.below items { ref, date, account, description, amount }.
 export function materialityItems(result, area = '') {
-  const one = (r, basis) => ({ key: `M:${r.ref || ''}|${r.account}|${r.description}|${r.amount}`, text: `${join([area && `${area}:`, r.ref, r.account, r.description, fmtDate(r.date)]).replace(':,', ':')}, amount SAR ${money(Math.abs(r.amount))} (${basis}): upload the supporting document (a short explanation is needed even when the document is provided)`, nature: 'document', data: { kind: /^rev/i.test(area) ? 'sales' : /cogs|cost/i.test(area) ? 'cogs' : 'expense', party: String(r.description || r.account), invoiceNo: String(r.ref || ''), date: isoDate(r.date), taxable: Math.abs(Number(r.amount) || 0) } })
+  const party = /^trade/i.test(area)
+  const one = (r, basis) => party
+    ? { key: `M:${area}|${r.ref || ''}|${r.description}|${r.amount}`, text: `${area}: ${r.description}, balance SAR ${money(Math.abs(r.amount))} (${basis}): upload the supporting documents for this balance (balance confirmation or statement of account)`, nature: 'document', data: { kind: 'party', party: String(r.description), category: area } }
+    : { key: `M:${area}|${r.ref || ''}|${r.account}|${r.description}|${r.amount}`, text: `${join([area && `${area}:`, r.ref, r.account, r.description, fmtDate(r.date)]).replace(':,', ':')}, amount SAR ${money(Math.abs(r.amount))} (${basis}): upload the supporting document (a short explanation is needed even when the document is provided)`, nature: 'document', data: { kind: /^rev/i.test(area) ? 'sales' : /cogs|cost/i.test(area) ? 'cogs' : 'expense', party: String(r.description || r.account), invoiceNo: String(r.ref || ''), date: isoDate(r.date), taxable: Math.abs(Number(r.amount) || 0) } }
   return [...result.above.map((r) => one(r, 'above materiality')), ...result.below.map((r) => one(r, 'selected below materiality'))]
 }
 // Which route the person is offered by default: documents go to the requirement list, explanations to Queries.

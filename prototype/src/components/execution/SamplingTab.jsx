@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
 import { Download, FileSpreadsheet, Loader2 } from 'lucide-react'
-import { Card, Chip, DataTable, Flags, Stat } from './ReviewParts'
+import { Card, Chip, DataTable, Flags, Stat, Field, FieldGrid, Section, Toggle, PrimaryButton, SecondaryButton } from './ReviewParts'
+import { groupOf } from '../../utils/tbCore'
 import { useToast } from '../shared/Toast'
 import { logEvent } from '../../utils/auditLog'
 import { currentUser } from '../../utils/currentUser'
@@ -144,58 +145,97 @@ function Parties({ ctx }) {
 }
 
 // ── ABCPA ─────────────────────────────────────────────────────────────────
-function Materiality({ ctx }) {
-  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
-  const [p, setP] = useState({ area: 'Revenue', revenue: '', matPct: 0.5, manual: '', risk: 'Moderate (3)', size: 'Medium', method: 'random', seed: 1, override: '' })
+// The test areas of the materiality method. Ledger areas read the voucher ledger and only take the accounts of that area; party areas read the party list.
+const AREAS = [['Revenue', 'ledger', ['revenue']], ['COGS', 'ledger', ['cogs']], ['Expenses', 'ledger', ['opex', 'finance']], ['Trade receivables', 'party'], ['Trade payables', 'party']]
+function Materiality({ ctx, initialArea = 'Revenue' }) {
+  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [pfile, setPfile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
+  const [p, setP] = useState({ area: initialArea, revenue: '', matPct: 0.5, manual: '', risk: 'Moderate (3)', size: 'Medium', method: 'random', seed: 1, override: '' })
+  const kind = AREAS.find((a) => a[0] === p.area)
   const load = async (f, buffer) => { setBusy(true); setInclude({}); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), MAT_FIELDS)), name: f?.name || (dc.ready ? `${dc.client} ledger` : 'Demo ledger.xlsx') }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
+  const loadParty = async (f, buffer) => { setBusy(true); try { setPfile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), PARTY_FIELDS)), name: f?.name || (dc.ready ? `${dc.client} party list` : 'Demo party list.xlsx') }) } catch (e) { setPfile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
+  const loadClient = async () => {
+    await load(null, await demoBuffer(dc.ready ? clientLedger(dc.ledgers) : demoLedgerForMateriality())); await loadParty(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties()))
+    setP((x) => ({ ...x, revenue: dc.ready ? String(-dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)) : '4000000' }))
+  }
   const calc = p.revenue !== '' ? materialityFromRevenue(Number(p.revenue), Number(p.matPct)) : null
   const materiality = p.manual !== '' ? Number(p.manual) : calc?.used
-  const items = useMemo(() => {
+  const all = useMemo(() => {
     if (!file?.rows?.length || !file.mapping.account) return []; const m = file.mapping
     return file.rows.map((x) => ({ sourceRow: x.sourceRow, ref: m.ref ? x.values[m.ref] : '', date: m.date ? x.values[m.date] : null, account: String(x.values[m.account] ?? '').trim(), description: m.description ? x.values[m.description] : '', amount: (toNum(x.values[m.debit]) ?? 0) - (toNum(x.values[m.credit]) ?? 0) })).filter((r) => r.account)
   }, [file])
+  // Only the accounts of the chosen area, so a sales sample never contains cost of sales or expense entries.
+  const ledgerItems = useMemo(() => all.filter((i) => (kind?.[2] || []).includes(groupOf(i.account))), [all, kind])
+  const unclassified = useMemo(() => [...new Set(all.filter((i) => groupOf(i.account) === 'unmapped').map((i) => i.account))], [all])
+  const partyItems = useMemo(() => {
+    if (!pfile?.rows?.length || !pfile.mapping.name) return []; const m = pfile.mapping
+    const list = pfile.rows.map((x) => { const closing = m.closing ? (toNum(x.values[m.closing]) ?? 0) : (toNum(x.values[m.debit]) ?? 0) - (toNum(x.values[m.credit]) ?? 0); return { sourceRow: x.sourceRow, ref: m.code ? x.values[m.code] : '', date: null, account: p.area, description: String(x.values[m.name] ?? ''), amount: closing } })
+    return list.filter((r) => (p.area === 'Trade receivables' ? r.amount > 0 : r.amount < 0))
+  }, [pfile, p.area])
+  const isParty = kind?.[1] === 'party'
+  const items = isParty ? partyItems : ledgerItems
   const accounts = [...new Set(items.map((i) => i.account))].sort()
   const res = useMemo(() => (items.length && materiality ? sampleByMateriality(items.map((i) => ({ ...i, excluded: p.area === 'Expenses' && include[i.account] === false })), { materiality, risk: p.risk, size: p.size, method: p.method, seed: Number(p.seed) || 1, override: p.override === '' ? null : Number(p.override) }) : null), [items, materiality, p, include])
   const set = (k, v) => setP({ ...p, [k]: v })
+  const active = isParty ? pfile : file
   return (
-    <Card title="Materiality method – above materiality 100%, below by sample size" right={<button onClick={async () => { await load(null, await demoBuffer(dc.ready ? clientLedger(dc.ledgers) : demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: dc.ready ? String(-dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)) : '4000000' })) }} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(dc.ready ? clientLedger(dc.ledgers) : demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: dc.ready ? String(-dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)) : '4000000' })) }} />
-      <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        <label className="text-xs font-medium text-slate-600">Test area<select aria-label="Test area" value={p.area} onChange={(e) => set('area', e.target.value)} className={`${SEL} mt-1 w-full font-normal normal-case`}><option>Revenue</option><option>COGS</option><option>Expenses</option></select></label>
-        <label className="text-xs font-medium text-slate-600">Revenue (this period)<input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} mt-1 w-full font-normal`} /></label>
-        <label className="text-xs font-medium text-slate-600">Materiality % of revenue<input aria-label="Materiality percent" type="number" step="0.1" value={p.matPct} onChange={(e) => set('matPct', e.target.value)} className={`${SEL} mt-1 w-full font-normal`} /></label>
-        <label className="text-xs font-medium text-slate-600">Or type the materiality<input aria-label="Materiality used" type="number" value={p.manual} onChange={(e) => set('manual', e.target.value)} className={`${SEL} mt-1 w-full font-normal`} /></label>
-        <label className="text-xs font-medium text-slate-600">Risk level<select aria-label="Risk level" value={p.risk} onChange={(e) => set('risk', e.target.value)} className={`${SEL} mt-1 w-full font-normal normal-case`}>{Object.keys(MAX_SAMPLE).map((k) => <option key={k}>{k}</option>)}</select></label>
-        <label className="text-xs font-medium text-slate-600">Entity size<select aria-label="Entity size" value={p.size} onChange={(e) => set('size', e.target.value)} className={`${SEL} mt-1 w-full font-normal normal-case`}><option>Small</option><option>Medium</option><option>Large</option></select></label>
-        <label className="text-xs font-medium text-slate-600">Below materiality<select aria-label="Below materiality method" value={p.method} onChange={(e) => set('method', e.target.value)} className={`${SEL} mt-1 w-full font-normal normal-case`}><option value="random">Random (stored seed)</option><option value="highest">Highest value</option></select></label>
-        <label className="text-xs font-medium text-slate-600">Sample size override<input aria-label="Sample size override" type="number" value={p.override} onChange={(e) => set('override', e.target.value)} className={`${SEL} mt-1 w-full font-normal`} /></label>
-      </div>
-      <p className="mt-1 text-xs text-slate-500">{calc ? `Calculated materiality ${money(calc.calculated)}; used for sampling (80%) ${money(calc.used)}.` : 'Enter the revenue, or type the materiality directly.'}</p>
-      <div className="mt-2"><Upload label="Choose the ledger (Excel)" onFile={(f) => f && load(f)} busy={busy} file={file} /></div>
-      <Mapping file={file} setFile={setFile} keys={['ref', 'date', 'account', 'description', 'debit', 'credit']} />
-      {p.area === 'Expenses' && accounts.length > 0 && (
-        <details className="mt-2"><summary className="cursor-pointer text-xs font-semibold text-navy">Include / Exclude each expense account</summary>
-          <div className="mt-2 grid gap-1 sm:grid-cols-2">{accounts.map((a) => <label key={a} className="flex items-center justify-between gap-2 rounded border border-slate-100 px-2 py-1 text-sm text-navy">{a}<select aria-label={`Include or exclude ${a}`} value={include[a] === false ? 'Exclude' : 'Include'} onChange={(e) => setInclude({ ...include, [a]: e.target.value === 'Include' })} className={SEL}><option>Include</option><option>Exclude</option></select></label>)}</div></details>
-      )}
+    <div className="space-y-6">
+      <Card title="Materiality method" subtitle="Everything above materiality is tested. Below it, a sample is chosen by the sample size."
+        right={<SecondaryButton onClick={loadClient}>{dc.ready ? "Use the client's data" : 'Use demo data'}</SecondaryButton>}><AutoDemo run={loadClient} />
+        <Section title="1. What are you testing?">
+          <FieldGrid cols={2}>
+            <Field label="Test area" hint={isParty ? 'Uses the party list: debit balances for receivables, credit balances for payables' : 'Only the accounts of this area are used'}><select aria-label="Test area" value={p.area} onChange={(e) => set('area', e.target.value)} className={`${SEL} w-full`}>{AREAS.map((a) => <option key={a[0]}>{a[0]}</option>)}</select></Field>
+          </FieldGrid>
+        </Section>
+        <Section title="2. Materiality" hint={calc ? `Calculated materiality ${money(calc.calculated)}; used for sampling (80%) ${money(calc.used)}.` : 'Enter the revenue, or type the materiality directly.'}>
+          <FieldGrid>
+            <Field label="Revenue (this period)"><input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} w-full`} /></Field>
+            <Field label="Materiality as % of revenue"><input aria-label="Materiality percent" type="number" step="0.1" value={p.matPct} onChange={(e) => set('matPct', e.target.value)} className={`${SEL} w-full`} /></Field>
+            <Field label="Or type the materiality"><input aria-label="Materiality used" type="number" value={p.manual} onChange={(e) => set('manual', e.target.value)} className={`${SEL} w-full`} /></Field>
+          </FieldGrid>
+        </Section>
+        <Section title="3. How many below materiality?">
+          <FieldGrid cols={4}>
+            <Field label="Risk level"><select aria-label="Risk level" value={p.risk} onChange={(e) => set('risk', e.target.value)} className={`${SEL} w-full`}>{Object.keys(MAX_SAMPLE).map((k) => <option key={k}>{k}</option>)}</select></Field>
+            <Field label="Entity size"><select aria-label="Entity size" value={p.size} onChange={(e) => set('size', e.target.value)} className={`${SEL} w-full`}><option>Small</option><option>Medium</option><option>Large</option></select></Field>
+            <Field label="Pick below materiality"><select aria-label="Below materiality method" value={p.method} onChange={(e) => set('method', e.target.value)} className={`${SEL} w-full`}><option value="random">Random (stored seed)</option><option value="highest">Highest value</option></select></Field>
+            <Field label="Sample size override" hint="Leave empty to use the table"><input aria-label="Sample size override" type="number" value={p.override} onChange={(e) => set('override', e.target.value)} className={`${SEL} w-full`} /></Field>
+          </FieldGrid>
+        </Section>
+        <Section title={isParty ? '4. The party list' : '4. The ledger'}>
+          <Upload label={isParty ? 'Choose the party list (Excel)' : 'Choose the ledger (Excel)'} onFile={(f) => f && (isParty ? loadParty(f) : load(f))} busy={busy} file={active} />
+          {isParty ? <Mapping file={pfile} setFile={setPfile} keys={['code', 'name', 'debit', 'credit', 'closing']} /> : <Mapping file={file} setFile={setFile} keys={['ref', 'date', 'account', 'description', 'debit', 'credit']} />}
+          {!isParty && file?.rows?.length > 0 && <p className="mt-3 text-sm text-slate-600">{ledgerItems.length} of {all.length} ledger entries belong to {p.area}.</p>}
+          {!isParty && unclassified.length > 0 && <div className="mt-3"><Flags flags={[`${unclassified.length} account(s) could not be placed in an area and are left out: ${unclassified.slice(0, 6).join(', ')}${unclassified.length > 6 ? ' and more' : ''}.`]} /></div>}
+          {isParty && pfile?.rows?.length > 0 && <p className="mt-3 text-sm text-slate-600">{partyItems.length} {p.area === 'Trade receivables' ? 'parties with a debit balance' : 'parties with a credit balance'}.</p>}
+        </Section>
+        {p.area === 'Expenses' && accounts.length > 0 && (
+          <details className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4"><summary className="cursor-pointer text-sm font-semibold text-navy">Include or exclude each expense account</summary>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">{accounts.map((a) => <Toggle key={a} label={a} checked={include[a] !== false} onChange={(v) => setInclude({ ...include, [a]: v })} />)}</div></details>
+        )}
+      </Card>
       {res && (
-        <div className="mt-3 space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Materiality" value={money(res.materiality)} /><Stat label={`Above materiality (${money(res.aboveValue)})`} value={res.above.length} tone="amber" /><Stat label={`Below materiality: ${res.belowPopulation} items worth ${money(res.remaining)}`} value={res.sizeUsed} tone="green" /><Stat label="Sample size: calculated / maximum / used" value={`${res.calculatedSize} / ${res.maxSize} / ${res.sizeUsed}`} /></div><p className="text-xs text-slate-500">Interval {money(res.interval)} · random seed {p.seed}.</p>
-          <DataTable columns={[{ key: 'check', label: 'Validation check' }, { key: 'pass', label: 'Result', render: (c) => <Chip value={c.pass ? 'Pass' : c.review ? 'Unclear' : 'Fail'} /> }]} rows={res.checks} />
-          <details><summary className="cursor-pointer text-xs font-semibold text-navy">Above materiality ({res.above.length}) and below-materiality sample ({res.below.length})</summary>
-            <DataTable columns={[{ key: 'account', label: 'Account' }, { key: 'description', label: 'Description' }, { key: 'amount', label: 'Amount', render: (r) => money(r.amount) }, { key: 'basis', label: 'Basis' }]} rows={[...res.above.map((r) => ({ ...r, basis: 'Above materiality' })), ...res.below.map((r) => ({ ...r, basis: p.method === 'highest' ? 'Below – highest value' : 'Below – random' }))]} /></details>
-          <button onClick={async () => { await save(await buildMaterialityWorkbook({ items: items.map((i) => ({ ...i, excluded: p.area === 'Expenses' && include[i.account] === false })), params: { risk: p.risk, size: p.size, method: p.method, seed: Number(p.seed) || 1, override: p.override === '' ? null : Number(p.override) }, result: res, area: p.area, revenue: p.revenue === '' ? null : Number(p.revenue), materialityCalc: p.manual === '' && calc ? { pct: Number(p.matPct), calculated: calc.calculated } : null }), `${p.area}_Materiality_Sampling.xlsx`, showToast); ctx.log(`${p.area} sample prepared (materiality method)`, `${res.above.length} above materiality, ${res.below.length} below`) }} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white"><Download className="h-3.5 w-3.5" />Download the workbook</button>
-          <SendSamples area="Materiality" label={`${p.area} (materiality method)`} client={ctx.client} items={materialityItems(res, p.area)} />
+        <div className="space-y-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Materiality" value={money(res.materiality)} /><Stat label={`Above materiality (${money(res.aboveValue)})`} value={res.above.length} tone="amber" /><Stat label={`Below materiality: ${res.belowPopulation} items worth ${money(res.remaining)}`} value={res.sizeUsed} tone="green" /><Stat label="Sample size: calculated / maximum / used" value={`${res.calculatedSize} / ${res.maxSize} / ${res.sizeUsed}`} /></div>
+          <Card title="Checks" subtitle={`Interval ${money(res.interval)} · random seed ${p.seed}`}><DataTable columns={[{ key: 'check', label: 'Validation check' }, { key: 'pass', label: 'Result', render: (c) => <Chip value={c.pass ? 'Pass' : c.review ? 'Unclear' : 'Fail'} /> }]} rows={res.checks} /></Card>
+          <Card title={`The sample: ${res.above.length} above materiality and ${res.below.length} below`}>
+            <DataTable columns={[{ key: 'account', label: 'Account' }, { key: 'description', label: 'Description' }, { key: 'amount', label: 'Amount', render: (r) => money(r.amount) }, { key: 'basis', label: 'Basis' }]} rows={[...res.above.map((r) => ({ ...r, basis: 'Above materiality' })), ...res.below.map((r) => ({ ...r, basis: p.method === 'highest' ? 'Below: highest value' : 'Below: random' }))]} />
+            <div className="flex flex-wrap items-center gap-3">
+              <PrimaryButton onClick={async () => { await save(await buildMaterialityWorkbook({ items: items.map((i) => ({ ...i, excluded: p.area === 'Expenses' && include[i.account] === false })), params: { risk: p.risk, size: p.size, method: p.method, seed: Number(p.seed) || 1, override: p.override === '' ? null : Number(p.override) }, result: res, area: p.area, revenue: p.revenue === '' ? null : Number(p.revenue), materialityCalc: p.manual === '' && calc ? { pct: Number(p.matPct), calculated: calc.calculated } : null }), `${p.area.replace(/\s+/g, '_')}_Materiality_Sampling.xlsx`, showToast); ctx.log(`${p.area} sample prepared (materiality method)`, `${res.above.length} above materiality, ${res.below.length} below`) }}><Download className="h-4 w-4" />Download the workbook</PrimaryButton>
+            </div>
+            <SendSamples area={p.area} label={`${p.area} (materiality method)`} client={ctx.client} items={materialityItems(res, p.area)} />
+          </Card>
         </div>
       )}
-    </Card>
+    </div>
   )
 }
 
-export default function SamplingTab({ firm, client, clientName, initialMode = 'sales' }) {
+export default function SamplingTab({ firm, client, clientName, initialMode = 'sales', initialArea = 'Revenue' }) {
   const me = currentUser()
   const [mode, setMode] = useState(initialMode)
   const ctx = { client, log: (title, description) => logEvent({ client, clientName, category: 'work', title, description, extra: { auditArea: 'Sampling', performedBy: me.name }, user: me }) }
   if (!firm) return <Card><p className="text-sm text-slate-500">Select a client first. The auditor on the proposal decides which sampling framework is used.</p></Card>
-  if (firm === 'ABCPA') return <div className="space-y-3"><p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p><Materiality ctx={ctx} /></div>
+  if (firm === 'ABCPA') return <div className="space-y-3"><p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p><Materiality ctx={ctx} initialArea={initialArea} /></div>
   return (
     <div className="space-y-3">
       <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">MISCPA file: the 50% rule books apply. The materiality method is for ABCPA files and is not shown.</p>

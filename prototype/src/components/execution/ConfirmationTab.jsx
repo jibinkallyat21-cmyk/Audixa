@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
 import { useDemoClient } from '../../utils/useDemoClient'
-import { clientConfirmations } from '../../utils/clientSamplingData'
+import { clientConfirmations, clientBankStatement } from '../../utils/clientSamplingData'
+import { useIssuedLists } from '../../utils/requirementsStore'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, Chip, Flags, Field, FieldGrid, Section, Toggle, Stat, Empty, PrimaryButton, SecondaryButton, INPUT } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -24,9 +25,20 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
   const demoItems = () => (dc.ready ? clientConfirmations(dc.ledgers).map((c) => ({ ...blank(c.type), ...c, fileName: `${c.type.toLowerCase()}_confirmation_${c.label.replace(/\W+/g, '_')}.pdf`, amount: c.tbAmount, clientName: dc.client, bankName: c.type === 'Bank' ? c.label : '', sealPresent: true, signaturePresent: true, letterhead: true })) : DEMO)
   const [legalName, setLegalName] = useState(initialLegal || clientName || ''); const [yearEnd, setYearEnd] = useState('2025-12-31')
   const [items, setItems] = useState([]); const patch = (id, p) => setItems((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)))
+  // The bank statements are a requirement the client uploads. For the demo client they are not typed in again: once the client has uploaded them the
+  // opening, money in and out and closing balance come from the statement (here worked out from the bank ledger) and the file name from the upload.
+  const issuedList = useIssuedLists()[dc.slug]
+  const stmtItem = useMemo(() => (issuedList?.categories || []).find((c) => c.id === 'BANK')?.items.find((i) => /bank statements/i.test(i.text)), [issuedList])
+  const stmtUploaded = !!stmtItem && ['Uploaded Processing', 'Under Review', 'Accepted'].includes(stmtItem.status)
+  const auto = dc.isDemo(client)
+  const effItems = useMemo(() => items.map((c) => {
+    if (!auto || c.type !== 'Bank') return c
+    const led = dc.ledgers.find((l) => l.name === c.label)
+    return { ...c, statement: stmtUploaded && led ? { has: true, fileName: stmtItem.filename || '', ...clientBankStatement(led), bankMatches: c.statement.bankMatches !== false, auto: true } : { ...c.statement, has: false, auto: true } }
+  }), [items, auto, stmtUploaded, stmtItem, dc.ledgers])
   const rows = useMemo(() => {
     const issued = []
-    return items.map((c) => {
+    return effItems.map((c) => {
       const ref = c.available ? nextRef(c.type === 'Cash' ? '5001.01' : '5002.01', issued) : ''; if (ref) issued.push(ref)
       const ctx = { tbAmount: c.tbAmount === '' ? null : Number(c.tbAmount), yearEnd, legalName, tbBank: c.tbBank }
       const t = confirmationTests({ ...c, amount: c.amount === '' ? null : Number(c.amount) }, ctx)
@@ -40,7 +52,7 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
       if (t.tests['Client Name'] === 'No') flags.push('Client name difference – flag for manager decision.')
       return { ...c, ref, tests: t.tests, reasons: t.reasons, overall, stm, den, flags, statementChecked: c.type === 'Bank' ? !!(c.statement.has && stm?.ok && stm.closeToConfirm) : undefined, denominationsChecked: c.type === 'Cash' ? !!den?.ok : undefined }
     })
-  }, [items, legalName, yearEnd])
+  }, [effItems, legalName, yearEnd])
   const completion = confirmationCompletion({ confirmations: rows, logComplete: rows.length > 0 })
   const docLog = rows.flatMap((c) => [{ ref: c.ref, fileName: c.fileName, description: `${c.type} confirmation`, amount: c.amount === '' ? null : Number(c.amount), comparedWith: c.tbAmount === '' ? null : Number(c.tbAmount), check: c.type === 'Cash' ? 'Denominations re-added' : 'Cross-verified with bank statement' }, ...(c.type === 'Bank' && c.statement.has ? [{ ref: `${c.ref}-A`, fileName: c.statement.fileName, description: 'Bank statement', amount: Number(c.statement.closing), comparedWith: Number(c.amount), check: `Opening + credits − debits = ${c.stm?.calculated?.toFixed(2)}` }] : [])])
   const download = async () => {
@@ -123,11 +135,16 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
                   </Section>
                   {c.type === 'Bank' && (
                     <Section title={`Bank statement cross-check (supporting document ${c.ref}-A)`} hint="Optional: tick it when you have the statement.">
+                      {c.statement.auto ? (c.statement.has ? (
+                        <div className="space-y-4"><p className="rounded-xl border border-emerald/30 bg-emerald/5 px-4 py-3 text-sm text-emerald">Taken from the bank statement the client uploaded{c.statement.fileName ? ` (${c.statement.fileName})` : ''}. Nothing to type.</p>
+                          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Opening balance" value={money(c.statement.opening)} /><Stat label="Money in (credits)" value={money(c.statement.credits)} /><Stat label="Money out (debits)" value={money(c.statement.debits)} /><Stat label="Closing balance" value={money(c.statement.closing)} /></div>
+                          <Toggle label="Bank, account and details match the confirmation" checked={c.statement.bankMatches} onChange={(v) => patch(c.id, { statement: { ...c.statement, bankMatches: v } })} /></div>
+                      ) : <p className="rounded-xl border border-amber/30 bg-amber/5 px-4 py-3 text-sm text-amber">The client has not uploaded the bank statements yet. They appear here by themselves once uploaded; nothing needs to be typed.</p>) : <>
                       <Toggle label="Statement available" checked={c.statement.has} onChange={(v) => patch(c.id, { statement: { ...c.statement, has: v } })} />
                       {c.statement.has && <div className="mt-4"><FieldGrid>
                         {[['fileName', 'Statement file name', 'text'], ['opening', 'Opening balance', 'number'], ['credits', 'Credits', 'number'], ['debits', 'Debits', 'number'], ['closing', 'Closing balance', 'number']].map(([k, l, t]) => <Field key={k} label={l}><input aria-label={l} type={t} value={c.statement[k]} onChange={(e) => patch(c.id, { statement: { ...c.statement, [k]: e.target.value } })} className={INPUT} /></Field>)}
                         <div className="flex items-end"><Toggle label="Bank, account and details match the confirmation" checked={c.statement.bankMatches} onChange={(v) => patch(c.id, { statement: { ...c.statement, bankMatches: v } })} /></div>
-                      </FieldGrid></div>}
+                      </FieldGrid></div>}</>}
                       {c.stm && <p className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy">Opening + credits − debits = {c.stm.calculated.toFixed(2)} (difference {c.stm.diff.toFixed(2)}). Closing agrees to the confirmation: <b>{c.stm.closeToConfirm ? 'Yes' : 'No'}</b>; to the trial balance: <b>{c.stm.closeToTb ? 'Yes' : 'No'}</b>.</p>}
                     </Section>
                   )}
