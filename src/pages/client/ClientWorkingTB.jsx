@@ -7,7 +7,6 @@ import { useToast } from '../../components/shared/Toast'
 import { useTB } from '../../context/TBContext'
 import { useClientFY } from '../../context/ClientFYContext'
 import { useTheme } from '../../context/ThemeContext'
-import { getTBLinesForFY } from '../../data/workingTB'
 
 const D = {
   card: 'var(--c-card)',
@@ -320,7 +319,7 @@ export default function ClientWorkingTB() {
 
   const isCurrentFY = selectedFY === 'FY2024'
   // For historical FYs show static finalised data; no pending adjustments
-  const tbLines = isCurrentFY ? fy2024Lines : getTBLinesForFY(selectedFY)
+  const tbLines = isCurrentFY ? fy2024Lines : []
   const displayPending = isCurrentFY ? pendingAdjustments : []
   const displayAdjustments = isCurrentFY ? adjustments : []
 
@@ -354,6 +353,12 @@ export default function ClientWorkingTB() {
               )}
             </div>
           </div>
+
+          {tbLines.length === 0 && (
+            <p className="rounded-xl p-8 text-center text-sm" style={{ border: `1px dashed ${D.border}`, color: D.muted }}>
+              {isCurrentFY ? 'Your working trial balance appears here once the audit team has approved the trial balance you uploaded.' : 'No trial balance is held for this year.'}
+            </p>
+          )}
 
           {/* ── Pending Adjustments — TOP of page ── */}
           {displayPending.length > 0 && (

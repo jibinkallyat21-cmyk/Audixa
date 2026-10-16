@@ -517,7 +517,7 @@ export default function ClientDocuments() {
                       >
                         <ChevronRight className="h-4 w-4" style={{ color: D.muted }} />
                       </motion.span>
-                      <span className="text-xs font-bold uppercase tracking-wide" style={{ color: D.text }}>{row.title}</span>
+                      <span className="text-xs font-bold tracking-wide" style={{ color: D.text }}>{row.title}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs" style={{ color: D.muted }}>{row.completed} of {row.total} complete</span>
