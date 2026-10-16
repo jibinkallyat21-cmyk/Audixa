@@ -11,6 +11,8 @@ import { workbookToBlob } from '../../utils/eosbExcel'
 import { DEP_CLASSES, EXTRA_CLASSES, depSchedule, depReview, depChecks } from '../../utils/prepaidDep'
 import { buildDepreciationWorkbook } from '../../utils/assetsExcel'
 import EvidenceDocs from './EvidenceDocs'
+import AssetInvoices from './AssetInvoices'
+import { demoAssetInvoices, linesFromInvoices } from '../../utils/assetInvoices'
 import { fixedAssetParts, checkEvidence, demoDocs } from '../../utils/evidence'
 
 const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
@@ -33,16 +35,19 @@ export default function DepreciationTab({ client, clientName }) {
   // For the demo client the list is built from its own trial balance ledgers; otherwise the generic demo list.
   const company = dc.ready ? dc.client : clientName
   const SUPPLIER = { Furniture: 'Furniture supplier', 'Motor Vehicles.': 'Vehicle dealer', 'Computers and IT equipments': 'IT equipment supplier', 'Leasehold Improvements': 'Fit-out contractor' }
-  const evLine = (a) => ({ amount: Number(a.addition) || 0, vatPct: 15, vendor: SUPPLIER[a.cls] || 'Supplier' })
+  const evLine = (a) => ({ amount: Number(a.addition) || 0, vatPct: 15, vendor: a.vendor || SUPPLIER[a.cls] || 'Supplier' })
   // Additions are backed by the supplier invoice and the payment proof (stands in for the client's uploads).
   const demoList = () => { const l = dc.ready ? clientAssets(dc.ledgers) : DEMO; const adds = l.filter((a) => Number(a.addition) > 0); const docs = demoDocs(adds.map(evLine), company, fixedAssetParts); return l.map((a) => { const k = adds.indexOf(a); return k >= 0 ? { ...a, docs: docs[k] } : a }) }
   const [yearStart, setYearStart] = useState('2025-01-01'); const [yearEnd, setYearEnd] = useState('2025-12-31'); const [assets, setAssets] = useState([]); const [reTotal, setRe] = useState('')
+  const [invoices, setInvoices] = useState([]); const built = assets.filter((a) => a.invoiceId).map((a) => a.invoiceId)
+  const tbAdditions = dc.ready ? clientAssets(dc.ledgers).reduce((n, a) => n + (Number(a.addition) || 0), 0) : null
+  const buildLines = (inv) => { const lines = linesFromInvoices(inv, { rateOf, existingIds: built }).map((x) => ({ ...blank(), ...x })); setAssets((l) => [...l, ...lines]); showToast(`${lines.length} asset line${lines.length === 1 ? '' : 's'} created from the invoices`); logEvent({ client, clientName, category: 'work', title: 'Asset lines created from client invoices', description: `${lines.length} invoices`, extra: { auditArea: 'Fixed assets', performedBy: me.name }, user: me }) }
   const patch = (id, p) => setAssets((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)))
   const priorStart = `${Number(yearStart.slice(0, 4)) - 1}${yearStart.slice(4)}`; const priorEnd = `${Number(yearEnd.slice(0, 4)) - 1}${yearEnd.slice(4)}`
   const sched = useMemo(() => depSchedule(assets, yearEnd, { yearStart }), [assets, yearEnd, yearStart])
   const checks = useMemo(() => depChecks(sched.rows, sched.totals), [sched]); const notes = useMemo(() => depReview(sched.rows), [sched])
   const download = async () => {
-    const wb = await buildDepreciationWorkbook({ assets: sched.rows, yearStart, yearEnd, priorStart, priorEnd, adjustments: { retainedEarnings: reTotal === '' ? null : Number(reTotal) }, client: clientName })
+    const wb = await buildDepreciationWorkbook({ assets: sched.rows, yearStart, yearEnd, priorStart, priorEnd, adjustments: { retainedEarnings: reTotal === '' ? null : Number(reTotal) }, client: clientName, invoices: invoices.map((i) => ({ ...i, asset: assets.some((a) => a.invoiceId === i.id) })) })
     const url = URL.createObjectURL(await workbookToBlob(wb)); const a = document.createElement('a'); a.href = url; a.download = `Depreciation_${yearEnd.slice(0, 4)}.xlsx`; a.click(); URL.revokeObjectURL(url); showToast('Workbook downloaded')
     logEvent({ client, clientName, category: 'work', title: 'Depreciation schedule prepared', description: `${assets.length} assets, charge ${money(sched.totals.I)}`, extra: { auditArea: 'Depreciation', performedBy: me.name }, user: me })
   }
@@ -56,6 +61,7 @@ export default function DepreciationTab({ client, clientName }) {
         </div>
         <p className="mt-1 text-xs text-slate-500">Straight line on cost. New additions are pro-rated from the date available for use to the year-end, inclusive, ÷ 365. Existing rows keep their existing rate; any that differ from the class rate are flagged, not changed.</p>
       </Card>
+      {invoices.length > 0 ? <AssetInvoices invoices={invoices} setInvoices={setInvoices} classes={CLASSES} company={company} tbAdditions={tbAdditions} built={built} onBuild={buildLines} /> : <Card title="Invoices received from the client"><p className="text-sm text-slate-600">When the client sends only invoices for asset purchases, read them here and build the asset lines from them.</p><button onClick={() => setInvoices(demoAssetInvoices(company))} className="mt-3 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's invoices" : 'Use demo invoices'}</button></Card>}
       <Card title="Assets" right={<button onClick={() => setAssets((l) => [...l, blank()])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add asset</button>}>
         {dc.ready && assets.length > 0 && !assets.some((a) => Number(a.addition) > 0) && <p className="mb-3 text-xs text-slate-500">The trial balance shows no additions in the year, so no purchase documents are needed yet. Enter an addition on an asset to see its invoice and payment proof.</p>}
         {assets.length === 0 && <p className="text-xs text-slate-400">No assets yet. Keep the template names and opening balances for existing assets. If an item does not fit a class, say so; nothing is guessed.</p>}
