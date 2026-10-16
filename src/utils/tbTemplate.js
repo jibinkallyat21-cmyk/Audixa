@@ -12,3 +12,17 @@ export async function buildTBTemplate() {
   n.getColumn(1).width = 110
   return workbookToBlob(wb)
 }
+
+// The blank general ledger workbook: party-wise balances for receivables, payables and the two advance accounts.
+export async function buildGLTemplate() {
+  const ExcelJS = await loadExcelJS()
+  const wb = new ExcelJS.Workbook(); const ws = wb.addWorksheet('General Ledger')
+  ws.addRow(['Account', 'Party', 'Opening Balance', 'Debit', 'Credit', 'Closing Balance']).font = { bold: true }
+  ws.addRow(['Trade Receivables', 'Example Customer A', 150000, 900000, 850000, 200000])
+  ws.addRow(['Trade Receivables', 'Example Customer B', 260000, 1400000, 1360000, 300000])
+  ;[34, 34, 18, 18, 18, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w })
+  const n = wb.addWorksheet('Notes')
+  ;['Provide the detailed general ledger. For trade receivables, trade payables, advances from customers and advances to suppliers there must be one row per party.', 'Account must be the same name (or code) as in your trial balance.', 'The party balances of each of these accounts must add up to the closing balance of that account in your trial balance. A file where they do not is rejected.', 'Debit balances are positive and credit balances are negative in the opening and closing columns.'].forEach((t) => n.addRow([t]))
+  n.getColumn(1).width = 110
+  return workbookToBlob(wb)
+}

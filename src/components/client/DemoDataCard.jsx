@@ -14,7 +14,7 @@ export default function DemoDataCard({ D }) {
         <Database className="mt-0.5 h-4 w-4 shrink-0" style={{ color: D.muted }} />
         <div className="min-w-0">
           <p className="text-sm font-semibold" style={{ color: D.text }}>Demo data {loaded && <span className="ml-1 text-xs font-medium text-emerald">loaded</span>}</p>
-          <p className="text-xs" style={{ color: D.muted }}>{loaded ? "This client now appears as a file in the Execution Team portal. Its demo trial balance is already submitted and waits for the audit team's approval." : 'Adds this client as a file in the Execution Team portal so you can see how it looks to the audit team.'}</p>
+          <p className="text-xs" style={{ color: D.muted }}>{loaded ? "This client now appears as a file in the Execution Team portal. Its demo trial balance and general ledger are already submitted and wait for the audit team's approval." : 'Adds this client as a file in the Execution Team portal so you can see how it looks to the audit team.'}</p>
         </div>
       </div>
       {!loaded ? (
