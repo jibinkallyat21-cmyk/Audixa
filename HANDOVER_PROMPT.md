@@ -4,6 +4,8 @@ Open Claude Code in this folder (the one that contains `prototype/` and `project
 
 ---
 
+Start now with the skill `analytix-prototype-to-prd` on `prototype/`, after reading this whole prompt.
+
 You are building the real **Audixa (Audit 360)** application for Analytix, an audit firm that works for two audit firms, **ABCPA** and **MISCPA**. A working prototype is in `prototype/`. The real application is built in `project/` with the Analytix skills you have. It runs **locally only** (SQLite, no hosting service).
 
 ## 0. Ground rules
@@ -16,10 +18,30 @@ You are building the real **Audixa (Audit 360)** application for Analytix, an au
 
 ## 1. Order of work
 
-1. **`analytix-prototype-to-prd`**: generate `PRD.md` and `.prd_work/` from `prototype/` (the code, `prototype/docs/execution-decisions.md` and `prototype/docs/source/`). I do not write the PRD by hand. Everything in the prototype that runs on sample data, browser storage or a stub must appear in the PRD as "to build". Every unclear rule goes into Open questions.
-2. **`analytix-recheck-prd`**: check the PRD against the Rule Book, the decisions file and the code. Give me the gaps and questions. Stop. I answer, then I set the PRD status to APPROVED.
-3. **`analytix-prd-to-app`**: build in `project/`, following its phases, `docs/BUILD_PLAN.md`, `docs/BUILD_PROGRESS.md`, `docs/CREDENTIALS_NEEDED.md`. Suggested module order: foundation and login, clients and allocation, the client onboarding flow (section 4), the execution tools tied to the client file, the other portals, integrations and AI.
+1. **`analytix-prototype-to-prd`** (the first step; it is not skipped). It builds `PRD.md` and `.prd_work/` from `prototype/`. Its Step 4 is mandatory: it will show you what it understood and ask me what to add. Do not answer for me. Show me its message; section 1A below holds my prepared answers, which I will paste or edit. It ends with me saying "approve the PRD", which sets the status to APPROVED and the version to 1.0.
+2. **`analytix-recheck-prd`** is **not** a review step you run on your own. It is only for after I edit `PRD.md` by hand (for example to answer open questions): run it then, before building.
+3. **`analytix-prd-to-app`**: builds in `project/` from the APPROVED PRD, following its phases and writing `project/docs/BUILD_PLAN.md`, `BUILD_PROGRESS.md`, `ASSUMPTIONS.md` and `CREDENTIALS_NEEDED.md`. Suggested module order: foundation and login, clients and allocation, the client onboarding flow (section 4), the execution tools tied to the client file, the other portals, integrations and AI. It can span several sessions: "continue the build" resumes it.
 4. **`analytix-app-testing`**, then **`analytix-fix-bugs`**, then **`analytix-app-testing`** again, until the app is ready.
+
+### 1A. How to run the first step on this prototype
+
+- The prototype is not a single HTML file. It is a React app (`prototype/src`, routes in `prototype/src/App.jsx`) with its own tests and documents. Treat `prototype/src`, `prototype/api`, `prototype/docs` and `prototype/index.html` as "the prototype". The inventory script handles JSX only roughly, so read every file as the skill says, one portal at a time (client, team, manager, front office, management, auth), and use the running prototype (`cd prototype && npm install && npm run dev`, http://localhost:5173, log in through the demo picker; on the client Engagement Dashboard press "Load demo data") to look at each screen.
+- **The 235 tests in `prototype/scripts/*.test.mjs` are the specification of the calculations and checks.** Use their expected numbers as the worked examples in the CALC and BR items and as acceptance criteria.
+- `prototype/docs/execution-decisions.md` and `prototype/docs/source/` hold the business rules the prototype cannot show. Treat them as department input (source "Department input").
+- The prototype has no real API keys. `.env.example` has placeholders only. Customer names in its sample data are made up for the demo; still write them as "Sample Client A" style in the PRD.
+- The PRD template's section 18 still says PostgreSQL in places. The database standard in the same skill is **SQLite**. Use SQLite everywhere.
+- `check_prd.py` will warn about many prototype functions that are not mentioned in the PRD. Cover them in section 22 grouped by file or module (one row per module with its functions listed). Do not drop real features to quiet the warnings.
+- Sample data in the prototype's Manager, Front Office and Management portals is not business rules (five sample files do not mean five files). The PRD still has to describe those screens and their real data needs.
+
+### 1B. My prepared answers for the skill's Step 4 questions
+
+**Anything to add (Department input, version 1 unless stated):**
+- Everything in `prototype/docs/execution-decisions.md` is a requirement, including its open questions with their stated defaults.
+- Everything listed in section 5 of this prompt is in scope for version 1: the client flow, the opening balance check, the real Reports & Documents issuing step, execution tools tied to the client file, real data in the manager, front office and management portals, real login, notifications, and document storage.
+- Monday.com is Later phases (interface and clearly labelled stub only). The company server folder is a configurable upload path.
+- Roles (confirm from the PRD): client user, audit lead, audit associate, audit manager, front office, front office manager (approves proposals; only front office sends them), management, administrator.
+
+**Defaults for the clarifying questions:** sample data is made up; version 1 integrations are Anthropic (document reading and the opening balance review), Odoo (proposals and leads) and email; AI platform is the Claude API through the backend; English only, left to right; currency SAR; money shown with 2 decimals; dates as DD MMM YYYY.
 
 ## 2. What the stack means for this prototype
 
