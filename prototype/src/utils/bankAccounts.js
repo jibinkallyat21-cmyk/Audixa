@@ -21,14 +21,17 @@ function itemsFor(acc, idx, yearEnd) {
 }
 const GENERIC = /bank statements|bank confirmations|bank reconc/i
 
-// The team asks for the documents account by account. The general bank requests that the client has not answered yet are replaced by these.
+// The team asks for the documents account by account. The general bank requests (statements, confirmations, reconciliation) are replaced by these:
+// whatever the client had already uploaded against them is carried over to the matching account document, so nothing is asked twice.
+const carry = (generic) => { const f = (re) => generic.find((g) => re.test(g.text) && ['Uploaded Processing', 'Under Review', 'Accepted'].includes(g.status)); return { conf: f(/confirmation/i), cy: f(/bank statements/i), sub: f(/bank statements/i) } }
 export function withBankRequirements(rec, accounts, yearEnd = '2025-12-31') {
   const cats = rec.categories || []; const have = cats.find((c) => c.id === 'BANKACC'); const known = new Set((have?.items || []).map((i) => i.ref))
-  const items = accounts.flatMap((a, idx) => itemsFor(a, idx, yearEnd).map((i) => ({ ...i, status: 'Pending Client', bank: { code: a.code, doc: i.doc } }))).filter((i) => !known.has(i.ref))
-  if (!items.length) return { rec, added: 0 }
-  let next = have ? cats.map((c) => (c.id === 'BANKACC' ? { ...c, items: [...c.items, ...items] } : c)) : [...cats, { id: 'BANKACC', title: 'Cash and bank accounts', reason: 'Documents for each cash and bank account, so each one can be checked on its own.', items }]
-  next = next.map((c) => (c.id === 'BANK' ? { ...c, items: c.items.filter((i) => !(GENERIC.test(i.text) && i.status === 'Pending Client')) } : c)).filter((c) => c.id !== 'BANK' || c.items.length)
-  return { rec: { ...rec, categories: next, itemCount: next.reduce((k, c) => k + c.items.length, 0) }, added: items.length }
+  const generic = (cats.find((c) => c.id === 'BANK')?.items || []).filter((i) => GENERIC.test(i.text)); const done = carry(generic)
+  const items = accounts.flatMap((a, idx) => itemsFor(a, idx, yearEnd).map((i) => { const g = a.type === 'Bank' ? done[i.doc] : null; return { ...i, status: g ? g.status : 'Pending Client', ...(g?.filename ? { filename: g.filename } : {}), bank: { code: a.code, doc: i.doc } } })).filter((i) => !known.has(i.ref))
+  if (!items.length && !generic.length) return { rec, added: 0 }
+  let next = items.length ? (have ? cats.map((c) => (c.id === 'BANKACC' ? { ...c, items: [...c.items, ...items] } : c)) : [...cats, { id: 'BANKACC', title: 'Cash and bank accounts', reason: 'Documents for each cash and bank account, so each one can be checked on its own.', items }]) : cats
+  next = next.map((c) => (c.id === 'BANK' ? { ...c, items: c.items.filter((i) => !GENERIC.test(i.text)) } : c)).filter((c) => c.id !== 'BANK' || c.items.length)
+  return { rec: { ...rec, categories: next, itemCount: next.reduce((k, c) => k + c.items.length, 0) }, added: items.length, changed: true }
 }
 // A bank reconciliation is asked for only for an account whose statement closing balance differs from the trial balance.
 export function withReconRequest(rec, acc, idx, diff, yearEnd = '2025-12-31') {

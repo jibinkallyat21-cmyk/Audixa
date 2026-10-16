@@ -106,3 +106,10 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - A bank reconciliation is requested only for an account whose statement closing balance differs from the trial balance, and it sits inside that account's row (Reconciliation tab). The confirmation checks (six tests) also sit inside the row.
 - Cut-off is done per account. The team enters the numbers for each bank (ABCPA: debits and credits; MISCPA: the number before and the same number after the year end). Each bank gets its own block on the client's cut-off list.
 - Not carried over: the cash denomination count of the old confirmation tool. Say if it is needed on the cash row.
+
+## Requirement list grouped by audit area (built)
+
+- The client's requirement list is grouped by area, in this order: Cash & Cash Equivalents, Trade Receivables, Inventory, Prepayments & Other Receivables, Fixed Assets, Trade Payables, Accrued Expense & Other Payables, Non Current Liabilities, Equity, Revenue, COGS, Expense, Salary. Trial balance and ledger sit first; anything that fits none sits last under Other. Empty areas are hidden.
+- Each area holds its documents, its samples and its cut-off items together. The same grouping is used on the team's Documents view.
+- Assumptions to confirm: VAT with Accrued Expense & Other Payables; loans, EOSB and related parties with Non Current Liabilities; staff advances with Prepayments & Other Receivables; rent with Expense.
+- The general bank requests are replaced by the per-account ones; whatever the client had already uploaded is carried over, so nothing is asked twice.

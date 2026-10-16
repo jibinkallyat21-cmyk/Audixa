@@ -42,7 +42,8 @@ export function sendReminders(slug, refs) {
 // The team asks for the documents of each cash and bank account (and, only when a statement differs from the books, its reconciliation).
 export function requestBankDocuments(slug, accounts, yearEnd) {
   const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return -1
-  const { rec, added } = withBankRequirements(cur, accounts, yearEnd)
+  const { rec, added, changed } = withBankRequirements(cur, accounts, yearEnd)
+  if (changed) writeStore(KEY, { ...all, [slug]: rec })
   if (added) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Bank documents requested', `${added} documents requested for ${accounts.length} cash and bank account${accounts.length === 1 ? '' : 's'}`, 'doc-request') }
   return added
 }

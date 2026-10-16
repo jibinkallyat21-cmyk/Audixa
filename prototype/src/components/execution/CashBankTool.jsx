@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Eye, Check, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, Field, FieldGrid, Section, Toggle, Flags, Stat, Empty, PrimaryButton, SecondaryButton, INPUT } from './ReviewParts'
@@ -29,6 +29,9 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
   const [yearEnd, setYearEnd] = useState('2025-12-31'); const [open, setOpen] = useState(accounts.length === 1 ? accounts[0].code : null); const [tabs, setTabs] = useState({}); const [view, setView] = useState({}); const [edit, setEdit] = useState({}); const [rejecting, setRejecting] = useState(''); const [reason, setReason] = useState('')
   const patch = (code, p) => setEdit((e) => ({ ...e, [code]: { ...e[code], ...p } }))
   const requested = (rec?.categories || []).some((c) => c.id === 'BANKACC')
+  // Once the per-account documents are requested, any general bank request left over from before is folded into them (nothing is asked twice).
+  const leftover = (rec?.categories || []).some((c) => c.id === 'BANK' && c.items.some((i) => /bank statements|bank confirmations|bank reconc/i.test(i.text)))
+  useEffect(() => { if (requested && leftover) requestBankDocuments(dc.slug, accounts, '2025-12-31') }, [requested, leftover, dc.slug, accounts])
 
   const rows = accounts.map((a, idx) => {
     const e = edit[a.code] || {}; const docs = bankDocs(rec, a.code)

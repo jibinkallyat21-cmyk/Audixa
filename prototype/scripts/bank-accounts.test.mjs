@@ -7,9 +7,10 @@ import { withSampleRequirements } from '../src/utils/sampleRequests.js'
 const led = demoCorrectedLedgers(); const accs = bankAccountsFrom(led)
 const rec = () => ({ categories: [{ id: 'BANK', title: 'Bank', items: [{ ref: 'BANK-01', text: 'All bank statements covering the audit period and the subsequent one month.', status: 'Pending Client' }, { ref: 'BANK-02', text: 'Bank reconciliation statements, if any.', status: 'Pending Client' }, { ref: 'BANK-03', text: 'Bank confirmations in the prescribed format.', status: 'Accepted' }] }] })
 test('accounts come from the cash ledgers', () => { assert.equal(accs.length, 1); assert.equal(accs[0].type, 'Bank'); assert.equal(accs[0].tb, 214800) })
-test('three documents per bank; unanswered general requests are replaced, answered ones kept', () => {
+test('three documents per bank; the general bank requests are replaced and what was uploaded is carried over', () => {
   const { rec: r, added } = withBankRequirements(rec(), accs); assert.equal(added, 3)
-  const bank = r.categories.find((c) => c.id === 'BANK'); assert.deepEqual(bank.items.map((i) => i.ref), ['BANK-03'])
+  const bank = r.categories.find((c) => c.id === 'BANK'); assert.equal(bank, undefined)
+  assert.equal(bankDocs(r, '1001').conf.status, 'Accepted')   // the accepted general confirmation is carried over, not asked again
   assert.equal(Object.keys(bankDocs(r, '1001')).sort().join(), 'conf,cy,sub')
   assert.equal(withBankRequirements(r, accs).added, 0)
 })
@@ -31,4 +32,10 @@ test('cut-off per bank: separate blocks per account, ledger on every row', () =>
   const a = withSampleRequirements({ categories: [] }, { area: 'bank', sub: 'Bank 1001', label: 'Bank: A', group: 'cutoff', samples: [{ key: 'a', text: 'x', row: { ledger: 'A' } }] })
   const b = withSampleRequirements(a.rec, { area: 'bank', sub: 'Bank 2002', label: 'Bank: B', group: 'cutoff', samples: [{ key: 'b', text: 'y', row: { ledger: 'B' } }] })
   assert.equal(b.rec.categories.length, 2); assert.ok(b.rec.categories.every((c) => c.area === 'bank')); assert.notEqual(b.rec.categories[0].items[0].ref, b.rec.categories[1].items[0].ref)
+})
+import { groupRequirements } from '../src/utils/requirementAreas.js'
+test('requirement list grouped by area', () => {
+  const r = { categories: [{ id: 'BANK', title: 'Bank', items: [{ ref: 'B1', status: 'Pending Client', text: 'x' }] }, { id: 'SALES', title: 'Sales', items: [{ ref: 'S1', status: 'Accepted', text: 'x' }] }, { id: 'cut-bank', title: 'Cut-off: Bank', group: 'cutoff', area: 'bank', items: [{ ref: 'C1', status: 'Pending Client', text: 'x' }] }, { id: 'smp-arap', title: 'Samples: AR/AP', group: 'samples', area: 'ARAP', items: [{ ref: 'A1', subgroup: 'Trade Payable', text: 'x', status: 'Pending Client' }, { ref: 'A2', subgroup: 'Trade Receivable', text: 'x', status: 'Pending Client' }] }] }
+  const g = groupRequirements(r); assert.deepEqual(g.map((x) => x.id), ['cash', 'receivables', 'payables', 'revenue'])
+  assert.equal(g[0].docs.length, 1); assert.equal(g[0].cutoff[0].items[0].ref, 'C1'); assert.equal(g[1].samples[0].items[0].ref, 'A2'); assert.equal(g[2].samples[0].items[0].ref, 'A1'); assert.equal(g[3].counts.accepted, 1)
 })
