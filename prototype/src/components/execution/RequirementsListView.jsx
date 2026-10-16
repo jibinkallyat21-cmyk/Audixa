@@ -54,6 +54,7 @@ function MisList({ file, renderIssued }) {
   const clientTB = sub && ['Submitted', 'Approved'].includes(sub.status) && sub.ledgers?.length ? sub : null
   const [reason, setReason] = useState('')
   const [adjust, setAdjust] = useState(false)
+  const [tbShow, setTbShow] = useState(null)   // null = automatic: open while the trial balance needs checking, folded once it is approved
 
   const effLedgers = clientTB ? clientTB.ledgers : null
   const effMulti = clientTB ? detectBranches(clientTB.ledgers, 1).multi : false
@@ -89,7 +90,13 @@ function MisList({ file, renderIssued }) {
         {err && <p className="mt-2 text-xs text-alert-red">{err}</p>}
         {clientTB && (
           <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-            <p className="font-semibold text-navy">Client trial balance: {clientTB.fileName} · {clientTB.ledgers.length} ledgers · {clientTB.status === 'Approved' ? `Approved by ${sub.approvedBy}` : 'Format check passed, waiting for your approval'}</p>
+            {(() => { const tbOpen = tbShow ?? clientTB.status !== 'Approved'; return (<>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-semibold text-navy">Client trial balance: {clientTB.fileName} · {clientTB.ledgers.length} ledgers · {clientTB.status === 'Approved' ? `Approved by ${sub.approvedBy}` : 'Format check passed, waiting for your approval'}</p>
+              {clientTB.status === 'Approved' && <button onClick={() => setTbShow(!tbOpen)} aria-expanded={tbOpen} className={`${BTN} border border-slate-300 text-navy hover:bg-white`}>{tbOpen ? 'Hide the checks' : 'Show the checks'}</button>}
+            </div>
+            {!tbOpen && <p className="mt-1 text-emerald">Party-wise balances {clientTB.partyWise ? 'applied' : 'not needed'}; opening balances checked against the previous year and confirmed.</p>}
+            {tbOpen && <>
             {(clientTB.warnings || []).map((w) => <p key={w} className="mt-1 text-amber">{w}</p>)}
             {(() => {
               const left = clientTB.ledgers.filter((l) => partyKindOf(l.name)).length
@@ -115,6 +122,8 @@ function MisList({ file, renderIssued }) {
                 <button onClick={sendBack} className={`${BTN} border border-slate-300 text-navy hover:bg-white`}><Undo2 className="h-3.5 w-3.5" />Return to client</button>
               </div>
             )}
+            </>}
+            </>) })()}
           </div>
         )}
         {!clientTB && sub?.status === 'Returned' && <p className="mt-2 text-xs text-amber">Returned to the client: {sub.returnReason}. Waiting for a new upload.</p>}
