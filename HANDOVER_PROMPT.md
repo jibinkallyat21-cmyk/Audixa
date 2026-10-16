@@ -83,6 +83,7 @@ The skill tells you to remove some prototype devices. For this app:
 - Requirement lists: the rules that decide which categories apply to a trial balance are the prototype author's reading of the category names (`requirementsEngine`). Confirm per category; confirm whether small balances should be dropped (materiality floor).
 - The open items in `prototype/docs/source/Audixa_Open_Items.xlsx` (credentials, templates, rule confirmations, app behaviours such as procedure locking, a client picker in the tools, the manager portal sidebar, whether the client uploads basic documents).
 - The wording corrections made to both requirement lists (decision 43).
+- Self-Review document (`prototype/docs/source/Self-Review_by_Audit_Team_Lead_3_3.docx`): all my answers are in `prototype/docs/self-review-decisions.md` and are requirements. Three questions are still open and I will answer them in this account: Q9 (foreign company / MISA 51% ownership rule), Q27 (what counts as a major or unusual bank transaction), Q46 (which documents count as ZATCA-compliant). Do not guess them; list them as open questions.
 
 ### B. Built as a demo only, must be built for real
 - Reports & Documents for the client: there is no step for the team to issue the engagement letter, Zakat return, draft and final financial statements; the client's signed-copy uploads are not saved.

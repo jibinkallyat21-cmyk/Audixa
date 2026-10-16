@@ -50,3 +50,8 @@ Q46 "ZATCA compliant documents" criteria: PARKED for later.
 Q47/48 Vouching: purchases/COGS/expenses compare supplier name, invoice date, NET amount; invoice number NOT checked. Sales: customer name, invoice date, NET amount, and invoice number still checked.
 Q49 Other income: ABCPA all above materiality plus a sample below; MISCPA 50% of total value of other income.
 PARKED: Q9 (51% foreign rule), Q27 (significant/unusual bank transactions), Q46 (ZATCA-compliant criteria).
+
+## Open questions (to be answered by the user in the company account)
+Q9 Foreign company / MISA: how to trace parent-company ownership (levels), what exactly makes a client "foreign" (GCC owners, under 51% Saudi), what the app does with the result, and which documents show ownership.
+Q27 Major and unusual bank transactions: threshold for "significant value", what "unusual nature" covers, which firms it applies to, and flag handling.
+Q46 ZATCA-compliant documents for external other receivables: which documents count, whether fields are checked or the team records yes/no, which items it applies to, and what happens if non-compliant.
