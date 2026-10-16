@@ -14,6 +14,9 @@ import { useDemoClient } from '../../utils/useDemoClient'
 import { clientSales, clientPurchases, clientExpenses, clientParties, clientLedger } from '../../utils/clientSamplingData'
 import { salesItems, expenseItems, partyItems, materialityItems } from '../../utils/sampleItems'
 import SendSamples from './SendSamples'
+import { Link } from 'react-router-dom'
+import { useMateriality } from '../../utils/materialityStore'
+import { sampleMateriality } from '../../utils/materiality'
 
 const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined || n === '' ? '' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
@@ -147,8 +150,8 @@ function Parties({ ctx }) {
 // ── ABCPA ─────────────────────────────────────────────────────────────────
 // The test areas of the materiality method. Ledger areas read the voucher ledger and only take the accounts of that area; party areas read the party list.
 const AREAS = [['Revenue', 'ledger', ['revenue']], ['COGS', 'ledger', ['cogs']], ['Expenses', 'ledger', ['opex', 'finance']], ['Trade receivables', 'party'], ['Trade payables', 'party']]
-function Materiality({ ctx, initialArea = 'Revenue' }) {
-  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [pfile, setPfile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
+function Materiality({ ctx, initialArea = 'Revenue', lockArea = false }) {
+  const dc = useDemoClient(); const stored = useMateriality(dc.slug); const showToast = useToast(); const [file, setFile] = useState(null); const [pfile, setPfile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
   const [p, setP] = useState({ area: initialArea, revenue: '', matPct: 0.5, manual: '', risk: 'Moderate (3)', size: 'Medium', method: 'random', seed: 1, override: '' })
   const kind = AREAS.find((a) => a[0] === p.area)
   const load = async (f, buffer) => { setBusy(true); setInclude({}); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), MAT_FIELDS)), name: f?.name || (dc.ready ? `${dc.client} ledger` : 'Demo ledger.xlsx') }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
@@ -157,7 +160,8 @@ function Materiality({ ctx, initialArea = 'Revenue' }) {
     await load(null, await demoBuffer(dc.ready ? clientLedger(dc.ledgers) : demoLedgerForMateriality())); await loadParty(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties()))
     setP((x) => ({ ...x, revenue: dc.ready ? String(-dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)) : '4000000' }))
   }
-  const calc = p.revenue !== '' ? materialityFromRevenue(Number(p.revenue), Number(p.matPct)) : null
+  const useStored = !!(stored && dc.ready)   // set in the file summary
+  const calc = useStored ? { calculated: stored.materiality, used: sampleMateriality(stored.materiality) } : p.revenue !== '' ? materialityFromRevenue(Number(p.revenue), Number(p.matPct)) : null
   const materiality = p.manual !== '' ? Number(p.manual) : calc?.used
   const all = useMemo(() => {
     if (!file?.rows?.length || !file.mapping.account) return []; const m = file.mapping
@@ -182,14 +186,17 @@ function Materiality({ ctx, initialArea = 'Revenue' }) {
       <Card title="Materiality method" subtitle="Everything above materiality is tested. Below it, a sample is chosen by the sample size."
         right={<SecondaryButton onClick={loadClient}>{dc.ready ? "Use the client's data" : 'Use demo data'}</SecondaryButton>}><AutoDemo run={loadClient} />
         <Section title="1. What are you testing?">
-          <FieldGrid cols={2}>
+          {lockArea && <p className="text-sm text-navy">Testing <b>{p.area}</b>: only the accounts of this area are used{isParty ? ' (party list: debit balances for receivables, credit balances for payables)' : ''}.</p>}
+          {!lockArea && <FieldGrid cols={2}>
             <Field label="Test area" hint={isParty ? 'Uses the party list: debit balances for receivables, credit balances for payables' : 'Only the accounts of this area are used'}><select aria-label="Test area" value={p.area} onChange={(e) => set('area', e.target.value)} className={`${SEL} w-full`}>{AREAS.map((a) => <option key={a[0]}>{a[0]}</option>)}</select></Field>
-          </FieldGrid>
+          </FieldGrid>}
         </Section>
         <Section title="2. Materiality" hint={calc ? `Calculated materiality ${money(calc.calculated)}; used for sampling (80%) ${money(calc.used)}.` : 'Enter the revenue, or type the materiality directly.'}>
+          {useStored && <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">Materiality was set in the <Link to="/team/workspace/summary" className="font-semibold text-navy hover:underline">file summary</Link>: SR {money(stored.materiality)} ({stored.pct}% of the chosen basis). Type a figure below only to override it for this test.</p>}
+          {!useStored && dc.ready && <p className="mb-3 rounded-lg bg-amber/5 px-3 py-2 text-sm text-amber">Materiality is not set for this file. Set it in the <Link to="/team/workspace/summary" className="font-semibold underline">file summary</Link>, or type it here.</p>}
           <FieldGrid>
-            <Field label="Revenue (this period)"><input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} w-full`} /></Field>
-            <Field label="Materiality as % of revenue"><input aria-label="Materiality percent" type="number" step="0.1" value={p.matPct} onChange={(e) => set('matPct', e.target.value)} className={`${SEL} w-full`} /></Field>
+            {!useStored && <Field label="Revenue (this period)"><input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} w-full`} /></Field>}
+            {!useStored && <Field label="Materiality as % of revenue"><input aria-label="Materiality percent" type="number" step="0.1" value={p.matPct} onChange={(e) => set('matPct', e.target.value)} className={`${SEL} w-full`} /></Field>}
             <Field label="Or type the materiality"><input aria-label="Materiality used" type="number" value={p.manual} onChange={(e) => set('manual', e.target.value)} className={`${SEL} w-full`} /></Field>
           </FieldGrid>
         </Section>
@@ -230,12 +237,12 @@ function Materiality({ ctx, initialArea = 'Revenue' }) {
   )
 }
 
-export default function SamplingTab({ firm, client, clientName, initialMode = 'sales', initialArea = 'Revenue', initialKind = 'Sales Report' }) {
+export default function SamplingTab({ firm, client, clientName, initialMode = 'sales', initialArea = 'Revenue', initialKind = 'Sales Report', lockArea = false }) {
   const me = currentUser()
   const [mode, setMode] = useState(initialMode)
   const ctx = { client, log: (title, description) => logEvent({ client, clientName, category: 'work', title, description, extra: { auditArea: 'Sampling', performedBy: me.name }, user: me }) }
   if (!firm) return <Card><p className="text-sm text-slate-500">Select a client first. The auditor on the proposal decides which sampling framework is used.</p></Card>
-  if (firm === 'ABCPA') return <div className="space-y-3"><p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p><Materiality ctx={ctx} initialArea={initialArea} /></div>
+  if (firm === 'ABCPA') return <div className="space-y-3"><p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p><Materiality ctx={ctx} initialArea={initialArea} lockArea={lockArea} /></div>
   return (
     <div className="space-y-3">
       <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">MISCPA file: the 50% rule books apply. The materiality method is for ABCPA files and is not shown.</p>

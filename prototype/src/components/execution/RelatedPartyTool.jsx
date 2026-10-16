@@ -6,6 +6,8 @@ import SendSamples from './SendSamples'
 import { useIssuedLists } from '../../utils/requirementsStore'
 import { clientRelatedTransactions, pickRelated, testedElsewhere, RELATED_PARTIES } from '../../utils/relatedParty'
 import { materialityFromRevenue } from '../../utils/sampling'
+import { useMateriality } from '../../utils/materialityStore'
+import { sampleMateriality } from '../../utils/materiality'
 import { fmtDate } from '../../utils/sampleItems'
 import { logEvent } from '../../utils/auditLog'
 import { currentUser } from '../../utils/currentUser'
@@ -32,7 +34,8 @@ export default function RelatedPartyTool({ dc }) {
   const txs = useMemo(() => (dc.ready ? clientRelatedTransactions(dc.ledgers) : []), [dc.ready, dc.ledgers])
   const revenue = -dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)
   const [mat, setMat] = useState(''); const [nAbove, setNAbove] = useState(''); const [nBelow, setNBelow] = useState(''); const [res, setRes] = useState(null)
-  const suggested = revenue > 0 ? materialityFromRevenue(revenue, 0.5).used : null
+  const stored = useMateriality(dc.slug)
+  const suggested = stored ? sampleMateriality(stored.materiality) : revenue > 0 ? materialityFromRevenue(revenue, 0.5).used : null
   const materiality = mat !== '' ? Number(mat) : suggested
   if (dc.auditor !== 'ABCPA') return <Empty>Related party transaction testing in this tool follows the ABCPA method. This file is audited under {dc.auditor}; record the work in your notes below.</Empty>
   const ok = materiality > 0 && nAbove !== '' && nBelow !== '' && Number(nAbove) >= 0 && Number(nBelow) >= 0
@@ -44,7 +47,7 @@ export default function RelatedPartyTool({ dc }) {
       <Card title="Related party transactions" subtitle="From the client's related party listing (stands in for the client's declaration). Choose how many to test; unusual ones are picked first.">
         <p className="text-xs text-slate-500">Related parties on the file: {RELATED_PARTIES.map((p) => `${p.name} (${p.relation})`).join(', ')}.</p>
         <FieldGrid cols={3}>
-          <Field label="Materiality" hint={suggested ? `Suggested ${money(suggested)}: 0.5% of revenue, 80% used` : 'Enter it'}><input aria-label="Materiality" type="number" value={mat} placeholder={suggested ? String(suggested) : ''} onChange={(e) => { setMat(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>
+          <Field label="Materiality" hint={stored ? `From the file summary: SR ${money(stored.materiality)}, 80% used` : suggested ? `Suggested ${money(suggested)}: 0.5% of revenue, 80% used. Set materiality in the file summary.` : 'Enter it'}><input aria-label="Materiality" type="number" value={mat} placeholder={suggested ? String(suggested) : ''} onChange={(e) => { setMat(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>
           <Field label="How many above materiality"><input aria-label="Number above materiality" type="number" min="0" value={nAbove} onChange={(e) => { setNAbove(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>
           <Field label="How many below materiality"><input aria-label="Number below materiality" type="number" min="0" value={nBelow} onChange={(e) => { setNBelow(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>
         </FieldGrid>

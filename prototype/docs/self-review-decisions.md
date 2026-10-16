@@ -113,3 +113,10 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - Each area holds its documents, its samples and its cut-off items together. The same grouping is used on the team's Documents view.
 - Assumptions to confirm: VAT with Accrued Expense & Other Payables; loans, EOSB and related parties with Non Current Liabilities; staff advances with Prepayments & Other Receivables; rent with Expense.
 - The general bank requests are replaced by the per-account ones; whatever the client had already uploaded is carried over, so nothing is asked twice.
+
+## ABCPA materiality setting (built)
+
+- File summary (ABCPA files only) has a Materiality card with "Set materiality". The dialog is the numerical threshold table: basis (sales / revenues 0.5% - 1%, total assets 0.5% - 1%, total equity 1%, income before zakat/tax 5% - 10%), the figure from the approved trial balance, the percentage applied (defaults 1, 0.5, 1, 5; a figure outside the typical range is flagged), and the possible materiality. One basis is chosen ("Yes"); the materiality is that basis at that percentage. A basis at or below zero cannot be chosen.
+- The sampling tools and the related party tool use 80% of the saved materiality (the existing ABCPA rule); a figure can still be typed over it for one test. Not applicable to MISCPA files.
+- Inside an audit area the sampling tool no longer asks which area is tested: the area is fixed by the procedure opened. The selector stays on the stand-alone sampling page.
+- Total equity = share capital + reserves + retained earnings + the year's income; assumption to confirm.
