@@ -26,7 +26,7 @@ export function approveTB(file, by = 'Audit team') {
 }
 export function setTBLedgers(file, ledgers, extra = {}) {
   const cur = getTBSubmission(file.slug); if (!cur) return
-  put(file.slug, { ...cur, ledgers, ...extra })
+  put(file.slug, { ...cur, ledgers, updatedAt: new Date().toISOString(), ...extra })
   log(file.client, 'Party-wise balances applied', `${extra.partyWise?.summary?.filter((s) => s.replaced).length || 0} control lines replaced with party-wise balances from the general ledger`)
 }
 export const clearTB = (slug) => { const all = { ...readStore(KEY, {}) }; delete all[slug]; writeStore(KEY, all) }

@@ -26,6 +26,12 @@ export const linesFromLedgers = (ledgers) => ledgers.map((l, i) => withClosing({
   openingBalance: l.opening, currentYearDebit: l.debit, currentYearCredit: l.credit, adjustmentDebit: 0, adjustmentCredit: 0, zakatClassification: classifyByName(l.name),
 }))
 
+export function formatUpdated(iso) {
+  if (!iso) return ''
+  const d = new Date(iso); const t = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()
+  return d.toDateString() === new Date().toDateString() ? `Today ${t}` : `${d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} ${t}`
+}
+
 export function TBProvider({ children }) {
   const sub = useTBSubmissions()[DEMO_FILE.slug]
   const [adjustments, setAdjustments] = useStore('workingtb:adjustments', [])
@@ -40,23 +46,25 @@ export function TBProvider({ children }) {
     })
   }, [approved, adjustments, classOverrides])
   const tbUploaded = !!approved
+  // Last change to the working trial balance: its approval, or the latest adjustment posted or decided.
+  const lastUpdated = approved ? [approved.decidedAt, approved.updatedAt, ...adjustments.map((a) => a.updatedAt)].filter(Boolean).sort().pop() || approved.submittedAt : null
 
   const pendingAdjustments = adjustments.filter((a) => a.status === 'Pending Client Approval')
 
   function approveAdjustment(adjId, clientNote = '') {
-    setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Approved by Client', clientNote } : a)))
+    setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Approved by Client', clientNote, updatedAt: new Date().toISOString() } : a)))
     const adj = adjustments.find((a) => a.id === adjId)
     if (adj) addActivityEvent({ id: `act-adj-approve-${adjId}`, icon: 'emerald', description: `You approved adjustment ${adj.adjustmentRef} — trial balance updated`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
   }
 
   function rejectAdjustment(adjId, clientNote = '') {
-    setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Rejected by Client', clientNote } : a)))
+    setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Rejected by Client', clientNote, updatedAt: new Date().toISOString() } : a)))
     const adj = adjustments.find((a) => a.id === adjId)
     if (adj) addActivityEvent({ id: `act-adj-reject-${adjId}`, icon: 'red', description: `You rejected adjustment ${adj.adjustmentRef}`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
   }
 
   function postAdjustment(newAdj) {
-    setAdjustments((prev) => [newAdj, ...prev])
+    setAdjustments((prev) => [{ ...newAdj, updatedAt: new Date().toISOString() }, ...prev])
     addActivityEvent({ id: `act-adj-post-${newAdj.id}`, icon: 'amber', description: `Your auditor proposed adjustment ${newAdj.adjustmentRef} — awaiting your review`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
   }
 
@@ -65,7 +73,7 @@ export function TBProvider({ children }) {
   }
 
   return (
-    <TBContext.Provider value={{ tbLines, adjustments, pendingAdjustments, tbUploaded, approveAdjustment, rejectAdjustment, postAdjustment, reclassifyLine }}>
+    <TBContext.Provider value={{ tbLines, adjustments, pendingAdjustments, tbUploaded, lastUpdated, approveAdjustment, rejectAdjustment, postAdjustment, reclassifyLine }}>
       {children}
     </TBContext.Provider>
   )
