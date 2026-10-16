@@ -1,10 +1,13 @@
 import { Database } from 'lucide-react'
 import { useToast } from '../shared/Toast'
-import { useDemoLoaded, loadDemoData, clearDemoData } from '../../utils/demoData'
+import { useState } from 'react'
+import { useDemoLoaded, useDemoAuditor, loadDemoData, clearDemoData } from '../../utils/demoData'
 
 export default function DemoDataCard({ D }) {
   const showToast = useToast()
   const loaded = useDemoLoaded()
+  const current = useDemoAuditor()
+  const [firm, setFirm] = useState('MISCPA')
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-3" style={{ background: D.card, border: `1px dashed ${D.border}` }}>
       <div className="flex min-w-0 items-start gap-3">
@@ -14,7 +17,12 @@ export default function DemoDataCard({ D }) {
           <p className="text-xs" style={{ color: D.muted }}>{loaded ? "This client now appears as a file in the Execution Team portal. Its demo trial balance is already submitted and waits for the audit team's approval." : 'Adds this client as a file in the Execution Team portal so you can see how it looks to the audit team.'}</p>
         </div>
       </div>
-      <button onClick={() => { if (loaded) { clearDemoData(); showToast('Demo data removed') } else { loadDemoData(); showToast('Demo data loaded. Open the Execution Team portal to see the file.') } }}
+      {!loaded ? (
+        <label className="flex items-center gap-2 text-xs" style={{ color: D.muted }}>Audit firm
+          <select aria-label="Audit firm" value={firm} onChange={(e) => setFirm(e.target.value)} className="rounded-md px-2 py-1.5 text-xs" style={{ background: D.card, color: D.text, border: `1px solid ${D.border}` }}><option>MISCPA</option><option>ABCPA</option></select>
+        </label>
+      ) : <span className="text-xs" style={{ color: D.muted }}>Audit firm: {current}</span>}
+      <button onClick={() => { if (loaded) { clearDemoData(); showToast('Demo data removed') } else { loadDemoData(firm); showToast('Demo data loaded. Open the Execution Team portal to see the file.') } }}
         className="shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold text-white" style={{ background: loaded ? '#64748b' : '#E63946' }}>
         {loaded ? 'Remove demo data' : 'Load demo data'}
       </button>

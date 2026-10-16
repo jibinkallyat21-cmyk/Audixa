@@ -42,3 +42,15 @@ test('demo TB gives a sensible list', () => {
   assert.ok(!ids(r).includes('LN')); assert.ok(!ids(r).includes('SA'))
   assert.ok(r.itemCount < 54)
 })
+
+import { ABC_REQUIREMENTS as ABC } from '../src/data/abcRequirements.js'
+import { requirementsFor } from '../src/data/firmRequirements.js'
+test('ABCPA list loads: 20 categories incl. general ledger and accrued expenses', () => {
+  assert.equal(ABC.length, 20); assert.equal(ABC.reduce((n, c) => n + c.items.length, 0), 57)
+  assert.equal(requirementsFor('ABCPA'), ABC); assert.equal(requirementsFor('MISCPA')[0].id, 'TB'); assert.deepEqual(requirementsFor('x'), [])
+})
+test('ABCPA: general ledger always, accrued expenses only with accrual ledgers', () => {
+  const a = buildIssuedList(ABC, [L('Trade Receivables', 'receivables')])
+  assert.ok(ids(a).includes('GL')); assert.ok(!ids(a).includes('ACC'))
+  assert.ok(ids(buildIssuedList(ABC, [L('Accruals', 'accruals', -5, '2100')])).includes('ACC'))
+})

@@ -840,7 +840,6 @@ export default function TeamWorkspaceRequirements() {
   const fileOptions = teamFiles.filter((f) => f.isDemo)
   const slug = params.get('file') || PORTAL_CLIENT.slug
   const selected = fileOptions.find((f) => f.slug === slug) || fileOptions[0] || PORTAL_CLIENT
-  const isMis = selected.auditor === 'MISCPA'
   const file = getTeamFile('al-marai')
   const percent = Math.round((file.pbcDone / file.pbcTotal) * 1000) / 10
   const showToast = useToast()
@@ -892,123 +891,7 @@ export default function TeamWorkspaceRequirements() {
           <p className="text-xs text-slate-500">The requirement list follows the auditor the client is allocated to.</p>
         </div>
 
-        {isMis ? <RequirementsListView file={selected} renderIssued={(rec) => <IssuedReview rec={rec} slug={selected.slug} />} /> : (<>
-        <RequirementsListView file={selected} />
-
-        <div className="space-y-6">
-          {/* PBC health bar */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-navy">
-                {file.pbcDone} of {file.pbcTotal} items validated — {percent}% Complete
-              </p>
-              <p className="text-xs font-medium text-slate-500">Target closure: 12 Nov 2024</p>
-            </div>
-            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
-              <motion.div
-                initial={{ width: '0%' }}
-                animate={{ width: `${percent}%` }}
-                transition={{ duration: 1, ease: 'easeInOut' }}
-                className="h-full rounded-full bg-emerald"
-              />
-            </div>
-          </div>
-
-          {/* TB Status + AI Analysis + Manual Entry */}
-          <TBStatusBanner isLead={isLead} />
-
-          {/* Filter row */}
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search requirements..."
-              className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-navy outline-none focus:border-navy"
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s === 'all' ? 'Status — all' : s}
-                </option>
-              ))}
-            </select>
-            <select className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-navy outline-none focus:border-navy">
-              <option>Priority — all</option>
-            </select>
-            <button
-              onClick={() => showToast('Batch OCR parse started — this may take a few minutes')}
-              className="rounded-lg border border-slate-300 px-3.5 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
-            >
-              Batch OCR Parse
-            </button>
-            <button
-              onClick={() => showToast('PBC Tracker exported')}
-              className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
-            >
-              Export PBC Tracker
-            </button>
-          </div>
-
-          {!isLead && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="rounded-lg border border-amber/30 bg-amber/10 px-4 py-3 text-xs text-amber"
-            >
-              You are viewing as Associate. Some Lead-only controls are hidden.
-            </motion.div>
-          )}
-
-          <div className="space-y-4">
-            {categories.map((category) => (
-              <div key={category.id}>
-                <CategorySection
-                  category={category}
-                  onUpdateItem={updateItem}
-                  statusFilter={statusFilter}
-                  searchQuery={search}
-                />
-                {category.id === '02' && signedOff && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald/30 bg-emerald/10 px-3 py-1 text-[11px] font-semibold text-emerald"
-                  >
-                    <Check className="h-3 w-3" /> Signed Off — Fahad Al-Otaibi — 05 Nov 2024
-                  </motion.div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <ReviewPointsSection canRaise={isLead} />
-
-          <div className="flex flex-wrap items-center justify-end gap-3 pb-2">
-            {isLead && (
-              <>
-                <button
-                  onClick={() => showToast('Resubmission request sent to client')}
-                  className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50"
-                >
-                  <AlertCircle className="h-4 w-4" />
-                  Request Client Resubmission
-                </button>
-                <button
-                  disabled={signedOff}
-                  onClick={handleSignOffClick}
-                  className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {signedOff ? 'Section 02 Signed Off' : 'Sign Off Section 02'}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-        </>)}
+        <RequirementsListView file={selected} renderIssued={(rec) => <IssuedReview rec={rec} slug={selected.slug} />} />
       </PageTransition>
     </AuditTeamLayout>
   )

@@ -17,6 +17,7 @@ const CASHISH = has(/cash in hand|cash on hand|petty cash|\bcash\b/)
 
 // category id -> test on a single ledger
 const RULES = {
+  ACC: or(inG('accruals'), has(/accrued|accrual/)),
   RP: or(inG('related'), has(/shareholder|partner|director|related part|owner|due (to|from) (a )?(shareholder|partner|director|related)/)),
   LN: or(inG('borrowings'), has(/\bloan|borrowing|term loan|overdraft|murabaha finance|finance lease|facility/)),
   VAT: or(inG('vat'), has(/\bvat\b|value added/)),
@@ -45,6 +46,7 @@ export function applicableCategories(categories, ledgers, { consolidated = false
   const rows = (ledgers || []).filter(live)
   const ctx = { consolidated }
   return categories.map((cat) => {
+    if (cat.id === 'GL') return { ...cat, applies: true, reason: 'Always requested: the general ledger is needed to test the audit period and to get party-wise balances.', ledgers: [], items: cat.items, skipped: 0 }
     if (cat.id === 'TB') {
       const items = cat.items.filter((it) => !ITEM_RULES[`TB:${it.n}`] || ITEM_RULES[`TB:${it.n}`](ctx))
       return { ...cat, applies: true, reason: 'Always requested: the trial balance is the starting point of the audit.', ledgers: [], items, skipped: cat.items.length - items.length }
