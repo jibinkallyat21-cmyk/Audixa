@@ -94,18 +94,17 @@ function FileRow({ f, idx }) {
     >
       {/* Summary row */}
       <div className={`flex min-h-[64px] items-center gap-4 px-5 py-3 transition-colors ${hovered || expanded ? 'bg-slate-50' : ''}`}>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-semibold text-navy">{f.client}</p>
-            <span className="font-mono text-[10px] text-slate-400">{f.code}</span>
-            {f.urgent && (
-              <span className="rounded-full border border-alert-red/40 bg-alert-red/10 px-2 py-0.5 text-[10px] font-bold text-alert-red">
-                URGENT
-              </span>
-            )}
-          </div>
-          <p className="mt-0.5 text-[11px] text-slate-400">{f.stage}</p>
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <p className="truncate text-sm font-semibold text-navy">{f.client}</p>
+          {f.urgent && (
+            <span className="shrink-0 rounded-full border border-alert-red/40 bg-alert-red/10 px-2 py-0.5 text-[10px] font-bold text-alert-red">
+              URGENT
+            </span>
+          )}
         </div>
+
+        <span className="hidden w-32 shrink-0 font-mono text-[11px] text-slate-400 md:block">{f.code}</span>
+        <span className="hidden w-44 shrink-0 truncate text-xs text-slate-500 lg:block">{f.stage}</span>
 
         <div className="flex w-24 shrink-0 justify-center">
           <AuditorChip auditor={f.auditor} />
@@ -276,7 +275,9 @@ export default function TeamFiles() {
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             {/* List header */}
             <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              <span className="min-w-0 flex-1">Client / File</span>
+              <span className="min-w-0 flex-1">Client</span>
+              <span className="hidden w-32 shrink-0 md:block">File Code</span>
+              <span className="hidden w-44 shrink-0 lg:block">Stage</span>
               <span className="w-24 shrink-0 text-center">Auditor</span>
               <span className="hidden w-44 shrink-0 sm:block">Attention</span>
               <span className="w-40 shrink-0 text-right">Action</span>
