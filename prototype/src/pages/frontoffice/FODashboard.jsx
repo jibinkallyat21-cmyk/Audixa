@@ -1,3 +1,5 @@
+import RecentActivityCard from '../../components/shared/RecentActivityCard'
+import { useAuditLog } from '../../utils/auditLog'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -60,7 +62,7 @@ const KPI_DATA = [
 
 export default function FODashboard() {
   const navigate = useNavigate()
-  const showToast = useToast()
+  const showToast = useToast(); const logCount = useAuditLog().length
 
   return (
     <FrontOfficeLayout title="Dashboard">
@@ -119,7 +121,7 @@ export default function FODashboard() {
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Recent Activity */}
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            {logCount > 0 ? <RecentActivityCard title="Recent activity" logHref="/fo/audit-log" /> : <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-sm font-semibold text-navy">Recent Activity</h2>
               <div className="space-y-3">
                 {foRecentActivity.map((a) => (
@@ -135,7 +137,7 @@ export default function FODashboard() {
                   </div>
                 ))}
               </div>
-            </div>
+            </div>}
 
             {/* Quick Actions */}
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

@@ -7,6 +7,7 @@ import {
   FileText,
   Bell,
   FileSignature,
+  History,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import Footer from '../shared/Footer'
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { id: 'leads', label: 'Lead Pipeline', href: '/fo/leads', icon: Filter },
   { id: 'proposals', label: 'Proposals', href: '/fo/proposals', icon: FileText },
   { id: 'el-queries', label: 'EL Queries', href: '/fo/el-queries', icon: FileSignature },
+  { id: 'audit-log', label: 'Audit Log', href: '/fo/audit-log', icon: History },
   { id: 'notifications', label: 'Notifications', href: '/fo/notifications', icon: Bell },
 ]
 

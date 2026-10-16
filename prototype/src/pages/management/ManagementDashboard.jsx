@@ -1,3 +1,4 @@
+import RecentActivityCard from '../../components/shared/RecentActivityCard'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -741,6 +742,8 @@ export default function ManagementDashboard() {
           </div>
         </div>
       </div>
+
+      <div className="mt-6"><RecentActivityCard title="Recent activity across the firm" logHref="/management/log" /></div>
 
       <MeetingRequestModal open={meetingOpen} onClose={() => setMeetingOpen(false)} />
 

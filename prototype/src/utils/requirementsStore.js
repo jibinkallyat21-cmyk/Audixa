@@ -39,6 +39,16 @@ export function sendReminders(slug, refs) {
   if (count) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Reminder sent to the client', `${count} item${count === 1 ? '' : 's'} still waiting for the client`, 'doc-request') }
   return count
 }
+// The team removes samples or cut-off items it sent (a block that ends up empty goes too). Items the client has already uploaded against are removed with it.
+export function removeSampleItems(slug, categoryId, refs) {
+  const all = readStore(KEY, {}); const rec = all[slug]; if (!rec || !refs.length) return 0
+  const drop = new Set(refs); let n = 0
+  const categories = rec.categories.map((c) => (c.id === categoryId ? { ...c, items: c.items.filter((i) => { if (drop.has(i.ref)) { n++; return false } return true }) } : c)).filter((c) => c.items.length)
+  if (!n) return 0
+  writeStore(KEY, { ...all, [slug]: { ...rec, categories, itemCount: categories.reduce((k, c) => k + c.items.length, 0) } })
+  log(rec.client, 'Sample items removed', `${n} item${n === 1 ? '' : 's'} removed from ${categoryId}`, 'doc-request')
+  return n
+}
 // A remark on one requirement: the client explains a transaction, the audit team replies. A thread per item. explanationOnly = the client answers with
 // an explanation and no document (mandatory when there is none); the item then goes to the team for review.
 export function postRemark(slug, ref, text, { by = 'Client', explanationOnly = false } = {}) {

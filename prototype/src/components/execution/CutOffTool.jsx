@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react'
 import { Loader2, FileSpreadsheet } from 'lucide-react'
 import { Card, DataTable, Flags, Field, FieldGrid, Section, Stat, Empty, PrimaryButton, INPUT } from './ReviewParts'
 import SendSamples from './SendSamples'
+import SentItems from './SentItems'
+import { sentCategoryId } from '../../utils/sampleRequests'
+import { useIssuedLists } from '../../utils/requirementsStore'
 import { useDemoClient } from '../../utils/useDemoClient'
 import { selectCutoff, requestText, areaLabel } from '../../utils/cutoff'
 import { clientCutoffTxns } from '../../utils/clientCutoffData'
@@ -22,7 +25,11 @@ export default function CutOffTool({ area, client, firm: firmProp, txnsOverride 
     if (!file?.rows?.length || !file.mapping.date) return []; const m = file.mapping
     return file.rows.map((x) => ({ date: isoDate(x.values[m.date]), ref: m.ref ? String(x.values[m.ref] ?? '') : '', ledger: m.account ? String(x.values[m.account] ?? '') : areaLabel(area), description: m.description ? String(x.values[m.description] ?? '') : '', debit: toNum(x.values[m.debit]) ?? 0, credit: toNum(x.values[m.credit]) ?? 0 })).filter((t) => t.date)
   }, [file, area])
-  const txns = uploaded.length ? uploaded : demoTxns
+  const allTxns = uploaded.length ? uploaded : demoTxns
+  // Items already sent for this area are not offered again, so picking again adds more instead of repeating.
+  const keyOf = (t) => `C:${area}|${t.date}|${t.ref}|${t.description}|${(Number(t.debit) || 0) > 0 ? Number(t.debit) : Number(t.credit) || 0}`
+  const sentCat = (useIssuedLists()[dc.slug]?.categories || []).find((c) => c.id === sentCategoryId('cutoff', area, sub)); const sentKeys = new Set((sentCat?.items || []).map((i) => i.sampleKey))
+  const txns = allTxns.filter((t) => !sentKeys.has(keyOf(t)))
   const load = async (f) => { if (!f) return; setBusy(true); try { setFile({ ...(await readLedgerSheet(await f.arrayBuffer(), MAT_FIELDS)), name: f.name }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f.name }) } setBusy(false); setPicked(null) }
   const ready = bankABC ? num(nDebit) !== null && num(nCredit) !== null : num(n) !== null
   const run = () => setPicked(selectCutoff({ firm, area, txns, yearEnd, n: num(n) ?? 0, nDebit: num(nDebit) ?? 0, nCredit: num(nCredit) ?? 0 }))
@@ -33,6 +40,7 @@ export default function CutOffTool({ area, client, firm: firmProp, txnsOverride 
     : 'MISCPA: the last items before the year end and the first items after it, the number you set for each side.'
   return (
     <div className="space-y-6">
+      <SentItems slug={dc.slug} area={area} sub={sub} group="cutoff" />
       <Card title={`${label || areaLabel(area)} cut-off`} subtitle={rule}>
         <Section title="1. Where the transactions come from">
           <div className="flex flex-wrap items-center gap-3">
@@ -49,7 +57,7 @@ export default function CutOffTool({ area, client, firm: firmProp, txnsOverride 
               <Field label="Number of credits (money in)"><input aria-label="Number of credits" type="number" min="0" value={nCredit} onChange={(e) => { setNCredit(e.target.value); setPicked(null) }} className={INPUT} /></Field></>
               : <Field label={firm === 'MISCPA' ? 'Number of items before and the same number after the year end' : 'Number of items'}><input aria-label="Number of items" type="number" min="0" value={n} onChange={(e) => { setN(e.target.value); setPicked(null) }} className={INPUT} /></Field>}
           </FieldGrid>
-          <div className="mt-5"><PrimaryButton onClick={run} disabled={!ready || !txns.length}>Pick the items</PrimaryButton></div>
+          <div className="mt-5"><PrimaryButton onClick={run} disabled={!ready || !txns.length}>{sentCat ? 'Pick more items' : 'Pick the items'}</PrimaryButton></div>
         </Section>
       </Card>
 
@@ -63,7 +71,7 @@ export default function CutOffTool({ area, client, firm: firmProp, txnsOverride 
           <SendSamples group="cutoff" area={area} sub={sub} label={label || areaLabel(area)} client={client} items={items} />
         </Card>
       )}
-      {!picked && txns.length === 0 && <Empty>Upload the transactions to pick from.</Empty>}
+      {!picked && txns.length === 0 && <Empty>{allTxns.length ? 'Every transaction available has already been sent to the client.' : 'Upload the transactions to pick from.'}</Empty>}
     </div>
   )
 }

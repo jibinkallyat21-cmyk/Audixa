@@ -3,6 +3,7 @@
 // sub-group (for example "Above materiality", or "Debits" and "Credits"). Each item carries the fields shown in the client's table. Pure functions.
 export const slugOf = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 14)
 
+export const sentCategoryId = (group, area, sub = '') => `${group === 'cutoff' ? 'cut' : 'smp'}-${slugOf(sub || area).toLowerCase()}`
 // samples: [{ key, text, data?, row?: { ref, date, ledger, description, amount }, subgroup? }]
 // key = a stable identifier of the item (invoice number, ledger line), so approving the same item twice does not duplicate it.
 export function withSampleRequirements(rec, { area, sub = '', label = area, group = 'samples', samples = [], approvedBy = '', note = '', at = new Date().toISOString() }) {
