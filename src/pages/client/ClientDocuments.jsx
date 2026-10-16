@@ -8,6 +8,7 @@ import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
 import { requirementCategories, getDocStatsForFY } from '../../data/sampleData'
+import { useIssuedLists, PORTAL_CLIENT } from '../../utils/requirementsStore'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
 // Flatten categories into a table-ready list with plain-language descriptions
@@ -335,6 +336,30 @@ const STATUS_FILTER_MAP = {
   'under-review': ['Under Review', 'Uploaded Processing'],
 }
 
+function IssuedRequirements({ D }) {
+  const rec = useIssuedLists()[PORTAL_CLIENT.slug]
+  const [open, setOpen] = useState({})
+  if (!rec) return null
+  return (
+    <div className="rounded-xl p-4" style={{ border: `1px solid ${D.border}`, background: D.card }}>
+      <p className="text-sm font-semibold" style={{ color: D.text }}>Requirement list from your auditor (MISCPA)</p>
+      <p className="mt-0.5 text-xs" style={{ color: D.muted }}>{rec.itemCount} documents in {rec.categories.length} areas, chosen from your trial balance. Issued {new Date(rec.issuedAt).toLocaleDateString()}.</p>
+      <div className="mt-3 space-y-2">
+        {rec.categories.map((c) => (
+          <div key={c.id} className="rounded-lg" style={{ border: `1px solid ${D.border}` }}>
+            <button onClick={() => setOpen((o) => ({ ...o, [c.id]: !o[c.id] }))} aria-expanded={!!open[c.id]} className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-semibold" style={{ color: D.text }}>
+              <span className="min-w-0 break-words">{c.title}</span><span className="shrink-0 font-normal" style={{ color: D.muted }}>{c.items.length} item{c.items.length === 1 ? '' : 's'}</span>
+            </button>
+            {open[c.id] && c.items.map((i) => (
+              <p key={i.ref} className="flex gap-3 px-3 py-2 text-xs" style={{ borderTop: `1px solid ${D.border}`, color: D.muted }}><span className="w-14 shrink-0 font-mono font-semibold" style={{ color: D.text }}>{i.ref}</span><span className="min-w-0 break-words">{i.text}</span></p>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function ClientDocuments() {
   const showToast = useToast()
   const { isDark } = useTheme()
@@ -439,6 +464,8 @@ export default function ClientDocuments() {
               <span className="rounded-md px-3 py-1 text-xs font-semibold" style={{ border: `1px solid ${D.border}`, color: D.muted, background: D.card }}>{engRef}</span>
             </div>
           </div>
+
+          <IssuedRequirements D={D} />
 
           {/* Bento stat cards */}
           <motion.div key={selectedFY} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="grid grid-cols-12 gap-3">
