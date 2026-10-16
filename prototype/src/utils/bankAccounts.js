@@ -66,9 +66,12 @@ export function accountStatus({ docs, diff, confOverall, reconOk }) {
 
 // Cut-off items requested before the cut-off was done account by account sit in one block for all banks. They are moved to their own account's block, and an
 // item asked twice (same transaction) is kept once, keeping the copy the client has progressed furthest.
+export const isLegacySample = (c) => !c.group && /^(smp|cut)-/i.test(c.id)
 const rank = (i) => (i.status === 'Accepted' ? 3 : ['Uploaded Processing', 'Under Review'].includes(i.status) ? 2 : i.status === 'Rejected' ? 1 : 0)
 export function withCutoffMigration(rec, accounts) {
   let changed = false; let cats = (rec.categories || []).map((c) => ({ ...c, items: [...c.items] }))
+  // Sample and cut-off blocks left over from an early version (no group, so they showed up as ordinary documents under "Other") are removed.
+  if (cats.some(isLegacySample)) { cats = cats.filter((c) => !isLegacySample(c)); changed = true }
   for (const a of accounts) {
     const area = a.type === 'Cash' ? 'cash' : 'bank'; const legacy = cats.find((c) => c.id === `cut-${area}`); if (!legacy) continue
     const mine = legacy.items.filter((i) => i.row?.ledger === a.name); if (!mine.length) continue

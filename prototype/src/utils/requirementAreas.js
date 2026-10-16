@@ -21,6 +21,7 @@ const counts = (items) => ({ total: items.length, accepted: items.filter((i) => 
 export function groupRequirements(rec) {
   const by = Object.fromEntries(AREA_GROUPS.map(([id, label]) => [id, { id, label, docs: [], samples: [], cutoff: [] }]))
   for (const c of rec?.categories || []) {
+    if (!c.group && /^(smp|cut)-/i.test(c.id)) continue   // leftover sample block from an early version
     if (!c.group) { (by[BASE[c.id] || 'other']).docs.push(c); continue }
     const split = {}
     for (const it of c.items) (split[sampleArea(c, it)] ||= []).push(it)
