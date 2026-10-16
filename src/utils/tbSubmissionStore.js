@@ -10,8 +10,8 @@ export const getTBSubmission = (slug) => readStore(KEY, {})[slug] || null
 const put = (slug, rec) => writeStore(KEY, { ...readStore(KEY, {}), [slug]: rec })
 const log = (client, title, description) => { try { logEvent({ client: 'kingdom-retail', clientName: client, category: 'client-response', title, description }) } catch { /* log is optional */ } }
 
-export function submitTB(file, { fileName, ledgers, warnings = [], sheetName = '', glFileName = '', glRows = [] }) {
-  put(file.slug, { status: 'Submitted', fileName, ledgers, warnings, sheetName, glFileName, glRows, submittedAt: new Date().toISOString(), returnReason: '' })
+export function submitTB(file, { fileName, ledgers, warnings = [], sheetName = '', glFileName = '', glRows = [], glStats = null }) {
+  put(file.slug, { status: 'Submitted', fileName, ledgers, warnings, sheetName, glFileName, glRows, glStats, submittedAt: new Date().toISOString(), returnReason: '' })
   log(file.client, 'Trial balance uploaded', `${fileName}: ${ledgers.length} ledgers${glFileName ? `, with the general ledger ${glFileName}` : ''}; waiting for audit team approval`)
 }
 export function returnTB(file, reason) {

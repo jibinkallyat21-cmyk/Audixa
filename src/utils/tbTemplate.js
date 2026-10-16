@@ -13,16 +13,18 @@ export async function buildTBTemplate() {
   return workbookToBlob(wb)
 }
 
-// The blank general ledger workbook: party-wise balances for receivables, payables and the two advance accounts.
+// The blank general ledger workbook: every transaction recorded in the books, one row per entry.
 export async function buildGLTemplate() {
   const ExcelJS = await loadExcelJS()
   const wb = new ExcelJS.Workbook(); const ws = wb.addWorksheet('General Ledger')
-  ws.addRow(['Account', 'Party', 'Opening Balance', 'Debit', 'Credit', 'Closing Balance']).font = { bold: true }
-  ws.addRow(['Trade Receivables', 'Example Customer A', 150000, 900000, 850000, 200000])
-  ws.addRow(['Trade Receivables', 'Example Customer B', 260000, 1400000, 1360000, 300000])
-  ;[34, 34, 18, 18, 18, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w })
+  ws.addRow(['Date', 'Voucher No', 'Account Code', 'Account Name', 'Party Name', 'Narration', 'Debit', 'Credit']).font = { bold: true }
+  ws.addRow(['2025-01-01', 'OB-001', '1100', 'Trade Receivables', 'Example Customer A', 'Opening balance', 150000, 0])
+  ws.addRow(['2025-03-10', 'INV-1001', '1100', 'Trade Receivables', 'Example Customer A', 'Sales invoice 1001', 900000, 0])
+  ws.addRow(['2025-06-05', 'RV-2001', '1100', 'Trade Receivables', 'Example Customer A', 'Receipt against invoice 1001', 0, 850000])
+  ws.addRow(['2025-03-10', 'INV-1001', '4001', 'Sales', '', 'Sales invoice 1001', 0, 900000])
+  ;[12, 14, 14, 30, 28, 34, 16, 16].forEach((w, i) => { ws.getColumn(i + 1).width = w })
   const n = wb.addWorksheet('Notes')
-  ;['Provide the detailed general ledger. For trade receivables, trade payables, advances from customers and advances to suppliers there must be one row per party.', 'Account must be the same name (or code) as in your trial balance.', 'The party balances of each of these accounts must add up to the closing balance of that account in your trial balance. A file where they do not is rejected.', 'Debit balances are positive and credit balances are negative in the opening and closing columns.'].forEach((t) => n.addRow([t]))
-  n.getColumn(1).width = 110
+  ;['Provide the detailed general ledger for the whole audit period: every transaction recorded in the books, one row per entry.', 'Enter the opening balance of each account as a line with the narration "Opening balance". For trade receivables, trade payables, advances from customers and advances to suppliers, enter the opening balance of each party the same way.', 'Account Name (and/or Account Code) must match the trial balance. Party Name is required on every line of trade receivables, trade payables, advances from customers and advances to suppliers.', 'Debit and Credit are positive amounts. For every account, the debits and credits (excluding the opening balance line) must agree with the Current Year Debit and Credit in your trial balance, otherwise the file is rejected.', 'Replace the example rows with your entries.'].forEach((t) => n.addRow([t]))
+  n.getColumn(1).width = 120
   return workbookToBlob(wb)
 }

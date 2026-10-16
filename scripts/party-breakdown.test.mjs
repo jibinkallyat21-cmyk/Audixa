@@ -1,15 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { applyPartyBreakdown, mapGLRows, demoGLRows } from '../src/utils/partyBreakdown.js'
+import { applyPartyBreakdown } from '../src/utils/partyBreakdown.js'
+import { mapGLTransactions, checkGL, demoGLTransactions } from '../src/utils/generalLedger.js'
 
 const L = (code, name, opening, debit, credit) => ({ code, name, group: 'x', opening, debit, credit, closing: opening + debit - credit, closingSupplied: true })
 const tb = [L('1001', 'Cash at Bank', 10, 0, 0), L('1100', 'Trade Receivables', 1000, 500, 300), L('2001', 'Trade Payables', -400, 0, 100)]
 
-test('maps columns and computes balance from debit and credit', () => {
-  const r = mapGLRows(['Account', 'Party Name', 'Debit', 'Credit'], [['Trade Receivables', 'A', 100, 20], ['Trade Receivables', 'Total', 100, 20]])
-  assert.equal(r.ok, true); assert.equal(r.rows.length, 1); assert.equal(r.rows[0].balance, 80)
-})
-test('missing party column is named', () => { assert.deepEqual(mapGLRows(['Account', 'Debit', 'Credit'], []).missing, ['Party']) })
 test('group line is replaced by parties and reconciles', () => {
   const gl = [{ account: 'Trade Receivables', party: 'A', opening: 600, debit: 300, credit: 100, balance: 800 }, { account: 'Trade Receivables', party: 'B', opening: 400, debit: 200, credit: 200, balance: 400 }]
   const r = applyPartyBreakdown(tb, gl)
@@ -26,19 +22,34 @@ test('same party on several rows is added up; unmatched accounts listed', () => 
   assert.equal(r.ledgers.filter((l) => l.partyOf).length, 1); assert.equal(r.ledgers.find((l) => l.partyOf).closing, 10); assert.deepEqual(r.unmatched, ['Other'])
 })
 test('demo general ledger adds up to the lines exactly', () => {
-  const r = applyPartyBreakdown(tb, demoGLRows(tb))
+  const r = applyPartyBreakdown(tb, checkGL(tb, demoGLTransactions(tb)).partyRows)
   assert.ok(r.summary.filter((s) => s.replaced).every((s) => s.difference === 0))
 })
 
-import { checkGLAgainstTB } from '../src/utils/partyBreakdown.js'
-test('general ledger check: matching passes, missing and mismatching lines are named', () => {
-  const ok = checkGLAgainstTB(tb, demoGLRows(tb))
-  assert.equal(ok.ok, true); assert.ok(ok.rows.length >= 6)
-  const missing = checkGLAgainstTB(tb, demoGLRows(tb).filter((r) => r.account !== 'Trade Payables'))
-  assert.equal(missing.ok, false); assert.ok(missing.errors[0].includes('Trade Payables'))
-  const off = checkGLAgainstTB(tb, demoGLRows(tb).map((r) => (r.account === 'Trade Receivables' && r.party === 'Al Noor Trading' ? { ...r, balance: r.balance + 50 } : r)))
-  assert.equal(off.ok, false); assert.ok(off.errors[0].includes('difference 50'))
+const T = (account, party, debit, credit, narration = 'Sale', extra = {}) => ({ date: '2025-03-01', ref: 'V1', accountName: account, accountCode: '', party, narration, debit, credit, isOpening: /Opening/i.test(narration), ...extra })
+test('transaction ledger: columns are mapped, opening lines flagged, totals dropped', () => {
+  const r = mapGLTransactions(['Date', 'Voucher No', 'Account Name', 'Party', 'Narration', 'Debit', 'Credit'], [['2025-01-01', 'OB', 'Trade Receivables', 'A', 'Opening balance', 100, 0], ['2025-02-01', 'V2', 'Trade Receivables', 'A', 'Invoice', 50, 0], ['', '', 'Total', '', '', 150, 0]])
+  assert.equal(r.ok, true); assert.equal(r.txns.length, 2); assert.equal(r.txns[0].isOpening, true); assert.equal(r.txns[1].isOpening, false)
 })
-test('no control lines in the trial balance: nothing required from the general ledger', () => {
-  assert.deepEqual(checkGLAgainstTB([L('1001', 'Cash at Bank', 0, 5, 0)], []), { ok: true, errors: [], rows: [] })
+test('missing debit/credit columns are named', () => { assert.deepEqual(mapGLTransactions(['Account', 'Narration'], []).missing, ['Debit', 'Credit']) })
+test('demo transaction ledger agrees with its trial balance and gives party rows', () => {
+  const r = checkGL(tb, demoGLTransactions(tb)); assert.deepEqual(r.errors, []); assert.ok(r.partyRows.some((p) => p.account === 'Trade Receivables'))
+  const ar = r.partyRows.filter((p) => p.account === 'Trade Receivables').reduce((n, p) => n + p.balance, 0); assert.ok(Math.abs(ar - 1200) < 0.01)
+})
+test('a movement that differs from the trial balance is rejected with the ledger and amounts', () => {
+  const t = demoGLTransactions(tb); t.push(T('Cash at Bank', '', 40, 0))
+  const r = checkGL(tb, t); assert.equal(r.ok, false); assert.ok(r.errors.join(' ').includes('Cash at Bank: debits 40'))
+})
+test('trial balance ledgers with no transactions, and accounts missing from the trial balance, are reported', () => {
+  const t = demoGLTransactions(tb).filter((x) => x.accountName !== 'Trade Payables'); t.push(T('Mystery Account', '', 5, 0))
+  const e = checkGL(tb, t).errors.join(' '); assert.ok(e.includes('Mystery Account')); assert.ok(e.includes('No transactions in the general ledger') && e.includes('Trade Payables'))
+})
+test('control account lines need a party and the parties must add up to the trial balance', () => {
+  const t = demoGLTransactions(tb).map((x) => (x.accountName === 'Trade Receivables' && x.isOpening && x.party === 'Gulf Supplies Co' ? { ...x, debit: x.debit + 70 } : x))
+  assert.ok(checkGL(tb, t).errors.join(' ').includes('Trade Receivables'))
+  const np = demoGLTransactions(tb).map((x) => (x.accountName === 'Trade Payables' ? { ...x, party: '' } : x))
+  assert.ok(checkGL(tb, np).errors.join(' ').includes('needs a party name'))
+})
+test('no control lines: ledger rows without parties are fine', () => {
+  const only = [L('1001', 'Cash at Bank', 10, 5, 0)]; assert.equal(checkGL(only, demoGLTransactions(only)).ok, true)
 })

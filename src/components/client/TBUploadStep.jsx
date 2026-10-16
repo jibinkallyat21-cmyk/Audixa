@@ -3,7 +3,7 @@ import { Download, Loader2, Upload, CheckCircle2, AlertCircle, Clock, FileSpread
 import { useToast } from '../shared/Toast'
 import { readTBWorkbook } from '../../utils/tbExcel'
 import { checkTBFormat, compactLedgers, PRESCRIBED_COLUMNS } from '../../utils/tbFormat'
-import { readGLWorkbook, checkGLAgainstTB, demoGLRows } from '../../utils/partyBreakdown'
+import { readGLWorkbook, checkGL, demoGLTransactions } from '../../utils/generalLedger'
 import { buildTBTemplate, buildGLTemplate } from '../../utils/tbTemplate'
 import { useTBSubmissions, submitTB } from '../../utils/tbSubmissionStore'
 import { demoCY, demoPY } from '../../data/demoTB'
@@ -25,9 +25,9 @@ export default function TBUploadStep({ D }) {
 
   // The general ledger must back the trial balance, so it is checked whenever both are present.
   const crossCheck = (t, g) => {
-    if (!t || !g) return { rows: g?.rows || [], errors: [] }
-    const r = checkGLAgainstTB(t.ledgers, g.rows)
-    return { rows: r.rows, errors: r.errors }
+    if (!t || !g) return { rows: [], errors: [], stats: null }
+    const r = checkGL(t.ledgers, g.txns)
+    return { rows: r.partyRows, errors: r.errors, stats: r.stats }
   }
   const setBoth = (t, g) => { setTb(t); setGl(g); setGlErr(g ? crossCheck(t, g).errors : []) }
 
@@ -46,21 +46,22 @@ export default function TBUploadStep({ D }) {
     setBusy('gl'); setGlErr([])
     try {
       const r = await readGLWorkbook(await f.arrayBuffer())
-      if (!r.ok) { setGlErr([`The general ledger needs these columns: ${r.missing.join(', ')}.`]); setGl(null) }
-      else if (!r.rows.length) { setGlErr(['The general ledger has no rows.']); setGl(null) }
-      else { const g = { fileName: f.name, rows: r.rows }; setGl(g); setGlErr(crossCheck(tb, g).errors) }
+      if (!r.ok) { setGlErr([`The general ledger needs these columns: ${r.missing.join(', ')}. It must list every transaction recorded in the books.`]); setGl(null) }
+      else if (!r.txns.length) { setGlErr(['The general ledger has no transactions.']); setGl(null) }
+      else { const g = { fileName: f.name, txns: r.txns }; setGl(g); setGlErr(crossCheck(tb, g).errors) }
     } catch { setGlErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']); setGl(null) }
     setBusy('')
   }
   const ready = !!tb && !!gl && glErr.length === 0
   const send = () => {
-    const { rows } = crossCheck(tb, gl)
-    submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows })
+    const { rows, stats } = crossCheck(tb, gl)
+    submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats })
     showToast('Trial balance and general ledger sent to the audit team')
   }
+  const demoGL = (ledgers) => { const txns = demoGLTransactions(ledgers); const r = checkGL(ledgers, txns); return { glRows: r.partyRows, glStats: r.stats } }
   const useDemo = () => {
     const ledgers = compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit })))
-    submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', glRows: demoGLRows(ledgers) })
+    submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', ...demoGL(ledgers) })
     showToast('Demo trial balance and general ledger sent to the audit team')
   }
 
@@ -95,7 +96,7 @@ export default function TBUploadStep({ D }) {
   return (
     <div className="rounded-xl p-6" style={card}>
       <p className="text-base font-bold" style={{ color: D.text }}>Step 1: Upload your trial balance and general ledger</p>
-      <p className="mt-1 text-xs" style={{ color: D.muted }}>Your audit requirement list is prepared from your trial balance, so only the documents relevant to you are requested. The general ledger gives the party-wise balances for receivables, payables and advances, so the trial balance can be kept at ledger level. Both must be in the prescribed format. The audit team reviews them before your list is released.</p>
+      <p className="mt-1 text-xs" style={{ color: D.muted }}>Your audit requirement list is prepared from your trial balance, so only the documents relevant to you are requested. The detailed general ledger supports the trial balance and gives the party-wise balances for receivables, payables and advances, so the trial balance can be kept at ledger level. Both must be in the prescribed format. The audit team reviews them before your list is released.</p>
       {sub?.status === 'Returned' && (
         <p className="mt-3 flex items-start gap-2 rounded-lg px-3 py-2 text-xs text-alert-red" style={{ background: 'rgba(230,57,70,0.08)' }}><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />Returned by the audit team: {sub.returnReason}. Please correct it and upload again.</p>
       )}
@@ -104,7 +105,7 @@ export default function TBUploadStep({ D }) {
       </ul>
       <div className="mt-4 grid gap-3 lg:grid-cols-2">
         {slot({ title: 'Trial balance', hint: 'Ledger level, no group or sub-group balances. Receivables, payables and the two advance accounts may be one line each.', file: tb && `${tb.fileName} · ${tb.ledgers.length} ledgers`, errs: tbErr, onPick: onTB, kind: 'tb', template: 'Download the trial balance format', templateName: 'Trial_Balance_Format.xlsx', builder: buildTBTemplate })}
-        {slot({ title: 'Detailed general ledger', hint: 'One row per party for trade receivables, trade payables, advances from customers and advances to suppliers. Their totals must agree with your trial balance.', file: gl && `${gl.fileName} · ${gl.rows.length} rows`, errs: glErr, onPick: onGL, kind: 'gl', template: 'Download the general ledger format', templateName: 'General_Ledger_Format.xlsx', builder: buildGLTemplate })}
+        {slot({ title: 'Detailed general ledger', hint: 'Every transaction recorded in your books for the period, one row per entry, with the opening balance of each account as an "Opening balance" line. For receivables, payables and advances give the party name on each line. Movements must agree with your trial balance.', file: gl && `${gl.fileName} · ${gl.txns.length} transactions`, errs: glErr, onPick: onGL, kind: 'gl', template: 'Download the general ledger format', templateName: 'General_Ledger_Format.xlsx', builder: buildGLTemplate })}
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button disabled={!ready} onClick={send} className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Send to the audit team</button>
