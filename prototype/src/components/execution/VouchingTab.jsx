@@ -11,6 +11,8 @@ import { currentUser } from '../../utils/currentUser'
 import { workbookToBlob } from '../../utils/eosbExcel'
 import { REF_START, assignRefs, sampleTestingPct, SALES_COLUMNS, SALES_MARKS, COGS_TESTS, COGS_MARKS, EXPENSE_COLUMNS, EXPENSE_STATUS, salesResult, cogsResult, expenseFinal, findDuplicates, partyVouchStatus, partyVouchSummary, overallColour } from '../../utils/vouching'
 import { buildVouchingWorkbook, buildPartyVouchingWorkbook } from '../../utils/vouchingExcel'
+import EvidenceDocs from './EvidenceDocs'
+import { vouchingParts, checkEvidence, demoDocs } from '../../utils/evidence'
 
 const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
@@ -29,6 +31,11 @@ export default function VouchingTab({ firm, client, clientName, initialKind = 's
   // For the demo client the list starts from the samples that were sent to the client; a sample counts as received once the client has uploaded against it.
   const clientRows = useMemo(() => (dc.isDemo(client) ? vouchingRowsFromSamples(issued) : null), [dc, client, issued])
   const demoRows = (k) => (clientRows && clientRows[k].length ? clientRows[k] : DEMO[k])
+  const company = dc.isDemo(client) ? dc.client : clientName
+  const evLine = (x) => ({ amount: Number(x.taxable) || 0, vatPct: 15, date: x.date || '', vendor: x.party })
+  // Supporting documents for each sample the client has uploaded (stands in for reading the uploaded files).
+  const withDocs = (k, list) => { if (k === 'party') return list; const got = list.filter((x) => x.received); const docs = demoDocs(got.map(evLine), company, () => vouchingParts(k)); return list.map((x) => { const d = x.received ? docs[got.indexOf(x)] : []; return { ...x, docs: d.map((y) => (y.part === 'invoice' && x.fileName ? { ...y, original: x.fileName } : y)) } }) }
+  const loadRows = (k) => withDocs(k, demoRows(k).map((d) => ({ ...blank(k), ...d })))
   const [kind, setKind] = useState(initialKind); const [rows, setRows] = useState({ sales: [], cogs: [], expense: [], party: [] }); const [total, setTotal] = useState('')
   const list = rows[kind]
   const setList = (fn) => setRows((r) => ({ ...r, [kind]: fn(r[kind]) }))
@@ -48,7 +55,7 @@ export default function VouchingTab({ firm, client, clientName, initialKind = 's
     <div className="space-y-3">
       <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">{firm === 'ABCPA' ? 'ABCPA file: the Rule Book gives no separate vouching steps, so the same vouching tables are used. They will be replaced by the ABCPA-specific rules if those are supplied.' : firm === 'MISCPA' ? 'MISCPA file: vouching follows the Vouching Rule Book.' : 'Select a client to see the framework for the file.'}</p>
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1">{Object.entries(KINDS).map(([id, k]) => <button key={id} onClick={() => setKind(id)} className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${kind === id ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>{k.label}</button>)}</div>
-      <Card title={`${KINDS[kind].label} vouching – yellow samples that were received`} right={<div className="flex gap-3"><button onClick={() => setList(() => demoRows(kind).map((d) => ({ ...blank(kind), ...d })))} className="text-xs font-semibold text-slate-500 underline">{clientRows && clientRows[kind].length ? 'Use the client samples' : 'Use demo samples'}</button><button onClick={() => setList((l) => [...l, blank(kind)])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add sample</button></div>}><AutoDemo run={() => setList(() => demoRows(kind).map((d) => ({ ...blank(kind), ...d })))} />
+      <Card title={`${KINDS[kind].label} vouching – yellow samples that were received`} right={<div className="flex gap-3"><button onClick={() => setList(() => loadRows(kind))} className="text-xs font-semibold text-slate-500 underline">{clientRows && clientRows[kind].length ? 'Use the client samples' : 'Use demo samples'}</button><button onClick={() => setList((l) => [...l, blank(kind)])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add sample</button></div>}><AutoDemo run={() => setList(() => loadRows(kind))} />
         {kind !== 'party' && <label className="mb-2 block text-xs font-semibold text-slate-500">Total value of the population <input aria-label="Total value" type="number" value={total} onChange={(e) => setTotal(e.target.value)} className={`${INP} ml-2 w-44 font-normal`} /></label>}
         {list.length === 0 && <p className="text-xs text-slate-400">No samples yet. Add the samples from the sampling step (yellow highlights).</p>}
         <div className="space-y-5">
@@ -84,6 +91,7 @@ export default function VouchingTab({ firm, client, clientName, initialKind = 's
                   <div className="mt-4"><Field label="Remarks" hint={kind === 'cogs' ? 'Exceptions and queries only' : undefined}><input aria-label="Remarks" value={x.remarks} onChange={(e) => patch(x.id, { remarks: e.target.value })} className={`${INP} w-full`} /></Field></div>
                 </Section></div>
               )}
+              {kind !== 'party' && x.docs && <EvidenceDocs area={`${KINDS[kind].label} vouching`} subject={x.invoiceNo || x.party || 'Sample'} parts={vouchingParts(kind)} docs={x.docs} result={checkEvidence(evLine(x), x.docs, company, vouchingParts(kind))} decision={x.decision} onDecide={(d) => { patch(x.id, { decision: d }); logEvent({ client, clientName, category: 'work', title: `${KINDS[kind].label} evidence ${d === 'Accepted' ? 'accepted' : 'raised with the client'}`, description: x.invoiceNo || x.party, extra: { auditArea: 'Vouching', performedBy: me.name }, user: me }) }} />}
               {!x.received && kind === 'expense' && <p className="mt-4 rounded-lg border border-amber/30 bg-amber/5 px-4 py-3 text-sm text-amber">EX-01 – Invoice Missing. Refer for follow-up. Its value is not counted in Sample Testing %.</p>}
             </div>
           ))}

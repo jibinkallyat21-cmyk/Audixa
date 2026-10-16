@@ -439,7 +439,8 @@ const STATUS_OPTIONS = ['all', 'Accepted', 'Under Review', 'Rejected', 'Pending 
 
 // The issued list for one client, reviewed with the same row layout as every other file: Accept, Reject with a reason, view file.
 function IssuedReview({ rec, slug }) {
-  const [view, setView] = useState('documents')
+  const [qp] = useSearchParams(); const focus = qp.get('item') || ''
+  const [view, setView] = useState(['samples', 'cutoff'].includes(qp.get('tab')) ? qp.get('tab') : 'documents')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const categories = rec.categories.filter((c) => !c.group).map((c) => {
@@ -462,7 +463,7 @@ function IssuedReview({ rec, slug }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2" role="tablist">{[['documents', 'Documents', rec.categories.filter((c) => !c.group).reduce((n, c) => n + c.items.length, 0)], ['samples', 'Samples sent', nSamples], ['cutoff', 'Cut-off sent', nCut]].map(([id, l, n]) => <button key={id} role="tab" aria-selected={view === id} onClick={() => setView(id)} className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${view === id ? 'bg-navy text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{l} <span className={`ml-1.5 rounded-full px-2 py-0.5 text-xs ${view === id ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{n}</span></button>)}</div>
-      {view !== 'documents' ? <SamplesSent rec={rec} slug={slug} group={view} /> : <>
+      {view !== 'documents' ? <SamplesSent rec={rec} slug={slug} group={view} focus={focus} /> : <>
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requirements..." className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />
         <select aria-label="Status filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-navy outline-none focus:border-navy">

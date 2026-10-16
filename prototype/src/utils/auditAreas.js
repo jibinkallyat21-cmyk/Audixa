@@ -43,7 +43,8 @@ export const AREAS = [
     { id: 'gosi-eosb', label: 'GOSI and end of service', kind: 'tool', tool: 'gosi', desc: 'GOSI against MUDAD and the end of service provision.' },
   ] },
   { id: 'accruals', section: 'Liabilities', label: 'Accruals and other payables', groups: ['accruals'], blurb: 'Costs owed but not yet paid', procedures: [
-    { id: 'accr-notes', label: 'Accruals work', kind: 'notes', desc: 'Payments after the year end, cut-off and unrecorded liabilities. Record your work and conclusion; there is no separate tool yet.' },
+    { id: 'accr-schedule', label: 'Accruals and supporting documents', kind: 'tool', tool: 'accruals', desc: 'List each accrual and check it against the invoice or contract and the payment after the year end.' },
+    { id: 'accr-notes', label: 'Accruals work', kind: 'notes', desc: 'Cut-off and unrecorded liabilities. Record your work and conclusion.' },
   ] },
   { id: 'borrowings', section: 'Liabilities', label: 'Borrowings', groups: ['borrowings'], blurb: 'Loans and finance', procedures: [
     { id: 'loan-notes', label: 'Borrowings work', kind: 'notes', desc: 'Loan confirmations, terms, repayments and finance cost. Record your work and conclusion.' },
@@ -58,7 +59,8 @@ export const AREAS = [
     { id: 'inv-notes', label: 'Inventory work', kind: 'notes', desc: 'Physical count attendance, obsolescence, NRV and cost. Record your work and conclusion; there is no separate tool yet.' },
   ] },
   { id: 'related', section: 'Liabilities', label: 'Related parties', groups: ['related'], blurb: 'Partners, shareholders and group', procedures: [
-    { id: 'rp-notes', label: 'Related party work', kind: 'notes', desc: 'Confirmations and transactions with related parties. Record your work; ABCPA picks transactions above materiality (maximum 5) plus 3 at random below.' },
+    { id: 'rp-transactions', label: 'Related party transactions', kind: 'tool', tool: 'related-tx', desc: 'ABCPA: you choose how many transactions above and below materiality; flagged ones are picked first, and anything already tested elsewhere is shown with a link.' },
+    { id: 'rp-notes', label: 'Related party work', kind: 'notes', desc: 'Confirmations and your conclusion on related parties. Record your work.' },
   ] },
   { id: 'equity', section: 'Equity', label: 'Equity', groups: ['capital', 're', 'reserves'], blurb: 'Capital and reserves', procedures: [
     { id: 'eq-notes', label: 'Equity work', kind: 'notes', desc: 'Capital against the AOA and CR, and the movement in reserves and retained earnings. Record your work.' },
