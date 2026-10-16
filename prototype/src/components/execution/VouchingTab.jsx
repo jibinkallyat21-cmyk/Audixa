@@ -4,7 +4,7 @@ import { useDemoClient } from '../../utils/useDemoClient'
 import { useIssuedLists } from '../../utils/requirementsStore'
 import { vouchingRowsFromSamples } from '../../utils/sampleItems'
 import { Download, Plus, Trash2 } from 'lucide-react'
-import { Card, Chip, Flags } from './ReviewParts'
+import { Card, Chip, Flags, Field, FieldGrid, Section, Toggle } from './ReviewParts'
 import { useToast } from '../shared/Toast'
 import { logEvent } from '../../utils/auditLog'
 import { currentUser } from '../../utils/currentUser'
@@ -12,8 +12,8 @@ import { workbookToBlob } from '../../utils/eosbExcel'
 import { REF_START, assignRefs, sampleTestingPct, SALES_COLUMNS, SALES_MARKS, COGS_TESTS, COGS_MARKS, EXPENSE_COLUMNS, EXPENSE_STATUS, salesResult, cogsResult, expenseFinal, findDuplicates, partyVouchStatus, partyVouchSummary, overallColour } from '../../utils/vouching'
 import { buildVouchingWorkbook, buildPartyVouchingWorkbook } from '../../utils/vouchingExcel'
 
-const SEL = 'rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-navy outline-none focus:border-navy'
-const INP = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
+const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const KINDS = { sales: { label: 'Sales', cols: SALES_COLUMNS, marks: SALES_MARKS }, cogs: { label: 'COGS / Purchases', cols: COGS_TESTS, marks: COGS_MARKS }, expense: { label: 'Expenses', cols: EXPENSE_COLUMNS, marks: EXPENSE_STATUS }, party: { label: 'AR / AP / Advances' } }
 const blank = (kind) => ({ id: Math.random().toString(36).slice(2), party: '', invoiceNo: '', date: '', taxable: '', fileName: '', received: true, ref: '', marks: {}, remarks: '', risk: '', category: '', namesAgree: false, amountChecked: false, confirmationVerified: false, paymentChecked: false, clientOptionPending: false, unableToVerify: false, issue: '', kind })
 const DEMO = {
@@ -51,35 +51,40 @@ export default function VouchingTab({ firm, client, clientName }) {
       <Card title={`${KINDS[kind].label} vouching – yellow samples that were received`} right={<div className="flex gap-3"><button onClick={() => setList(() => demoRows(kind).map((d) => ({ ...blank(kind), ...d })))} className="text-xs font-semibold text-slate-500 underline">{clientRows && clientRows[kind].length ? 'Use the client samples' : 'Use demo samples'}</button><button onClick={() => setList((l) => [...l, blank(kind)])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add sample</button></div>}><AutoDemo run={() => setList(() => demoRows(kind).map((d) => ({ ...blank(kind), ...d })))} />
         {kind !== 'party' && <label className="mb-2 block text-xs font-semibold text-slate-500">Total value of the population <input aria-label="Total value" type="number" value={total} onChange={(e) => setTotal(e.target.value)} className={`${INP} ml-2 w-44 font-normal`} /></label>}
         {list.length === 0 && <p className="text-xs text-slate-400">No samples yet. Add the samples from the sampling step (yellow highlights).</p>}
-        <div className="space-y-3">
+        <div className="space-y-5">
           {list.map((x, i) => (
-            <div key={x.id} className="rounded-lg border border-slate-100 p-2.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <label className="flex items-center gap-1 text-xs text-navy"><input type="checkbox" checked={x.received} onChange={(e) => patch(x.id, { received: e.target.checked })} className="h-4 w-4 accent-navy" />{kind === 'party' ? 'Document received' : 'Invoice received'}</label>
-                <input aria-label="Party" placeholder="Party" value={x.party} onChange={(e) => patch(x.id, { party: e.target.value })} className={`${INP} w-44`} />
-                {kind !== 'party' ? <>
-                  <input aria-label="Invoice number" placeholder="Invoice no." value={x.invoiceNo} onChange={(e) => patch(x.id, { invoiceNo: e.target.value })} className={`${INP} w-32`} />
-                  <input aria-label="Invoice date" type="date" value={x.date} onChange={(e) => patch(x.id, { date: e.target.value })} className={`${INP} w-36`} />
-                  <input aria-label="Taxable value" type="number" placeholder="Taxable value" value={x.taxable} onChange={(e) => patch(x.id, { taxable: e.target.value })} className={`${INP} w-32`} /></>
-                  : <input aria-label="Category" placeholder="Category" value={x.category} onChange={(e) => patch(x.id, { category: e.target.value })} className={`${INP} w-40`} />}
-                <input aria-label="Client file name" placeholder="Client file name" value={x.fileName} onChange={(e) => patch(x.id, { fileName: e.target.value })} className={`${INP} w-44`} />
-                <span className="text-xs font-semibold text-navy">{x.ref ? `Ref. ${x.ref}` : x.received ? 'Not yet numbered' : 'Invoice Not Received – Not Numbered'}</span>
+            <div key={x.id} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <span className="rounded-md bg-navy/10 px-2.5 py-1 text-xs font-bold text-navy">{x.ref ? `Ref. ${x.ref}` : x.received ? 'Not yet numbered' : 'Not received: not numbered'}</span>
+                <p className="min-w-[160px] flex-1 text-sm font-semibold text-navy">{x.party || 'New sample'}{x.invoiceNo ? ` · ${x.invoiceNo}` : ''}</p>
                 {kind === 'party' && x.ref && <Chip value={partyVouchStatus(x) === 'OK' ? 'Pass' : partyVouchStatus(x) === 'PENDING' ? 'Unclear' : 'Fail'} />}
                 {kind !== 'party' && x.received && <Chip value={['OK', 'VERIFIED – PASS'].includes(resultOf(x)) ? 'Pass' : ['Exception', 'EXCEPTION', 'HIGH-RISK EXCEPTION'].includes(resultOf(x)) ? 'Fail' : 'Unclear'} />}
-                <button aria-label="Remove sample" onClick={() => setList((l) => l.filter((y) => y.id !== x.id))} className="ml-auto rounded p-1 text-slate-400 hover:text-alert-red"><Trash2 className="h-3.5 w-3.5" /></button>
+                <button aria-label="Remove sample" onClick={() => setList((l) => l.filter((y) => y.id !== x.id))} className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-alert-red"><Trash2 className="h-4 w-4" />Remove</button>
               </div>
+              <FieldGrid cols={4}>
+                <Field label={kind === 'party' ? 'Party' : 'Customer / supplier'}><input aria-label="Party" value={x.party} onChange={(e) => patch(x.id, { party: e.target.value })} className={`${INP} w-full`} /></Field>
+                {kind !== 'party' ? <>
+                  <Field label="Invoice number"><input aria-label="Invoice number" value={x.invoiceNo} onChange={(e) => patch(x.id, { invoiceNo: e.target.value })} className={`${INP} w-full`} /></Field>
+                  <Field label="Invoice date"><input aria-label="Invoice date" type="date" value={x.date} onChange={(e) => patch(x.id, { date: e.target.value })} className={`${INP} w-full`} /></Field>
+                  <Field label="Taxable value"><input aria-label="Taxable value" type="number" value={x.taxable} onChange={(e) => patch(x.id, { taxable: e.target.value })} className={`${INP} w-full`} /></Field></>
+                  : <Field label="Category"><input aria-label="Category" value={x.category} onChange={(e) => patch(x.id, { category: e.target.value })} className={`${INP} w-full`} /></Field>}
+                <Field label="Client file name"><input aria-label="Client file name" value={x.fileName} onChange={(e) => patch(x.id, { fileName: e.target.value })} className={`${INP} w-full`} /></Field>
+                <div className="flex items-end"><Toggle label={kind === 'party' ? 'Document received' : 'Invoice received'} checked={x.received} onChange={(v) => patch(x.id, { received: v })} /></div>
+              </FieldGrid>
               {kind === 'party' && x.received && (
-                <div className="mt-2 flex flex-wrap gap-3 text-xs text-navy">{[['namesAgree', 'Party names agree'], ['amountChecked', 'Amounts checked'], ['confirmationVerified', 'Confirmation details verified'], ['paymentChecked', 'Payment / receipt copies checked'], ['clientOptionPending', 'Client option pending'], ['unableToVerify', 'Unable to verify']].map(([k, l]) => <label key={k} className="flex items-center gap-1"><input type="checkbox" checked={!!x[k]} onChange={(e) => patch(x.id, { [k]: e.target.checked })} className="h-3.5 w-3.5 accent-navy" />{l}</label>)}
-                  <input aria-label="Issue" placeholder="Issue identified (if any)" value={x.issue} onChange={(e) => patch(x.id, { issue: e.target.value })} className={`${INP} min-w-[220px] flex-1`} /></div>
+                <div className="mt-5 space-y-4"><Section title="Checks (tick what was done)"><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[['namesAgree', 'Party names agree'], ['amountChecked', 'Amounts checked'], ['confirmationVerified', 'Confirmation details verified'], ['paymentChecked', 'Payment / receipt copies checked'], ['clientOptionPending', 'Client option pending'], ['unableToVerify', 'Unable to verify']].map(([k, l]) => <Toggle key={k} label={l} checked={!!x[k]} onChange={(v) => patch(x.id, { [k]: v })} />)}</div></Section>
+                  <Field label="Issue identified (if any)"><input aria-label="Issue" value={x.issue} onChange={(e) => patch(x.id, { issue: e.target.value })} className={`${INP} w-full`} /></Field></div>
               )}
               {kind !== 'party' && x.received && (
-                <div className="mt-2 grid gap-x-3 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
-                  {KINDS[kind].cols.filter((c) => c !== 'Invoice Received').map((c) => <label key={c} className="flex items-center justify-between gap-1 text-[11px] text-slate-500">{c}<select aria-label={`${c} for ${x.invoiceNo || x.party}`} value={x.marks[c] || ''} onChange={(e) => mark(x.id, c, e.target.value)} className={SEL}><option value=""></option>{KINDS[kind].marks.map((m) => <option key={m}>{m}</option>)}</select></label>)}
-                  {kind === 'expense' && <><label className="flex items-center justify-between gap-1 text-[11px] text-slate-500">Risk<select aria-label="Risk" value={x.risk} onChange={(e) => patch(x.id, { risk: e.target.value })} className={SEL}><option value=""></option><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label><span className="text-[11px] text-slate-500">Duplicate check: {dups[i]}</span></>}
-                  <input aria-label="Remarks" placeholder={kind === 'cogs' ? 'Remarks (exceptions and queries only)' : 'Remarks'} value={x.remarks} onChange={(e) => patch(x.id, { remarks: e.target.value })} className={`${INP} sm:col-span-2 lg:col-span-4`} />
-                </div>
+                <div className="mt-5"><Section title="Tests" hint="Choose the result of each test.">
+                  <FieldGrid cols={4}>
+                    {KINDS[kind].cols.filter((c) => c !== 'Invoice Received').map((c) => <Field key={c} label={c}><select aria-label={`${c} for ${x.invoiceNo || x.party}`} value={x.marks[c] || ''} onChange={(e) => mark(x.id, c, e.target.value)} className={`${INP} w-full`}><option value="">Choose…</option>{KINDS[kind].marks.map((m) => <option key={m}>{m}</option>)}</select></Field>)}
+                    {kind === 'expense' && <><Field label="Risk"><select aria-label="Risk" value={x.risk} onChange={(e) => patch(x.id, { risk: e.target.value })} className={`${INP} w-full`}><option value="">Choose…</option><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></Field><p className="self-end pb-2.5 text-sm text-slate-500">Duplicate check: <b className="text-navy">{dups[i]}</b></p></>}
+                  </FieldGrid>
+                  <div className="mt-4"><Field label="Remarks" hint={kind === 'cogs' ? 'Exceptions and queries only' : undefined}><input aria-label="Remarks" value={x.remarks} onChange={(e) => patch(x.id, { remarks: e.target.value })} className={`${INP} w-full`} /></Field></div>
+                </Section></div>
               )}
-              {!x.received && kind === 'expense' && <p className="mt-1 text-xs text-amber">EX-01 – Invoice Missing. Refer for follow-up. Its value is not counted in Sample Testing %.</p>}
+              {!x.received && kind === 'expense' && <p className="mt-4 rounded-lg border border-amber/30 bg-amber/5 px-4 py-3 text-sm text-amber">EX-01 – Invoice Missing. Refer for follow-up. Its value is not counted in Sample Testing %.</p>}
             </div>
           ))}
         </div>

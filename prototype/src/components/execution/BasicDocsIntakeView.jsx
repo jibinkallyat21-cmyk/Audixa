@@ -10,7 +10,7 @@ import { FOLDERS, outstanding, referredItems, folderStatus, folderTree, isDone, 
 import { financialYear } from '../../utils/proposalDraft'
 import { foUser } from '../../data/sampleData'
 
-const INP = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const TONE = { Accepted: 'Pass', Confirmed: 'Pass', Retrieved: 'Pass', Rejected: 'Fail', Referred: 'Unclear', Missing: 'Fail', 'Not applicable': 'Not provided', 'Not issued': 'Not provided' }
 const BOOL = (key, label) => ({ key, label, kind: 'bool' })
 const FACTS = {
@@ -98,7 +98,7 @@ export default function BasicDocsIntakeView({ role = 'fo', user = foUser }) {
     <div className="space-y-4">
       <div><h1 className="text-xl font-bold text-navy">Signed Proposal and Basic Documents</h1><p className="mt-1 text-sm text-slate-500">Process 1.2. {role === 'fo' ? 'Issue the checklist, collect and validate each document, and follow up on what is missing.' : 'Review the documents the AI could not settle and confirm that the client folder is complete.'}</p></div>
       <Card>
-        <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Client<select aria-label="Client" value={clientId} onChange={(e) => { setClientId(e.target.value); setOpen(null) }} className={`${INP} ml-2 min-w-[260px] font-normal normal-case`}><option value="">Select a client</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.name}{intakes[c.id] ? ' ✓' : ''}</option>)}</select></label>
+        <label className="text-xs font-medium text-slate-600">Client<select aria-label="Client" value={clientId} onChange={(e) => { setClientId(e.target.value); setOpen(null) }} className={`${INP} ml-2 min-w-[260px] font-normal normal-case`}><option value="">Select a client</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.name}{intakes[c.id] ? ' ✓' : ''}</option>)}</select></label>
       </Card>
 
       {cl && !s && (
