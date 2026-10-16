@@ -3,9 +3,7 @@ import { ChevronDown, ChevronRight, FileSpreadsheet, Loader2, Send, Undo2, Plus,
 import AuditorChip from '../shared/AuditorChip'
 import { useToast } from '../shared/Toast'
 import { MIS_REQUIREMENTS } from '../../data/misRequirements'
-import { demoPY, demoCY } from '../../data/demoTB'
-import { toLedgers, detectBranches, consolidate } from '../../utils/tbCore'
-import { readTBWorkbook } from '../../utils/tbExcel'
+import { detectBranches } from '../../utils/tbCore'
 import { buildIssuedList, presetList } from '../../utils/requirementsEngine'
 import { useIssuedLists, issueList, withdrawList } from '../../utils/requirementsStore'
 import { applyPartyBreakdown, readGLWorkbook, demoGLRows } from '../../utils/partyBreakdown'
@@ -49,9 +47,6 @@ function MisList({ file, renderIssued }) {
   const showToast = useToast()
   const issuedAll = useIssuedLists()
   const issued = issuedAll[file.slug]
-  const [ledgers, setLedgers] = useState(null)
-  const [src, setSrc] = useState('')
-  const [multi, setMulti] = useState(false)
   const [overrides, setOverrides] = useState({})
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -61,29 +56,15 @@ function MisList({ file, renderIssued }) {
   const [adjust, setAdjust] = useState(false)
   const [gl, setGl] = useState(null)
 
-  const useDemo = () => { setLedgers(demoCY(demoPY())); setSrc('Demo trial balance'); setOverrides({}); setErr(''); setMulti(false) }
-  const onFile = async (f) => {
-    if (!f) return
-    setBusy(true); setErr('')
-    try {
-      const sheets = await readTBWorkbook(await f.arrayBuffer())
-      if (!sheets.length) throw new Error('No trial balance found. It needs a ledger name column and at least two of Opening, Debit, Credit, Closing.')
-      const all = sheets.flatMap((s) => toLedgers(s.rows, s.mapping, { fileName: s.sheetName }))
-      const b = detectBranches(all, sheets.length)
-      setMulti(b.multi); setLedgers(b.multi ? consolidate(all).ledgers : all); setSrc(`${f.name} · ${all.length} ledgers`); setOverrides({})
-    } catch (e) { setErr(e.message || 'Could not read the file.') }
-    setBusy(false)
-  }
-  const effLedgers = clientTB ? clientTB.ledgers : ledgers
-  const effMulti = clientTB ? detectBranches(clientTB.ledgers, 1).multi : multi
+  const effLedgers = clientTB ? clientTB.ledgers : null
+  const effMulti = clientTB ? detectBranches(clientTB.ledgers, 1).multi : false
   const built = useMemo(() => (effLedgers ? buildIssuedList(MIS_REQUIREMENTS, effLedgers, { consolidated: effMulti, overrides }) : null), [effLedgers, effMulti, overrides])
-  const preset = useMemo(() => presetList(MIS_REQUIREMENTS), [])
   const toggle = (c) => setOverrides((o) => {
     const next = { ...o }; const want = !c.include
     if (want === c.applies) delete next[c.id]; else next[c.id] = want
     return next
   })
-  const issue = () => { const r = issueList(file, built, { source: clientTB ? `Client TB: ${clientTB.fileName}` : src }); if (clientTB) approveTB(file); showToast(`${r.itemCount} requirements issued to ${file.client}`) }
+  const issue = () => { const r = issueList(file, built, { source: `Client TB: ${clientTB.fileName}` }); if (clientTB) approveTB(file); showToast(`${r.itemCount} requirements issued to ${file.client}`) }
   const readGL = async (f) => {
     if (!f) return
     setBusy(true); setErr('')
@@ -100,13 +81,9 @@ function MisList({ file, renderIssued }) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="flex items-center gap-2 text-sm font-semibold text-navy">MISCPA general audit requirements <AuditorChip auditor="MISCPA" /></p>
-            <p className="mt-0.5 text-xs text-slate-500">{file.client}. The full preset list is shown first; once the trial balance is read, only the relevant requirements are kept.</p>
+            <p className="mt-0.5 text-xs text-slate-500">{file.client}. The requirement list is prepared from the client's approved trial balance: only the relevant requirements are kept.</p>
           </div>
-          {!clientTB && <div className="flex flex-wrap gap-2">
-            <label className={`${BTN} cursor-pointer border border-slate-300 text-navy hover:bg-slate-50`}>{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}Analyse trial balance (Excel)
-              <input type="file" accept=".xlsx" className="hidden" onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} /></label>
-            <button onClick={useDemo} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo trial balance</button>
-          </div>}
+
         </div>
         {err && <p className="mt-2 text-xs text-alert-red">{err}</p>}
         {clientTB && (
@@ -147,8 +124,7 @@ function MisList({ file, renderIssued }) {
           </div>
         )}
         {!clientTB && sub?.status === 'Returned' && <p className="mt-2 text-xs text-amber">Returned to the client: {sub.returnReason}. Waiting for a new upload.</p>}
-        {!clientTB && !sub && <p className="mt-2 text-xs text-slate-500">The client has not uploaded a trial balance yet. Their requirement list stays hidden until you approve one.</p>}
-        {src && <p className="mt-2 text-xs text-slate-500">Trial balance: {src}{multi ? ' · several branches / entities, consolidated first' : ''}.</p>}
+        {!clientTB && !sub && <p className="mt-2 text-xs text-slate-500">Waiting for the client to upload the trial balance.</p>}
       </div>
 
       {issued && (
@@ -164,11 +140,10 @@ function MisList({ file, renderIssued }) {
       {issued && renderIssued && renderIssued(issued)}
       {issued && renderIssued && <button onClick={() => setAdjust(!adjust)} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>{adjust ? 'Hide category changes' : 'Change categories (re-issuing resets review progress)'}</button>}
 
-      {(!issued || !renderIssued || adjust) && !built && (
-        <>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Preset list · {preset.reduce((n, c) => n + c.items.length, 0)} items in {preset.length} categories (not yet filtered)</p>
-          {preset.map((c) => <Cat key={c.id} title={c.title} count={c.items.length}><Items items={c.items} /></Cat>)}
-        </>
+      {!clientTB && !issued && (
+        <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+          No requirement list yet. It is prepared from the client's trial balance, so nothing is requested until the client uploads one and you approve it.
+        </div>
       )}
 
       {built && (!issued || !renderIssued || adjust) && (

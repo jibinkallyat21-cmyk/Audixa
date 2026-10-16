@@ -2,7 +2,9 @@
 // The requirement list is NOT issued here: the client uploads a trial balance first and the audit team approves it.
 import { teamFiles } from '../data/sampleData.js'
 import { withdrawList, PORTAL_CLIENT } from './requirementsStore.js'
-import { clearTB } from './tbSubmissionStore.js'
+import { clearTB, submitTB } from './tbSubmissionStore.js'
+import { demoPY, demoCY } from '../data/demoTB.js'
+import { compactLedgers } from './tbFormat.js'
 import { useStore, readStore, writeStore } from './store.js'
 import { logEvent } from './auditLog.js'
 
@@ -24,8 +26,10 @@ export const useDemoLoaded = () => !!useStore(KEY, null)[0]
 
 export function loadDemoData() {
   attach(true)
+  // Demo data stands in for the client's upload: the trial balance is already received and waits for the audit team's approval.
+  submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers: compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit }))), sheetName: 'Trial Balance' })
   writeStore(KEY, { at: new Date().toISOString() })
-  logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio; waiting for the client's trial balance` })
+  logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio; trial balance received, waiting for approval` })
 }
 export function clearDemoData() {
   attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore(KEY, null)
