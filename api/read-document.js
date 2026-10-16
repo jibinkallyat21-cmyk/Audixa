@@ -109,6 +109,11 @@ const DOCS = {
       notes,
     }),
   },
+  pyTb: {
+    describe: 'the previous year audited trial balance of a company (a listing of every ledger with its balances); translate any Arabic into English and keep every number unchanged',
+    fields: 'ledgers[]: one entry per ledger line, with code (account code or null), name (as shown), opening, debit, credit and closing (numbers, debit positive and credit negative for the opening and closing; null when a column is not shown). Do not include total, sub-total or group lines. Do not total or recompute anything. Also periodEnd (ISO yyyy-mm-dd) and currency.',
+    schema: obj({ ledgers: arr(obj({ code: str, name: str, opening: numOrNull, debit: numOrNull, credit: numOrNull, closing: numOrNull })), periodEnd: str, currency: str, notes }),
+  },
   intake: {
     describe: 'a client document uploaded to the client portal of an audit firm in Saudi Arabia: a signed proposal, Commercial Registration (CR), Articles of Association (AOA), previous year audit report, Zakat and tax certificate or return, VAT registration certificate, or a turnover statement / trial balance',
     fields: 'detectedType (one of: proposal, cr, aoa, pyAudit, zakat, vat, tb, or other); legible (true if the text can be read); complete (true if all pages appear present); confidence (0 to 1, how sure you are of the type and the fields); legalName (the company name exactly as written, in English if both languages are present); crNumber; vatNumber (digits only); validUntil (expiry date, ISO yyyy-mm-dd; convert Hijri to Gregorian); fyYear (the financial year the document relates to, as a 4-digit year); signaturePresent and stampPresent (for a signed proposal); signatoryAuthorised (null unless the document states the signatory authority); fee (the audit fee stated on a proposal, excluding VAT); periodFrom and periodTo (ISO dates); isLatestAmended (null unless it states the amendment status); hasOpinion, hasFS, hasNotes (for an audit report); coversFullPeriod and hasTotals (for a trial balance or turnover statement).',

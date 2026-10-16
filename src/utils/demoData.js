@@ -25,16 +25,25 @@ function attach(on, auditor = 'MISCPA') {
 attach(!!readStore(KEY, null), readStore(KEY, null)?.auditor) // restore after a page reload
 
 export const useDemoLoaded = () => !!useStore(KEY, null)[0]
+export const useDemoExisting = () => useStore(KEY, null)[0]?.existing !== false
 export const useDemoAuditor = () => useStore(KEY, null)[0]?.auditor || 'MISCPA'
 
-export function loadDemoData(auditor = 'MISCPA') {
-  attach(true, auditor)
-  // Demo data stands in for the client's upload: the trial balance is already received and waits for the audit team's approval.
-  const ledgers = compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit })))
+// What the client sends in the demo. This year the prepayment is split in two and the second part is named in a way the grouping cannot place:
+// the code check flags it and the review resolves it. For an existing client the previous year audited trial balance is added by the audit team.
+export function demoPayload(existing = true) {
+  let ledgers = compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit })))
+  ledgers = ledgers.flatMap((l) => (l.code === '1300' ? [{ ...l, opening: 12000, closing: 12000 }, { ...l, code: '1350', name: 'Amounts due from Al Noor Contracting', group: 'unmapped', opening: 6000, closing: 6000 }] : [l]))
   const gl = checkGL(ledgers, demoGLTransactions(ledgers))
-  submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', glRows: gl.partyRows, glStats: gl.stats, pyFileName: 'Demo previous year audited trial balance.xlsx', pyLedgers: compactLedgers(demoPY()) })
+  return { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', glRows: gl.partyRows, glStats: gl.stats, ...(existing ? {} : { pyFileName: 'Demo previous year audited trial balance.xlsx', pyLedgers: compactLedgers(demoPY()) }) }
+}
+export const demoPYPayload = () => ({ fileName: 'Demo previous year audited trial balance.xlsx', ledgers: compactLedgers(demoPY()) })
+
+export function loadDemoData(auditor = 'MISCPA', existing = true) {
+  attach(true, auditor)
+  // Demo data stands in for the client's upload: the trial balance and general ledger are already received and wait for the audit team's approval.
+  submitTB(DEMO_FILE, demoPayload(existing))
   saveClientProfile({ id: DEMO_FILE.slug, client: DEMO_FILE.client, auditor, auditType: 'Proper', services: { audit: { opted: true, fee: null } }, source: 'demo', createdBy: 'Demo data', createdDate: new Date().toISOString().slice(0, 10) })
-  writeStore(KEY, { at: new Date().toISOString(), auditor })
+  writeStore(KEY, { at: new Date().toISOString(), auditor, existing })
   logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio as a ${auditor} file; trial balance and general ledger received, waiting for approval` })
 }
 export function clearDemoData() {

@@ -29,4 +29,16 @@ export function setTBLedgers(file, ledgers, extra = {}) {
   put(file.slug, { ...cur, ledgers, updatedAt: new Date().toISOString(), ...extra })
   log(file.client, 'Party-wise balances applied', `${extra.partyWise?.summary?.filter((s) => s.replaced).length || 0} control lines replaced with party-wise balances from the general ledger`)
 }
+// The allocated audit team member adds last year's audited trial balance (existing clients).
+export function setPYTB(file, { fileName, ledgers }) {
+  const cur = getTBSubmission(file.slug); if (!cur) return
+  put(file.slug, { ...cur, pyFileName: fileName, pyLedgers: ledgers, openingReview: null, firstYear: false })
+  log(file.client, 'Previous year audited trial balance added', `${fileName}: ${ledgers.length} ledgers`)
+}
+// Result of the second (AI) step of the opening balance check, kept so it is not paid for twice.
+export function setOpeningReview(file, review) {
+  const cur = getTBSubmission(file.slug); if (!cur) return
+  put(file.slug, { ...cur, openingReview: review })
+  log(file.client, 'Opening balance review', `${review.source === 'ai' ? 'AI review' : 'Amount matching'} of ${review.flagCount} flagged ledger(s): ${review.verifiedCount} resolved`)
+}
 export const clearTB = (slug) => { const all = { ...readStore(KEY, {}) }; delete all[slug]; writeStore(KEY, all) }
