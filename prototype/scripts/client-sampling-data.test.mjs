@@ -9,7 +9,7 @@ const sum = (rows, i) => Math.round(rows.reduce((n, r) => n + r[i], 0) * 100) / 
 test('splitAmount adds up to the cent', () => { for (const [t, n] of [[2400000, 48], [7200, 12], [33.33, 7]]) assert.equal(Math.round(splitAmount(t, n, 3).reduce((a, b) => a + b, 0) * 100) / 100, t) })
 test('sales and purchases equal the revenue and cost of sales ledgers', () => {
   assert.equal(sum(clientSales(L).rows, 3), 2400000); assert.equal(sum(clientPurchases(L).rows, 3), 1700000)
-  assert.equal(clientSales(L).rows.length, 48)
+  assert.equal(clientSales(L).rows.length, 240)
 })
 test('every expense ledger is covered exactly and the voucher ledger agrees', () => {
   const e = clientExpenses(L); const names = [...new Set(e.rows.map((r) => r[0]))]

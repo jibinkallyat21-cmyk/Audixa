@@ -67,7 +67,7 @@ function SalesPurchase({ ctx, initialKind = 'Sales Report' }) {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Total taxable value" value={money(res.total)} /><Stat label="50% target" value={money(res.target)} /><Stat label="Entries selected" value={res.selectedIds.length} tone="green" /><Stat label={`Value covered (${pct(res.coverage)})`} value={money(res.covered)} /></div>
           {res.capped && <Flags flags={[`The 30-entry limit was reached before 50% was covered (${pct(res.coverage)}). Per the Rule Book there is no need to cover the full 50%.`]} />}
           <button onClick={async () => save(await buildSalesWorkbook({ source: file, taxableHeader: file.mapping.taxable, result: res, label: kind }), `${kind.replace(/\s+/g, '_')}_Sampling.xlsx`, showToast)} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white"><Download className="h-3.5 w-3.5" />Download the file with yellow highlights</button>
-          <SendSamples area="Sales" label={kind} client={ctx.client} items={salesItems({ rows: file.rows, mapping: file.mapping, result: res, kind })} />
+          <SendSamples area={kind.replace(/ Report$/, '')} label={kind} client={ctx.client} items={salesItems({ rows: file.rows, mapping: file.mapping, result: res, kind })} />
         </div>
       )}
     </Card>

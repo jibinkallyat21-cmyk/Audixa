@@ -5,6 +5,7 @@ import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
 import { useToast } from '../../components/shared/Toast'
+import { useDemoClient } from '../../utils/useDemoClient'
 
 const DURATIONS = ['30 min', '45 min', '1 hour', '1.5 hours', '2 hours']
 const TEAMS_LINK = 'https://teams.microsoft.com/l/meetup-join/19%3ameeting_demo/0'
@@ -18,6 +19,7 @@ const initialState = {
 }
 
 export default function TeamScheduleMeeting() {
+  const dc = useDemoClient()
   const showToast = useToast()
   const [subject, setSubject] = useState('')
   const [date, setDate] = useState('')
@@ -107,8 +109,8 @@ export default function TeamScheduleMeeting() {
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Client</label>
                 <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2.5">
-                  <span className="text-sm font-medium text-navy">Al-Marai Logistics JSC</span>
-                  <AuditorChip auditor="ABCPA" />
+                  <span className="text-sm font-medium text-navy">{dc.loaded ? dc.client : 'Al-Marai Logistics JSC'}</span>
+                  <AuditorChip auditor={dc.loaded ? dc.auditor : 'ABCPA'} />
                 </div>
               </div>
 

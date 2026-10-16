@@ -82,7 +82,7 @@ function AreaList({ dc, statuses, issued }) {
         <input aria-label="Search areas and accounts" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search an area or an account" className="ml-auto w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-none focus:border-navy" />
       </div>
       {SECTIONS.map((sec) => {
-        const list = AREAS.filter((a) => a.section === sec && keep(a)); if (!list.length) return null
+        const list = AREAS.filter((a) => a.section === sec && (a.id !== 'unclassified' || areaFigures(a, dc.ledgers).ledgers.length) && keep(a)); if (!list.length) return null
         return (
           <section key={sec}>
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{sec}</h3>

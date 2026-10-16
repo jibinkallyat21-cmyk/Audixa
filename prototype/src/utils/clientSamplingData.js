@@ -23,8 +23,8 @@ function register(prefix, names, sum, n, seed, headers) {
   rows.sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0)).forEach((r, i) => { r[0] = `${prefix}-${YEAR}-${String(i + 1).padStart(4, '0')}` })
   return { headers, rows }
 }
-export const clientSales = (ledgers) => register('INV', CUSTOMERS, -total(ledgers, 'revenue'), 48, 11, ['Invoice No', 'Date', 'Customer', 'Taxable Value'])
-export const clientPurchases = (ledgers) => register('PUR', SUPPLIERS, total(ledgers, 'cogs'), 40, 17, ['Invoice No', 'Date', 'Supplier', 'Taxable Value'])
+export const clientSales = (ledgers) => register('INV', CUSTOMERS, -total(ledgers, 'revenue'), 240, 11, ['Invoice No', 'Date', 'Customer', 'Taxable Value'])
+export const clientPurchases = (ledgers) => register('PUR', SUPPLIERS, total(ledgers, 'cogs'), 160, 17, ['Invoice No', 'Date', 'Supplier', 'Taxable Value'])
 
 const MONTHLY = /salar|wage|rent|bank charge|insurance|telephone|utilit/i
 export function clientExpenses(ledgers) {

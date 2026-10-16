@@ -9,6 +9,7 @@ import { demoGLTransactions, checkGL } from './generalLedger.js'
 import { useStore, readStore, writeStore } from './store.js'
 import { logEvent } from './auditLog.js'
 import { saveClientProfile, removeClientProfile } from './clientProfiles.js'
+import { clearProcedureStatuses } from './procedureStore.js'
 
 const KEY = 'demo:loaded'
 export const DEMO_FILE = {
@@ -53,5 +54,5 @@ export function loadDemoData(auditor = 'MISCPA', existing = true) {
   logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio as a ${auditor} file; trial balance and general ledger received, waiting for approval` })
 }
 export function clearDemoData() {
-  attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore('workingtb:adjustments', []); removeClientProfile(DEMO_FILE.slug); writeStore('queries', readStore('queries', []).filter((q) => q.client !== DEMO_FILE.slug)); writeStore('workingtb:classOverrides', {}); writeStore('audit-log', readStore('audit-log', []).filter((e) => e.clientName !== DEMO_FILE.client)); writeStore(KEY, null)
+  attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore('workingtb:adjustments', []); removeClientProfile(DEMO_FILE.slug); writeStore('queries', readStore('queries', []).filter((q) => q.client !== DEMO_FILE.slug)); writeStore('workingtb:classOverrides', {}); writeStore('audit-log', readStore('audit-log', []).filter((e) => e.clientName !== DEMO_FILE.client)); clearProcedureStatuses(DEMO_FILE.slug); writeStore(KEY, null)
 }
