@@ -17,9 +17,9 @@ import { useAuditLog } from '../../utils/auditLog'
 import { useProcedureStatuses } from '../../utils/procedureStore'
 
 const TABS_BASE = [
+  { id: 'summary', label: 'File summary', href: '/team/workspace/summary' },
   { id: 'requirements', label: 'Requirements', href: '/team/workspace/requirements' },
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries' },
-  { id: 'summary', label: 'File summary', href: '/team/workspace/summary' },
   { id: 'areas', label: 'Audit areas', href: '/team/workspace/areas' },
   { id: 'procedures', label: 'Other procedures', href: '/team/workspace/procedures' },
   { id: 'working-tb', label: 'Working TB', href: '/team/workspace/working-tb' },
@@ -28,7 +28,6 @@ const TABS_BASE = [
 ]
 
 // Audit Requirements shows only Requirements and Queries; Audit Procedures shows everything else.
-const REQUIREMENT_TABS = ['requirements', 'queries']
 
 const AUDIT_TYPE_LABEL = { Proper: 'Proper Audit', Disclaimer: 'Disclaimer' }
 
@@ -189,8 +188,8 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
   const pbcTotal = scope.demo ? (issued[file.slug]?.itemCount || 0) : file.pbcTotal
   const trailCount = scope.demo ? log.filter((e) => e.clientName === file.client).length : 47
 
-  const inRequirements = REQUIREMENT_TABS.some((id) => location.pathname === `/team/workspace/${id}`)
-  const tabs = TABS_BASE.filter((tab) => REQUIREMENT_TABS.includes(tab.id) === inRequirements).map((tab) => {
+  // One row of tabs on every workspace page: File summary, Requirements, Queries, Audit areas and the rest.
+  const tabs = TABS_BASE.map((tab) => {
     if (tab.id === 'requirements') return { ...tab, badge: `${pbcTotal}`, badgeTone: 'grey' }
     if (tab.id === 'queries') return { ...tab, badge: `${openQueries} open`, badgeTone: openQueries > 0 ? 'red' : 'grey' }
     if (tab.id === 'procedures') return { ...tab, badge: `${inProgressProcedures} in progress`, badgeTone: 'amber' }
