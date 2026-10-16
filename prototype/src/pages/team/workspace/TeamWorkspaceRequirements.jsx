@@ -9,6 +9,7 @@ import StatusPill from '../../../components/shared/StatusPill'
 import { useToast } from '../../../components/shared/Toast'
 import { useModal } from '../../../components/shared/Modal'
 import { useSearchParams } from 'react-router-dom'
+import { groupRequirements } from '../../../utils/requirementAreas'
 import { teamAuditTrail, teamFiles } from '../../../data/sampleData'
 import RequirementsListView from '../../../components/execution/RequirementsListView'
 import { PORTAL_CLIENT, setItemStatus } from '../../../utils/requirementsStore'
@@ -443,7 +444,7 @@ function IssuedReview({ rec, slug }) {
   const [view, setView] = useState(['samples', 'cutoff'].includes(qp.get('tab')) ? qp.get('tab') : 'documents')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const categories = rec.categories.filter((c) => !c.group).map((c) => {
+  const categories = groupRequirements(rec).filter((g) => g.docs.length).map((g) => ({ id: g.id, title: g.label, items: g.docs.flatMap((c) => c.items) })).map((c) => {
     const done = c.items.filter((i) => i.status === 'Accepted').length
     const statusColor = done === c.items.length ? 'emerald' : c.items.some((i) => ['Under Review', 'Uploaded Processing', 'Rejected'].includes(i.status)) ? 'amber' : 'grey'
     return {

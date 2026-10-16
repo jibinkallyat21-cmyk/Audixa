@@ -9,9 +9,9 @@ import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
 import { useIssuedLists, PORTAL_CLIENT, setItemStatus, uploadDemoDocuments } from '../../utils/requirementsStore'
 import TBUploadStep from '../../components/client/TBUploadStep'
-import SampleBoard from '../../components/client/SampleBoard'
 import { DEMO_FILE, useDemoLoaded } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
+import AreaRequirements from '../../components/client/AreaRequirements'
 
 function rowsFromIssued(rec, only = null) {
   const rows = []
@@ -318,9 +318,8 @@ export default function ClientDocuments() {
   const demoOn = useDemoLoaded()
   const showToast = useToast()
   const ALL_ROWS = useMemo(() => rowsFromIssued(rec), [rec])
-  const [tab, setTab] = useState('documents')
+  const [tab, setTab] = useState('areas')
   const DOC_ROWS = useMemo(() => rowsFromIssued(rec, (c) => !c.group), [rec])
-  const sampleCats = (rec?.categories || []).filter((c) => c.group === 'samples'); const cutCats = (rec?.categories || []).filter((c) => c.group === 'cutoff')
   const engRef = rec ? DEMO_FILE.code : ENGAGEMENT_REFS[selectedFY]
   const [searchParams, setSearchParams] = useSearchParams()
   const [bulkOpen, setBulkOpen] = useState(false)
@@ -449,7 +448,7 @@ export default function ClientDocuments() {
 
           {/* Toolbar */}
           <div className="flex flex-wrap gap-2" role="tablist">
-            {[['documents', 'Documents', DOC_ROWS.filter((r) => r.type === 'row').length], ['samples', 'Samples', sampleCats.reduce((n, c) => n + c.items.length, 0)], ['cutoff', 'Cut-off', cutCats.reduce((n, c) => n + c.items.length, 0)]].map(([id, label, count]) => (
+            {[['areas', 'By area', ALL_ROWS.filter((r) => r.type === 'row').length], ['documents', 'Document list', DOC_ROWS.filter((r) => r.type === 'row').length]].map(([id, label, count]) => (
               <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors ${tab === id ? 'bg-navy text-white shadow-sm' : ''}`} style={tab === id ? undefined : { border: `1px solid ${D.border}`, color: D.text, background: D.card }}>{label} <span className={`ml-1.5 rounded-full px-2 py-0.5 text-xs ${tab === id ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{count}</span></button>
             ))}
           </div>
@@ -487,8 +486,7 @@ export default function ClientDocuments() {
 
           {/* Table */}
           </>)}
-          {tab === 'samples' && <SampleBoard categories={sampleCats} emptyText="No samples have been requested yet. When the audit team approves a sample, it appears here, one block per area." />}
-          {tab === 'cutoff' && <SampleBoard categories={cutCats} emptyText="No cut-off items have been requested yet. They appear here once the audit team approves them." />}
+          {tab === 'areas' && <><div className="flex flex-wrap items-center justify-between gap-3"><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search an area or a document..." className="w-72 rounded-lg px-4 py-2 text-sm outline-none" style={{ border: `1px solid ${D.border}`, background: D.card, color: D.text }} />{demoOn && <button onClick={() => { const n = uploadDemoDocuments(PORTAL_CLIENT.slug); showToast(n ? `${n} demo documents uploaded for the audit team to review` : 'Every requirement already has a document.') }} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50" style={{ color: D.text }}>Upload demo documents</button>}</div><AreaRequirements rec={rec} search={search} /></>}
           {rec && tab === 'documents' && <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
             {/* Table header */}
             <div className="hidden items-center gap-3 px-4 py-2.5 md:flex" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderBottom: `1px solid ${D.border}` }}>
