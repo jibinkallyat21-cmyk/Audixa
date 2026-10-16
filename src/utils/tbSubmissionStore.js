@@ -8,7 +8,7 @@ export const useTBSubmissions = () => useStore(KEY, {})[0]
 export const getTBSubmission = (slug) => readStore(KEY, {})[slug] || null
 
 const put = (slug, rec) => writeStore(KEY, { ...readStore(KEY, {}), [slug]: rec })
-const log = (client, title, description) => { try { logEvent({ clientName: client, category: 'requirements', title, description }) } catch { /* log is optional */ } }
+const log = (client, title, description) => { try { logEvent({ client: 'kingdom-retail', clientName: client, category: 'client-response', title, description }) } catch { /* log is optional */ } }
 
 export function submitTB(file, { fileName, ledgers, warnings = [], sheetName = '' }) {
   put(file.slug, { status: 'Submitted', fileName, ledgers, warnings, sheetName, submittedAt: new Date().toISOString(), returnReason: '' })

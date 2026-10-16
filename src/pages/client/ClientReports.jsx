@@ -535,16 +535,13 @@ function TaxCalculatorSection({ tbLines, selectedFY }) {
 }
 
 /* ─── FY-aware data ─── */
-function getReportsData(fy) {
-  const isComplete = fy === 'FY2023' || fy === 'FY2022'
-  const qawaemRef = fy === 'FY2022' ? 'QAW-2022-62018' : fy === 'FY2023' ? 'QAW-2023-77203' : null
-  const issuedDate = fy === 'FY2022' ? '18 Oct 2022' : fy === 'FY2023' ? '20 Oct 2023' : null
-  const filedDate  = fy === 'FY2022' ? '22 Oct 2022' : fy === 'FY2023' ? '22 Oct 2023' : null
+// Nothing is issued by the engagement team yet: documents appear here once the team issues them.
+function getReportsData() {
   return {
-    engagementLetter: { filename: `Engagement Letter — ${fy}.pdf`, size: '1.1 MB', issuedDate: fy === 'FY2022' ? '01 Aug 2022' : fy === 'FY2023' ? '01 Aug 2023' : '01 Aug 2024' },
-    zakatReturn:  { available: isComplete, qawaemRef, filename: isComplete ? `Zakat Return — Kingdom Retail Holdings — ${fy}.pdf` : null, filedDate },
-    draftAFS:     { available: isComplete, confirmed: isComplete, filename: isComplete ? `Draft Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null, pages: 24, size: '2.8 MB' },
-    finalAFS:     { available: isComplete, filename: isComplete ? `Final Audited Financial Statements — Kingdom Retail Holdings LLC — ${fy}.pdf` : null, size: '3.2 MB', issuedDate, qawaemRef, filedDate },
+    engagementLetter: null,
+    zakatReturn:  { available: false, qawaemRef: null, filename: null, filedDate: null },
+    draftAFS:     { available: false, confirmed: false, filename: null, pages: 0, size: '' },
+    finalAFS:     { available: false, filename: null, size: '', issuedDate: null, qawaemRef: null, filedDate: null },
   }
 }
 
@@ -563,10 +560,7 @@ export default function ClientReports() {
   const data = getReportsData(selectedFY)
   const [activeTab, setActiveTab] = useState('engagement')
   const [signedOff, setSignedOff] = useState(false)
-  const [comments, setComments] = useState([
-    { id: 'c1', author: 'Analytix Audit Team', side: 'team', text: 'Related party disclosure on Note 7 updated per your confirmation on 12 Oct.' },
-    { id: 'c2', author: 'You', side: 'client', text: 'Confirmed, the note is accurate. Note 12 (Zakat provision) also reviewed.' },
-  ])
+  const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
 
   const handleAddComment = (e) => {
@@ -647,6 +641,7 @@ export default function ClientReports() {
                         <Download className="h-3.5 w-3.5" style={{ color: D.subtle }} />
                         <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: D.subtle }}>From Analytix — Download</p>
                       </div>
+                      {data.engagementLetter ? (<>
                       <DocListRow
                         icon={FileText} iconColor="#8B5CF6"
                         label={`Audit Proposal — ${selectedFY}.pdf`}
@@ -665,6 +660,9 @@ export default function ClientReports() {
                         onDownload={() => showToast('Downloading engagement letter...')}
                         delay={0.08}
                       />
+                      </>) : (
+                        <p className="px-5 py-4 text-sm" style={{ color: D.muted }}>Your audit proposal and engagement letter appear here once your engagement team issues them.</p>
+                      )}
                     </div>
 
                     {/* Section: Your signatures (upload) */}

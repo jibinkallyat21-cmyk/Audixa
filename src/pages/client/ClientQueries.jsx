@@ -5,7 +5,10 @@ import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useTheme } from '../../context/ThemeContext'
-import { getQueriesForFY } from '../../data/sampleData'
+import { useQueries } from '../../utils/queriesStore'
+import { DEMO_FILE } from '../../utils/demoData'
+import { logEvent } from '../../utils/auditLog'
+import { toThread, chatStatus } from '../../utils/queryThread'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
 const FILTERS = [
@@ -15,21 +18,28 @@ const FILTERS = [
   { id: 'closed', label: 'Closed', match: (q) => q.status === 'Closed' },
 ]
 
+const todayIso = () => new Date().toISOString().slice(0, 10)
+
+// The audit team's query tracker is the single source: the client sees the queries raised for this client and replies to them here.
+function toClientView(q) {
+  return { query: { id: q.id, no: q.no, subject: `${q.no} · ${q.area}`, status: chatStatus(q), date: q.raisedAt, linkedRef: q.priority !== 'Normal' ? `${q.priority} priority` : '' }, msgs: toThread(q) }
+}
+
 export default function ClientQueries() {
   const { isDark } = useTheme()
   const { selectedFY } = useClientFY()
-  const { queries: clientQueries, threads: queryThreadMessages } = getQueriesForFY(selectedFY)
+  const { queries: allQueries, upsert } = useQueries()
+  const mine = allQueries.filter((q) => q.client === DEMO_FILE.slug).map(toClientView)
+  const clientQueries = mine.map((m) => m.query)
   const engRef = ENGAGEMENT_REFS[selectedFY]
-  const [selectedId, setSelectedId] = useState('QRY-01')
+  const [selectedId, setSelectedId] = useState('')
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [reply, setReply] = useState('')
   const [attachment, setAttachment] = useState(null)
-  const [extraMessages, setExtraMessages] = useState({})
   const fileRef = useRef(null)
 
-  // Reset selected query when FY changes
-  const firstQueryId = clientQueries[0]?.id || 'QRY-01'
+  const firstQueryId = clientQueries[0]?.id || ''
   const resolvedSelectedId = clientQueries.find((q) => q.id === selectedId) ? selectedId : firstQueryId
 
   const activeFilter = FILTERS.find((f) => f.id === filter)
@@ -38,27 +48,19 @@ export default function ClientQueries() {
   )
 
   const selectedQuery = clientQueries.find((q) => q.id === resolvedSelectedId) || clientQueries[0]
-  const baseMessages = queryThreadMessages[selectedQuery?.id] || []
-  const messages = [...baseMessages, ...(extraMessages[selectedQuery?.id] || [])]
+  const messages = mine.find((m) => m.query.id === selectedQuery?.id)?.msgs || []
 
   const handleReply = (e) => {
     e.preventDefault()
     if (!reply.trim() && !attachment) return
-    setExtraMessages((prev) => ({
-      ...prev,
-      [selectedQuery?.id]: [
-        ...(prev[selectedQuery?.id] || []),
-        {
-          side: 'right',
-          author: 'You',
-          role: 'Finance Director',
-          timestamp: 'Just now',
-          text: reply.trim(),
-          deliveredRead: false,
-          attachment: attachment ? { name: attachment.name, size: `${(attachment.size / 1024).toFixed(0)} KB` } : null,
-        },
-      ],
-    }))
+    const q = allQueries.find((x) => x.id === selectedQuery?.id)
+    if (!q || q.status === 'Closed') return
+    const at = todayIso(); const text = reply.trim() || `Attached ${attachment.name}`
+    const prior = q.clientReplies || (q.responseText ? [{ at: q.replyDate, text: q.responseText }] : [])
+    upsert({ ...q, replied: 'Replied', status: q.status === 'Escalated' ? 'Escalated' : 'Replied', dateReceived: q.dateReceived || at, replyDate: at, responseText: text,
+      clientReplies: [...prior, { at, text, attachment: attachment ? { name: attachment.name, size: `${(attachment.size / 1024).toFixed(0)} KB` } : null }],
+      history: [{ at, by: 'Client', text: `Client reply: ${text}` }, ...q.history] })
+    logEvent({ client: DEMO_FILE.slug, clientName: DEMO_FILE.client, category: 'query', title: `${q.no}: you replied`, description: text })
     setReply('')
     setAttachment(null)
   }
@@ -76,6 +78,9 @@ export default function ClientQueries() {
           </span>
         </div>
 
+        {clientQueries.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">No audit queries have been raised for you yet. They appear here when your audit team raises one.</p>
+        ) : (
         <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-12">
           {/* Left panel */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm md:col-span-4">
@@ -125,7 +130,7 @@ export default function ClientQueries() {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-slate-400">{query.id}</span>
+                      <span className="text-xs font-semibold text-slate-400">{query.no}</span>
                       <StatusPill status={query.status} />
                     </div>
                     <p className="mt-1 text-sm font-medium text-navy">{query.subject}</p>
@@ -266,6 +271,7 @@ export default function ClientQueries() {
             </motion.div>
           </AnimatePresence>
         </div>
+        )}
       </PageTransition>
     </ClientLayout>
   )

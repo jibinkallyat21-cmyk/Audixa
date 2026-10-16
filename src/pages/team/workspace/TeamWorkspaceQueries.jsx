@@ -7,7 +7,14 @@ import PageTransition from '../../../components/shared/PageTransition'
 import StatusPill from '../../../components/shared/StatusPill'
 import { useToast } from '../../../components/shared/Toast'
 import { useModal } from '../../../components/shared/Modal'
-import { teamQueries, teamQueryThread, teamAuditTrail } from '../../../data/sampleData'
+import { useQueries } from '../../../utils/queriesStore'
+import { newQuery } from '../../../utils/queriesCore'
+import { toThread, chatStatus } from '../../../utils/queryThread'
+import { logEvent } from '../../../utils/auditLog'
+import { DEMO_FILE } from '../../../utils/demoData'
+
+const iso = (d = 0) => { const x = new Date(); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10) }
+const LEAD = 'Fahad Al-Otaibi'
 
 const FILTERS = [
   { id: 'all', label: 'All', match: () => true },
@@ -59,13 +66,15 @@ function RaiseQueryModalBody({ onSubmit, onCancel }) {
 }
 
 export default function TeamWorkspaceQueries() {
-  const [queries, setQueries] = useState(teamQueries)
-  const [selectedId, setSelectedId] = useState('QRY-01')
+  const { queries: all, upsert } = useQueries()
+  const raw = all.filter((q) => q.client === DEMO_FILE.slug)
+  // The same queries the client sees, from the shared query tracker.
+  const queries = raw.map((q) => ({ id: q.id, no: q.no, subject: q.description, status: chatStatus(q), date: q.raisedAt, linkedRef: q.area }))
+  const [selectedId, setSelectedId] = useState('')
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [aiSuggestOpen, setAiSuggestOpen] = useState(false)
   const [reply, setReply] = useState('')
-  const [threads, setThreads] = useState({ 'QRY-01': teamQueryThread })
   const showToast = useToast()
   const { openModal, closeModal } = useModal()
 
@@ -74,17 +83,13 @@ export default function TeamWorkspaceQueries() {
     (q) => activeFilter.match(q) && q.subject.toLowerCase().includes(search.toLowerCase())
   )
   const selectedQuery = queries.find((q) => q.id === selectedId) || queries[0]
-  const messages = threads[selectedQuery.id] || []
+  const selectedRaw = raw.find((q) => q.id === selectedQuery?.id)
+  const messages = selectedRaw ? toThread(selectedRaw, DEMO_FILE.client) : []
 
   const handleSend = () => {
-    if (!reply.trim()) return
-    setThreads((prev) => ({
-      ...prev,
-      [selectedQuery.id]: [
-        ...(prev[selectedQuery.id] || []),
-        { side: 'left', author: 'Fahad Al-Otaibi', role: 'Audit Lead — ABCPA', timestamp: 'Just now', text: reply.trim() },
-      ],
-    }))
+    if (!reply.trim() || !selectedRaw) return
+    const t = iso()
+    upsert({ ...selectedRaw, status: selectedRaw.status === 'Escalated' ? 'Escalated' : 'Follow-up', replied: 'Not replied', followUps: [...(selectedRaw.followUps || []), { date: t, note: reply.trim(), by: LEAD }], history: [{ at: t, by: LEAD, text: `Follow-up: ${reply.trim()}` }, ...selectedRaw.history] })
     showToast('Follow-up sent to client')
     setReply('')
   }
@@ -96,21 +101,11 @@ export default function TeamWorkspaceQueries() {
         <RaiseQueryModalBody
           onCancel={closeModal}
           onSubmit={(subject, linkedRef) => {
-            const id = `QRY-0${queries.length + 1}`
-            const newQuery = { id, subject, status: 'Open', date: 'Today', linkedRef }
-            setQueries((prev) => [newQuery, ...prev])
-            teamQueries.unshift(newQuery)
-            teamAuditTrail.unshift({
-              id: `ev-${Date.now()}`,
-              type: 'query',
-              title: 'Query Raised',
-              description: `${subject} — by Fahad Al-Otaibi`,
-              user: 'Fahad Al-Otaibi',
-              client: 'Al-Marai Logistics JSC',
-              timestamp: 'Just now',
-            })
-            setSelectedId(id)
-            showToast(`${id} raised and sent to client`)
+            const q = newQuery({ queries: all, client: DEMO_FILE.slug, clientName: DEMO_FILE.client, area: linkedRef || 'Other', description: subject, owner: LEAD, dueDate: iso(7), raisedAt: iso(), raisedBy: LEAD })
+            upsert(q)
+            logEvent({ client: DEMO_FILE.slug, clientName: DEMO_FILE.client, category: 'query', title: `${q.no}: query raised`, description: subject })
+            setSelectedId(q.id)
+            showToast(`${q.no} raised and sent to client`)
             closeModal()
           }}
         />
@@ -128,27 +123,32 @@ export default function TeamWorkspaceQueries() {
       ),
       confirmLabel: 'Confirm',
       onConfirm: () => {
-        setQueries((prev) => prev.map((q) => (q.id === selectedQuery.id ? { ...q, status: 'Closed' } : q)))
-        const shared = teamQueries.find((q) => q.id === selectedQuery.id)
-        if (shared) shared.status = 'Closed'
-        showToast(`${selectedQuery.id} closed`)
-        teamAuditTrail.unshift({
-          id: `ev-${Date.now()}`,
-          type: 'accept',
-          title: 'Query Closed',
-          description: `Query ${selectedQuery.id} closed by Fahad Al-Otaibi`,
-          user: 'Fahad Al-Otaibi',
-          client: 'Al-Marai Logistics JSC',
-          timestamp: 'Just now',
-        })
+        if (!selectedRaw) return
+        upsert({ ...selectedRaw, status: 'Closed', closedAt: iso(), history: [{ at: iso(), by: LEAD, text: 'Query closed' }, ...selectedRaw.history] })
+        logEvent({ client: DEMO_FILE.slug, clientName: DEMO_FILE.client, category: 'query', title: `${selectedRaw.no}: query closed`, description: selectedRaw.description })
+        showToast(`${selectedRaw.no} closed`)
       },
     })
+  }
+
+  if (!selectedQuery) {
+    return (
+      <AuditTeamLayout title="File Workspace">
+        <PageTransition>
+          <WorkspaceHeader fileSlug={DEMO_FILE.slug} />
+          <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center">
+            <p className="text-sm text-slate-500">No queries have been raised for this client yet.</p>
+            <button onClick={handleRaiseQuery} className="mt-3 rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#D12C35]">Raise New Query</button>
+          </div>
+        </PageTransition>
+      </AuditTeamLayout>
+    )
   }
 
   return (
     <AuditTeamLayout title="File Workspace">
       <PageTransition>
-        <WorkspaceHeader fileSlug="al-marai" />
+        <WorkspaceHeader fileSlug={DEMO_FILE.slug} />
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[35%_65%]">
           {/* Left panel */}
@@ -197,7 +197,7 @@ export default function TeamWorkspaceQueries() {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-slate-400">{query.id}</span>
+                      <span className="text-xs font-semibold text-slate-400">{query.no}</span>
                       <StatusPill status={query.status} />
                     </div>
                     <p className="mt-1 text-sm font-medium text-navy">{query.subject}</p>
