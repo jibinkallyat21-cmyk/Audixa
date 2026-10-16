@@ -5,7 +5,7 @@ import { withdrawList, PORTAL_CLIENT } from './requirementsStore.js'
 import { clearTB, submitTB } from './tbSubmissionStore.js'
 import { demoPY, demoCY } from '../data/demoTB.js'
 import { compactLedgers } from './tbFormat.js'
-import { demoGLRows } from './partyBreakdown.js'
+import { demoGLTransactions, checkGL } from './generalLedger.js'
 import { useStore, readStore, writeStore } from './store.js'
 import { logEvent } from './auditLog.js'
 import { saveClientProfile, removeClientProfile } from './clientProfiles.js'
@@ -31,7 +31,8 @@ export function loadDemoData(auditor = 'MISCPA') {
   attach(true, auditor)
   // Demo data stands in for the client's upload: the trial balance is already received and waits for the audit team's approval.
   const ledgers = compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit })))
-  submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', glRows: demoGLRows(ledgers) })
+  const gl = checkGL(ledgers, demoGLTransactions(ledgers))
+  submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', glRows: gl.partyRows, glStats: gl.stats })
   saveClientProfile({ id: DEMO_FILE.slug, client: DEMO_FILE.client, auditor, auditType: 'Proper', services: { audit: { opted: true, fee: null } }, source: 'demo', createdBy: 'Demo data', createdDate: new Date().toISOString().slice(0, 10) })
   writeStore(KEY, { at: new Date().toISOString(), auditor })
   logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio as a ${auditor} file; trial balance and general ledger received, waiting for approval` })
