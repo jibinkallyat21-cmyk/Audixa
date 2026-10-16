@@ -6,7 +6,7 @@ import SendSamples from './SendSamples'
 import { useIssuedLists } from '../../utils/requirementsStore'
 import { clientRelatedTransactions, pickRelated, testedElsewhere, RELATED_PARTIES } from '../../utils/relatedParty'
 import { materialityFromRevenue } from '../../utils/sampling'
-import { useMateriality } from '../../utils/materialityStore'
+import { useLiveMateriality } from '../../utils/materialityStore'
 import { sampleMateriality } from '../../utils/materiality'
 import { fmtDate } from '../../utils/sampleItems'
 import { logEvent } from '../../utils/auditLog'
@@ -34,7 +34,7 @@ export default function RelatedPartyTool({ dc }) {
   const txs = useMemo(() => (dc.ready ? clientRelatedTransactions(dc.ledgers) : []), [dc.ready, dc.ledgers])
   const revenue = -dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)
   const [mat, setMat] = useState(''); const [nAbove, setNAbove] = useState(''); const [nBelow, setNBelow] = useState(''); const [res, setRes] = useState(null)
-  const stored = useMateriality(dc.slug)
+  const stored = useLiveMateriality(dc)
   const suggested = stored ? sampleMateriality(stored.materiality) : revenue > 0 ? materialityFromRevenue(revenue, 0.5).used : null
   const materiality = mat !== '' ? Number(mat) : suggested
   if (dc.auditor !== 'ABCPA') return <Empty>Related party transaction testing in this tool follows the ABCPA method. This file is audited under {dc.auditor}; record the work in your notes below.</Empty>
