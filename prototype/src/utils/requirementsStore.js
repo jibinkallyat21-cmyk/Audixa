@@ -2,6 +2,7 @@
 import { useStore, readStore, writeStore } from './store.js'
 import { logEvent } from './auditLog.js'
 import { withDemoDocuments } from './demoDocuments.js'
+import { withSampleRequirements } from './sampleRequests.js'
 
 const KEY = 'requirements:issued'
 // The client portal demo client is not one of the team's files, so it is offered as an extra MISCPA engagement.
@@ -21,6 +22,13 @@ export function setItemStatus(slug, ref, patch) {
   const p = typeof patch === 'string' ? { status: patch } : patch
   if (p.status) { const what = { 'Uploaded Processing': 'uploaded', Accepted: 'accepted by the audit team', Rejected: 'rejected by the audit team' }[p.status]; if (what) log(rec.client, 'Document ' + what.split(' ')[0], `${ref}${p.filename ? ` (${p.filename})` : ''}: ${what}${p.alert ? `. Reason: ${p.alert}` : ''}`, 'client-response') }
   writeStore(KEY, { ...all, [slug]: { ...rec, categories: rec.categories.map((c) => ({ ...c, items: c.items.map((i) => (i.ref === ref ? { ...i, ...(typeof patch === 'string' ? { status: patch } : patch) } : i)) })) } })
+}
+// A person approved a sample: it becomes one requirement per sample on the client's list. Returns how many were added (0 when nothing is issued yet).
+export function addSampleRequirements(slug, args) {
+  const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return -1
+  const { rec, added } = withSampleRequirements(cur, args)
+  if (added) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Samples sent to the client', `${added} sample${added === 1 ? '' : 's'} for ${args.label || args.area}${args.approvedBy ? `, approved by ${args.approvedBy}` : ''}`, 'doc-request') }
+  return added
 }
 export function uploadDemoDocuments(slug) {
   const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return 0

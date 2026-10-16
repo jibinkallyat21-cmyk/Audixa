@@ -46,3 +46,15 @@ test('demo documents fill only what is waiting for the client', () => {
   assert.deepEqual(out.categories[0].items.map((i) => i.status), ['Uploaded Processing', 'Accepted', 'Uploaded Processing', 'Under Review'])
   assert.equal(out.categories[0].items[2].alert, '')
 })
+
+import { withSampleRequirements } from '../src/utils/sampleRequests.js'
+test('approved samples become one requirement each, once', () => {
+  const rec = { categories: [{ id: 'a', title: 'A', items: [{ ref: 'a-01', text: 'x', status: 'Pending Client' }] }], itemCount: 1 }
+  const args = { area: 'Sales', label: 'Sales', approvedBy: 'Fahad', samples: [{ key: 'INV-1', text: 'INV-1, 12 Mar, SAR 100' }, { key: 'INV-2', text: 'INV-2, 14 Mar, SAR 200' }] }
+  const one = withSampleRequirements(rec, args)
+  assert.equal(one.added, 2); assert.equal(one.rec.itemCount, 3)
+  const cat = one.rec.categories.find((c) => c.id === 'smp-sales')
+  assert.deepEqual(cat.items.map((i) => i.ref), ['SMP-SALES-01', 'SMP-SALES-02']); assert.ok(cat.items.every((i) => i.status === 'Pending Client' && i.sample))
+  const again = withSampleRequirements(one.rec, { ...args, samples: [...args.samples, { key: 'INV-3', text: 'INV-3' }] })
+  assert.equal(again.added, 1); assert.equal(again.rec.categories.find((c) => c.id === 'smp-sales').items.length, 3)
+})

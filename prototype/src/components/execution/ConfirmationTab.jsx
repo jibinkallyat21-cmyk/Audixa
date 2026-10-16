@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientConfirmations } from '../../utils/clientSamplingData'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, Chip, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -19,7 +21,9 @@ const DEMO = [
 const Check = ({ label, checked, onChange }) => <label className="flex items-center gap-1 text-xs text-navy"><input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-3.5 w-3.5 accent-navy" />{label}</label>
 
 export default function ConfirmationTab({ client, clientName, legalName: initialLegal = '' }) {
-  const showToast = useToast(); const me = currentUser()
+  const showToast = useToast(); const me = currentUser(); const dc = useDemoClient()
+  // For the demo client the confirmations are the client's own cash and bank ledgers; the bank letters are demo documents that agree to the trial balance.
+  const demoItems = () => (dc.ready ? clientConfirmations(dc.ledgers).map((c) => ({ ...blank(c.type), ...c, fileName: `${c.type.toLowerCase()}_confirmation_${c.label.replace(/\W+/g, '_')}.pdf`, amount: c.tbAmount, clientName: dc.client, bankName: c.type === 'Bank' ? c.label : '', sealPresent: true, signaturePresent: true, letterhead: true })) : DEMO)
   const [legalName, setLegalName] = useState(initialLegal || clientName || ''); const [yearEnd, setYearEnd] = useState('2025-12-31')
   const [items, setItems] = useState([]); const patch = (id, p) => setItems((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)))
   const rows = useMemo(() => {
@@ -54,7 +58,7 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
           <label className="text-[11px] font-semibold uppercase text-slate-500">Year-end (from the TB, or the engagement letter)<input aria-label="Year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
         </div>
       </Card>
-      <Card title="Confirmations" right={<div className="flex gap-3"><button onClick={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button><button onClick={() => setItems((l) => [...l, blank('Bank')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Bank</button><button onClick={() => setItems((l) => [...l, blank('Cash')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Cash</button></div>}><AutoDemo run={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
+      <Card title="Confirmations" right={<div className="flex gap-3"><button onClick={() => setItems(demoItems().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button><button onClick={() => setItems((l) => [...l, blank('Bank')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Bank</button><button onClick={() => setItems((l) => [...l, blank('Cash')])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Cash</button></div>}><AutoDemo run={() => setItems(demoItems().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         {rows.length === 0 && <p className="text-xs text-slate-400">No confirmations yet. Ref. Nos. are assigned in the order they are added: 5001.xx for cash, 5002.xx for bank.</p>}
         <div className="space-y-3">
           {rows.map((c) => (

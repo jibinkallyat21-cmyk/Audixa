@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useClientProfiles } from '../../utils/clientProfiles'
 import { FIRMS } from '../../data/firms.js'
+import { useDemoLoaded } from '../../utils/demoData'
+import { DEMO_FILE } from '../../utils/demoData'
 import SamplingTab from './SamplingTab'
 import VouchingTab from './VouchingTab'
 import ConfirmationTab from './ConfirmationTab'
@@ -10,7 +12,7 @@ const SEL = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm tex
 // Process 3.4. Audit Team portal.
 export default function SamplingVouchingView() {
   const profiles = useClientProfiles()
-  const [pid, setPid] = useState(''); const [tab, setTab] = useState('sampling')
+  const demoOn = useDemoLoaded(); const [pid, setPid] = useState(demoOn ? DEMO_FILE.slug : ''); const [tab, setTab] = useState('sampling')
   const prof = profiles.find((p) => p.id === pid); const firm = prof?.auditor && FIRMS[prof.auditor] ? prof.auditor : ''
   return (
     <div className="space-y-5">

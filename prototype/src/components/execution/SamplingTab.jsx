@@ -9,6 +9,10 @@ import { loadExcelJS, workbookToBlob } from '../../utils/eosbExcel'
 import { sampleSalesPurchase, sampleExpense, sampleParties, sampleByMateriality, materialityFromRevenue, MAX_SAMPLE } from '../../utils/sampling'
 import { readLedgerSheet, toNum, buildSalesWorkbook, buildExpenseWorkbook, buildPartyWorkbook, buildMaterialityWorkbook, SALES_FIELDS, EXPENSE_FIELDS, PARTY_FIELDS, MAT_FIELDS } from '../../utils/samplingExcel'
 import { demoSales, demoExpenses, demoParties, demoLedgerForMateriality } from '../../data/demoSampling'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientSales, clientPurchases, clientExpenses, clientParties, clientLedger } from '../../utils/clientSamplingData'
+import { salesItems, expenseItems, partyItems, materialityItems } from '../../utils/sampleItems'
+import SendSamples from './SendSamples'
 
 const SEL = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
 const money = (n) => (n === null || n === undefined || n === '' ? '' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
@@ -45,11 +49,11 @@ const save = async (wb, name, showToast) => { const url = URL.createObjectURL(aw
 
 // ── MISCPA ────────────────────────────────────────────────────────────────
 function SalesPurchase({ ctx }) {
-  const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [kind, setKind] = useState('Sales Report'); const [res, setRes] = useState(null)
+  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [kind, setKind] = useState('Sales Report'); const [res, setRes] = useState(null)
   const load = async (f, buffer) => { setBusy(true); setRes(null); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), SALES_FIELDS)), name: f?.name || 'Demo sales report.xlsx' }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
   const run = () => { const h = file.mapping.taxable; if (!h) return; const r = sampleSalesPurchase(file.rows.map((x) => ({ taxable: toNum(x.values[h]) ?? 0 }))); setRes(r); ctx.log(`${kind} sampled`, `${r.selectedIds.length} of ${file.rows.length} entries selected, ${pct(r.coverage)} of taxable value`) }
   return (
-    <Card title="Sales / Purchase – 50% of taxable value, highest first (maximum 30 entries)" right={<button onClick={async () => load(null, await demoBuffer(demoSales()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => load(null, await demoBuffer(demoSales()))} />
+    <Card title="Sales / Purchase – 50% of taxable value, highest first (maximum 30 entries)" right={<button onClick={async () => load(null, await demoBuffer(dc.ready ? (/purchase/i.test(kind) ? clientPurchases(dc.ledgers) : clientSales(dc.ledgers)) : demoSales()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => load(null, await demoBuffer(dc.ready ? (/purchase/i.test(kind) ? clientPurchases(dc.ledgers) : clientSales(dc.ledgers)) : demoSales()))} />
       <div className="mb-2 flex gap-2"><select aria-label="Report" value={kind} onChange={(e) => { setKind(e.target.value); setRes(null) }} className={SEL}><option>Sales Report</option><option>Sales Return Report</option><option>Purchase Report</option></select>
         <Upload label="Choose the report (Excel)" onFile={(f) => f && load(f)} busy={busy} file={file} /></div>
       <Mapping file={file} setFile={setFile} keys={['id', 'date', 'party', 'taxable']} />
@@ -59,6 +63,7 @@ function SalesPurchase({ ctx }) {
           <p className="text-sm text-navy">Total taxable value <b>{money(res.total)}</b> · 50% target <b>{money(res.target)}</b> · selected <b>{res.selectedIds.length}</b> entries worth <b>{money(res.covered)}</b> ({pct(res.coverage)}).</p>
           {res.capped && <Flags flags={[`The 30-entry limit was reached before 50% was covered (${pct(res.coverage)}). Per the Rule Book there is no need to cover the full 50%.`]} />}
           <button onClick={async () => save(await buildSalesWorkbook({ source: file, taxableHeader: file.mapping.taxable, result: res, label: kind }), `${kind.replace(/\s+/g, '_')}_Sampling.xlsx`, showToast)} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white"><Download className="h-3.5 w-3.5" />Download the file with yellow highlights</button>
+          <SendSamples area="Sales" label={kind} client={ctx.client} items={salesItems({ rows: file.rows, mapping: file.mapping, result: res, kind })} />
         </div>
       )}
     </Card>
@@ -66,7 +71,7 @@ function SalesPurchase({ ctx }) {
 }
 
 function Expense({ ctx }) {
-  const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
+  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
   const load = async (f, buffer) => { setBusy(true); setInclude({}); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), EXPENSE_FIELDS)), name: f?.name || 'Demo expenses.xlsx' }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
   const rows = useMemo(() => {
     if (!file?.rows?.length || !file.mapping.account) return []
@@ -75,7 +80,7 @@ function Expense({ ctx }) {
   const res = useMemo(() => (rows.length ? sampleExpense(rows, include) : null), [rows, include])
   const accounts = useMemo(() => [...new Set(rows.map((r) => r.account))].sort(), [rows])
   return (
-    <Card title="Expenses – 50% of the revised eligible population, maximum 7 per account" right={<button onClick={async () => load(null, await demoBuffer(demoExpenses()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => load(null, await demoBuffer(demoExpenses()))} />
+    <Card title="Expenses – 50% of the revised eligible population, maximum 7 per account" right={<button onClick={async () => load(null, await demoBuffer(dc.ready ? clientExpenses(dc.ledgers) : demoExpenses()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => load(null, await demoBuffer(dc.ready ? clientExpenses(dc.ledgers) : demoExpenses()))} />
       <Upload label="Choose the Consolidated Expenses Ledger" onFile={(f) => f && load(f)} busy={busy} file={file} />
       <Mapping file={file} setFile={setFile} keys={['account', 'description', 'date', 'debit', 'credit', 'amount']} />
       {res && (
@@ -92,6 +97,7 @@ function Expense({ ctx }) {
                 <select aria-label={`Include or exclude ${a}`} value={include[a] === false ? 'Exclude' : 'Include'} onChange={(e) => setInclude({ ...include, [a]: e.target.value === 'Include' })} className={SEL}><option>Include</option><option>Exclude</option></select></label>))}</div></details>
           <DataTable columns={[{ key: 'rank', label: 'Rank' }, { key: 'account', label: 'Account' }, { key: 'description', label: 'Description' }, { key: 'amount', label: 'Amount', render: (r) => money(r.amount) }]} rows={res.selected} />
           <button onClick={async () => { await save(await buildExpenseWorkbook({ rows: res.rows, include, result: res }), 'Expense_Sampling.xlsx', showToast); ctx.log('Expense sample prepared', `${res.selected.length} entries, ${pct(res.percentage)} of the revised eligible population`) }} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white"><Download className="h-3.5 w-3.5" />Download the workbook</button>
+          <SendSamples area="Expenses" label="Expenses" client={ctx.client} items={expenseItems(res)} />
         </div>
       )}
     </Card>
@@ -99,7 +105,7 @@ function Expense({ ctx }) {
 }
 
 function Parties({ ctx }) {
-  const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false)
+  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false)
   const [inp, setInp] = useState({ yearEnd: '', auditStart: '', today: new Date().toISOString().slice(0, 10), pct: 50, tolerance: 1, customerLedger: false })
   const load = async (f, buffer) => { setBusy(true); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), PARTY_FIELDS)), name: f?.name || 'Demo ledger.xlsx' }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
   const res = useMemo(() => {
@@ -109,7 +115,7 @@ function Parties({ ctx }) {
   }, [file, inp])
   const missing = [!inp.yearEnd && 'financial year-end', !inp.auditStart && 'audit start date'].filter(Boolean)
   return (
-    <Card title="AR / AP / Advances – cumulative 50% by category" right={<button onClick={async () => { await load(null, await demoBuffer(demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} />
+    <Card title="AR / AP / Advances – cumulative 50% by category" right={<button onClick={async () => { await load(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} />
       <div className="mb-2 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {[['yearEnd', 'Financial year-end', 'date'], ['auditStart', 'Audit start date', 'date'], ['today', 'Current date', 'date'], ['pct', 'Sample %', 'number'], ['tolerance', 'Nil-balance tolerance', 'number']].map(([k, l, t]) => (
           <label key={k} className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{l}<input aria-label={l} type={t} value={inp[k]} onChange={(e) => setInp({ ...inp, [k]: e.target.value })} className={`${SEL} mt-1 w-full font-normal normal-case`} /></label>))}
@@ -127,6 +133,7 @@ function Parties({ ctx }) {
             <details key={cat}><summary className="cursor-pointer text-xs font-semibold text-navy">{cat} – {c.selectedCount} selected of {c.count}</summary>
               <DataTable columns={[{ key: 'sNo', label: 'S.No' }, { key: 'name', label: 'Party' }, { key: 'absolute', label: 'Balance', render: (r) => money(r.absolute) }, { key: 'share', label: '% of total', render: (r) => pct(r.share) }, { key: 'cumulative', label: 'Cumulative', render: (r) => money(r.cumulative) }, { key: 'selected', label: 'Selected', render: (r) => <Chip value={r.selected ? 'Yes' : 'No'} /> }]} rows={c.rows} /></details>))}
           <button onClick={async () => { await save(await buildPartyWorkbook({ result: res, inputs: { ...inp, pct: Number(inp.pct) / 100, tolerance: Number(inp.tolerance) || 1 } }), 'AR_AP_Sampling.xlsx', showToast); ctx.log('AR/AP/Advance sample prepared', `${Object.values(res.categories).reduce((n, c) => n + c.selectedCount, 0)} parties selected`) }} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white"><Download className="h-3.5 w-3.5" />Download the workbook</button>
+          <SendSamples area="ARAP" label="AR / AP / Advances" client={ctx.client} items={partyItems(res)} />
         </div>
       )}
     </Card>
@@ -135,7 +142,7 @@ function Parties({ ctx }) {
 
 // ── ABCPA ─────────────────────────────────────────────────────────────────
 function Materiality({ ctx }) {
-  const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
+  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
   const [p, setP] = useState({ area: 'Revenue', revenue: '', matPct: 0.5, manual: '', risk: 'Moderate (3)', size: 'Medium', method: 'random', seed: 1, override: '' })
   const load = async (f, buffer) => { setBusy(true); setInclude({}); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), MAT_FIELDS)), name: f?.name || 'Demo ledger.xlsx' }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
   const calc = p.revenue !== '' ? materialityFromRevenue(Number(p.revenue), Number(p.matPct)) : null
@@ -148,7 +155,7 @@ function Materiality({ ctx }) {
   const res = useMemo(() => (items.length && materiality ? sampleByMateriality(items.map((i) => ({ ...i, excluded: p.area === 'Expenses' && include[i.account] === false })), { materiality, risk: p.risk, size: p.size, method: p.method, seed: Number(p.seed) || 1, override: p.override === '' ? null : Number(p.override) }) : null), [items, materiality, p, include])
   const set = (k, v) => setP({ ...p, [k]: v })
   return (
-    <Card title="Materiality method – above materiality 100%, below by sample size" right={<button onClick={async () => { await load(null, await demoBuffer(demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: '4000000' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: '4000000' })) }} />
+    <Card title="Materiality method – above materiality 100%, below by sample size" right={<button onClick={async () => { await load(null, await demoBuffer(dc.ready ? clientLedger(dc.ledgers) : demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: dc.ready ? String(-dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)) : '4000000' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(dc.ready ? clientLedger(dc.ledgers) : demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: dc.ready ? String(-dc.ledgers.filter((l) => l.group === 'revenue').reduce((n, l) => n + l.closing, 0)) : '4000000' })) }} />
       <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-4">
         <label className="text-[11px] font-semibold uppercase text-slate-500">Test area<select aria-label="Test area" value={p.area} onChange={(e) => set('area', e.target.value)} className={`${SEL} mt-1 w-full font-normal normal-case`}><option>Revenue</option><option>COGS</option><option>Expenses</option></select></label>
         <label className="text-[11px] font-semibold uppercase text-slate-500">Revenue (this period)<input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} mt-1 w-full font-normal`} /></label>
@@ -173,6 +180,7 @@ function Materiality({ ctx }) {
           <details><summary className="cursor-pointer text-xs font-semibold text-navy">Above materiality ({res.above.length}) and below-materiality sample ({res.below.length})</summary>
             <DataTable columns={[{ key: 'account', label: 'Account' }, { key: 'description', label: 'Description' }, { key: 'amount', label: 'Amount', render: (r) => money(r.amount) }, { key: 'basis', label: 'Basis' }]} rows={[...res.above.map((r) => ({ ...r, basis: 'Above materiality' })), ...res.below.map((r) => ({ ...r, basis: p.method === 'highest' ? 'Below – highest value' : 'Below – random' }))]} /></details>
           <button onClick={async () => { await save(await buildMaterialityWorkbook({ items: items.map((i) => ({ ...i, excluded: p.area === 'Expenses' && include[i.account] === false })), params: { risk: p.risk, size: p.size, method: p.method, seed: Number(p.seed) || 1, override: p.override === '' ? null : Number(p.override) }, result: res, area: p.area, revenue: p.revenue === '' ? null : Number(p.revenue), materialityCalc: p.manual === '' && calc ? { pct: Number(p.matPct), calculated: calc.calculated } : null }), `${p.area}_Materiality_Sampling.xlsx`, showToast); ctx.log(`${p.area} sample prepared (materiality method)`, `${res.above.length} above materiality, ${res.below.length} below`) }} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white"><Download className="h-3.5 w-3.5" />Download the workbook</button>
+          <SendSamples area="Materiality" label={`${p.area} (materiality method)`} client={ctx.client} items={materialityItems(res, p.area)} />
         </div>
       )}
     </Card>
@@ -182,7 +190,7 @@ function Materiality({ ctx }) {
 export default function SamplingTab({ firm, client, clientName }) {
   const me = currentUser()
   const [mode, setMode] = useState('sales')
-  const ctx = { log: (title, description) => logEvent({ client, clientName, category: 'work', title, description, extra: { auditArea: 'Sampling', performedBy: me.name }, user: me }) }
+  const ctx = { client, log: (title, description) => logEvent({ client, clientName, category: 'work', title, description, extra: { auditArea: 'Sampling', performedBy: me.name }, user: me }) }
   if (!firm) return <Card><p className="text-sm text-slate-500">Select a client first. The auditor on the proposal decides which sampling framework is used.</p></Card>
   if (firm === 'ABCPA') return <div className="space-y-3"><p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p><Materiality ctx={ctx} /></div>
   return (
