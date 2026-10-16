@@ -667,6 +667,7 @@ function ClientDashboardLive() {
   const count = (...st) => issuedItems.filter((i) => st.includes(i.status))
   const OUTSTANDING = count('Pending Client', 'Rejected', 'Action Required')
   const UNDER_REVIEW = count('Under Review', 'Uploaded Processing')
+  const openQs = useQueries().queries.filter((q) => q.client === DEMO_FILE.slug && q.status !== 'Closed')
   const tbSub = useTBSubmissions()[PORTAL_CLIENT.slug]
   const tbApproved = tbSub?.status === 'Approved'
   const demoFile = teamFiles.find((f) => f.isDemo)
@@ -687,7 +688,6 @@ function ClientDashboardLive() {
     id: e.id, icon: /reject|return/i.test(e.title) ? 'red' : /approved|accepted/i.test(e.title) ? 'emerald' : 'blue', section: SECTION[e.category],
     description: e.description ? `${e.title}: ${e.description}` : e.title, timestamp: new Date(e.at).toLocaleString('en-GB'),
   }))
-  const openQs = useQueries().queries.filter((q) => q.client === DEMO_FILE.slug && q.status !== 'Closed')
   const [liveEvents, setLiveEvents] = useState([])
   const recentEvents = [...liveEvents, ...baseEvents]
   const [meetingModal, setMeetingModal] = useState(false)
