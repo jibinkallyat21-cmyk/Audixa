@@ -120,3 +120,16 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - The sampling tools and the related party tool use 80% of the saved materiality (the existing ABCPA rule); a figure can still be typed over it for one test. Not applicable to MISCPA files.
 - Inside an audit area the sampling tool no longer asks which area is tested: the area is fixed by the procedure opened. The selector stays on the stand-alone sampling page.
 - Total equity = share capital + reserves + retained earnings + the year's income; assumption to confirm.
+
+## Bank requests come from the trial balance; supporting documents for the other areas (built)
+
+- When the requirement list is issued, every cash and bank account in the trial balance is requested on its own (confirmation, statement to the year end, statement for the month after; a cash account needs its count sheet). The general bank and cash requests are not issued. There is no separate "ask the client" step. A list issued earlier is brought up to date automatically, carrying over anything already uploaded.
+- Supporting documents (same matching and statuses as prepaid; payment proof only where the area needs it; a part payment is accepted where a later receipt or repayment is expected). Assumptions to confirm:
+  - Trade receivables: statement of account or confirmation (required); receipt after the year end (if applicable).
+  - Trade payables: supplier statement or confirmation (required); payment after the year end (if applicable).
+  - Inventory: stock count sheet (required); third-party stock confirmation (if applicable). No payment.
+  - Borrowings: loan agreement and lender statement or confirmation (required); repayment proof (if applicable).
+  - Related parties: confirmation or statement (required); agreement and payment or receipt proof (if applicable).
+  - Equity: registration or articles for capital, shareholder resolution or prior-year statements for reserves and retained earnings (required); proof of capital paid in (if applicable).
+  - End of service benefits: computation (required); employment contracts and payments to leavers (if applicable).
+- Already built earlier: prepaid, fixed asset additions, accruals, sales / purchases / expenses vouching. Not covered: salary (no ledger line to support; payroll register and WPS proof need their own design), tax and unclassified.

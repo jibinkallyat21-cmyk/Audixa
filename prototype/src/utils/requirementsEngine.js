@@ -61,6 +61,7 @@ export function applicableCategories(categories, ledgers, { consolidated = false
 export const refOf = (cat, it) => `${cat.id}-${String(it.n).padStart(2, '0')}`
 
 // Builds the list issued to the client. overrides = { [categoryId]: true|false } set by the auditor (true = force in, false = force out).
+import { bankAccountsFrom, withBankRequirements } from './bankAccounts.js'
 export function buildIssuedList(categories, ledgers, { consolidated = false, overrides = {} } = {}) {
   const result = applicableCategories(categories, ledgers, { consolidated })
   const picked = result.map((c) => {
@@ -72,7 +73,9 @@ export function buildIssuedList(categories, ledgers, { consolidated = false, ove
     id: c.id, title: c.title, reason: c.overridden ? 'Added by the auditor.' : c.reason,
     items: c.items.map((it) => ({ ref: refOf(c, it), text: it.text, status: 'Pending Client' })),
   }))
-  return { analysis: picked, categories: included, itemCount: included.reduce((n, c) => n + c.items.length, 0) }
+  // Every cash and bank account in the trial balance is requested on its own (confirmation and statements), in place of the general bank requests.
+  const accounts = bankAccountsFrom(ledgers || []); const { rec: withBanks } = accounts.length ? withBankRequirements({ categories: included }, accounts) : { rec: { categories: included } }
+  return { analysis: picked, categories: withBanks.categories, itemCount: withBanks.categories.reduce((n, c) => n + c.items.length, 0) }
 }
 
 export const presetList = (categories) => categories.map((c) => ({ id: c.id, title: c.title, items: c.items.map((it) => ({ ref: refOf(c, it), text: it.text })) }))

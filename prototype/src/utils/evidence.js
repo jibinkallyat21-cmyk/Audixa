@@ -55,8 +55,9 @@ export function checkEvidence(line, docs, company, parts = []) {
   let payOk = null
   if (pay) {
     const p = pay.fields || {}; const gross = r2((Number(line.amount) || 0) * (1 + (Number(line.vatPct) || 0) / 100))
-    payOk = near(p.paid, gross) && same(p.company, company) && (!f.vendor || same(p.vendor, f.vendor))
-    checks.push({ label: 'Payment proof', ok: payOk, detail: `Paid ${p.paid ?? 'not shown'} to ${p.vendor || 'not shown'} · Expected ${gross} to ${f.vendor || 'the counterparty'}` })
+    const amountOk = line.payMode === 'upto' ? Number(p.paid) > 0 && Number(p.paid) <= gross + 0.005 : near(p.paid, gross)   // 'upto': a part payment is fine (a later receipt or repayment)
+    payOk = amountOk && same(p.company, company) && (!f.vendor || same(p.vendor, f.vendor))
+    checks.push({ label: 'Payment proof', ok: payOk, detail: `Paid ${p.paid ?? 'not shown'} to ${p.vendor || 'not shown'} · Expected ${line.payMode === 'upto' ? `up to ${gross}` : gross} to ${f.vendor || 'the counterparty'}` })
   }
   const needsPay = parts.some((x) => x.part === 'payment' && x.need === 'Required')
   const status = !figuresOk || payOk === false ? 'Mismatch' : pay ? 'Supported and paid' : needsPay ? 'Supported, payment not shown' : 'Supported'

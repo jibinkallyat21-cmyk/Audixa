@@ -12,6 +12,9 @@ import TBUploadStep from '../../components/client/TBUploadStep'
 import { DEMO_FILE, useDemoLoaded } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 import AreaRequirements from '../../components/client/AreaRequirements'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { bankAccountsFrom } from '../../utils/bankAccounts'
+import { requestBankDocuments } from '../../utils/requirementsStore'
 
 function rowsFromIssued(rec, only = null) {
   const rows = []
@@ -315,7 +318,9 @@ export default function ClientDocuments() {
   const { isDark } = useTheme()
   const { selectedFY } = useClientFY()
   const rec = useIssuedLists()[PORTAL_CLIENT.slug]
-  const demoOn = useDemoLoaded()
+  const demoOn = useDemoLoaded(); const dcl = useDemoClient()
+  // A list issued before the per-account bank requests existed is brought up to date (idempotent; nothing is asked twice).
+  useEffect(() => { if (rec && dcl.ready) requestBankDocuments(PORTAL_CLIENT.slug, bankAccountsFrom(dcl.ledgers), '2025-12-31') }, [rec, dcl.ready, dcl.ledgers])
   const showToast = useToast()
   const ALL_ROWS = useMemo(() => rowsFromIssued(rec), [rec])
   const [tab, setTab] = useState('areas')
