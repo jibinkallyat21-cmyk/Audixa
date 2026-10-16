@@ -72,10 +72,10 @@ test('IFRS workbook: sheet order, bridge formulas, pending, status', async () =>
   const cogs = cogsSchedule(l, tb); const vat = vatReconciliation(l, tb); const ver = verification([{ label: 'Salary', code: 'P103', schedule: 12000 }], tb)
   const st = statements(tb); const pending = pendingList({ tb, ledgers: l, adj: tb.adj })
   const wb = await buildIfrsWorkbook({ tb, ledgers: l, cogs, vat, verification: ver, pending, st, capital: [{ name: 'A', amount: 20000 }], period: { from: '01 Jan 2025', to: '31 Dec 2025' } })
-  assert.deepEqual(wb.worksheets.map((w) => w.name), ['IFRS TB', 'BS', 'P and L', 'Statement of equity', 'Capital', 'COGS', 'IFRS Adjustment Entries', 'Reconciliation', 'Pending - Audit Review', 'Client TB Mapping', 'Client TB', 'VAT Reconciliation', 'Verification'])
-  const it = wb.getWorksheet('IFRS TB'); assert.match(it.getCell('K4').value.formula, /MAX\(0,G4-H4\+I4-J4\)/); assert.match(it.getCell('G4').value.formula, /SUMIF\('Client TB Mapping'/)
+  assert.deepEqual(wb.worksheets.map((w) => w.name), ['Client TB', 'IFRS TB', 'BS', 'P and L', 'Statement of equity', 'IFRS TB Working', 'Capital', 'COGS', 'IFRS Adjustment Entries', 'Reconciliation', 'Pending - Audit Review', 'Client TB Mapping', 'VAT Reconciliation', 'Verification'])
+  const it = wb.getWorksheet('IFRS TB Working'); assert.match(it.getCell('K4').value.formula, /MAX\(0,G4-H4\+I4-J4\)/); assert.match(it.getCell('G4').value.formula, /SUMIF\('Client TB Mapping'/)
   assert.equal(it.getCell('E4').value, 'A101'); assert.equal(it.getCell('B3').value, 2025)
-  assert.match(JSON.stringify(wb.getWorksheet('BS').getCell('D7').value), /IFRS TB/); await wb.xlsx.writeBuffer()
+  assert.match(JSON.stringify(wb.getWorksheet('BS').getCell('D7').value), /IFRS TB Working/); await wb.xlsx.writeBuffer()
 })
 
 test('supported balancing posting is booked and visible; unsupported stays pending', () => {
