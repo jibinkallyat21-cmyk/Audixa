@@ -83,7 +83,7 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
 
       {rows.filter((r) => open === r.code).map((r) => {
         const kinds = r.type === 'Cash' ? ['conf'] : ['conf', 'cy', 'sub', ...(r.diff ? ['recon'] : [])]
-        const tab = tabs[r.code] || 'docs'; const tabList = [['docs', 'Documents'], ['conf', 'Confirmation checks'], ...(r.type === 'Bank' ? [['bal', 'Balances']] : []), ...(r.diff ? [['recon', 'Reconciliation']] : []), ['cut', 'Cut-off']]
+        const tab = tabs[r.code] || 'docs'; const tabList = [['docs', 'Documents'], ['conf', 'Confirmation checks'], ...(r.type === 'Bank' ? [['bal', 'Balances']] : []), ...(r.diff ? [['recon', 'Reconciliation']] : [])]
         const cur = view[r.code]; const vit = cur && r.docs[cur]
         return (
           <Card key={r.code} title={r.name} subtitle={`${r.type} account ${r.code} · trial balance ${money(r.tb)}`}>
@@ -160,7 +160,6 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
               </div>
             )}
 
-            {tab === 'cut' && <CutOffTool area={r.type === 'Cash' ? 'cash' : 'bank'} client={dc.slug} firm={dc.auditor} txnsOverride={txns[r.code] || null} sub={`${r.type} ${r.code}`} label={`${r.type}: ${r.name}`} />}
           </Card>
         )
       })}
