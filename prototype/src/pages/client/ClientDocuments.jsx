@@ -9,12 +9,13 @@ import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
 import { useIssuedLists, PORTAL_CLIENT, setItemStatus, uploadDemoDocuments } from '../../utils/requirementsStore'
 import TBUploadStep from '../../components/client/TBUploadStep'
+import SampleBoard from '../../components/client/SampleBoard'
 import { DEMO_FILE, useDemoLoaded } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
-function rowsFromIssued(rec) {
+function rowsFromIssued(rec, only = null) {
   const rows = []
-  ;(rec?.categories || []).forEach((cat) => {
+  ;(rec?.categories || []).filter((c) => !only || only(c)).forEach((cat) => {
     rows.push({ type: 'category', id: cat.id, title: cat.title, completed: cat.items.filter((i) => i.status === 'Accepted').length, total: cat.items.length })
     cat.items.forEach((item) => rows.push({
       type: 'row', categoryId: cat.id, ref: item.ref, name: item.text, plainDesc: cat.reason, status: item.status,
@@ -317,6 +318,9 @@ export default function ClientDocuments() {
   const demoOn = useDemoLoaded()
   const showToast = useToast()
   const ALL_ROWS = useMemo(() => rowsFromIssued(rec), [rec])
+  const [tab, setTab] = useState('documents')
+  const DOC_ROWS = useMemo(() => rowsFromIssued(rec, (c) => !c.group), [rec])
+  const sampleCats = (rec?.categories || []).filter((c) => c.group === 'samples'); const cutCats = (rec?.categories || []).filter((c) => c.group === 'cutoff')
   const engRef = rec ? DEMO_FILE.code : ENGAGEMENT_REFS[selectedFY]
   const [searchParams, setSearchParams] = useSearchParams()
   const [bulkOpen, setBulkOpen] = useState(false)
@@ -374,7 +378,7 @@ export default function ClientDocuments() {
   const matchingCategoryIds = useMemo(() => {
     if (!search) return new Set()
     const ids = new Set()
-    ALL_ROWS.forEach((row) => {
+    DOC_ROWS.forEach((row) => {
       if (row.type === 'row' && (
         row.name.toLowerCase().includes(search.toLowerCase()) ||
         row.ref?.toLowerCase().includes(search.toLowerCase())
@@ -387,7 +391,7 @@ export default function ClientDocuments() {
     ? matchingCategoryIds
     : expanded
 
-  const filteredRows = ALL_ROWS.filter((row) => {
+  const filteredRows = DOC_ROWS.filter((row) => {
     if (row.type === 'category') {
       // Hide category if searching and it has no matches
       if (search && !matchingCategoryIds.has(row.id)) return false
@@ -444,6 +448,12 @@ export default function ClientDocuments() {
           </motion.div>
 
           {/* Toolbar */}
+          <div className="flex flex-wrap gap-2" role="tablist">
+            {[['documents', 'Documents', DOC_ROWS.filter((r) => r.type === 'row').length], ['samples', 'Samples', sampleCats.reduce((n, c) => n + c.items.length, 0)], ['cutoff', 'Cut-off', cutCats.reduce((n, c) => n + c.items.length, 0)]].map(([id, label, count]) => (
+              <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors ${tab === id ? 'bg-navy text-white shadow-sm' : ''}`} style={tab === id ? undefined : { border: `1px solid ${D.border}`, color: D.text, background: D.card }}>{label} <span className={`ml-1.5 rounded-full px-2 py-0.5 text-xs ${tab === id ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{count}</span></button>
+            ))}
+          </div>
+          {tab === 'documents' && (<>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -476,7 +486,10 @@ export default function ClientDocuments() {
           {!rec && <TBUploadStep D={D} />}
 
           {/* Table */}
-          {rec && <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
+          </>)}
+          {tab === 'samples' && <SampleBoard categories={sampleCats} emptyText="No samples have been requested yet. When the audit team approves a sample, it appears here, one block per area." />}
+          {tab === 'cutoff' && <SampleBoard categories={cutCats} emptyText="No cut-off items have been requested yet. They appear here once the audit team approves them." />}
+          {rec && tab === 'documents' && <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
             {/* Table header */}
             <div className="hidden items-center gap-3 px-4 py-2.5 md:flex" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderBottom: `1px solid ${D.border}` }}>
               <span className="w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide" style={{ color: D.subtle }}>Ref #</span>
