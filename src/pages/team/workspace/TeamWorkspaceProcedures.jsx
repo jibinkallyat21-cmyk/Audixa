@@ -15,6 +15,8 @@ import QueryTrackerView from '../../../components/execution/QueryTrackerView'
 import ArchiveView from '../../../components/execution/ArchiveView'
 import TeamELRequest from '../TeamELRequest'
 import TeamBasicDocuments from '../TeamBasicDocuments'
+import BasicDocsIntakeView from '../../../components/execution/BasicDocsIntakeView'
+import { teamUser } from '../../../data/sampleData'
 
 /* ── Working tools: each opens inside its own audit procedure ── */
 const TOOLS = {
@@ -23,7 +25,7 @@ const TOOLS = {
   sampling: [{ id: 'sv', label: 'Sampling, vouching and confirmations', C: () => <SamplingVouchingView /> }],
 }
 const EXTRA_PROCEDURES = [
-  { id: 'engagement', name: 'Engagement Letter and Basic Documents', description: 'EL request and verification, AOA, MISA, VAT certificate, EL review and the EOSB contributor lists.', tools: [{ id: 'el', label: 'EL requests', C: () => <TeamELRequest embedded /> }, { id: 'basic', label: 'Basic documents', C: () => <TeamBasicDocuments embedded /> }] },
+  { id: 'engagement', name: 'Engagement Letter and Basic Documents', description: 'EL request and verification, AOA, MISA, VAT certificate, EL review and the EOSB contributor lists.', tools: [{ id: 'intake', label: 'Basic documents intake (Project Co-ordinator)', C: () => <BasicDocsIntakeView role="pc" user={teamUser} /> }, { id: 'el', label: 'EL requests', C: () => <TeamELRequest embedded /> }, { id: 'basic', label: 'Basic documents', C: () => <TeamBasicDocuments embedded /> }] },
   { id: 'fs', name: 'Financial Statement Preparation', description: 'Client TB to IFRS TB (proper and disclaimer audits) and the financial statements from the TB and the prior-year audited AFS.', tools: [{ id: 'fs', label: 'IFRS TB and financial statements', C: () => <FinancialStatementsView /> }] },
   { id: 'closure', name: 'Queries, Audit Log and File Closure', description: 'Client query follow-up, the audit log and trail, and archiving and closure of the audit file.', tools: [{ id: 'q', label: 'Query tracker', C: () => <QueryTrackerView /> }, { id: 'log', label: 'Audit log', C: () => <AuditLogView /> }, { id: 'arch', label: 'Archive and closure', C: () => <ArchiveView /> }] },
 ]

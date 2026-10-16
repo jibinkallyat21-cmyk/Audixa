@@ -1,25 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Phone, Mail, FileText, X, Plus, Upload, Download,
-  ChevronDown, ChevronUp, Sparkles, Calendar, MessageSquare,
+  ChevronDown, ChevronUp, Sparkles, Calendar, MessageSquare, RefreshCw,
 } from 'lucide-react'
 import FrontOfficeLayout from '../../components/frontoffice/FrontOfficeLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
-import { foLeads, SCORE_TONE, FOLLOWUP_TONE } from '../../data/sampleData'
+import { FOLLOWUP_TONE } from '../../data/sampleData'
+import LeadProposalModal from '../../components/frontoffice/LeadProposalModal'
+import { BANDS, MANAGER_RATINGS, rankLeads, isExcluded, scoreLead, contactBy } from '../../utils/leadScoring'
+import { useLeads, useLeadMeta, useLeadWeights, syncLeads, updateLead, setManagerRating, overrideScore, clearOverride, setWeights, addLead, recordOutcome, reassignLead } from '../../utils/leadStore'
 
-/* ── AI score label → filter key ── */
-const AI_SCORE_FILTER = 'AI: High Score'
+const FILTERS = ['All', 'Band A (Hot)', 'Band B (Warm)', 'Band C (Cold)', 'Manager input pending', 'Due Today', 'Overdue', 'With Proposal', 'Excluded']
 
-const FILTERS = ['All', 'High Priority', AI_SCORE_FILTER, 'Due Today', 'Overdue', 'With Proposal']
-
-const AUDITORS = ['ABCPA', 'MISCPA']
-const SERVICES = [
-  { key: 'zakat', label: 'Zakat Filing' },
-  { key: 'accounts', label: 'Accounts Finalisation' },
-  { key: 'translation', label: 'English Translation' },
-]
 
 function useCountUp(target, duration = 900) {
   const [value, setValue] = useState(0)
@@ -49,64 +43,110 @@ function SummaryCard({ label, value, highlight }) {
   )
 }
 
+const BAND_TONE = {
+  A: 'bg-alert-red/10 text-alert-red border-alert-red/30',
+  B: 'bg-amber/10 text-amber border-amber/30',
+  C: 'bg-slate-100 text-slate-500 border-slate-300',
+}
+const FOS = ['Layla Al-Khatib', 'Khalid Saad', 'Nora Al-Qahtani']
+const when = (iso) => (iso ? new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'never')
+
+function Breakdown({ info }) {
+  return (
+    <table className="w-full text-xs">
+      <thead><tr className="text-left text-[10px] uppercase tracking-wide text-slate-400"><th className="py-1 pr-2">Factor</th><th className="pr-2">Rating (1–5)</th><th className="pr-2">Weight</th><th className="pr-2">Points</th><th>Basis</th></tr></thead>
+      <tbody>
+        {[['A', 'Years with Analytix'], ['B', 'FO Manager input'], ['C', 'Previous audit satisfaction'], ['D', 'Other services']].map(([k, label]) => (
+          <tr key={k} className="border-t border-slate-100"><td className="py-1.5 pr-2 font-semibold text-navy">{k} · {label}</td><td className="pr-2">{info.factors[k].rating}</td><td className="pr-2">{info.factors[k].weight}%</td><td className="pr-2 font-semibold text-navy">{info.factors[k].points}</td><td className="text-slate-500">{info.factors[k].note}</td></tr>
+        ))}
+        <tr className="border-t border-slate-200"><td colSpan={3} className="py-1.5 font-semibold text-navy">Lead score (calculated)</td><td className="font-bold text-navy">{info.computed}</td><td className="text-slate-500">{info.overridden ? `Overridden to ${info.score}` : ''}</td></tr>
+      </tbody>
+    </table>
+  )
+}
+
+function ManagerControls({ lead, showToast }) {
+  const [score, setScore] = useState(''); const [reason, setReason] = useState('')
+  const apply = () => { try { overrideScore(lead.id, score, reason); setScore(''); setReason(''); showToast('Score overridden; the original is kept in the log') } catch (e) { showToast(e.message) } }
+  return (
+    <div className="rounded-lg border border-slate-200 p-3">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">FO Manager</p>
+      <div className="grid gap-3 md:grid-cols-3">
+        <label className="text-xs text-slate-500">Rating (likelihood of conversion)
+          <select aria-label="Manager rating" value={lead.managerRating ?? ''} onChange={(e) => setManagerRating(lead.id, e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-navy outline-none focus:border-navy">
+            <option value="">Not rated (neutral 3)</option>{MANAGER_RATINGS.map(([v, l]) => <option key={v} value={v}>{v} · {l}</option>)}
+          </select></label>
+        <label className="text-xs text-slate-500">Assigned FO
+          <select aria-label="Assigned FO" value={lead.assignedFO} onChange={(e) => reassignLead(lead.id, e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-navy outline-none focus:border-navy">{FOS.map((f) => <option key={f}>{f}</option>)}</select></label>
+        <div className="text-xs text-slate-500">Override the score
+          <div className="mt-1 flex gap-1.5"><input aria-label="Override score" type="number" min="0" max="100" value={score} onChange={(e) => setScore(e.target.value)} placeholder="0–100" className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-navy outline-none focus:border-navy" />
+            <input aria-label="Override reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-navy outline-none focus:border-navy" />
+            <button onClick={apply} className="rounded-md bg-navy px-2.5 text-xs font-semibold text-white">Apply</button></div>
+          {lead.override && <p className="mt-1 text-[11px] text-amber">Overridden to {lead.override.score} (calculated {lead.override.original}): {lead.override.reason}. <button onClick={() => clearOverride(lead.id)} className="font-semibold underline">Remove</button></p>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function FOLeads() {
   const showToast = useToast()
+  const [stored] = useLeads()
+  const [meta] = useLeadMeta()
+  const [weights] = useLeadWeights()
+  useEffect(() => { if (!stored) syncLeads({ by: 'system' }) }, [stored])
+  const leads = useMemo(() => stored || [], [stored])
   const [filter, setFilter] = useState('All')
   const [search, setSearch] = useState('')
-  const [leads, setLeads] = useState(foLeads)
-  const [contactedIds, setContactedIds] = useState({})
   const [logModalLead, setLogModalLead] = useState(null)
   const [addLeadOpen, setAddLeadOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
-  const [sendProposalLead, setSendProposalLead] = useState(null)
+  const [proposalLeadId, setProposalLeadId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
+  const [wDraft, setWDraft] = useState(null)
+  const [simFail, setSimFail] = useState(false)
 
-  /* derive pipeline stats */
   const totalLeads = leads.length
   const totalContacted = leads.filter((l) => l.followUp !== 'Not Started').length
   const proposalSent = leads.filter((l) => l.hasProposal).length
   const proposalSigned = leads.filter((l) => l.signed).length
 
+  const queue = useMemo(() => rankLeads(leads.map((lead) => ({ lead, result: lead.scoreInfo || scoreLead(lead, { weights }) }))), [leads, weights])
+  const excluded = useMemo(() => leads.filter((l) => isExcluded(l)), [leads])
+  const rankOf = useMemo(() => Object.fromEntries(queue.map((q, i) => [q.lead.id, i + 1])), [queue])
+
   const filtered = useMemo(() => {
-    return leads.filter((l) => {
-      if (search && !l.company.toLowerCase().includes(search.toLowerCase())) return false
-      const status = contactedIds[l.id] || l.followUp
-      if (filter === 'High Priority') return l.score === 'High'
-      if (filter === AI_SCORE_FILTER) return l.score === 'High' && l.confidence === 'high'
-      if (filter === 'Due Today') return status === 'Due Today'
-      if (filter === 'Overdue') return status === 'Overdue'
-      if (filter === 'With Proposal') return l.hasProposal
+    const rows = filter === 'Excluded' ? excluded.map((lead) => ({ lead, result: lead.scoreInfo })) : queue
+    return rows.filter(({ lead, result }) => {
+      if (search && !lead.company.toLowerCase().includes(search.toLowerCase())) return false
+      if (filter === 'Band A (Hot)') return result.band === 'A'
+      if (filter === 'Band B (Warm)') return result.band === 'B'
+      if (filter === 'Band C (Cold)') return result.band === 'C'
+      if (filter === 'Manager input pending') return result.flags.includes('Manager input pending')
+      if (filter === 'Due Today') return lead.followUp === 'Due Today'
+      if (filter === 'Overdue') return lead.followUp === 'Overdue'
+      if (filter === 'With Proposal') return lead.hasProposal
       return true
     })
-  }, [search, filter, contactedIds, leads])
+  }, [search, filter, queue, excluded])
 
   const handleLogContact = (lead, data) => {
-    setContactedIds((prev) => ({ ...prev, [lead.id]: data.nextFollowUp }))
+    updateLead(lead.id, { followUp: data.nextFollowUp, lastContact: 'Today' }, 'Contact logged', 'FO')
     setLogModalLead(null)
     showToast(`Contact logged for ${lead.company}`)
   }
-
   const handleAddLead = (form) => {
-    const newLead = {
-      id: `l${Date.now()}`,
-      company: form.companyName,
-      contactName: form.contactName,
-      contactEmail: form.contactEmail,
-      contactPhone: form.contactPhone,
-      city: form.city,
-      sector: form.sector,
-      score: 'Medium',
-      confidence: 'low',
-      source: 'Manual',
-      lastContact: 'Today',
-      followUp: 'Not Started',
-      hasProposal: false,
-      signed: false,
-    }
-    setLeads((prev) => [newLead, ...prev])
+    addLead({ company: form.companyName, legalName: form.companyName, contactName: form.contactName, contactEmail: form.contactEmail, contactPhone: form.contactPhone, city: form.city, sector: form.sector })
     setAddLeadOpen(false)
     showToast(`Lead added — ${form.companyName}`)
   }
+  const doSync = () => {
+    const r = syncLeads({ simulateFailure: simFail, by: 'FO' })
+    if (r.ok) showToast('Synchronised with Odoo (demo): scores recalculated')
+    else showToast('Odoo synchronisation failed: the System Administrator has been alerted')
+  }
+  const proposalLead = leads.find((l) => l.id === proposalLeadId)
+  const wForm = wDraft || weights
 
   return (
     <FrontOfficeLayout title="Lead Pipeline">
@@ -129,6 +169,19 @@ export default function FOLeads() {
               >
                 <Plus className="h-3.5 w-3.5" /> Add New Lead
               </button>
+            </div>
+          </div>
+
+          {/* ── Synchronisation ── */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            <div className="text-xs text-slate-500">
+              <span className="font-semibold text-navy">Odoo CRM</span> · last successful synchronisation: <span className="font-semibold text-navy">{when(meta.lastSync)}</span>
+              <span className="ml-2 rounded-full bg-amber/10 px-2 py-0.5 text-[10px] font-semibold text-amber">Demo mode</span>
+              {meta.failed && <p className="mt-1 text-alert-red">Synchronisation failed {when(meta.failed.at)}: {meta.failed.message}</p>}
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1.5 text-[11px] text-slate-400"><input type="checkbox" checked={simFail} onChange={(e) => setSimFail(e.target.checked)} className="accent-navy" />Simulate a failure</label>
+              <button onClick={doSync} className="flex items-center gap-1.5 rounded-lg bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy/90"><RefreshCw className="h-3.5 w-3.5" />Sync now</button>
             </div>
           </div>
 
@@ -160,58 +213,60 @@ export default function FOLeads() {
                     filter === f ? 'bg-navy text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                   }`}
                 >
-                  {f === AI_SCORE_FILTER && <Sparkles className="h-3 w-3" />}
-                  {f}
+                  {f}{f === 'Excluded' && ` (${excluded.length})`}
                 </button>
               ))}
             </div>
+            <details className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs">
+              <summary className="cursor-pointer font-semibold text-navy">Scoring weights (System Administrator) · A {weights.A}% · B {weights.B}% · C {weights.C}% · D {weights.D}%</summary>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                {[['A', 'Years with Analytix'], ['B', 'FO Manager input'], ['C', 'Satisfaction'], ['D', 'Other services']].map(([k, l]) => (
+                  <label key={k} className="text-slate-500">{k} · {l}<input aria-label={`Weight ${k}`} type="number" value={wForm[k]} onChange={(e) => setWDraft({ ...wForm, [k]: e.target.value })} className="ml-1 mt-1 block w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-navy outline-none focus:border-navy" /></label>
+                ))}
+                <button onClick={() => { try { setWeights(wForm); setWDraft(null); showToast('Weights saved; all scores recalculated') } catch (e) { showToast(e.message) } }} className="rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white">Save weights</button>
+              </div>
+            </details>
           </div>
 
-          {/* ── Lead List ── */}
+          {/* ── Work queue (ranked by score) ── */}
           <div className="space-y-2">
-            {filtered.map((lead, idx) => {
-              const status = contactedIds[lead.id] || lead.followUp
+            {filtered.map(({ lead, result }, idx) => {
               const isExpanded = expandedId === lead.id
+              const dueBy = contactBy(result.band)
               return (
                 <motion.div
                   key={lead.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04, duration: 0.22 }}
-                  className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+                  transition={{ delay: idx * 0.03, duration: 0.22 }}
+                  className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
                 >
-                  {/* ── Collapsed row (always visible) ── */}
                   <button
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50"
                     onClick={() => setExpandedId(isExpanded ? null : lead.id)}
+                    aria-expanded={isExpanded}
                   >
                     <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <span className="w-6 shrink-0 text-center text-xs font-bold text-slate-400">{rankOf[lead.id] ? `#${rankOf[lead.id]}` : '—'}</span>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-navy truncate">{lead.company}</p>
-                          <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SCORE_TONE[lead.score]}`}>
-                            {lead.score}
-                          </span>
-                          {lead.score === 'High' && lead.confidence === 'high' && (
-                            <span className="shrink-0 flex items-center gap-1 rounded-full bg-purple-100 border border-purple-300 px-2 py-0.5 text-[10px] font-semibold text-purple-700">
-                              <Sparkles className="h-2.5 w-2.5" /> AI Match
-                            </span>
-                          )}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="truncate text-sm font-bold text-navy">{lead.company}</p>
+                          <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${BAND_TONE[result.band]}`}>{BANDS[result.band].label}</span>
+                          {result.flags.includes('Manager input pending') && <span className="shrink-0 rounded-full border border-amber/40 bg-amber/10 px-2 py-0.5 text-[10px] font-semibold text-amber">Manager input pending</span>}
+                          {result.overridden && <span className="shrink-0 rounded-full border border-purple-300 bg-purple-100 px-2 py-0.5 text-[10px] font-semibold text-purple-700">Overridden</span>}
+                          {lead.conflicts?.length > 0 && <span className="shrink-0 rounded-full border border-alert-red/30 bg-alert-red/10 px-2 py-0.5 text-[10px] font-semibold text-alert-red">Records conflict</span>}
+                          {lead.status !== 'Open' && <span className="shrink-0 rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">{lead.status}</span>}
                         </div>
-                        <p className="mt-0.5 text-[11px] text-slate-400">
-                          Source: {lead.source} · Last contact {lead.lastContact}
-                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-400">{lead.assignedFO} · Source: {lead.source} · Last contact {lead.lastContact}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${FOLLOWUP_TONE[status] || FOLLOWUP_TONE['Not Started']}`}>
-                        {status}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right"><p className="text-lg font-bold leading-none text-navy">{result.score}</p><p className="text-[10px] text-slate-400">of 100</p></div>
+                      <span className={`hidden shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold sm:inline ${FOLLOWUP_TONE[lead.followUp] || FOLLOWUP_TONE['Not Started']}`}>{lead.followUp}</span>
                       {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
                     </div>
                   </button>
 
-                  {/* ── Expanded detail ── */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
@@ -221,37 +276,41 @@ export default function FOLeads() {
                         transition={{ duration: 0.22, ease: 'easeOut' }}
                         className="overflow-hidden"
                       >
-                        <div className="border-t border-slate-100 px-4 pb-4 pt-3">
-                          {lead.contactName && (
-                            <div className="mb-3 flex flex-wrap gap-4 text-xs text-slate-500">
-                              <span className="font-semibold text-navy">{lead.contactName}</span>
-                              {lead.contactEmail && <span>{lead.contactEmail}</span>}
-                              {lead.contactPhone && <span>{lead.contactPhone}</span>}
-                              {lead.city && <span>{lead.city}</span>}
-                              {lead.sector && <span className="italic">{lead.sector}</span>}
-                            </div>
-                          )}
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              onClick={() => setLogModalLead(lead)}
-                              className="rounded-md bg-navy px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy/90"
-                            >
-                              Log Contact
-                            </button>
+                        <div className="space-y-4 border-t border-slate-100 px-4 pb-4 pt-3">
+                          <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+                            <span className="font-semibold text-navy">{lead.contactName}</span>
+                            {lead.contactEmail && <span>{lead.contactEmail}</span>}
+                            {lead.contactPhone && <span>{lead.contactPhone}</span>}
+                            {lead.city && <span>{lead.city}</span>}
+                            {lead.sector && <span className="italic">{lead.sector}</span>}
+                            {lead.turnover > 0 && <span>Turnover SAR {Number(lead.turnover).toLocaleString('en-US')}</span>}
+                            {lead.statutoryDeadline && <span>Statutory deadline {lead.statutoryDeadline}</span>}
+                          </div>
+                          {lead.conflicts?.length > 0 && <div className="rounded-lg border border-alert-red/30 bg-alert-red/5 p-2.5 text-xs text-alert-red">{lead.conflicts.join('; ')}. The FO must resolve this before a proposal is prepared.</div>}
+
+                          <div><p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Score breakdown · {BANDS[result.band].contact}{dueBy ? ` (by ${dueBy.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })})` : ''}</p><Breakdown info={result} /></div>
+
+                          <ManagerControls lead={lead} showToast={showToast} />
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Outcome of the contact</span>
+                            {['Interested', 'Follow up later', 'Lost'].map((o) => (
+                              <button key={o} onClick={() => { recordOutcome(lead.id, o); showToast(`${lead.company}: ${o}`) }} className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${lead.lastOutcome === o ? 'border-navy bg-navy text-white' : 'border-slate-300 text-navy hover:bg-slate-50'}`}>{o}</button>
+                            ))}
+                            <button onClick={() => setLogModalLead(lead)} className="rounded-md bg-navy px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy/90">Log Contact</button>
                             {lead.hasProposal ? (
-                              <span className="flex items-center gap-1 rounded-md bg-emerald/10 px-3 py-1.5 text-xs font-semibold text-emerald">
-                                <FileText className="h-3.5 w-3.5" />
-                                {lead.signed ? 'Proposal Signed' : 'Proposal on File'}
-                              </span>
+                              <span className="flex items-center gap-1 rounded-md bg-emerald/10 px-3 py-1.5 text-xs font-semibold text-emerald"><FileText className="h-3.5 w-3.5" />{lead.signed ? 'Proposal Signed' : `Proposal ${lead.proposalRef || 'on file'}`}</span>
+                            ) : lead.status === 'Interested' ? (
+                              <button onClick={() => setProposalLeadId(lead.id)} className="flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#D12C35]"><Sparkles className="h-3.5 w-3.5" />{lead.draft ? `Draft proposal (${lead.draft.status})` : 'Prepare draft proposal'}</button>
                             ) : (
-                              <button
-                                onClick={() => setSendProposalLead(lead)}
-                                className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50"
-                              >
-                                Create & Send Proposal
-                              </button>
+                              <span className="text-[11px] text-slate-400">Mark the lead as Interested to prepare its draft proposal.</span>
                             )}
                           </div>
+
+                          {lead.history?.length > 0 && (
+                            <details className="text-xs text-slate-500"><summary className="cursor-pointer font-semibold text-navy">Score history ({lead.history.length})</summary>
+                              <ul className="mt-1 space-y-0.5">{[...lead.history].reverse().map((h, i) => <li key={i}>{when(h.at)} · {h.trigger} · score {h.score} ({h.band}){h.overridden ? ' · overridden' : ''}{h.by ? ` · ${h.by}` : ''}</li>)}</ul></details>
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -262,42 +321,23 @@ export default function FOLeads() {
             {filtered.length === 0 && (
               <p className="py-8 text-center text-sm text-slate-400">No leads match this filter.</p>
             )}
+            {filter !== 'Excluded' && excluded.length > 0 && <p className="text-[11px] text-slate-400">{excluded.length} lead(s) marked lost or do-not-contact are left out of the work queue (see Excluded).</p>}
           </div>
         </div>
 
         {/* ── Modals ── */}
         <AnimatePresence>
           {logModalLead && (
-            <LogContactModal
-              lead={logModalLead}
-              onClose={() => setLogModalLead(null)}
-              onSubmit={handleLogContact}
-            />
+            <LogContactModal lead={logModalLead} onClose={() => setLogModalLead(null)} onSubmit={handleLogContact} />
           )}
         </AnimatePresence>
         <AnimatePresence>
-          {addLeadOpen && (
-            <AddLeadModal onClose={() => setAddLeadOpen(false)} onSubmit={handleAddLead} />
-          )}
+          {addLeadOpen && <AddLeadModal onClose={() => setAddLeadOpen(false)} onSubmit={handleAddLead} />}
         </AnimatePresence>
         <AnimatePresence>
-          {importOpen && (
-            <ImportClientsModal onClose={() => setImportOpen(false)} showToast={showToast} />
-          )}
+          {importOpen && <ImportClientsModal onClose={() => setImportOpen(false)} showToast={showToast} />}
         </AnimatePresence>
-        <AnimatePresence>
-          {sendProposalLead && (
-            <SendProposalModal
-              lead={sendProposalLead}
-              onClose={() => setSendProposalLead(null)}
-              onSent={(lead) => {
-                setLeads((prev) => prev.map((l) => l.id === lead.id ? { ...l, hasProposal: true } : l))
-                setSendProposalLead(null)
-                showToast(`Proposal sent to ${lead.company} — login credentials shared`)
-              }}
-            />
-          )}
-        </AnimatePresence>
+        {proposalLead && <LeadProposalModal key={proposalLead.id} lead={proposalLead} onClose={() => setProposalLeadId(null)} />}
       </PageTransition>
     </FrontOfficeLayout>
   )
@@ -567,190 +607,6 @@ function ImportClientsModal({ onClose, showToast }) {
           </button>
           <button onClick={handleImport} className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]">
             Import
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────────
-   Send Proposal Modal (with auditor, type, fees, extra services)
-───────────────────────────────────────────── */
-const AUDIT_TYPES = ['Proper Audit', 'Disclaimer Audit', 'Liquidation Audit', 'Special Audit', 'Agreed-Upon Procedures']
-
-function SendProposalModal({ lead, onClose, onSent }) {
-  const [auditor, setAuditor] = useState('')
-  const [auditType, setAuditType] = useState('')
-  const [auditFee, setAuditFee] = useState('')
-  const [services, setServices] = useState({})
-  const [sendVia, setSendVia] = useState('email')
-  const [errors, setErrors] = useState({})
-
-  const toggleService = (key) => {
-    setServices((prev) => ({ ...prev, [key]: prev[key] ? null : { enabled: true, fee: '' } }))
-  }
-
-  const setServiceFee = (key, fee) => {
-    setServices((prev) => ({ ...prev, [key]: { ...prev[key], fee } }))
-  }
-
-  const validate = () => {
-    const next = {}
-    if (!auditor) next.auditor = 'Select auditor'
-    if (!auditType) next.auditType = 'Select audit type'
-    if (!auditFee || isNaN(Number(auditFee))) next.auditFee = 'Enter audit fee'
-    setErrors(next)
-    return Object.keys(next).length === 0
-  }
-
-  const totalFee = [Number(auditFee) || 0, ...SERVICES.map((s) => services[s.key] ? Number(services[s.key].fee) || 0 : 0)].reduce((a, b) => a + b, 0)
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.94 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.94 }}
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
-      >
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-navy">Send Proposal</h3>
-            <p className="text-xs text-slate-500">{lead.company}</p>
-          </div>
-          <button onClick={onClose}><X className="h-4 w-4 text-slate-400" /></button>
-        </div>
-
-        <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
-          {/* Auditor */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-600">Auditor *</label>
-            <div className="grid grid-cols-2 gap-2">
-              {AUDITORS.map((a) => (
-                <button
-                  key={a}
-                  type="button"
-                  onClick={() => setAuditor(a)}
-                  className={`rounded-lg border-2 py-2.5 text-sm font-semibold transition-all ${
-                    auditor === a ? 'border-navy bg-navy text-white' : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                  }`}
-                >
-                  {a}
-                </button>
-              ))}
-            </div>
-            {errors.auditor && <p className="mt-1 text-[10px] text-alert-red">{errors.auditor}</p>}
-          </div>
-
-          {/* Audit Type */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-600">Audit Type *</label>
-            <select
-              value={auditType}
-              onChange={(e) => setAuditType(e.target.value)}
-              className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-navy ${errors.auditType ? 'border-alert-red' : 'border-slate-300'}`}
-            >
-              <option value="">Select audit type</option>
-              {AUDIT_TYPES.map((t) => <option key={t}>{t}</option>)}
-            </select>
-            {errors.auditType && <p className="mt-1 text-[10px] text-alert-red">{errors.auditType}</p>}
-          </div>
-
-          {/* Audit Fee */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-600">Audit Fee (SAR) *</label>
-            <input
-              value={auditFee}
-              onChange={(e) => setAuditFee(e.target.value)}
-              inputMode="numeric"
-              placeholder="e.g. 18500"
-              className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-navy ${errors.auditFee ? 'border-alert-red' : 'border-slate-300'}`}
-            />
-            {errors.auditFee && <p className="mt-1 text-[10px] text-alert-red">{errors.auditFee}</p>}
-          </div>
-
-          {/* Additional Services */}
-          <div>
-            <p className="mb-2 text-xs font-semibold text-slate-600">Additional Services</p>
-            <div className="space-y-2">
-              {SERVICES.map(({ key, label }) => (
-                <div key={key}>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={!!services[key]}
-                      onChange={() => toggleService(key)}
-                      className="h-4 w-4 rounded accent-navy"
-                    />
-                    <span className="text-sm text-slate-700">{label}</span>
-                  </label>
-                  <AnimatePresence>
-                    {services[key] && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <input
-                          value={services[key].fee}
-                          onChange={(e) => setServiceFee(key, e.target.value)}
-                          inputMode="numeric"
-                          placeholder={`${label} fee (SAR)`}
-                          className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-navy"
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Total */}
-          {totalFee > 0 && (
-            <div className="flex items-center justify-between rounded-lg bg-navy/5 px-4 py-2.5">
-              <span className="text-xs font-semibold text-slate-500">Total Engagement Fee</span>
-              <span className="text-sm font-bold text-navy">SAR {totalFee.toLocaleString()}</span>
-            </div>
-          )}
-
-          {/* Send via */}
-          <div>
-            <p className="mb-2 text-xs font-semibold text-slate-600">Send Proposal via</p>
-            <div className="grid grid-cols-2 gap-2">
-              {[{ key: 'email', label: 'Email', icon: Mail }, { key: 'whatsapp', label: 'WhatsApp', icon: MessageSquare }].map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setSendVia(key)}
-                  className={`flex items-center justify-center gap-2 rounded-lg border-2 py-2.5 text-xs font-semibold transition-all ${
-                    sendVia === key ? 'border-navy bg-navy text-white' : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" /> {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-emerald/20 bg-emerald/5 p-3">
-            <p className="text-[11px] text-emerald font-medium leading-relaxed">
-              The proposal and client login credentials (email + default password) will be shared with the client via {sendVia === 'email' ? 'email' : 'WhatsApp'}. The client can change their password after first login.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 flex gap-2">
-          <button onClick={onClose} className="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50">
-            Cancel
-          </button>
-          <button
-            onClick={() => validate() && onSent(lead)}
-            className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]"
-          >
-            Send Proposal
           </button>
         </div>
       </motion.div>

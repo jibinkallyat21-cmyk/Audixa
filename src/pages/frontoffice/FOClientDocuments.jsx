@@ -7,6 +7,7 @@ import { useToast } from '../../components/shared/Toast'
 import { AnalytixMark } from '../../components/shared/AnalytixLogo'
 import Footer from '../../components/shared/Footer'
 import ExitDemoButton from '../../components/shared/ExitDemoButton'
+import BasicDocsIntakeView from '../../components/execution/BasicDocsIntakeView'
 
 // Reuse FO layout pattern inline (no separate import to avoid circular deps)
 const CLIENTS = [
@@ -171,6 +172,7 @@ const FO_NAV = [
 
 export default function FOClientDocuments() {
   const location = useLocation()
+  const [tab, setTab] = useState('basic')
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -208,16 +210,26 @@ export default function FOClientDocuments() {
         <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
           <PageTransition>
             <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-bold text-navy">Client Documents</h1>
-                <p className="mt-1 text-sm text-slate-500">Upload documents for each client — they will be visible in the client portal immediately.</p>
-              </div>
-
-              <div className="space-y-4">
-                {CLIENTS.map((client) => (
-                  <ClientRow key={client.id} client={client} />
+              <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
+                {[['basic', 'Basic documents (checklist)'], ['reports', 'Engagement letter and reports']].map(([id, l]) => (
+                  <button key={id} onClick={() => setTab(id)} className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${tab === id ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>{l}</button>
                 ))}
               </div>
+
+              {tab === 'basic' ? <BasicDocsIntakeView role="fo" /> : (
+                <>
+                  <div>
+                    <h1 className="text-2xl font-bold text-navy">Client Documents</h1>
+                    <p className="mt-1 text-sm text-slate-500">Upload documents for each client — they will be visible in the client portal immediately.</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {CLIENTS.map((client) => (
+                      <ClientRow key={client.id} client={client} />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </PageTransition>
         </main>
