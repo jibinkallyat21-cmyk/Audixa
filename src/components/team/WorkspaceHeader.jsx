@@ -23,6 +23,9 @@ const TABS_BASE = [
   { id: 'audit-trail', label: 'Audit Trail', href: '/team/workspace/audit-trail' },
 ]
 
+// Audit Requirements shows only Requirements and Queries; Audit Procedures shows everything else.
+const REQUIREMENT_TABS = ['requirements', 'queries']
+
 const AUDIT_TYPE_LABEL = { Proper: 'Proper Audit', Disclaimer: 'Disclaimer' }
 
 // Fixed "today" for the prototype's demo date (05 Nov 2024).
@@ -236,7 +239,8 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
   const openQueries = teamQueries.filter((q) => q.status === 'Open').length
   const inProgressProcedures = teamProcedures.filter((p) => p.status === 'In Progress').length
 
-  const tabs = TABS_BASE.map((tab) => {
+  const inRequirements = REQUIREMENT_TABS.some((id) => location.pathname === `/team/workspace/${id}`)
+  const tabs = TABS_BASE.filter((tab) => REQUIREMENT_TABS.includes(tab.id) === inRequirements).map((tab) => {
     if (tab.id === 'requirements') return { ...tab, badge: `${file.pbcTotal}`, badgeTone: 'grey' }
     if (tab.id === 'queries') return { ...tab, badge: `${openQueries} open`, badgeTone: openQueries > 0 ? 'red' : 'grey' }
     if (tab.id === 'procedures') return { ...tab, badge: `${inProgressProcedures} in progress`, badgeTone: 'amber' }
