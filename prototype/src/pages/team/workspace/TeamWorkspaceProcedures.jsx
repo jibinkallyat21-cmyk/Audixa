@@ -7,9 +7,6 @@ import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { useToast } from '../../../components/shared/Toast'
 import { useTeamRole } from '../../../hooks/useTeamRole'
-import TBReviewView from '../../../components/execution/TBReviewView'
-import SamplingVouchingView from '../../../components/execution/SamplingVouchingView'
-import PayrollAssetsView from '../../../components/execution/PayrollAssetsView'
 import FinancialStatementsView from '../../../components/execution/FinancialStatementsView'
 import AuditLogView from '../../../components/execution/AuditLogView'
 import QueryTrackerView from '../../../components/execution/QueryTrackerView'
@@ -28,11 +25,7 @@ import { logEvent } from '../../../utils/auditLog'
 import { currentUser } from '../../../utils/currentUser'
 
 /* ── Working tools: each opens inside its own audit procedure ── */
-const TOOLS = {
-  obv: [{ id: 'tb', label: 'Opening balances and TB review', C: () => <TBReviewView /> }],
-  area: [{ id: 'payroll', label: 'Payroll, prepaid and depreciation', C: () => <PayrollAssetsView /> }],
-  sampling: [{ id: 'sv', label: 'Sampling, vouching and confirmations', C: () => <SamplingVouchingView /> }],
-}
+const TOOLS = {}
 const EXTRA_PROCEDURES = [
   { id: 'engagement', name: 'Engagement Letter and Basic Documents', description: 'EL request and verification, AOA, MISA, VAT certificate, EL review and the EOSB contributor lists.', tools: [{ id: 'intake', label: 'Basic documents intake (Project Co-ordinator)', C: () => <BasicDocsIntakeView role="pc" user={teamUser} /> }, { id: 'el', label: 'EL requests', C: () => <TeamELRequest embedded /> }, { id: 'basic', label: 'Basic documents', C: () => <TeamBasicDocuments embedded /> }] },
   { id: 'fs', name: 'Financial Statement Preparation', description: 'Client TB to IFRS TB (proper and disclaimer audits) and the financial statements from the TB and the prior-year audited AFS.', tools: [{ id: 'fs', label: 'IFRS TB and financial statements', C: () => <FinancialStatementsView /> }] },
@@ -73,18 +66,6 @@ function ToolSection({ proc }) {
 /* ── Sample data ── */
 const MAIN_PROCEDURES = [
   {
-    id: 'obv',
-    seq: 1,
-    name: 'Opening Balance Verification',
-    description: 'For previously-audited clients: verify prior year closing balances agree with current year opening balances per ISA 510.',
-    note: 'Previously audited client — opening balance verification required',
-    subTasks: [
-      { id: 'obv-1', name: 'Prior Year FS Review', desc: 'Review prior year financial statements and audit report. Confirm no material misstatements were raised.', aiFlag: null },
-      { id: 'obv-2', name: 'Opening Balance Tie-in', desc: 'Agree closing balances per prior year FS to current year opening trial balance.', aiFlag: null },
-      { id: 'obv-3', name: 'Lead Schedule Verification', desc: 'Verify lead schedules agree with prior year working papers and any carry-forward items are resolved.', aiFlag: null },
-    ],
-  },
-  {
     id: 'analytical',
     seq: 2,
     name: 'Analytical Procedures',
@@ -103,49 +84,6 @@ const MAIN_PROCEDURES = [
       { id: 'ap-2', name: 'Ratio Analysis', desc: 'Calculate and evaluate liquidity, profitability, and leverage ratios. Compare to prior year and industry norms.', aiFlag: null },
       { id: 'ap-3', name: 'Variance vs Prior Year', desc: 'Identify and document all significant variances vs prior year with explanations obtained.', aiFlag: null },
       { id: 'ap-4', name: 'Industry Benchmarking', desc: 'Compare key performance indicators against sector peers to identify outliers.', aiFlag: null },
-    ],
-  },
-  {
-    id: 'area',
-    seq: 3,
-    name: 'Area-Specific Audit Procedures',
-    description: 'Perform substantive testing procedures for each account area identified in the trial balance.',
-    subTasks: [
-      { id: 'area-cash', name: 'Cash & Bank', desc: 'Bank confirmation letters, reconciliation review, petty cash count where material.', aiFlag: null },
-      { id: 'area-ar', name: 'Trade Receivables', desc: 'Debtors circularisation, aging analysis, bad debt provision adequacy, cut-off testing.', aiFlag: null },
-      {
-        id: 'area-inv',
-        name: 'Inventory',
-        desc: 'Physical count attendance, obsolescence assessment, NRV testing, cost verification.',
-        aiFlag: {
-          id: 'qd-inv',
-          draft: 'Inventory aging shows 28% of stock over 18 months with no write-down recorded. Based on TB analysis, this may indicate an understated provision. Requesting client explanation and stock movement records.',
-          pending: true,
-        },
-      },
-      { id: 'area-fa', name: 'Fixed Assets', desc: 'Physical verification, additions & disposals testing, depreciation accuracy, impairment review.', aiFlag: null },
-      { id: 'area-ap', name: 'Trade Payables', desc: 'Supplier statement reconciliation, cut-off testing, search for unrecorded liabilities.', aiFlag: null },
-      { id: 'area-rev', name: 'Revenue Recognition', desc: 'Sales cut-off, recognition policy compliance with IFRS 15, completeness and accuracy testing.', aiFlag: null },
-    ],
-  },
-  {
-    id: 'sampling',
-    seq: 4,
-    name: 'Sampling & AI Vouching',
-    description: 'Statistical or judgmental sampling with AI-assisted vouching and automated exception detection.',
-    subTasks: [
-      { id: 'samp-1', name: 'Sample Selection (AI)', desc: 'AI selects representative sample using stratified random sampling. High-value and unusual items selected by default.', aiFlag: null },
-      { id: 'samp-2', name: 'Document Vouching', desc: 'Vouch selected transactions to source documents — invoices, purchase orders, goods received notes, payment receipts.', aiFlag: null },
-      {
-        id: 'samp-3',
-        name: 'AI Exception Review',
-        desc: 'Review AI-flagged exceptions from vouching. Each exception is queued for audit team review before client communication.',
-        aiFlag: {
-          id: 'qd-samp3',
-          draft: '3 transactions above SAR 500,000 lack corresponding purchase orders in the system. Amounts: SAR 612,000 (Oct 12), SAR 780,000 (Oct 28), SAR 534,000 (Nov 01). Requesting PO documentation or alternative approval evidence from client.',
-          pending: true,
-        },
-      },
     ],
   },
 ]
@@ -227,16 +165,7 @@ function AIFlagPanel({ flag, isLead, onApprove, onDismiss }) {
 
 /* ── Sub-task row ── */
 // The working tool behind a sub-task, opened right under it. Sub-tasks without a tool say so and keep the person's own notes.
-const SUB_TOOLS = {
-  'area-cash': { label: 'Open the cash and bank confirmations', C: () => <SamplingVouchingView embedded initialTab="confirm" /> },
-  'area-ar': { label: 'Open the receivables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" initialArea="Trade receivables" /> },
-  'area-ap': { label: 'Open the payables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" initialArea="Trade payables" /> },
-  'area-rev': { label: 'Open the sales sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="sales" initialArea="Revenue" /> },
-  'area-fa': { label: 'Open the depreciation schedule', C: () => <PayrollAssetsView embedded initialTab="dep" /> },
-  'samp-1': { label: 'Open the sampling tool', C: () => <SamplingVouchingView embedded initialTab="sampling" /> },
-  'samp-2': { label: 'Open the vouching tool', C: () => <SamplingVouchingView embedded initialTab="vouching" /> },
-  'samp-3': { label: 'Open the vouching results', C: () => <SamplingVouchingView embedded initialTab="vouching" /> },
-}
+const SUB_TOOLS = {}
 
 function SubTaskRow({ sub, isLead, locked, status = 'Not Started', setStatus, info = [], flagDraft = null, onRaise, auto = false, note = '', setNote }) {
   const showToast = useToast()
@@ -465,12 +394,12 @@ export default function TeamWorkspaceProcedures() {
         <WorkspaceHeader fileSlug="al-marai" />
 
         <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm"><p className="text-sm text-slate-600">Prefer to work account by account? <b className="text-navy">Audit areas</b> lists each area with its accounts and procedures, including the cut-off.</p><Link to="/team/workspace/areas" className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">Open audit areas</Link></div>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm"><p className="text-sm text-slate-600">Sampling, vouching, confirmations, cut-off and the other work on each balance are in <b className="text-navy">Audit areas</b> (opening balances are already checked when the trial balance is approved). This page keeps the file-wide procedures.</p><Link to="/team/workspace/areas" className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">Go to audit areas</Link></div>
           {/* Overview bar */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold text-navy">Audit Procedures Progress</p>
+                <p className="text-sm font-semibold text-navy">Procedure progress</p>
                 <p className="mt-0.5 text-[11px] text-slate-400">
                   {totalComplete} of {MAIN_PROCEDURES.length} procedure sections complete
                 </p>
