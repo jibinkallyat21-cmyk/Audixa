@@ -13,17 +13,17 @@ import { AREAS } from '../../../utils/auditAreas'
 import { fileSummary } from '../../../utils/sampleTracking'
 
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-const BS = ['cash', 'receivables', 'prepayments', 'ppe', 'inventory', 'payables', 'payroll', 'related', 'equity']
-const PL = ['revenue', 'cogs', 'expenses']
+const BS = ['cash', 'receivables', 'prepayments', 'ppe', 'inventory', 'payables', 'accruals', 'payroll', 'borrowings', 'related', 'equity', 'unclassified']
+const PL = ['revenue', 'cogs', 'expenses', 'tax']
 
 function AreaTable({ title, ids, sum }) {
-  const rows = ids.map((id) => sum.rows.find((r) => r.id === id)).filter(Boolean)
+  const rows = ids.map((id) => sum.rows.find((r) => r.id === id)).filter((r) => r && (r.id !== 'unclassified' || r.accounts > 0))
   return (
     <Card title={title}>
       <div className="overflow-x-auto rounded-xl border border-slate-200"><table className="w-full text-left text-sm">
         <thead><tr className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500"><th className="px-4 py-3">Area</th><th className="px-4 py-3 text-right">Balance (SAR)</th><th className="px-4 py-3">Procedures</th><th className="px-4 py-3 text-right">Sent to the client</th><th className="px-4 py-3 text-right">Waiting</th><th className="px-4 py-3 text-right">Rejected</th></tr></thead>
-        <tbody>{rows.map((r) => (
-          <tr key={r.id} className="border-t border-slate-100 even:bg-slate-50">
+        <tbody>{rows.map((r, k) => (
+          <tr key={r.id} className={`border-t border-slate-100 ${k % 2 ? 'bg-slate-50' : ''}`}>
             <td className="px-4 py-3"><Link to={`/team/workspace/areas?area=${r.id}`} className="font-semibold text-navy hover:underline">{r.label}</Link><span className="block text-xs text-slate-400">{r.accounts} account{r.accounts === 1 ? '' : 's'}</span></td>
             <td className="px-4 py-3 text-right tabular-nums text-navy">{r.accounts ? `${money(Math.abs(r.balance))} ${r.balance >= 0 ? 'Dr' : 'Cr'}` : '—'}</td>
             <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="h-2 w-28 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald" style={{ width: `${r.total ? (r.done / r.total) * 100 : 0}%` }} /></div><span className="text-xs text-slate-600">{r.done} of {r.total}</span></div></td>

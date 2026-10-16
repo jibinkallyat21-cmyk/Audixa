@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Loader2, FileSpreadsheet } from 'lucide-react'
-import { Card, Chip, DataTable, Flags, Field, FieldGrid, Section, Stat, Empty, PrimaryButton, INPUT } from './ReviewParts'
+import { Card, DataTable, Flags, Field, FieldGrid, Section, Stat, Empty, PrimaryButton, INPUT } from './ReviewParts'
 import SendSamples from './SendSamples'
 import { useDemoClient } from '../../utils/useDemoClient'
 import { selectCutoff, requestText, areaLabel } from '../../utils/cutoff'
@@ -58,7 +58,7 @@ export default function CutOffTool({ area, client, firm: firmProp }) {
           <div className="grid gap-3 sm:grid-cols-3"><Stat label="Items picked" value={picked.picks.length} tone="green" />{firm === 'MISCPA' ? <><Stat label="Before the year end" value={picked.picks.filter((p) => p.period === 'Before year end').length} /><Stat label="After the year end" value={picked.picks.filter((p) => p.period === 'After year end').length} /></> : bankABC ? <><Stat label="Debits" value={picked.picks.filter((p) => p.side === 'Debit').length} /><Stat label="Credits" value={picked.picks.filter((p) => p.side === 'Credit').length} /></> : <Stat label="After the year end" value={picked.picks.length} />}</div>
           {picked.notes.length > 0 && <Flags flags={picked.notes} />}
           {picked.picks.length === 0 ? <Empty>Nothing was picked. Check the year-end and the transactions.</Empty> : (
-            <DataTable columns={[{ key: 'period', label: 'Period', render: (r) => <Chip value={r.period === 'Before year end' ? 'Unclear' : 'Pass'} /> }, { key: 'date', label: 'Date' }, { key: 'ref', label: 'Reference' }, { key: 'ledger', label: 'Ledger' }, { key: 'description', label: 'Description' }, { key: 'debit', label: 'Debit', render: (r) => (r.debit ? money(r.debit) : '') }, { key: 'credit', label: 'Credit', render: (r) => (r.credit ? money(r.credit) : '') }]} rows={picked.picks} />
+            <DataTable columns={[{ key: 'period', label: 'Period', render: (r) => <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${r.period === 'Before year end' ? 'bg-slate-100 text-slate-600' : 'bg-blue-50 text-blue-700'}`}>{r.period}</span> }, { key: 'date', label: 'Date' }, { key: 'ref', label: 'Reference' }, { key: 'ledger', label: 'Ledger' }, { key: 'description', label: 'Description' }, { key: 'debit', label: 'Debit', render: (r) => (r.debit ? money(r.debit) : '') }, { key: 'credit', label: 'Credit', render: (r) => (r.credit ? money(r.credit) : '') }]} rows={picked.picks} />
           )}
           <SendSamples group="cutoff" area={area} label={areaLabel(area)} client={client} items={items} />
         </Card>

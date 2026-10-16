@@ -99,8 +99,8 @@ export default function IfrsTBTab({ mode, client, clientName }) {
             {live.unmapped.length > 0 ? <Flags flags={[`${live.unmapped.length} account(s) could not be classified. Choose an IFRS account for each one below.`]} /> : <p className="rounded-xl border border-emerald/30 bg-emerald/5 px-4 py-3 text-sm font-medium text-emerald">All accounts are mapped.</p>}
             <div className="max-h-[480px] overflow-auto rounded-xl border border-slate-200">
               <table className="w-full text-sm"><thead className="sticky top-0"><tr className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"><th className="px-4 py-3">Code</th><th className="px-4 py-3">Client account</th><th className="px-4 py-3 text-right">Balance</th><th className="px-4 py-3">IFRS account</th></tr></thead>
-                <tbody>{live.mapped.map((m) => (
-                  <tr key={m.id} className="border-t border-slate-100 align-top even:bg-slate-50"><td className="px-4 py-3 text-xs text-slate-400">{m.id}</td><td className="px-4 py-3 text-navy">{m.name}{m.flag && <span className="mt-1 block text-xs text-amber">{m.flag}</span>}</td><td className="px-4 py-3 text-right text-navy">{money(m.closing)}</td>
+                <tbody>{live.mapped.map((m, k) => (
+                  <tr key={m.id} className={`border-t border-slate-100 align-top ${k % 2 ? 'bg-slate-50' : ''}`}><td className="px-4 py-3 text-xs text-slate-400">{m.id}</td><td className="px-4 py-3 text-navy">{m.name}{m.flag && <span className="mt-1 block text-xs text-amber">{m.flag}</span>}</td><td className="px-4 py-3 text-right text-navy">{money(m.closing)}</td>
                     <td className="px-4 py-3"><select aria-label={`IFRS account for ${m.name}`} value={overrides[m.key] || m.ifrs || ''} onChange={(e) => setOverrides({ ...overrides, [m.key]: e.target.value })} className={`${SEL} w-full min-w-[260px]`}><option value="">Unmapped</option>{IFRS.map((a) => <option key={a.code} value={a.code}>{a.code} {a.name}</option>)}</select></td></tr>))}</tbody></table>
             </div>
           </Card>

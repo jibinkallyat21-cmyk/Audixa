@@ -20,3 +20,9 @@ test('area figures come from the ledgers; progress counts completed procedures',
   assert.equal(areaFigures(AREAS.find((a) => a.id === 'revenue'), L).total, -2400000)
   const p = areaProgress(cash, { [procStatusKey('cash', 'bank-cutoff')]: 'Complete' }); assert.equal(p.done, 1); assert.equal(p.total, cash.procedures.length)
 })
+
+test('every trial balance ledger belongs to exactly one area and the areas add up to the whole trial balance', () => {
+  for (const l of L) assert.equal(AREAS.filter((a) => a.groups.includes(l.group)).length, 1, l.name)
+  assert.ok(GROUPS.every((g) => AREAS.some((a) => a.groups.includes(g.id))), 'a group has no area')
+  assert.equal(Math.round(AREAS.reduce((n, a) => n + areaFigures(a, L).total, 0) * 100), 0)
+})

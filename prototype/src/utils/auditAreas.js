@@ -13,12 +13,12 @@ export const AREAS = [
     { id: 'ar-sample', label: 'Sample and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade receivables', desc: 'Select the customer balances to confirm and send them to the client.' },
     { id: 'ar-vouching', label: 'Vouching', kind: 'tool', tool: 'vouching', vouch: 'party', desc: 'Check the confirmations and support received for the selected balances.' },
   ] },
-  { id: 'revenue', section: 'Income and expenses', label: 'Revenue (sales)', groups: ['revenue', 'otherIncome'], sampleAreas: ['Sales', 'Revenue', 'sales'], blurb: 'Sales and other income', procedures: [
+  { id: 'revenue', section: 'Income and expenses', label: 'Revenue (sales)', groups: ['revenue', 'otherIncome'], sampleAreas: ['Sales', 'Sales Return', 'Revenue', 'sales'], blurb: 'Sales and other income', procedures: [
     { id: 'sales-sample', label: 'Sales sample', kind: 'tool', tool: 'sales-sample', area: 'Revenue', desc: 'Select the sales entries to test and send them to the client.' },
     { id: 'sales-vouching', label: 'Sales vouching', kind: 'tool', tool: 'vouching', vouch: 'sales', desc: 'Compare each sampled invoice with its document: customer, date, net amount, invoice number.' },
     { id: 'sales-cutoff', label: 'Sales cut-off', kind: 'cutoff', area: 'sales', desc: 'Pick sales around the year end; the client supports each one.' },
   ] },
-  { id: 'cogs', section: 'Income and expenses', label: 'Cost of sales and purchases', groups: ['cogs'], sampleAreas: ['COGS', 'cogs'], blurb: 'What the goods and services cost', procedures: [
+  { id: 'cogs', section: 'Income and expenses', label: 'Cost of sales and purchases', groups: ['cogs'], sampleAreas: ['COGS', 'cogs', 'Purchase', 'Purchase Return'], blurb: 'What the goods and services cost', procedures: [
     { id: 'cogs-sample', label: 'Purchases sample', kind: 'tool', tool: 'cogs-sample', area: 'COGS', purchase: true, desc: 'Select the purchase entries to test and send them to the client.' },
     { id: 'cogs-vouching', label: 'Purchases vouching', kind: 'tool', tool: 'vouching', vouch: 'cogs', desc: 'Compare each sampled invoice with its document: supplier, date, net amount.' },
     { id: 'cogs-cutoff', label: 'Cost of sales cut-off', kind: 'cutoff', area: 'cogs', desc: 'Pick purchases around the year end; the client supports each one.' },
@@ -42,6 +42,18 @@ export const AREAS = [
     { id: 'salary', label: 'Salary schedule', kind: 'tool', tool: 'salary', desc: 'Build the salary schedule and compare it with the trial balance.' },
     { id: 'gosi-eosb', label: 'GOSI and end of service', kind: 'tool', tool: 'gosi', desc: 'GOSI against MUDAD and the end of service provision.' },
   ] },
+  { id: 'accruals', section: 'Liabilities', label: 'Accruals and other payables', groups: ['accruals'], blurb: 'Costs owed but not yet paid', procedures: [
+    { id: 'accr-notes', label: 'Accruals work', kind: 'notes', desc: 'Payments after the year end, cut-off and unrecorded liabilities. Record your work and conclusion; there is no separate tool yet.' },
+  ] },
+  { id: 'borrowings', section: 'Liabilities', label: 'Borrowings', groups: ['borrowings'], blurb: 'Loans and finance', procedures: [
+    { id: 'loan-notes', label: 'Borrowings work', kind: 'notes', desc: 'Loan confirmations, terms, repayments and finance cost. Record your work and conclusion.' },
+  ] },
+  { id: 'tax', section: 'Income and expenses', label: 'Zakat and tax', groups: ['tax'], blurb: 'Zakat, income tax and the ZATCA position', procedures: [
+    { id: 'tax-notes', label: 'Zakat and tax work', kind: 'notes', desc: 'The computation, the filing and the position with ZATCA. Record your work and conclusion.' },
+  ] },
+  { id: 'unclassified', section: 'Unclassified', label: 'Accounts not placed in an area', groups: ['unmapped'], blurb: 'Accounts the grouping could not place', procedures: [
+    { id: 'unc-notes', label: 'Place these accounts', kind: 'notes', desc: 'Decide which area each account belongs to and record why.' },
+  ] },
   { id: 'inventory', section: 'Assets', label: 'Inventory', groups: ['inventory'], blurb: 'Stock', procedures: [
     { id: 'inv-notes', label: 'Inventory work', kind: 'notes', desc: 'Physical count attendance, obsolescence, NRV and cost. Record your work and conclusion; there is no separate tool yet.' },
   ] },
@@ -53,7 +65,7 @@ export const AREAS = [
   ] },
 ]
 
-export const SECTIONS = ['Assets', 'Liabilities', 'Equity', 'Income and expenses']
+export const SECTIONS = ['Assets', 'Liabilities', 'Equity', 'Income and expenses', 'Unclassified']
 export const procStatusKey = (areaId, procId) => `area:${areaId}.${procId}`
 export const findArea = (id) => AREAS.find((a) => a.id === id)
 

@@ -33,7 +33,7 @@ export function DataTable({ columns, rows }) {
         <thead className="sticky top-0"><tr className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{columns.map((c) => <th key={c.key} className="px-4 py-3">{c.label}</th>)}</tr></thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-t border-slate-100 align-top even:bg-slate-50">
+            <tr key={i} className={`border-t border-slate-100 align-top ${i % 2 ? 'bg-slate-50' : ''}`}>
               {columns.map((c) => <td key={c.key} className="px-4 py-3 text-navy">{c.render ? c.render(r) : r[c.key]}</td>)}
             </tr>
           ))}

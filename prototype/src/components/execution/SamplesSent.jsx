@@ -9,12 +9,12 @@ const money = (n) => (n === undefined || n === null ? '—' : Number(n).toLocale
 const fmt = (d) => { if (!d) return '—'; const t = new Date(d); return Number.isNaN(t.getTime()) ? d : t.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) }
 const ORDER = ['Debits', 'Credits', 'Before year end', 'After year end', 'Above materiality', 'Selected below materiality']
 
-function Row({ it, slug }) {
+function Row({ it, slug, odd }) {
   const showToast = useToast(); const [rejecting, setRejecting] = useState(false); const [reason, setReason] = useState('')
   const r = it.row || {}; const canReview = ['Uploaded Processing', 'Under Review'].includes(it.status)
   return (
     <>
-      <tr className="border-t border-slate-100 align-top even:bg-slate-50">
+      <tr className={`border-t border-slate-100 align-top ${odd ? 'bg-slate-50' : ''}`}>
         <td className="px-4 py-3 text-xs font-semibold text-slate-500">{it.ref}</td>
         <td className="px-4 py-3 text-sm text-navy">{r.date ? fmt(`${r.date}T00:00:00Z`) : '—'}</td>
         <td className="px-4 py-3 text-sm text-navy">{r.ledger || '—'}</td>
@@ -59,7 +59,7 @@ export default function SamplesSent({ rec, slug, group }) {
               <div key={s || 'all'}>
                 {s && <p className="mb-2 text-sm font-semibold text-navy">{s}</p>}
                 <div className="overflow-x-auto rounded-xl border border-slate-200"><table className="w-full text-left text-sm"><thead><tr className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">{['No.', 'Date', 'Ledger', 'Description', 'Amount (SAR)', 'Sent by', 'Status', 'File', ''].map((h, i) => <th key={i} className={`px-4 py-3 ${h.startsWith('Amount') ? 'text-right' : ''}`}>{h}</th>)}</tr></thead>
-                  <tbody>{b.items.filter((i) => (i.subgroup || '') === s).map((i) => <Row key={i.ref} it={i} slug={slug} />)}</tbody></table></div>
+                  <tbody>{b.items.filter((i) => (i.subgroup || '') === s).map((i, k) => <Row key={i.ref} it={i} slug={slug} odd={k % 2 === 1} />)}</tbody></table></div>
               </div>
             ))}
           </Card>
