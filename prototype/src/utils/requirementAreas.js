@@ -1,7 +1,7 @@
 // The client's requirement list grouped by audit area (the way the audit areas read): documents, samples and cut-off items all sit under their area.
 // Pure functions. Base categories come from the rule books (BANK, SALES, ...); sample and cut-off categories carry the area they were raised for.
-export const AREA_GROUPS = [['general', 'Trial balance and ledger'], ['cash', 'Cash & Cash Equivalents'], ['receivables', 'Trade Receivables'], ['inventory', 'Inventory'], ['prepaid', 'Prepayments & Other Receivables'], ['fixed', 'Fixed Assets'], ['payables', 'Trade Payables'], ['accrued', 'Accrued Expense & Other Payables'], ['noncurrent', 'Non Current Liabilities'], ['equity', 'Equity'], ['revenue', 'Revenue'], ['cogs', 'COGS'], ['expense', 'Expense'], ['salary', 'Salary'], ['other', 'Other']]
-const BASE = { TB: 'general', GL: 'general', CASH: 'cash', BANK: 'cash', BANKACC: 'cash', TR: 'receivables', INV: 'inventory', PP: 'prepaid', SA: 'prepaid', FA: 'fixed', TP: 'payables', ACC: 'accrued', VAT: 'accrued', LN: 'noncurrent', EOSB: 'noncurrent', RP: 'noncurrent', SALES: 'revenue', PUR: 'cogs', EXP: 'expense', RENT: 'expense', SAL: 'salary' }
+export const AREA_GROUPS = [['general', 'Trial balance and ledger'], ['cash', 'Cash & Cash Equivalents'], ['receivables', 'Trade Receivables'], ['inventory', 'Inventory'], ['prepaid', 'Prepayments & Other Receivables'], ['fixed', 'Fixed Assets'], ['payables', 'Trade Payables'], ['accrued', 'Accrued Expense & Other Payables'], ['noncurrent', 'Non Current Liabilities'], ['related', 'Related Parties'], ['equity', 'Equity'], ['revenue', 'Revenue'], ['cogs', 'COGS'], ['expense', 'Expense'], ['salary', 'Salary'], ['other', 'Other']]
+const BASE = { TB: 'general', GL: 'general', CASH: 'cash', BANK: 'cash', BANKACC: 'cash', TR: 'receivables', INV: 'inventory', PP: 'prepaid', SA: 'prepaid', FA: 'fixed', TP: 'payables', ACC: 'accrued', VAT: 'accrued', LN: 'noncurrent', EOSB: 'noncurrent', RP: 'related', SALES: 'revenue', PUR: 'cogs', EXP: 'expense', RENT: 'expense', SAL: 'salary' }
 
 // The area of one sample or cut-off item.
 export function sampleArea(cat, item) {
@@ -10,7 +10,7 @@ export function sampleArea(cat, item) {
   if (/^(sales|revenue)/i.test(a)) return 'revenue'
   if (/^(cogs|purchase)/i.test(a)) return 'cogs'
   if (/^expenses?$/i.test(a)) return 'expense'
-  if (/related/i.test(a)) return 'noncurrent'
+  if (/related/i.test(a)) return 'related'
   if (/receivable/i.test(a)) return 'receivables'
   if (/payable/i.test(a)) return 'payables'
   if (/^arap$/i.test(a)) return /payab|supplier/i.test(`${item.subgroup || ''} ${item.text || ''}`) ? 'payables' : 'receivables'
