@@ -7,7 +7,6 @@ import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
 import AuditTypeChip from '../../components/shared/AuditTypeChip'
 import { useToast } from '../../components/shared/Toast'
-import { useModal } from '../../components/shared/Modal'
 import { foProposals, foProposalFilterCounts, foSentProposals } from '../../data/sampleData'
 import { AUDITORS, AUDIT_TYPES, SERVICES, emailProposal, useGeneratedProposals } from '../../utils/proposals'
 import NewProposalModal from './NewProposalModal'
@@ -18,7 +17,6 @@ import { getClientProfile, saveClientProfile } from '../../utils/clientProfiles'
 export default function FOProposals() {
   const navigate = useNavigate()
   const showToast = useToast()
-  const { openModal, closeModal } = useModal()
   const [filter, setFilter] = useState('All')
   const [statuses, setStatuses] = useState({})
   const [expanded, setExpanded] = useState(true)

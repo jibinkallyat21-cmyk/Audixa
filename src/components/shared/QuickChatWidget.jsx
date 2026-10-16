@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AtSign, MessageSquare, Minus, Send, X } from 'lucide-react'
+import { MessageSquare, Minus, Send, X } from 'lucide-react'
 
 const DEFAULT_MEMBERS = [
   { id: 'tariq', name: 'Tariq Al-Harbi', role: 'Audit Manager', initials: 'TH', color: '#2563EB' },

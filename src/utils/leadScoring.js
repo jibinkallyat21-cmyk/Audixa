@@ -2,8 +2,6 @@
 // Lead Score = (A/5 x wA) + (B/5 x wB) + (C/5 x wC) + (D/5 x wD), default weights 25 / 30 / 25 / 20.
 export const DEFAULT_WEIGHTS = { A: 25, B: 30, C: 25, D: 20 }
 export const MANAGER_RATINGS = [[5, 'Ready to sign'], [4, 'High'], [3, 'Moderate'], [2, 'Low'], [1, 'Very low']]
-export const SATISFACTION = [[5, 'Very satisfied'], [4, 'Satisfied'], [3, 'Neutral'], [2, 'Dissatisfied'], [1, 'Very dissatisfied / complaint']]
-export const OTHER_SERVICES = ['VAT', 'Zakat', 'Bookkeeping', 'Payroll', 'Advisory']
 export const BANDS = {
   A: { id: 'A', label: 'Band A (Hot)', short: 'Hot', contact: 'Contact within two working days' },
   B: { id: 'B', label: 'Band B (Warm)', short: 'Warm', contact: 'Contact within the week' },

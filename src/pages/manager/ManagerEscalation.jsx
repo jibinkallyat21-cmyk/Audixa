@@ -23,7 +23,7 @@ const TIER_STYLE = {
 export default function ManagerEscalation() {
   const navigate = useNavigate()
   const showToast = useToast()
-  const { openModal, closeModal } = useModal()
+  const { openModal } = useModal()
   const [band, setBand] = useState(REVENUE_BANDS[0])
   const [tier2, setTier2] = useState(escalationTier2)
   const [tier3, setTier3] = useState(escalationTier3)

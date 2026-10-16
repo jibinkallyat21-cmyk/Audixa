@@ -1,13 +1,15 @@
 import { Database } from 'lucide-react'
 import { useToast } from '../shared/Toast'
 import { useState } from 'react'
-import { useDemoLoaded, useDemoAuditor, loadDemoData, clearDemoData } from '../../utils/demoData'
+import { useDemoLoaded, useDemoAuditor, useDemoExisting, loadDemoData, clearDemoData } from '../../utils/demoData'
 
 export default function DemoDataCard({ D }) {
   const showToast = useToast()
   const loaded = useDemoLoaded()
   const current = useDemoAuditor()
   const [firm, setFirm] = useState('MISCPA')
+  const [existingClient, setExistingClient] = useState(true)
+  const isExisting = useDemoExisting()
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-3" style={{ background: D.card, border: `1px dashed ${D.border}` }}>
       <div className="flex min-w-0 items-start gap-3">
@@ -21,8 +23,13 @@ export default function DemoDataCard({ D }) {
         <label className="flex items-center gap-2 text-xs" style={{ color: D.muted }}>Audit firm
           <select aria-label="Audit firm" value={firm} onChange={(e) => setFirm(e.target.value)} className="rounded-md px-2 py-1.5 text-xs" style={{ background: D.card, color: D.text, border: `1px solid ${D.border}` }}><option>MISCPA</option><option>ABCPA</option></select>
         </label>
-      ) : <span className="text-xs" style={{ color: D.muted }}>Audit firm: {current}</span>}
-      <button onClick={() => { if (loaded) { clearDemoData(); showToast('Demo data removed') } else { loadDemoData(firm); showToast('Demo data loaded. Open the Execution Team portal to see the file.') } }}
+      ) : <span className="text-xs" style={{ color: D.muted }}>Audit firm: {current} · {isExisting ? 'existing client' : 'new client'}</span>}
+      {!loaded && (
+        <label className="flex items-center gap-2 text-xs" style={{ color: D.muted }}>Client
+          <select aria-label="Client type" value={existingClient ? 'existing' : 'new'} onChange={(e) => setExistingClient(e.target.value === 'existing')} className="rounded-md px-2 py-1.5 text-xs" style={{ background: D.card, color: D.text, border: `1px solid ${D.border}` }}><option value="existing">Existing (audited by us last year)</option><option value="new">New</option></select>
+        </label>
+      )}
+      <button onClick={() => { if (loaded) { clearDemoData(); showToast('Demo data removed') } else { loadDemoData(firm, existingClient); showToast('Demo data loaded. Open the Execution Team portal to see the file.') } }}
         className="shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold text-white" style={{ background: loaded ? '#64748b' : '#E63946' }}>
         {loaded ? 'Remove demo data' : 'Load demo data'}
       </button>

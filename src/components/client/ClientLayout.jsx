@@ -2,22 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
-import {
-  LayoutDashboard,
-  ListChecks,
-  MessageSquare,
-  FolderOpen,
-  LineChart,
-  Table2,
-  ChevronDown,
-  MessageCircle,
-  Paperclip,
-  Send,
-  X,
-  Clock,
-  Maximize2,
-  Minimize2,
-} from 'lucide-react'
+import { LayoutDashboard, ListChecks, MessageSquare, FolderOpen, LineChart, Table2, ChevronDown, MessageCircle, Paperclip, Send, X, Maximize2, Minimize2 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
 import DemoGate from '../shared/DemoGate'
 import ExitDemoButton from '../shared/ExitDemoButton'
@@ -537,10 +522,7 @@ function PartnerBadge() {
 /* ─── Header ─── */
 function ClientHeader({ title }) {
   const { isDark } = useTheme()
-  const tx = isDark ? 'text-white' : 'text-[#0D1B2A]'
-  const txMuted = isDark ? 'text-white/50' : 'text-slate-500'
   const txTitle = isDark ? 'text-white/80' : 'text-slate-700'
-  const sep = isDark ? 'text-white/20' : 'text-slate-300'
   const avatarBg = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(13,27,42,0.08)'
   const avatarTx = isDark ? 'text-white' : 'text-[#0D1B2A]'
   return (

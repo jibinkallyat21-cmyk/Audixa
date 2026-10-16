@@ -80,8 +80,6 @@ export function sampleParties(ledger, { tolerance = 1, pct = 0.5, customerLedger
   const catTotal = r2(Object.values(cats).flat().reduce((n, p) => n + p.closing, 0) + needsReview.reduce((n, p) => n + p.closing, 0))
   return { categories: out, needsReview, items, reconciliation: { ledgerTotal, categoriesTotal: catTotal, diff: r2(ledgerTotal - catTotal), ledgerCount: items.length, categoriesCount: Object.values(cats).flat().length + needsReview.length } }
 }
-// Confirmation tracker rules.
-export const clientOptionApplies = (opt) => opt === 'Confirmation'
 export function alternativeApplicable({ option, status }) {
   if (!option) return 'Select option'
   return option === 'Alternative Procedures' || status === 'No Reply' ? 'Yes' : 'No'

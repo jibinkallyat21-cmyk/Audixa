@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Star, Eye, CheckCircle2, TrendingUp, Banknote, Briefcase, UserCheck } from 'lucide-react'
+import { FileText, Star, TrendingUp, Banknote, Briefcase, UserCheck } from 'lucide-react'
 import FrontOfficeLayout from '../../components/frontoffice/FrontOfficeLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
@@ -13,9 +13,6 @@ import {
   foExpiringProposals,
   SCORE_TONE,
 } from '../../data/sampleData'
-
-const ICONS = { FileText, Star, Eye, CheckCircle2 }
-
 function useCountUp(target, duration = 1000) {
   const [value, setValue] = useState(0)
   useEffect(() => {

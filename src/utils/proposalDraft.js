@@ -1,5 +1,5 @@
 // Process 1.1 — draft proposal preparation and approval (paragraphs 1.1.4, 1.1.6, 1.1.7). Pure functions.
-import { REVENUE_CATEGORIES, categoryById } from '../data/feeSchedule.js'
+import { categoryById } from '../data/feeSchedule.js'
 
 // Settings (the System Administrator can change them). Placeholders until the audit lead confirms the real values.
 export const DRAFT_SETTINGS = {
@@ -64,8 +64,6 @@ export function draftProposal(lead, { asOf = new Date(), settings = DRAFT_SETTIN
   return { blocked: false, existing, draft, missing, changed, basis: { framework: framework.basis, fee: feeBasis, scope: existing ? 'Same as the previous year\'s proposal' : 'Standard statutory audit scope in the template', period: `Financial year under audit (${fy.label}) from the client's year end` }, ...outsideMatrix(draft.fee, lead, settings) }
 }
 
-// ── approval workflow: Draft -> Pending approval -> Approved / Returned -> Sent. Only the FO sends. ──
-export const DRAFT_STATUS = ['Draft', 'Pending approval', 'Returned', 'Approved', 'Sent']
 export function canSubmit(d, { missing = [], outside = false }) {
   const errors = []
   if (missing.length) errors.push(`Complete the missing fields first: ${missing.join(', ')}.`)

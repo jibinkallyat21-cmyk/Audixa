@@ -8,8 +8,6 @@ export const PORTAL_CLIENT = { slug: 'kingdom-retail', client: 'Kingdom Retail H
 
 const log = (clientName, title, description, category) => { try { logEvent({ client: PORTAL_CLIENT.slug, clientName, category, title, description }) } catch { /* log is optional */ } }
 export const useIssuedLists = () => useStore(KEY, {})[0]
-export const getIssued = (slug) => readStore(KEY, {})[slug] || null
-
 export function issueList(file, built, { by = 'Audit team', source = '' } = {}) {
   const all = readStore(KEY, {})
   const rec = { slug: file.slug, client: file.client, auditor: file.auditor, issuedAt: new Date().toISOString(), by, source, itemCount: built.itemCount, categories: built.categories }

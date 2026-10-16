@@ -3,12 +3,11 @@ import { Download, Loader2, Upload, CheckCircle2, AlertCircle, Clock, FileSpread
 import { useToast } from '../shared/Toast'
 import { readTBWorkbook } from '../../utils/tbExcel'
 import { checkTBFormat, compactLedgers, PRESCRIBED_COLUMNS } from '../../utils/tbFormat'
-import { readGLWorkbook, checkGL, demoGLTransactions } from '../../utils/generalLedger'
+import { readGLWorkbook, checkGL } from '../../utils/generalLedger'
 import { buildTBTemplate, buildGLTemplate } from '../../utils/tbTemplate'
 import { useTBSubmissions, submitTB } from '../../utils/tbSubmissionStore'
 import { openingCheck } from '../../utils/openingCheck'
-import { demoCY, demoPY } from '../../data/demoTB'
-import { DEMO_FILE } from '../../utils/demoData'
+import { DEMO_FILE, demoPayload, useDemoExisting } from '../../utils/demoData'
 
 const save = async (blob, name) => { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url) }
 
@@ -67,19 +66,15 @@ export default function TBUploadStep({ D }) {
     } catch { setGlErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']); cur.current.gl = null; setGl(null) }
     setBusy('')
   }
-  const ready = !!tb && !!gl && glErr.length === 0 && (firstYear || !!py)
-  const oc = tb && py && !firstYear ? openingCheck(py.ledgers, tb.ledgers) : null
+  const ready = !!tb && !!gl && glErr.length === 0 && (existing || firstYear || !!py)
+  const oc = tb && py && !firstYear && !existing ? openingCheck(py.ledgers, tb.ledgers) : null
   const send = () => {
     const { rows, stats } = crossCheck(tb, gl)
-    submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats, pyFileName: firstYear ? '' : py.fileName, pyLedgers: firstYear ? [] : py.ledgers, firstYear })
+    submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats, pyFileName: existing || firstYear ? '' : py.fileName, pyLedgers: existing || firstYear ? [] : py.ledgers, firstYear: !existing && firstYear })
     showToast('Trial balance and general ledger sent to the audit team')
   }
-  const demoGL = (ledgers) => { const txns = demoGLTransactions(ledgers); const r = checkGL(ledgers, txns); return { glRows: r.partyRows, glStats: r.stats } }
-  const useDemo = () => {
-    const ledgers = compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit })))
-    submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', ...demoGL(ledgers), pyFileName: 'Demo previous year audited trial balance.xlsx', pyLedgers: compactLedgers(demoPY()) })
-    showToast('Demo files sent to the audit team')
-  }
+  const existing = useDemoExisting()
+  const useDemo = () => { submitTB(DEMO_FILE, demoPayload(existing)); showToast('Demo files sent to the audit team') }
 
   if (sub?.status === 'Submitted') return (
     <div className="rounded-xl p-6" style={card}>
@@ -124,14 +119,15 @@ export default function TBUploadStep({ D }) {
         {slot({ title: 'Detailed general ledger', hint: 'Every transaction recorded in your books for the period, one row per entry, with the opening balance of each account as an "Opening balance" line. For receivables, payables and advances give the party name on each line. Movements must agree with your trial balance.', file: gl && `${gl.fileName} · ${gl.txns.length} transactions`, errs: glErr, onPick: onGL, kind: 'gl', template: 'Download the general ledger format', templateName: 'General_Ledger_Format.xlsx', builder: buildGLTemplate })}
       </div>
       <div className="mt-3">
-        {!firstYear && slot({ title: 'Previous year audited trial balance', hint: 'The audited trial balance of last year, in the same format. Your opening balances are checked against its closing balances.', file: py && `${py.fileName} · ${py.ledgers.length} ledgers`, errs: pyErr, onPick: onPY, kind: 'py', template: 'Download the trial balance format', templateName: 'Trial_Balance_Format.xlsx', builder: buildTBTemplate })}
-        <label className="mt-2 flex items-center gap-2 text-xs" style={{ color: D.muted }}><input type="checkbox" checked={firstYear} onChange={(e) => setFirstYear(e.target.checked)} />This is our first audit, so there is no previous year audited trial balance</label>
+        {existing && <p className="text-xs" style={{ color: D.muted }}>We audited you last year, so your audit team adds last year's audited trial balance themselves and checks your opening balances against it. You do not need to upload it.</p>}
+        {!existing && !firstYear && slot({ title: 'Previous year audited trial balance', hint: 'The audited trial balance of last year, in the same format. Your opening balances are checked against its closing balances.', file: py && `${py.fileName} · ${py.ledgers.length} ledgers`, errs: pyErr, onPick: onPY, kind: 'py', template: 'Download the trial balance format', templateName: 'Trial_Balance_Format.xlsx', builder: buildTBTemplate })}
+        {!existing && <label className="mt-2 flex items-center gap-2 text-xs" style={{ color: D.muted }}><input type="checkbox" checked={firstYear} onChange={(e) => setFirstYear(e.target.checked)} />This is our first audit, so there is no previous year audited trial balance</label>}
         {oc && !oc.aligned && <p className="mt-2 rounded-lg px-3 py-2 text-xs text-amber" style={{ background: 'rgba(245,158,11,0.1)' }}>{oc.differences} area{oc.differences === 1 ? '' : 's'} of your opening balances differ from last year's audited closing balances. You can still send; the audit team will ask you to explain the difference.</p>}
         {oc && oc.aligned && <p className="mt-2 text-xs text-emerald">Your opening balances agree with last year's audited trial balance.</p>}
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button disabled={!ready} onClick={send} className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Send to the audit team</button>
-        {!ready && <span className="text-xs" style={{ color: D.muted }}>The trial balance, the general ledger and last year's audited trial balance are needed.</span>}
+        {!ready && <span className="text-xs" style={{ color: D.muted }}>{existing ? 'The trial balance and the general ledger are needed.' : "The trial balance, the general ledger and last year's audited trial balance are needed."}</span>}
         <button onClick={useDemo} className="rounded-lg px-4 py-2 text-sm font-semibold underline" style={{ color: D.muted }}>Use demo files</button>
       </div>
     </div>

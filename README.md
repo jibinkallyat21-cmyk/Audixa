@@ -1,19 +1,56 @@
-# React + Vite
+# Audixa (Audit 360)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Front-end platform for an audit firm (Analytix): a client portal, the audit execution team, the audit manager, front office and management.
+React 19 + Vite, Tailwind, React Router, framer-motion, ExcelJS. There is no database or real login yet: data is kept in the browser
+(`localStorage`, with an in-memory fallback) behind one module, `src/utils/store.js`, so a server can replace it by changing that file. Four
+Vercel serverless functions live in `api/`.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```
+npm install
+npm run dev      # development
+npm run build    # production build (always check the production build, not only dev)
+npm test         # node --test "scripts/*.test.mjs": the rule logic (no browser needed)
+npm run lint
+```
 
-## React Compiler
+## Demo data
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Sign in through the demo picker on `/login`. The client portal and the execution team portal are empty until the client opens the
+**Engagement Dashboard and presses "Load demo data"** (it can create an ABCPA or MISCPA client, existing or new). That adds the demo client
+to the team's files, submits a demo trial balance, general ledger and (for a new client) previous year audited trial balance, and the whole
+flow can then be followed in both portals. "Remove demo data" clears it. The manager, front office and management portals still use sample
+data from `src/data/sampleData.js`.
 
-## Expanding the Oxlint configuration
+## The client flow (what is built)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+1. The client uploads the trial balance and the detailed general ledger (prescribed formats, checked on upload: `src/utils/tbFormat.js`,
+   `src/utils/generalLedger.js`). Existing clients: the allocated team member adds last year's audited trial balance (PDF or Excel);
+   new clients upload it themselves or say it is their first audit.
+2. The audit team checks the opening balances against the previous year audited trial balance in two steps: code first
+   (`src/utils/openingCheck.js`), then, only for flagged ledgers, the AI review (`api/opening-review.js`) whose proposals are verified by
+   adding the amounts (`src/utils/openingReview.js`). The team confirms and approves.
+3. Approval applies the party-wise balances from the general ledger, issues the requirement list for the allocated firm
+   (`src/data/misRequirements.js`, `src/data/abcRequirements.js`, filtered by `src/utils/requirementsEngine.js`), and fills the working
+   trial balance. The client then uploads documents and the team accepts or rejects them. Queries, activity log and adjustments follow.
+4. The execution tools (TB review, sampling and vouching, payroll and assets, IFRS trial balance and financial statements, query tracker,
+   audit log, archive) are under the team's My Workspace > Audit Procedures. Their logic is pure code in `src/utils/*.js` with tests in `scripts/`.
+
+`docs/execution-decisions.md` is the running list of every decision taken and every open question. Read it before changing rules.
+
+## AI (Claude) endpoints
+
+Both are optional: without `ANTHROPIC_API_KEY` the screens fall back to manual entry or code-only matching and say so.
+
+| Variable | Purpose |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | Claude API key (Vercel, secret) |
+| `ANTHROPIC_MODEL` | Optional model id (default `claude-opus-5-5`) |
+| `ALLOWED_ORIGIN` | Optional. Only accept requests from this origin |
+
+- `api/read-document.js` reads uploaded PDFs/images (proposal, CR, AOA, engagement letter, previous year trial balance, intake documents).
+- `api/opening-review.js` reviews only the ledgers the code check flagged in the opening balance comparison.
 
 ## Odoo proposal integration
 

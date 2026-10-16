@@ -8,6 +8,9 @@
     },
     "api/read-document.js": {
       "maxDuration": 60
+    },
+    "api/opening-review.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [

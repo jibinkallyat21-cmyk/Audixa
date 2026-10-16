@@ -66,7 +66,6 @@ test('pending list flags zakat, ECL, inventory, related parties', () => {
 })
 test('IFRS list has unique codes', () => assert.equal(new Set(IFRS.map((a) => a.code)).size, IFRS.length))
 
-import ExcelJS from 'exceljs'
 import { buildIfrsWorkbook } from '../src/utils/ifrsExcel.js'
 test('IFRS workbook: sheet order, bridge formulas, pending, status', async () => {
   const l = bal().map((x) => ({ ...x, closingSupplied: true })); const tb = buildIfrsTB({ ledgers: l })

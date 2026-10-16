@@ -43,7 +43,6 @@ export const IFRS = [
 export const ifrsByCode = (c) => IFRS.find((a) => a.code === c)
 const GROUP_TO_IFRS = { cash: 'A101', receivables: 'A102', prepayments: 'A107', inventory: 'A105', ppeCost: 'A201', accDep: 'A202', intangibles: 'A203', vat: 'A108', payables: 'L101', accruals: 'L102', borrowings: 'L201', eosb: 'L203', capital: 'E101', re: 'E104', revenue: 'P101', cogs: 'P102', opex: 'P103', finance: 'P106', otherIncome: 'P105', tax: 'P107' }
 const SELLING = /advertis|marketing|promotion|selling|distribution|sales commission|delivery/i
-const NOTE_BY_CODE = {}
 // Default IFRS account for a client ledger; the reason is kept as the mapping note.
 export function mapLedger(l, override) {
   if (override && ifrsByCode(override)) return { code: override, note: 'Mapped by the reviewer', flag: '' }

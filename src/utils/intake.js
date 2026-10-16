@@ -19,8 +19,6 @@ const norm = (s) => String(s ?? '').toLowerCase().replace(/[^a-z0-9؀-ۿ]/g, '')
 const same = (a, b) => norm(a) !== '' && norm(a) === norm(b)
 
 export const docFileName = ({ clientCode, fyLabel, type, version }) => `${clientCode}_${fyLabel}_${DOC_TYPES[type]?.code || 'DOC'}_v${version}`
-export function clientFolderPaths(clientCode, fyLabel) { return FOLDERS.map((f) => `${clientCode}/${fyLabel}/${f}`) }
-
 let seq = 0; const uid = (p) => `${p}-${Date.now().toString(36)}-${(seq++).toString(36)}`
 export function newIntake({ clientId, clientName, clientCode, fyLabel, fyYear, hasPriorAudit = false, priorByAnalytix = false, vatRegistered = false, odoo = {}, proposal = {} }) {
   const mk = (type, applicable) => ({ id: uid('it'), type, label: DOC_TYPES[type].label, folder: DOC_TYPES[type].folder, custom: false, applicable, status: 'Not issued', docs: [], reminders: [], note: '' })

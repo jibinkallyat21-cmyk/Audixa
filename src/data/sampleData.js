@@ -45,8 +45,6 @@ export const engFrontOfficers = [
   { id: 'AZ', name: 'Azhar', role: 'Front Officer', phone: '+966 54 662 1150', email: 'azhar@analytix.sa', color: '#7C3AED' },
   { id: 'AL', name: 'Allen', role: 'Front Officer (Senior)', phone: '+966 50 889 3277', email: 'allen@analytix.sa', color: '#DC2626' },
 ]
-export const foById = (id) => engFrontOfficers.find((f) => f.id === id) || engFrontOfficers[0]
-
 // Primary client / engagement portfolio data source (replaces prior placeholder
 // `clients` array). Field shape kept as in the source console: code/id/name/
 // sector/fy/turnover/phase/progress/status/exceptions/city/lead/profile/fo/
@@ -59,13 +57,6 @@ export const clients = [
   { code: 'ZK-005', id: 'TF', name: 'Tabuk Foods Co.', sector: 'Manufacturing / FMCG', fy: 'FY2025', turnover: 'SAR 78.9M', phase: 8, progress: 94, status: 'ok', exceptions: 0, city: 'Tabuk', lead: 'DS', profile: 'MIS', fo: 'AL', contact: 'Faisal Tabuk', cphone: '+966 14 422 3390', cemail: 'finance@tabukfoods.sa', due: '2026-09-12', zakat: true, audit: 'Proper' },
   { code: 'ZK-006', id: 'HL', name: 'Hijaz Logistics WLL', sector: 'Services / Logistics', fy: 'FY2025', turnover: 'SAR 33.5M', phase: 4, progress: 46, status: 'warn', exceptions: 1, city: 'Jeddah', lead: 'RP', profile: 'ABCA', fo: 'FY', contact: 'Yousef Hijaz', cphone: '+966 12 770 1123', cemail: 'ap@hijazlogistics.sa', due: '2026-10-31', zakat: true, audit: 'Proper' },
 ]
-
-// status -> {label, tone} for the portfolio "status" pill (ok/warn/crit)
-export const CLIENT_STATUS_TONE = {
-  ok: { label: 'On Track', tone: 'emerald' },
-  warn: { label: 'Needs Attention', tone: 'amber' },
-  crit: { label: 'Critical', tone: 'alert-red' },
-}
 
 const TODAY_DEMO = new Date('2026-09-16T00:00:00')
 // Days remaining until a client's due date — negative means overdue.
@@ -83,213 +74,6 @@ export function dueChip(c) {
   return { text: new Date(c.due + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), tone: 'grey' }
 }
 
-// Audit engagement files — the core work object shown across most screens.
-export const auditFiles = [
-  {
-    id: 'AF-2026-0141',
-    fileRef: 'ABCPA/2026/0141',
-    clientId: 'cl-001',
-    clientName: 'Nakheel Al-Riyadh Trading Co. Ltd.',
-    auditType: 'Proper Audit',
-    auditor: 'ABCPA',
-    fiscalYearEnd: '2025-12-31',
-    sarAmount: 18450000,
-    status: 'Active',
-    assignedTo: 'Sara Al-Qahtani',
-    manager: 'Fahad Al-Otaibi',
-    startDate: '2026-01-12',
-    dueDate: '2026-03-15',
-    progress: 62,
-    openQueries: 4,
-  },
-  {
-    id: 'AF-2026-0142',
-    fileRef: 'ABCPA/2026/0142',
-    clientId: 'cl-002',
-    clientName: 'Jeddah Coastal Logistics Co.',
-    auditType: 'Proper Audit',
-    auditor: 'ABCPA',
-    fiscalYearEnd: '2025-12-31',
-    sarAmount: 9870000,
-    status: 'With Reviewer',
-    assignedTo: 'Omar Al-Harbi',
-    manager: 'Fahad Al-Otaibi',
-    startDate: '2026-01-05',
-    dueDate: '2026-02-28',
-    progress: 88,
-    openQueries: 1,
-  },
-  {
-    id: 'AF-2026-0207',
-    fileRef: 'MISCPA/2026/0207',
-    clientId: 'cl-003',
-    clientName: 'Dammam Steel Fabrication Est.',
-    auditType: 'Special Audit',
-    auditor: 'MISCPA',
-    fiscalYearEnd: '2025-09-30',
-    sarAmount: 32900000,
-    status: 'Under Review',
-    assignedTo: 'Yousef Al-Dosari',
-    manager: 'Rania Al-Shehri',
-    startDate: '2025-12-01',
-    dueDate: '2026-02-10',
-    progress: 95,
-    openQueries: 2,
-  },
-  {
-    id: 'AF-2026-0208',
-    fileRef: 'MISCPA/2026/0208',
-    clientId: 'cl-004',
-    clientName: 'Al Madinah Healthcare Holding',
-    auditType: 'Proper Audit',
-    auditor: 'MISCPA',
-    fiscalYearEnd: '2025-12-31',
-    sarAmount: 56200000,
-    status: 'Pending',
-    assignedTo: 'Lina Al-Mutairi',
-    manager: 'Rania Al-Shehri',
-    startDate: '2026-02-01',
-    dueDate: '2026-04-30',
-    progress: 8,
-    openQueries: 0,
-  },
-  {
-    id: 'AF-2026-0143',
-    fileRef: 'ABCPA/2026/0143',
-    clientId: 'cl-005',
-    clientName: 'Qassim Agri-Foods Manufacturing Co.',
-    auditType: 'Disclaimer',
-    auditor: 'ABCPA',
-    fiscalYearEnd: '2025-12-31',
-    sarAmount: 4120000,
-    status: 'Parked',
-    assignedTo: 'Sara Al-Qahtani',
-    manager: 'Fahad Al-Otaibi',
-    startDate: '2025-11-10',
-    dueDate: '2026-01-20',
-    progress: 34,
-    openQueries: 6,
-  },
-  {
-    id: 'AF-2026-0209',
-    fileRef: 'MISCPA/2026/0209',
-    clientId: 'cl-006',
-    clientName: 'Khobar Digital Solutions Co.',
-    auditType: 'Proper Audit',
-    auditor: 'MISCPA',
-    fiscalYearEnd: '2025-12-31',
-    sarAmount: 7650000,
-    status: 'Accepted',
-    assignedTo: 'Yousef Al-Dosari',
-    manager: 'Rania Al-Shehri',
-    startDate: '2025-12-15',
-    dueDate: '2026-02-05',
-    progress: 100,
-    openQueries: 0,
-  },
-  {
-    id: 'AF-2026-0144',
-    fileRef: 'ABCPA/2026/0144',
-    clientId: 'cl-007',
-    clientName: 'Taif Rose Cosmetics Manufacturing',
-    auditType: 'Liquidation—Proper',
-    auditor: 'ABCPA',
-    fiscalYearEnd: '2025-06-30',
-    sarAmount: 2380000,
-    status: 'On Hold',
-    assignedTo: 'Omar Al-Harbi',
-    manager: 'Fahad Al-Otaibi',
-    startDate: '2025-10-01',
-    dueDate: '2026-01-15',
-    progress: 47,
-    openQueries: 3,
-  },
-  {
-    id: 'AF-2026-0210',
-    fileRef: 'MISCPA/2026/0210',
-    clientId: 'cl-008',
-    clientName: 'Al Ahsa Date Processing Co.',
-    auditType: 'Liquidation—Disclaimer',
-    auditor: 'MISCPA',
-    fiscalYearEnd: '2025-12-31',
-    sarAmount: 1150000,
-    status: 'Rejected',
-    assignedTo: 'Lina Al-Mutairi',
-    manager: 'Rania Al-Shehri',
-    startDate: '2025-11-20',
-    dueDate: '2026-01-31',
-    progress: 71,
-    openQueries: 5,
-  },
-]
-
-// Query threads attached to audit files — client/team back-and-forth.
-export const queryThreads = [
-  {
-    id: 'Q-1141-01',
-    fileId: 'AF-2026-0141',
-    subject: 'Inventory valuation — obsolete stock provision',
-    status: 'Under Review',
-    raisedBy: 'Sara Al-Qahtani',
-    raisedOn: '2026-02-02',
-    messages: [
-      { id: 'm1', author: 'Sara Al-Qahtani', role: 'Senior Auditor', timestamp: '2026-02-02 09:14', text: 'Could you provide the aging report for inventory as of 2025-12-31, broken down by SKU category?' },
-      { id: 'm2', author: 'Abdullah Al-Rashid', role: 'Client', timestamp: '2026-02-03 11:40', text: 'Attached the aging report. Note that the electronics category includes SAR 640,000 of stock flagged for write-down.' },
-      { id: 'm3', author: 'Sara Al-Qahtani', role: 'Senior Auditor', timestamp: '2026-02-04 08:02', text: 'Thank you. Please also share management\'s basis for the 15% provision rate applied to slow-moving items.' },
-    ],
-  },
-  {
-    id: 'Q-1141-02',
-    fileId: 'AF-2026-0141',
-    subject: 'Related party transactions — disclosure completeness',
-    status: 'Pending',
-    raisedBy: 'Omar Al-Harbi',
-    raisedOn: '2026-02-08',
-    messages: [
-      { id: 'm1', author: 'Omar Al-Harbi', role: 'Audit Associate', timestamp: '2026-02-08 14:20', text: 'We noted a SAR 1.2M payable to a sister company (Nakheel Logistics Ltd). Please confirm this is fully disclosed in Note 24.' },
-    ],
-  },
-  {
-    id: 'Q-0207-01',
-    fileId: 'AF-2026-0207',
-    subject: 'Fixed asset impairment — furnace equipment',
-    status: 'Accepted',
-    raisedBy: 'Yousef Al-Dosari',
-    raisedOn: '2026-01-10',
-    messages: [
-      { id: 'm1', author: 'Yousef Al-Dosari', role: 'Senior Auditor', timestamp: '2026-01-10 10:00', text: 'The furnace equipment (carrying value SAR 4.8M) shows indicators of impairment per the utilization log. Please provide an impairment assessment.' },
-      { id: 'm2', author: 'Mansour Al-Anazi', role: 'Client', timestamp: '2026-01-14 16:32', text: 'Assessment attached — recoverable amount estimated at SAR 3.9M based on value-in-use. Impairment of SAR 900K to be booked.' },
-      { id: 'm3', author: 'Yousef Al-Dosari', role: 'Senior Auditor', timestamp: '2026-01-15 09:18', text: 'Agreed with the methodology. Please post the adjusting journal entry and share the updated FAR.' },
-      { id: 'm4', author: 'Mansour Al-Anazi', role: 'Client', timestamp: '2026-01-16 12:05', text: 'JE posted, updated FAR attached.' },
-    ],
-  },
-  {
-    id: 'Q-0143-01',
-    fileId: 'AF-2026-0143',
-    subject: 'Going concern — cash flow forecast',
-    status: 'Rejected',
-    raisedBy: 'Sara Al-Qahtani',
-    raisedOn: '2025-12-18',
-    messages: [
-      { id: 'm1', author: 'Sara Al-Qahtani', role: 'Senior Auditor', timestamp: '2025-12-18 09:00', text: 'Given the working capital deficit, please provide a 12-month cash flow forecast supporting the going concern assumption.' },
-      { id: 'm2', author: 'Faisal Al-Muqbil', role: 'Client', timestamp: '2025-12-22 15:47', text: 'Forecast attached, relies on a planned SAR 5M shareholder injection in Q2.' },
-      { id: 'm3', author: 'Sara Al-Qahtani', role: 'Senior Auditor', timestamp: '2025-12-27 10:11', text: 'No signed commitment letter for the shareholder injection was provided. Forecast cannot be relied upon as presented — query rejected pending evidence.' },
-    ],
-  },
-  {
-    id: 'Q-0210-01',
-    fileId: 'AF-2026-0210',
-    subject: 'Liquidation — creditor claim verification',
-    status: 'Active',
-    raisedBy: 'Lina Al-Mutairi',
-    raisedOn: '2026-01-05',
-    messages: [
-      { id: 'm1', author: 'Lina Al-Mutairi', role: 'Audit Associate', timestamp: '2026-01-05 13:15', text: 'Please provide the full creditor claims register with supporting invoices for claims above SAR 100,000.' },
-      { id: 'm2', author: 'Turki Al-Hajri', role: 'Client', timestamp: '2026-01-09 09:30', text: 'Register attached. Three claims totaling SAR 480,000 are under dispute with the liquidator.' },
-    ],
-  },
-]
-
 // Notifications feed used by Header bell / notification center.
 export const notifications = [
   { id: 'n1', type: 'query', title: 'New reply on Q-1141-01', description: 'Abdullah Al-Rashid replied on Nakheel Al-Riyadh inventory query.', timestamp: '2026-02-03 11:40', read: false },
@@ -298,73 +82,6 @@ export const notifications = [
   { id: 'n4', type: 'assignment', title: 'You were assigned AF-2026-0208', description: 'Al Madinah Healthcare Holding assigned to Lina Al-Mutairi.', timestamp: '2026-02-01 09:12', read: true },
   { id: 'n5', type: 'status', title: 'AF-2026-0210 rejected', description: 'Al Ahsa Date Processing liquidation file rejected — see review notes.', timestamp: '2026-01-31 16:44', read: true },
 ]
-
-// Analytics/dashboard summary data (used with recharts).
-export const monthlyFileVolume = [
-  { month: 'Sep', filesOpened: 14, filesClosed: 11 },
-  { month: 'Oct', filesOpened: 18, filesClosed: 15 },
-  { month: 'Nov', filesOpened: 22, filesClosed: 19 },
-  { month: 'Dec', filesOpened: 16, filesClosed: 20 },
-  { month: 'Jan', filesOpened: 25, filesClosed: 17 },
-  { month: 'Feb', filesOpened: 19, filesClosed: 14 },
-]
-
-export const sarByAuditType = [
-  { type: 'Proper Audit', sarAmount: 92170000 },
-  { type: 'Special Audit', sarAmount: 32900000 },
-  { type: 'Disclaimer', sarAmount: 4120000 },
-  { type: 'Liquidation—Proper', sarAmount: 2380000 },
-  { type: 'Liquidation—Disclaimer', sarAmount: 1150000 },
-]
-
-export const statusBreakdown = [
-  { status: 'Active', count: 1 },
-  { status: 'With Reviewer', count: 1 },
-  { status: 'Under Review', count: 1 },
-  { status: 'Pending', count: 1 },
-  { status: 'Parked', count: 1 },
-  { status: 'Accepted', count: 1 },
-  { status: 'On Hold', count: 1 },
-  { status: 'Rejected', count: 1 },
-]
-
-// Navigation item sets per role (used by Sidebar across the app's dashboards).
-export const navByRole = {
-  client: [
-    { id: 'overview', label: 'Overview' },
-    { id: 'files', label: 'My Audit Files' },
-    { id: 'queries', label: 'Queries' },
-    { id: 'documents', label: 'Documents' },
-    { id: 'invoices', label: 'Invoices' },
-  ],
-  team: [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'my-files', label: 'My Files' },
-    { id: 'queries', label: 'Queries' },
-    { id: 'clients', label: 'Clients' },
-  ],
-  manager: [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'team', label: 'Team' },
-    { id: 'files', label: 'All Files' },
-    { id: 'reviews', label: 'Reviews' },
-    { id: 'reports', label: 'Reports' },
-  ],
-  frontoffice: [
-    { id: 'intake', label: 'Client Intake' },
-    { id: 'scheduling', label: 'Scheduling' },
-    { id: 'clients', label: 'Clients' },
-    { id: 'billing', label: 'Billing' },
-  ],
-  management: [
-    { id: 'overview', label: 'Firm Overview' },
-    { id: 'auditors', label: 'Auditors' },
-    { id: 'files', label: 'All Files' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'settings', label: 'Settings' },
-  ],
-}
-
 // ── Client Portal (Module 2) — Kingdom Retail Holdings LLC ──────────────────
 
 export const clientPortal = {
@@ -518,126 +235,6 @@ export const clientNotifications = [
     unread: false,
   },
 ]
-
-export const requirementCategories = [
-  {
-    id: '01',
-    title: 'Corporate Governance & Statutory Records',
-    completed: 12,
-    total: 12,
-    percent: 100,
-    status: 'Complete',
-    statusColor: 'emerald',
-    defaultOpen: false,
-    items: [
-      { ref: 'COG-01', name: 'Trade License (CR) 2024', status: 'Accepted', fileInfo: 'trade_license_2024.pdf · 1.2MB · Uploaded 01 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'COG-02', name: 'Articles of Association (Certified Copy)', status: 'Accepted', fileInfo: 'articles_of_association_certified.pdf · 3.4MB · Uploaded 01 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'COG-03', name: 'Board Resolutions FY2024', status: 'Accepted', fileInfo: 'board_resolutions_fy24.pdf · 0.8MB · Uploaded 02 Sep 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'COG-04', name: 'Authorised Signatory List', status: 'Accepted', fileInfo: 'authorised_signatories_2024.pdf · 0.4MB · Uploaded 02 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'COG-05', name: 'VAT Registration Certificate', status: 'Accepted', fileInfo: 'vat_registration_cert.pdf · 0.5MB · Uploaded 03 Sep 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'COG-06', name: 'ZATCA Taxpayer ID Certificate', status: 'Accepted', fileInfo: 'zatca_taxpayer_id.pdf · 0.3MB · Uploaded 03 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'COG-07', name: 'Chamber of Commerce Certificate', status: 'Accepted', fileInfo: 'chamber_of_commerce_cert.pdf · 0.6MB · Uploaded 04 Sep 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'COG-08', name: 'GOSI Registration Document', status: 'Accepted', fileInfo: 'gosi_registration.pdf · 0.4MB · Uploaded 04 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'COG-09', name: 'Municipal License Renewal', status: 'Accepted', fileInfo: 'municipal_license_2024.pdf · 0.7MB · Uploaded 05 Sep 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'COG-10', name: 'List of Shareholders / Partners', status: 'Accepted', fileInfo: 'shareholders_list_2024.pdf · 0.5MB · Uploaded 05 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'COG-11', name: 'Related Party Declaration', status: 'Accepted', fileInfo: 'related_party_declaration.pdf · 0.4MB · Uploaded 06 Sep 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'COG-12', name: 'MoI Registration Certificate', status: 'Accepted', fileInfo: 'moi_registration_cert.pdf · 0.9MB · Uploaded 06 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-    ],
-  },
-  {
-    id: '02',
-    title: 'Revenue & Receivables',
-    completed: 15,
-    total: 20,
-    percent: 75,
-    status: 'In Progress',
-    statusColor: 'amber',
-    defaultOpen: true,
-    items: [
-      {
-        ref: 'REV-01',
-        name: 'Audited Revenue Ledger',
-        status: 'Accepted',
-        fileInfo: 'rev_ledger_fy24.xlsx · 4.2MB · Uploaded 2 days ago · Reviewed by K. Al-Otaibi',
-        action: 'View Audit Trail',
-      },
-      {
-        ref: 'REV-02',
-        name: 'Top 10 Customer Contracts',
-        status: 'Under Review',
-        fileInfo: 'contracts_top10_signed.pdf · 18.6MB · Uploaded Today 10:14AM',
-        action: 'Replace / Details',
-      },
-      {
-        ref: 'REV-03',
-        name: 'Allowance for Expected Credit Losses',
-        status: 'Rejected',
-        fileInfo: 'ecl_provision_calc_v1.xlsx · Reviewed by Partner T. Al-Ghamdi',
-        action: 'Re-upload Document',
-        alert:
-          'Missing historical default rate calculation for FY22-FY23. The transition matrix provided only covers FY24 forward probabilities without macroeconomic overlay weighting.',
-      },
-      {
-        ref: 'REV-04',
-        name: 'Year-end Cutoff Invoices',
-        status: 'Pending Client',
-        fileInfo: 'Statutory Deadline 18 Oct 2024',
-        tag: 'Newly requested 03 Oct',
-        action: 'Upload File or Drag Here',
-      },
-      {
-        ref: 'REV-05',
-        name: 'ZATCA E-Invoicing Samples',
-        status: 'Uploaded Processing',
-        fileInfo: 'zatca_phase2_hashes.xml · 1.1MB · Processing',
-        action: 'View File',
-      },
-    ],
-  },
-  {
-    id: '03',
-    title: 'Property Plant & Equipment',
-    completed: 12,
-    total: 20,
-    percent: 60,
-    status: 'In Progress',
-    statusColor: 'amber',
-    defaultOpen: false,
-    items: [
-      { ref: 'PPE-01', name: 'Fixed Asset Register (Detailed)', status: 'Accepted', fileInfo: 'fa_register_fy24.xlsx · 5.1MB · Uploaded 05 Oct 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'PPE-02', name: 'Depreciation Schedule FY2024', status: 'Accepted', fileInfo: 'depreciation_schedule_fy24.xlsx · 3.8MB · Uploaded 05 Oct 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'PPE-03', name: 'Additions List (New Assets FY24)', status: 'Accepted', fileInfo: 'ppe_additions_fy24.xlsx · 2.2MB · Uploaded 04 Oct 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'PPE-04', name: 'Disposal Certificates & Sale Agreements', status: 'Accepted', fileInfo: 'ppe_disposals_fy24.pdf · 1.6MB · Uploaded 25 Sep 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'PPE-05', name: 'Asset Impairment Assessment', status: 'Under Review', fileInfo: 'impairment_assessment_fy24.pdf · 4.0MB · Uploaded 10 Oct 2024', action: 'View File' },
-      { ref: 'PPE-06', name: 'Lease Agreements (IFRS 16 Schedule)', status: 'Pending Client', fileInfo: 'Statutory Deadline 20 Oct 2024', tag: 'Newly requested 08 Oct', action: 'Upload File or Drag Here' },
-      { ref: 'PPE-07', name: 'Maintenance & Capex Contracts', status: 'Pending Client', fileInfo: 'Statutory Deadline 20 Oct 2024', tag: 'Newly requested 08 Oct', action: 'Upload File or Drag Here' },
-      { ref: 'PPE-08', name: 'Insurance Certificates (Major Assets)', status: 'Accepted', fileInfo: 'insurance_certs_fy24.pdf · 2.8MB · Uploaded 30 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'PPE-09', name: 'Right-of-Use Asset Schedule (IFRS 16)', status: 'Under Review', fileInfo: 'rou_asset_schedule.xlsx · 1.9MB · Uploaded 10 Oct 2024', action: 'View File' },
-      { ref: 'PPE-10', name: 'Property Title Deeds', status: 'Accepted', fileInfo: 'property_title_deeds.pdf · 6.3MB · Uploaded 28 Sep 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-    ],
-  },
-  {
-    id: '04',
-    title: 'Tax, Zakat & Compliance',
-    completed: 8,
-    total: 16,
-    percent: 50,
-    status: 'In Progress',
-    statusColor: 'grey',
-    defaultOpen: false,
-    items: [
-      { ref: 'TAX-01', name: 'VAT Returns Q1–Q4 FY2024', status: 'Accepted', fileInfo: 'vat_returns_q1_q4_2024.pdf · 4.5MB · Uploaded 10 Sep 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'TAX-02', name: 'ZATCA VAT Return Q3 2024', status: 'Pending Client', fileInfo: 'On Hold — Required before audit can proceed.', tag: 'On Hold', action: 'Upload File or Drag Here', alert: 'This document is flagged as outstanding under the current On Hold notice. Please upload immediately.' },
-      { ref: 'TAX-03', name: 'Zakat Declaration Form', status: 'Accepted', fileInfo: 'zakat_declaration_fy24.pdf · 1.1MB · Uploaded 03 Oct 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'TAX-04', name: 'Withholding Tax Returns (WHT)', status: 'Accepted', fileInfo: 'wht_returns_fy24.pdf · 2.0MB · Uploaded 04 Oct 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-      { ref: 'TAX-05', name: 'GOSI Contribution Statements', status: 'Accepted', fileInfo: 'gosi_statements_fy24.pdf · 1.8MB · Uploaded 05 Oct 2024 · Reviewed by L. Khalid', action: 'View Audit Trail' },
-      { ref: 'TAX-06', name: 'Transfer Pricing Documentation', status: 'Under Review', fileInfo: 'transfer_pricing_fy24.pdf · 5.2MB · Uploaded 07 Oct 2024', action: 'View File' },
-      { ref: 'TAX-07', name: 'Bank Statement October 2024', status: 'Pending Client', fileInfo: 'On Hold — Required before audit can proceed.', tag: 'On Hold', action: 'Upload File or Drag Here', alert: 'October 2024 bank statement is outstanding. This is blocking the current audit phase.' },
-      { ref: 'TAX-08', name: 'Zakat Computation Worksheet', status: 'Accepted', fileInfo: 'zakat_computation_fy24.xlsx · 3.1MB · Uploaded 06 Oct 2024 · Reviewed by S. Rashid', action: 'View Audit Trail' },
-    ],
-  },
-]
-
 export const clientQueries = [
   {
     id: 'QRY-01',
@@ -661,144 +258,6 @@ export const clientQueries = [
     linkedRef: null,
   },
 ]
-
-export const queryThreadMessages = {
-  'QRY-01': [
-    {
-      side: 'left',
-      author: 'Tariq Al-Harbi',
-      role: 'Lead Audit Partner — Analytix Assurance',
-      timestamp: '10:42 AM',
-      text:
-        'Regarding the Q3 Revenue cutoff test, we noted an unbilled SAR 450,000 ledger entry recorded on Sept 29. Requirement REV-2024-409 — Please attach supporting delivery notes and client sign-off verifying transfer of physical control prior to September 30 midnight.',
-    },
-    {
-      side: 'right',
-      author: 'You',
-      role: 'Finance Director',
-      timestamp: '11:15 AM',
-      text:
-        'Received. The warehouse logistics batch for that shipment was finalized on Sept 30. Gathering the signed PODs from Dammam depot right now.',
-      deliveredRead: true,
-    },
-  ],
-  'QRY-02': [
-    {
-      side: 'left',
-      author: 'Sarah Crawford',
-      role: 'Technical Audit Senior — Analytix Assurance',
-      timestamp: '02 Oct, 09:20 AM',
-      text: 'Please confirm the current authorised signatories on the SNB and Al-Rajhi SAB accounts for our bank confirmation letters.',
-    },
-    {
-      side: 'right',
-      author: 'You',
-      role: 'Finance Director',
-      timestamp: '02 Oct, 03:40 PM',
-      text: 'Confirmed — signatories are unchanged since FY2023. Letter of authorization re-attached for reference.',
-      deliveredRead: true,
-    },
-  ],
-  'QRY-03': [
-    {
-      side: 'left',
-      author: 'Tariq Al-Harbi',
-      role: 'Lead Audit Partner — Analytix Assurance',
-      timestamp: '24 Sep, 11:02 AM',
-      text: 'Please provide the disposal certificate and sale agreement for the delivery vehicles written off in August.',
-    },
-    {
-      side: 'right',
-      author: 'You',
-      role: 'Finance Director',
-      timestamp: '25 Sep, 08:55 AM',
-      text: 'Disposal certificate and sale agreement uploaded to the requirement list.',
-      deliveredRead: true,
-    },
-    {
-      side: 'left',
-      author: 'Tariq Al-Harbi',
-      role: 'Lead Audit Partner — Analytix Assurance',
-      timestamp: '25 Sep, 02:30 PM',
-      text: 'Received, thank you — this query is now closed.',
-    },
-  ],
-}
-
-// FY-keyed queries — FY2024 reuses the live clientQueries above
-const QUERIES_FY2023 = [
-  { id: 'QRY-01', subject: 'Revenue Recognition — Long-term Contracts Policy (IFRS 15)', status: 'Closed', date: '12 Nov', linkedRef: 'REV-01' },
-  { id: 'QRY-02', subject: 'Lease Liability Remeasurement — IFRS 16 Modification', status: 'Closed', date: '08 Nov', linkedRef: null },
-  { id: 'QRY-03', subject: 'Impairment Assessment — Non-current Assets Group', status: 'Closed', date: '22 Oct', linkedRef: null },
-  { id: 'QRY-04', subject: 'Related Party Transactions — Board Disclosure FY2023', status: 'Closed', date: '15 Oct', linkedRef: null },
-  { id: 'QRY-05', subject: 'Zakat Base Calculation — Deductible Items', status: 'Closed', date: '05 Oct', linkedRef: null },
-]
-
-const QUERY_THREADS_FY2023 = {
-  'QRY-01': [
-    { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '12 Nov 2023, 09:00', text: 'Please confirm the revenue recognition policy applied to multi-period logistics contracts under IFRS 15 and provide sample contract computations.' },
-    { side: 'right', author: 'You', role: 'Finance Director', timestamp: '12 Nov 2023, 14:20', text: 'Revenue is recognised over the contract term as services are delivered. Policy note attached along with three sample computations.', deliveredRead: true },
-    { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '14 Nov 2023, 10:05', text: 'Policy and samples are satisfactory — this query is now closed.' },
-  ],
-  'QRY-02': [
-    { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '08 Nov 2023, 10:30', text: 'Lease terms for three warehouses were modified in August. Please provide the remeasurement schedules confirming the updated carrying amounts.' },
-    { side: 'right', author: 'You', role: 'Finance Director', timestamp: '08 Nov 2023, 15:45', text: 'Remeasurement schedules prepared by our treasury team are attached.', deliveredRead: true },
-    { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '10 Nov 2023, 09:15', text: 'Reviewed and agreed — query closed.' },
-  ],
-  'QRY-03': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '22 Oct 2023', text: 'Impairment indicators noted for three distribution assets. Management assessment and recoverable amount calculations required.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '25 Oct 2023', text: 'No impairment required — VIU exceeds carrying amount on all three assets. Supporting DCF attached.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '28 Oct 2023', text: 'Agreed with management assessment — closed.' }],
-  'QRY-04': [{ side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '15 Oct 2023', text: 'Please confirm completeness of related-party disclosures including subsidiaries, associates, and key management compensation.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '16 Oct 2023', text: 'Full RPT schedule attached and confirmed complete.', deliveredRead: true }, { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '18 Oct 2023', text: 'Satisfactory — closed.' }],
-  'QRY-05': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '05 Oct 2023', text: 'Please confirm whether the long-term loans are included in the Zakat base and provide basis for any deduction claimed.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '06 Oct 2023', text: 'Loans are non-Zakat items per GAZT guidelines. Deduction schedule attached.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '07 Oct 2023', text: 'Agreed — closed.' }],
-}
-
-const QUERIES_FY2022 = [
-  { id: 'QRY-01', subject: 'Opening Balances Verification — First Year with Analytix', status: 'Closed', date: '18 Nov', linkedRef: null },
-  { id: 'QRY-02', subject: 'Inventory Count Procedures — Dammam & Riyadh Warehouses', status: 'Closed', date: '10 Nov', linkedRef: null },
-  { id: 'QRY-03', subject: 'Bank Confirmation — Al-Rajhi SAB Facilities FY2022', status: 'Closed', date: '28 Oct', linkedRef: null },
-]
-
-const QUERY_THREADS_FY2022 = {
-  'QRY-01': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '18 Nov 2022', text: 'As this is the first year of our engagement, please provide the predecessor auditor\'s signed TB and prior-year AFS for our opening balance procedures.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '19 Nov 2022', text: 'Predecessor AFS and signed TB uploaded.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '22 Nov 2022', text: 'Opening balances agreed — closed.' }],
-  'QRY-02': [{ side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '10 Nov 2022', text: 'Physical inventory count is scheduled for 30 Nov. Please confirm attendance list and count procedures for Dammam and Riyadh warehouses.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '11 Nov 2022', text: 'Procedures confirmed — our warehouse managers will be present. Count sheets sent.', deliveredRead: true }, { side: 'left', author: 'Sarah Crawford', role: 'Technical Audit Senior — Analytix Assurance', timestamp: '02 Dec 2022', text: 'Count completed satisfactorily — closed.' }],
-  'QRY-03': [{ side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '28 Oct 2022', text: 'Please sign and return the bank confirmation request forms for all Al-Rajhi SAB facilities so we can despatch directly to the bank.' }, { side: 'right', author: 'You', role: 'Finance Director', timestamp: '28 Oct 2022', text: 'Signed forms attached.', deliveredRead: true }, { side: 'left', author: 'Tariq Al-Harbi', role: 'Lead Audit Partner — Analytix Assurance', timestamp: '10 Nov 2022', text: 'Bank response received and agreed — closed.' }],
-}
-
-export function getQueriesForFY(fy) {
-  if (fy === 'FY2023') return { queries: QUERIES_FY2023, threads: QUERY_THREADS_FY2023 }
-  if (fy === 'FY2022') return { queries: QUERIES_FY2022, threads: QUERY_THREADS_FY2022 }
-  return { queries: clientQueries, threads: queryThreadMessages }
-}
-
-// Per-FY document stats for the PBC Documents page
-export function getDocStatsForFY(fy) {
-  if (fy === 'FY2023') return { total: 78, submitted: 78, approved: 78, stillNeeded: 0, needsCorrection: 0, isComplete: true }
-  if (fy === 'FY2022') return { total: 71, submitted: 71, approved: 71, stillNeeded: 0, needsCorrection: 0, isComplete: true }
-  return { total: 84, submitted: 20, approved: 62, stillNeeded: 14, needsCorrection: 3, isComplete: false }
-}
-
-export const draftReview = {
-  bannerText: 'Draft AFS issued 15 Oct 2024. Please review the full document and confirm below.',
-  document: {
-    name: 'Draft AFS — Kingdom Retail Holdings LLC — FY2024',
-    pages: 24,
-    size: '2.8MB',
-  },
-  comments: [
-    {
-      id: 'c1',
-      author: 'Audit Team',
-      side: 'team',
-      text: 'Please note the related party disclosure on Note 7 has been updated per your confirmation on 12 Oct.',
-    },
-    {
-      id: 'c2',
-      author: 'You',
-      side: 'client',
-      text: 'Confirmed, looks correct. Note 12 — Zakat provision also reviewed.',
-    },
-  ],
-  signOff: { recorded: false },
-}
-
 export const deliverables = {
   banner: { qawaemRef: 'QAW-2024-88412', filedDate: '22 Oct 2024' },
   cards: [
@@ -835,31 +294,6 @@ export const deliverables = {
     status: 'Closed',
     completionDate: '22 Oct 2024',
   },
-}
-
-// ── Engagement documents — shared source of truth (Audit360 console) ───────
-// Each document belongs to a profile (SHARED / ABCA / MIS) and carries a
-// version per profile in `usedBy` — this is how the console flags cross-team
-// version conflicts (two profiles working off different versions of the same
-// document).
-export const engagementDocuments = [
-  { name: 'Final_TB.xlsx', profile: 'SHARED', ver: 'V3', by: 'PJ', date: 'today', status: 'Current', usedBy: { ABCA: 'V3', MIS: 'V2' }, req: 'SH-001' },
-  { name: 'General_Ledger.xlsx', profile: 'SHARED', ver: 'V1', by: 'PJ', date: '2d ago', status: 'Current', usedBy: { ABCA: 'V1', MIS: 'V1' }, req: 'SH-002' },
-  { name: 'Bank_NCB_main.pdf', profile: 'SHARED', ver: 'V1', by: 'JF', date: '3d ago', status: 'Current', usedBy: { ABCA: 'V1', MIS: 'V1' }, req: 'SH-003' },
-  { name: 'Payroll_GOSI_Dec.xlsx', profile: 'SHARED', ver: 'V2', by: 'PJ', date: '4d ago', status: 'Current', usedBy: { ABCA: 'V2', MIS: 'V2' }, req: 'SH-005' },
-  { name: 'ABCA_External_Confirmations.pdf', profile: 'ABCA', ver: 'V1', by: 'JF', date: '1d ago', status: 'Current', usedBy: { ABCA: 'V1' }, req: 'ABCA-001' },
-  { name: 'ABCA_ZATCA_invoices.xml', profile: 'ABCA', ver: 'V2', by: 'JF', date: 'today', status: 'Current', usedBy: { ABCA: 'V2' }, req: 'ABCA-002' },
-  { name: 'MIS_Management_Accounts.xlsx', profile: 'MIS', ver: 'V1', by: 'PJ', date: '2d ago', status: 'Current', usedBy: { MIS: 'V1' }, req: 'MIS-001' },
-  { name: 'MIS_KPI_Variance.xlsx', profile: 'MIS', ver: 'V1', by: 'PJ', date: 'today', status: 'Draft', usedBy: { MIS: 'V1' }, req: 'MIS-003' },
-]
-
-// A document is "conflicted" when more than one profile is on a different
-// version of the same shared document (ported from docConflicts()).
-export function getDocConflicts(docs = engagementDocuments) {
-  return docs.filter((d) => {
-    const versions = Object.values(d.usedBy || {})
-    return versions.length > 1 && new Set(versions).size > 1
-  })
 }
 
 // ── Engagement lifecycle (8-stage model) ────────────────────────────────────
@@ -933,61 +367,6 @@ export function getLifecycleStages(state, stages = ENGAGEMENT_LIFECYCLE) {
     }
     return { ...stage, status }
   })
-}
-
-// ── AI verification queue (File Workspace / Requirements tab) ──────────────
-// Ported from aiQueue + __aiReview()/__aiDecide(): low-confidence AI
-// extractions routed to a human for Accept / Correct / Reject / Escalate.
-// Nothing is finalised below 90% confidence without auditor confirmation.
-export const aiReviewQueue = [
-  { id: 'AI-OUT-089', doc: 'EXP-0774', feature: 'Invoice extraction', profile: 'ABCA', confidence: 71, due: 'Today', fields: 'Vendor name · VAT number · Total amount', note: 'Arabic invoice · poor scan' },
-  { id: 'AI-OUT-090', doc: 'FA-0033', feature: 'Asset classification', profile: 'ABCA', confidence: 82, due: 'Today', fields: 'Asset tag · Useful life', note: 'Missing asset tag' },
-  { id: 'AI-OUT-091', doc: 'INV-2318', feature: 'Invoice matching', profile: 'MIS', confidence: 88, due: 'Tomorrow', fields: 'PO reference', note: 'Partial PO match' },
-]
-
-// ── Requirement list registry (Client Portal + Audit Team workspace) ───────
-// Base requirement seed — ported from `requirements` in the console, spanning
-// SHARED / ABCA / MIS profiles per SOP 4.2.
-export const requirementSeed = [
-  { id: 'SH-001', item: 'Final adjusted Trial Balance (V3)', status: 'ok', owner: 'PJ', due: 'Received', profile: 'SHARED', sop: 'SOP 4.2' },
-  { id: 'SH-002', item: 'General Ledger (full)', status: 'ok', owner: 'PJ', due: 'Received', profile: 'SHARED', sop: 'SOP 4.2' },
-  { id: 'SH-003', item: 'Bank statements — all accounts', status: 'warn', owner: 'JF', due: 'Due in 2d', profile: 'SHARED', sop: 'SOP 4.2' },
-  { id: 'SH-004', item: 'AR / AP ageing listings', status: 'ok', owner: 'JF', due: 'Received', profile: 'SHARED', sop: 'SOP 4.2' },
-  { id: 'SH-005', item: 'Payroll register + GOSI records', status: 'ok', owner: 'PJ', due: 'Received', profile: 'SHARED', sop: 'SOP 4.2' },
-  { id: 'ABCA-001', item: 'External bank confirmations', status: 'warn', owner: 'JF', due: 'Due in 3d', profile: 'ABCA', sop: 'SOP 4.2' },
-  { id: 'ABCA-002', item: 'ZATCA e-invoice sample batch', status: 'ok', owner: 'JF', due: 'Received', profile: 'ABCA', sop: 'SOP 4.2' },
-  { id: 'ABCA-003', item: 'Related-party confirmations', status: 'crit', owner: 'AM', due: 'Overdue 1d', profile: 'ABCA', sop: 'SOP 4.2' },
-  { id: 'ABCA-004', item: 'Statutory AFS pack (IFRS)', status: 'mut', owner: 'AM', due: 'Not yet requested', profile: 'ABCA', sop: 'SOP 4.4' },
-  { id: 'MIS-001', item: 'Monthly management accounts', status: 'warn', owner: 'PJ', due: 'Due in 2d', profile: 'MIS', sop: 'MIS 2.1' },
-  { id: 'MIS-002', item: 'Budget vs actual analysis', status: 'mut', owner: 'JF', due: 'Requested', profile: 'MIS', sop: 'MIS 2.2' },
-  { id: 'MIS-003', item: 'KPI & variance schedule', status: 'warn', owner: 'PJ', due: 'Due in 4d', profile: 'MIS', sop: 'MIS 2.3' },
-  { id: 'MIS-004', item: 'Fixed asset register', status: 'warn', owner: 'PJ', due: 'Due in 4d', profile: 'MIS', sop: 'MIS 2.1' },
-  { id: 'MIS-005', item: 'Management representation letter', status: 'mut', owner: 'AM', due: 'Not yet requested', profile: 'MIS', sop: 'MIS 3.0' },
-]
-
-// getReqs()-equivalent: a module-level cache keyed by client code, so the
-// same client always gets back the same (mutable-in-memory) requirement
-// records instead of a fresh array each call — lets a consuming component
-// attach file/remarks/rejectReason state onto a requirement over time.
-const requirementRegistryCache = {}
-export function getRequirementsForClient(code) {
-  if (!requirementRegistryCache[code]) {
-    requirementRegistryCache[code] = requirementSeed.map((r) => ({
-      ...r,
-      file: null,
-      remarks: [],
-      rejectReason: '',
-    }))
-  }
-  return requirementRegistryCache[code]
-}
-
-// status -> tone, used by both the requirement list and the AI queue.
-export const REQ_STATUS_TONE = {
-  ok: { label: 'Received', tone: 'emerald' },
-  warn: { label: 'Pending', tone: 'amber' },
-  crit: { label: 'Overdue', tone: 'alert-red' },
-  mut: { label: 'Not requested', tone: 'grey' },
 }
 
 // ── Role registry — single source of truth for role-switching ──────────────
@@ -1279,84 +658,6 @@ export const teamRecentActivity = [
   { id: 'a5', client: 'Eastern Petrochemical Supplies', event: '5 documents uploaded to requirements', timestamp: 'Yesterday' },
 ]
 
-// ── File Workspace — Requirements tab ───────────────────────────────────────
-export const teamRequirementCategories = [
-  {
-    id: '01',
-    title: 'Corporate Governance & Statutory Records',
-    completed: 12,
-    total: 12,
-    percent: 100,
-    status: 'Complete',
-    statusColor: 'emerald',
-    defaultOpen: false,
-    items: [],
-  },
-  {
-    id: '02',
-    title: 'Revenue & Receivables',
-    completed: 15,
-    total: 20,
-    percent: 75,
-    status: 'In Progress',
-    statusColor: 'amber',
-    defaultOpen: true,
-    items: [
-      {
-        ref: 'REV-01',
-        name: 'Audited Revenue Ledger by Customer & Region',
-        status: 'Accepted',
-        fileInfo: 'rev_ledger_fy24.xlsx · 4.2MB · Uploaded 2 days ago · Auditor: K. Al-Otaibi',
-        action: 'View Audit Trail',
-      },
-      {
-        ref: 'REV-02',
-        name: 'Top 10 Customer Contract Terms',
-        status: 'Under Review',
-        fileInfo: 'contracts_top10_signed.pdf · 18.6MB · Today 10:14AM · AI extraction 92% confidence',
-        action: 'Replace / Details',
-      },
-      {
-        ref: 'REV-03',
-        name: 'ECL Model Matrix',
-        status: 'Rejected',
-        fileInfo: 'ecl_provision_calc_v1.xlsx · Partner T. Al-Ghamdi',
-        action: 'Re-upload',
-        aiFlag: {
-          draftText:
-            'Missing historical default rate calculation for FY22-FY23. The transition matrix provided only covers FY24 forward probabilities without macroeconomic overlay weighting.',
-        },
-      },
-      {
-        ref: 'REV-04',
-        name: 'Year-end Cutoff Invoices',
-        status: 'Pending Client',
-        fileInfo: 'Statutory Deadline: 18 Oct 2024 · Requires ZATCA QR UUID verification',
-        tag: 'Newly requested 03 Oct',
-        action: 'Upload File or Drag Here',
-      },
-      {
-        ref: 'REV-05',
-        name: 'ZATCA E-Invoicing Phase 2 Samples',
-        status: 'Uploaded Processing',
-        fileInfo: 'zatca_phase2_hashes.xml · 1.1MB · Awaiting AI OCR & Cryptographic validation',
-        action: 'View File',
-      },
-    ],
-  },
-  {
-    id: '03',
-    title: 'Property Plant & Equipment',
-    completed: 12,
-    total: 20,
-    percent: 60,
-    status: 'In Progress',
-    statusColor: 'amber',
-    defaultOpen: false,
-    items: [],
-  },
-]
-
 // ── File Workspace — Queries tab ────────────────────────────────────────────
 export const teamQueries = [
   { id: 'QRY-01', subject: 'Revenue Q3 Drop — Unbilled SAR 450,000 Entry Sept 29', status: 'Open', date: '05 Oct', linkedRef: 'REV-02' },
@@ -1364,27 +665,6 @@ export const teamQueries = [
   { id: 'QRY-03', subject: 'Fixed Asset Disposal Documentation', status: 'Closed', date: '25 Sep', linkedRef: null },
   { id: 'QRY-04', subject: 'GOSI Contribution Variance — Sept Payroll', status: 'Open', date: '01 Oct', linkedRef: null },
 ]
-
-export const teamQueryThread = [
-  {
-    side: 'left',
-    author: 'Fahad Al-Otaibi',
-    role: 'Audit Lead — ABCPA',
-    timestamp: '10:42 AM',
-    text:
-      'Regarding the Q3 Revenue cutoff test, we noted an unbilled SAR 450,000 ledger entry recorded on Sept 29. Please attach supporting delivery notes and client sign-off verifying transfer of physical control prior to September 30 midnight.',
-  },
-  {
-    side: 'right',
-    author: 'Kingdom Retail Holdings',
-    role: 'Client',
-    timestamp: '11:15 AM',
-    text:
-      'Received. The warehouse logistics batch for that shipment was finalized on Sept 30. Gathering the signed PODs from Dammam depot right now.',
-    deliveredRead: true,
-  },
-]
-
 // ── File Workspace — Procedures tab ─────────────────────────────────────────
 export const teamProcedures = [
   { id: 'P-01', name: 'Opening Balance Verification', description: 'Verify prior year closing balances agree to current year opening entries', status: 'Not Started', action: 'Begin' },
@@ -1719,15 +999,6 @@ export const abcpaPortfolio = [
   { name: 'On Hold', value: 8, color: '#CA8A04' },
   { name: 'With Reviewer', value: 5, color: '#2563EB' },
 ]
-
-export const abcpaDeptManagers = { manager: 'Tariq Al-Ghamdi', assistantManager: 'Sarah Al-Mansoor' }
-
-export const abcpaUrgentFiles = [
-  { client: 'Al-Rajhi Heavy Industries', days: 14, status: 'Active' },
-  { client: 'Dammam Hospitality Holdings', days: 8, status: 'On Hold' },
-  { client: 'Qassim Petrochemical', days: 19, status: 'Parked' },
-]
-
 export const firmPerformanceSummary = { avgTurnaround: '18.4 Days', avgAccuracy: '92%' }
 
 export const leadWorkload = [
@@ -1757,13 +1028,6 @@ export const managerTodaysActivity = [
   { client: 'Noor FinTech Micro-Lending', event: 'Shariah board sign-off received', timestamp: '3 hours ago' },
   { client: 'Tamimi King Retailers', event: 'Audit opinion draft submitted for review', timestamp: 'Yesterday' },
 ]
-
-export const managerEscalationAlerts = [
-  { client: 'Al-Yamamah Steel Industries', daysOverdue: 18, lead: 'Fahad Al-Otaibi', tier: 3 },
-  { client: 'Saudi Petrochem Logistics', daysOverdue: 14, lead: 'Nadia Hassan', tier: 3 },
-  { client: 'Dammam Hospitality Holdings', daysOverdue: 8, lead: 'Majed Al-Subaie', tier: 2 },
-]
-
 // ── File Status Board (screen 24) ───────────────────────────────────────────
 export const statusBoardFiles = [
   {
@@ -1884,8 +1148,6 @@ export const abcpaTeamPlan = [
     ],
   },
 ]
-export const SENIORITY_OPTIONS = ['Lead', 'Lead Senior', 'Senior Lead']
-
 // ── Escalation Monitor (screen 27) ──────────────────────────────────────────
 export const escalationTier1 = [
   { client: 'Al-Rajhi Heavy Industries', band: 'SAR 50M+ Band', due: '12 Nov 2024', daysRemaining: 3, lead: 'Fahad Al-Otaibi' },
@@ -1993,31 +1255,6 @@ export const foNotifications = [
   { title: 'New Lead Added', message: 'Eastern Tech Solutions submitted via CRM.', timestamp: '2 hours ago' },
   { title: 'Payment Received', message: 'SAR 24,000 received from Riyadh Food Industries.', timestamp: '3 hours ago' },
 ]
-
-export const foStatChips = [
-  { label: '12 New Leads Today', tone: 'bg-navy/10 text-navy' },
-  { label: '4 Proposals Awaiting Approval', tone: 'bg-alert-red/10 text-alert-red', pulse: true },
-  { label: '3 ELs Pending Capture', tone: 'bg-amber/10 text-amber' },
-  { label: '87 Proposals Sent This Month', tone: 'bg-emerald/10 text-emerald' },
-]
-
-export const foActionCards = [
-  { id: 'proposals-approval', tone: 'alert-red', title: '4 Proposals Awaiting FO Manager Approval', icon: 'FileText', action: 'Review Now', route: '/fo/proposals' },
-  { id: 'el-capture', tone: 'amber', title: '3 Engagement Letters Pending Capture', icon: 'Mail', action: 'Capture EL', route: '/fo/proposals?tab=el' },
-  { id: 'leads-priority', tone: 'amber', title: '8 High-Priority Leads Not Yet Contacted', icon: 'Star', action: 'View Leads', route: '/fo/leads' },
-  { id: 'registration-incomplete', tone: 'alert-red', title: '2 Client Registrations Incomplete', icon: 'User', action: 'Complete Now', route: '/fo/registration' },
-  { id: 'proposals-noreply', tone: 'amber', title: '5 Proposals Opened by Client — No Reply', icon: 'Eye', action: 'Follow Up', route: '/fo/proposals' },
-  { id: 'signed-unconverted', tone: 'amber', title: '3 Signed Proposals Not Yet Converted', icon: 'CheckCircle2', action: 'Convert Now', route: null },
-]
-
-export const foPipelineFunnel = [
-  { label: 'Total', value: 2148, color: '#0D1B2A' },
-  { label: 'Contacted', value: 890, color: '#2563EB' },
-  { label: 'Proposal Sent', value: 325, color: '#D97706' },
-  { label: 'Signed', value: 87, color: '#059669' },
-  { label: 'Converted', value: 54, color: '#047857' },
-]
-
 export const foRecentActivity = [
   { type: 'New Registration', client: 'Tabuk Renewable Energy Co.', timestamp: '25 mins ago', status: 'Accepted' },
   { type: 'Proposal Sent', client: 'Hail Agricultural Co.', timestamp: '1 hour ago', status: 'Sent to Client' },
@@ -2040,36 +1277,12 @@ export const foExpiringProposals = [
   { company: 'Eastern Tech Solutions', sentDate: '01 Nov 2024', expiryDate: '01 Dec 2024', daysRemaining: 6 },
   { company: 'Al-Nakheel Retail Group', sentDate: '25 Oct 2024', expiryDate: '24 Nov 2024', daysRemaining: 1 },
 ]
-
-// ── Lead Pipeline (screen 31) ────────────────────────────────────────────
-export const foLeadSummary = { total: 2148, highPriority: 312, proposalsSentMonth: 87, conversionRate: 17 }
-
-export const foLeads = [
-  { id: 'l1', company: 'Al-Bashir Trading Co.', score: 'High', confidence: 'high', source: 'Referral', lastContact: '03 Nov', followUp: 'Due Today', hasProposal: false },
-  { id: 'l2', company: 'Madinah Contracting LLC', score: 'High', confidence: 'high', source: 'MQL', lastContact: '01 Nov', followUp: 'Overdue', hasProposal: false },
-  { id: 'l3', company: 'Gulf Star Logistics', score: 'High', confidence: 'low', source: 'CRM', lastContact: '28 Oct', followUp: 'Scheduled', hasProposal: true },
-  { id: 'l4', company: 'Eastern Tech Solutions', score: 'Medium', confidence: 'high', source: 'Referral', lastContact: '02 Nov', followUp: 'Due Today', hasProposal: false },
-  { id: 'l5', company: 'Al-Nakheel Retail Group', score: 'Medium', confidence: 'low', source: 'CRM', lastContact: '25 Oct', followUp: 'Overdue', hasProposal: false },
-  { id: 'l6', company: 'Riyadh Food Industries', score: 'Medium', confidence: 'high', source: 'MQL', lastContact: '30 Oct', followUp: 'Scheduled', hasProposal: false },
-  { id: 'l7', company: 'Hail Agricultural Co.', score: 'Low', confidence: 'low', source: 'CRM', lastContact: '15 Oct', followUp: 'Not Started', hasProposal: false },
-  { id: 'l8', company: 'Northern Cement Factory', score: 'Low', confidence: 'low', source: 'Walk-in', lastContact: '10 Oct', followUp: 'Not Started', hasProposal: false },
-]
-
 export const FOLLOWUP_TONE = {
   Overdue: 'bg-alert-red/10 text-alert-red border-alert-red/30',
   Scheduled: 'bg-emerald/10 text-emerald border-emerald/30',
   'Due Today': 'bg-amber/10 text-amber border-amber/30',
   'Not Started': 'bg-slate-100 text-slate-500 border-slate-300',
 }
-
-export const foLossReasons = [
-  { label: 'Too Expensive', pct: 38, color: '#0D1B2A' },
-  { label: 'No Response', pct: 29, color: '#D97706' },
-  { label: 'Not Audit Obligated', pct: 18, color: '#94A3B8' },
-  { label: 'Chose Another Firm', pct: 10, color: '#2563EB' },
-  { label: 'Other', pct: 5, color: '#CBD5E1' },
-]
-
 // ── Proposals & Engagement Letters (screen 32) ──────────────────────────────
 export const foProposals = [
   { id: 'al-bashir', client: 'Al-Bashir Trading Co.', auditor: 'ABCPA', auditType: 'Proper', fee: 18500, createdBy: 'Layla Al-Khatib', createdDate: '04 Nov', status: 'Awaiting Approval' },
@@ -2084,20 +1297,6 @@ export const foSentProposals = [
   { client: 'Hail Agricultural Co.', sentDate: '28 Oct 2024', opened: false, daysSince: 8 },
   { client: 'Al-Andalus Pharmaceutical', sentDate: '25 Oct 2024', opened: true, daysSince: 11 },
 ]
-
-export const foEngagementLetters = [
-  { client: 'Eastern Petrochemical Supplies', auditor: 'MISCPA', status: 'Awaiting from Auditor', date: null },
-  { client: 'Al-Bashir Trading Co.', auditor: 'ABCPA', status: 'Received Ready to Forward', date: null },
-  { client: 'Noor FinTech Micro-Lending', auditor: 'MISCPA', status: 'Forwarded Awaiting Signature', date: '02 Nov 2024' },
-  { client: 'Al-Rajhi Capital Audits', auditor: 'ABCPA', status: 'Signed Captured', date: '01 Aug 2024' },
-]
-export const EL_STATUS_TONE = {
-  'Awaiting from Auditor': 'bg-amber/10 text-amber border-amber/30',
-  'Received Ready to Forward': 'bg-blue-100 text-blue-700 border-blue-300',
-  'Forwarded Awaiting Signature': 'bg-yellow-100 text-yellow-700 border-yellow-400',
-  'Signed Captured': 'bg-emerald/10 text-emerald border-emerald/30',
-}
-
 // ── Proposal Preview & Approval (screen 33) ─────────────────────────────────
 export const foProposalDetail = {
   reference: 'PROP-2024-1247',
@@ -2128,21 +1327,6 @@ export const mgmtFOContacts = {
 export const MGMT_VISIBLE_ESCALATION_TIER = 3
 
 export const mgmtUser = { name: 'Mohammed Al-Rashid', role: 'Partner', department: 'Management', initials: 'MR' }
-
-export const mgmtStatChips = [
-  { label: '148 Total Active Files', tone: 'bg-navy/10 text-navy' },
-  { label: 'On Track: 121', tone: 'bg-emerald/10 text-emerald' },
-  { label: 'At Risk: 18', tone: 'bg-amber/10 text-amber' },
-  { label: 'Critical: 3', tone: 'bg-alert-red/10 text-alert-red', pulse: true },
-  { label: 'Unallocated: 6', tone: 'bg-yellow-100 text-yellow-700' },
-]
-
-export const mgmtActionCards = [
-  { id: 'tier3', tone: 'alert-red', icon: 'Clock', title: '3 Critical Files — Immediate Partner Action', action: 'Escalate Now', route: '/management/dashboard' },
-  { id: 'parked', tone: 'amber', icon: 'PauseCircle', title: '8 Files Parked >14 Days', action: 'Review Parking', route: '/management/analytics' },
-  { id: 'overdue', tone: 'alert-red', icon: 'Banknote', title: 'SAR 84K Overdue Invoices', action: 'Follow Up', route: null },
-]
-
 export const mgmtAbcpaPortfolio = {
   label: 'ABCPA Department — 89 Files',
   total: 89,
@@ -2178,19 +1362,6 @@ export const mgmtMiscpaPortfolio = {
     { client: 'Saudi Petrochem Logistics', days: 14, status: 'Parked' },
   ],
 }
-
-export const mgmtFirmPerformance = {
-  turnaround: '18.4 Days',
-  accuracy: '92%',
-}
-
-export const mgmtRevenueTiles = [
-  { label: 'Total Fees Contracted', value: 1240000, display: 'SAR 1.24M', tone: 'navy' },
-  { label: 'Advance Payments Received', value: 890000, display: 'SAR 890K', tone: 'emerald' },
-  { label: 'Balance Payments Pending', value: 352000, display: 'SAR 352K', tone: 'amber' },
-  { label: 'Overdue Invoices', value: 84000, display: 'SAR 84K', tone: 'alert-red' },
-]
-
 export const mgmtLeadConversion = [
   { label: 'Leads', value: 2148 },
   { label: 'Contacted', value: 890 },
@@ -2198,26 +1369,7 @@ export const mgmtLeadConversion = [
   { label: 'Signed', value: 54 },
 ]
 export const mgmtConversionRate = 17
-
-const escalationsTodayAll = [
-  { client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', daysOverdue: 18, lead: 'Fahad Al-Otaibi', tier: 3 },
-  { client: 'Saudi Petrochem Logistics', dept: 'MISCPA', daysOverdue: 14, lead: 'Khalid Al-Farsi', tier: 3 },
-  { client: 'Dammam Hospitality', dept: 'ABCPA', daysOverdue: 8, lead: 'Majed Al-Subaie', tier: 2 },
-]
-export const mgmtEscalationsToday = escalationsTodayAll.filter(e => e.tier === MGMT_VISIBLE_ESCALATION_TIER)
-
-export const mgmtRecentActivity = [
-  { title: 'FO Escalation', client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', user: 'Tariq Al-Ghamdi', timestamp: '05 Nov 2024, 09:15 AM' },
-  { title: 'Proposal Approved & Sent', client: 'Al-Bashir Trading Co.', dept: 'ABCPA', user: 'Layla Al-Khatib', timestamp: '04 Nov 2024, 04:30 PM' },
-  { title: 'FO Escalation', client: 'Saudi Petrochem Logistics', dept: 'MISCPA', user: 'Khalid Al-Farsi', timestamp: '04 Nov 2024, 03:00 PM' },
-  { title: 'Engagement Letter Captured', client: 'Al-Rajhi Capital Audits', dept: 'ABCPA', user: 'Layla Al-Khatib', timestamp: '04 Nov 2024, 11:00 AM' },
-  { title: 'Stage Changed', client: 'Noor FinTech Micro-Lending', dept: 'MISCPA', user: 'System', timestamp: '03 Nov 2024, 09:00 AM' },
-]
-
 // ── Management Dashboard — new data blocks ──────────────────────────────────
-
-// Total turnover across all 148 engaged files (FY2025)
-export const mgmtTotalTurnover = { value: 'SAR 4.84B', raw: 4840000000, note: '148 files · FY2025' }
 
 // FO-manager-wise file allocation (business-development / client-acquisition level —
 // the detail shareholders care about; individual audit-staff assignments are not shown here)
@@ -2227,17 +1379,6 @@ export const mgmtFOFiles = [
   { fo: 'FY', name: 'Fayis', role: 'Front Officer', color: '#2563EB', total: 29, active: 25, won: 9, pipeline: 5, revenue: 243000 },
   { fo: 'UV', name: 'Uvais', role: 'Front Officer', color: '#0F766E', total: 27, active: 23, won: 8, pipeline: 4, revenue: 226000 },
   { fo: 'AZ', name: 'Azhar', role: 'Front Officer', color: '#7C3AED', total: 21, active: 17, won: 6, pipeline: 5, revenue: 176000 },
-]
-
-// AR summary — clients with pending payments
-export const mgmtARPending = [
-  { client: 'Al-Yamamah Steel Industries', code: 'ZK-011', fee: 95000, paid: 47500, balance: 47500, daysOverdue: 42, dept: 'ABCPA', contact: 'Nabil Al-Yamamah', phone: '+966 11 499 7100', status: 'Overdue' },
-  { client: 'Al-Rowad Trading Co.', code: 'ZK-001', fee: 38000, paid: 19000, balance: 19000, daysOverdue: 28, dept: 'ABCPA', contact: 'Khalid Al-Rowad', phone: '+966 11 462 7788', status: 'Overdue' },
-  { client: 'Saudi Petrochem Logistics', code: 'ZK-018', fee: 120000, paid: 60000, balance: 60000, daysOverdue: 18, dept: 'MISCPA', contact: 'Ibrahim Al-Saud', phone: '+966 13 551 2200', status: 'Overdue' },
-  { client: 'Najd Manufacturing Ltd.', code: 'ZK-002', fee: 72000, paid: 36000, balance: 36000, daysOverdue: 14, dept: 'MISCPA', contact: 'Sara Al-Najdi', phone: '+966 13 331 4020', status: 'Overdue' },
-  { client: 'Hijaz Logistics WLL', code: 'ZK-006', fee: 44000, paid: 22000, balance: 22000, daysOverdue: 7, dept: 'ABCPA', contact: 'Yousef Hijaz', phone: '+966 12 770 1123', status: 'Due Soon' },
-  { client: 'Qassim Petrochemical Co.', code: 'ZK-009', fee: 88000, paid: 44000, balance: 44000, daysOverdue: 3, dept: 'ABCPA', contact: 'Faris Al-Qassim', phone: '+966 16 433 8800', status: 'Due Soon' },
-  { client: 'Salam Services WLL', code: 'ZK-004', fee: 28000, paid: 14000, balance: 14000, daysOverdue: 0, dept: 'MISCPA', contact: 'Nada Salam', phone: '+966 11 208 5567', status: 'Due Today' },
 ]
 
 // Escalation levels raised from the client portal: 1 Audit Lead, 2 Audit Manager,
@@ -2312,13 +1453,6 @@ export const mgmtHealthBreakdown = [
   { label: 'Critical', value: 3, color: '#DC2626' },
   { label: 'Parked', value: 6, color: '#94A3B8' },
 ]
-
-export const mgmtParkingReasons = [
-  { label: 'Capacity', value: 12, color: '#0D1B2A' },
-  { label: 'Awaiting Internal Input', value: 6, color: '#D97706' },
-  { label: 'Reviewer Busy', value: 5, color: '#94A3B8' },
-]
-
 export const mgmtThroughput = [
   { month: 'Jun', value: 28 },
   { month: 'Jul', value: 31 },
@@ -2327,13 +1461,6 @@ export const mgmtThroughput = [
   { month: 'Oct', value: 38 },
   { month: 'Nov', value: 34 },
 ]
-
-export const mgmtAtRiskFiles = [
-  { client: 'Al-Yamamah Steel Industries', dept: 'ABCPA', status: 'OVERDUE 8D', blocker: 'PBC Bank Confirmation missing from 2 international branches', action: 'escalate' },
-  { client: 'Saudi Petrochem Logistics', dept: 'MISCPA', status: 'OVERDUE 4D', blocker: 'VAT Rec discrepancy SAR 14.2M unadjusted between ERP', action: 'escalate' },
-  { client: 'Kingdom Retail Consortia Ltd', dept: 'MISCPA', status: 'DUE IN 48H', blocker: 'Stage 4 Draft Financial Statement pending final Partner sign-off', action: 'review' },
-]
-
 // ── Audit Log — Management View (screen 37) ──────────────────────────────────
 // Note: individual staff assignments, transfers and performance reviews are
 // operational/HR detail owned by the Manager module (/manager/workload,
@@ -2398,32 +1525,12 @@ export const mgmtMonthlyRevenue = [
   { month: 'Nov', value: 690000 },
 ]
 
-// ── Risk & Compliance (Management) ───────────────────────────────────────────
-const riskHeatmapAll = [
-  { dept: 'ABCPA', tier1: 56, tier2: 31, tier3: 2 },
-  { dept: 'MISCPA', tier1: 38, tier2: 20, tier3: 1 },
-]
-export const mgmtRiskHeatmap = riskHeatmapAll.map(({ dept, tier3 }) => ({ dept, critical: tier3 }))
-
-export const mgmtComplianceChecks = [
-  { id: 'cc-1', label: 'Independence Declarations Signed', status: 'ok', value: '96%', note: '142 of 148 files' },
-  { id: 'cc-2', label: 'QC Review Completed Pre-Issuance', status: 'warn', value: '88%', note: '6 files pending reviewer sign-off' },
-  { id: 'cc-3', label: 'Engagement Letters on File', status: 'ok', value: '100%', note: 'All 148 files' },
-  { id: 'cc-4', label: 'Conflict of Interest Checks', status: 'ok', value: '100%', note: 'Cleared at onboarding' },
-]
-
 export const mgmtDeadlineBreaches = [
   { client: 'Al-Yamamah Steel Industries', code: 'ZK-011', dept: 'ABCPA', deadline: '05 Nov 2026', daysLeft: -4, severity: 'crit' },
   { client: 'Saudi Petrochem Logistics', code: 'ZK-018', dept: 'MISCPA', deadline: '08 Nov 2026', daysLeft: -1, severity: 'crit' },
   { client: 'Qassim Petrochemical Co.', code: 'ZK-009', dept: 'ABCPA', deadline: '10 Nov 2026', daysLeft: 2, severity: 'warn' },
   { client: 'Najd Manufacturing Ltd.', code: 'ZK-002', dept: 'MISCPA', deadline: '15 Nov 2026', daysLeft: 5, severity: 'warn' },
 ]
-
-export const mgmtIndependenceFlags = [
-  { client: 'Riyadh Fintech Group', dept: 'ABCPA', issue: 'Former audit manager now holds CFO role at client — cooling-off period required', status: 'Under Review' },
-  { client: 'Arabian Cloud Computing', dept: 'ABCPA', issue: 'Partner holds minor shareholding via family trust — materiality assessment pending', status: 'Cleared' },
-]
-
 // ── Firm & FO-Level Performance (Management) ──────────────────────────────────
 // Firm-wide execution quality — aggregate only, not attributed to named audit
 // staff (that detail lives in the Manager module's own performance view).

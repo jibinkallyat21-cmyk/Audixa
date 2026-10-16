@@ -16,7 +16,6 @@ const CLIENTS = [
 ]
 
 function UploadSlot({ label, note, locked, lockedReason, acceptFormats, onUpload, currentFile }) {
-  const showToast = useToast()
   const fileRef = useRef(null)
   const [file, setFile] = useState(currentFile || null)
   const [error, setError] = useState(null)
