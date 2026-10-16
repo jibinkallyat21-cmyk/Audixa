@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Printer, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -11,6 +11,9 @@ import { useProcedureStatuses } from '../../../utils/procedureStore'
 import { useQueries } from '../../../utils/queriesStore'
 import { AREAS } from '../../../utils/auditAreas'
 import { fileSummary } from '../../../utils/sampleTracking'
+import MaterialityDialog from '../../../components/execution/MaterialityDialog'
+import { useMateriality } from '../../../utils/materialityStore'
+import { BASES, sampleMateriality } from '../../../utils/materiality'
 
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const BS = ['cash', 'receivables', 'prepayments', 'ppe', 'inventory', 'payables', 'accruals', 'payroll', 'borrowings', 'related', 'equity', 'unclassified']
@@ -39,6 +42,7 @@ function AreaTable({ title, ids, sum }) {
 export default function TeamWorkspaceSummary() {
   const dc = useDemoClient(); const statuses = useProcedureStatuses(dc.slug); const issued = useIssuedLists()[dc.slug]; const { queries } = useQueries()
   const sum = useMemo(() => (dc.ready ? fileSummary({ areas: AREAS, ledgers: dc.ledgers, rec: issued, statuses, queries: queries.filter((q) => q.client === dc.slug), tb: dc.tb }) : null), [dc, issued, statuses, queries])
+  const mat = useMateriality(dc.slug); const [matOpen, setMatOpen] = useState(false)
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
   return (
     <AuditTeamLayout title="File Workspace">
@@ -57,6 +61,16 @@ export default function TeamWorkspaceSummary() {
               <Stat label="Procedures done" value={`${sum.procedures.done} of ${sum.procedures.total}`} />
               <Stat label="Open queries" value={sum.queries.open} tone={sum.queries.open ? 'amber' : 'green'} />
             </div>
+
+            {dc.auditor === 'ABCPA' && (
+              <Card title="Materiality" subtitle="ABCPA files: the threshold the sampling and related party tools work from.">
+                <div className="flex flex-wrap items-center gap-4">
+                  {mat ? <p className="min-w-[260px] flex-1 text-sm text-slate-600">Materiality <b className="text-lg text-navy">SR {money(mat.materiality)}</b> · {BASES.find((b) => b.id === mat.basis)?.label} at {mat.pct}% of {money(mat.benchmark)} · sampling tools use 80%: SR {money(sampleMateriality(mat.materiality))}<span className="block text-xs text-slate-400">Set by {mat.setBy}</span></p>
+                    : <p className="min-w-[260px] flex-1 text-sm text-amber">Materiality is not set yet. Set it before picking samples above and below materiality.</p>}
+                  <SecondaryButton onClick={() => setMatOpen(true)}>{mat ? 'Change materiality' : 'Set materiality'}</SecondaryButton>
+                </div>
+                {matOpen && <MaterialityDialog dc={dc} current={mat} onClose={() => setMatOpen(false)} />}
+              </Card>)}
 
             <Card title="Needs your attention">
               {sum.attention.length === 0 ? <p className="flex items-center gap-2 text-sm font-medium text-emerald"><CheckCircle2 className="h-4 w-4" />Nothing is waiting on you right now.</p>

@@ -50,10 +50,10 @@ function ToolBody({ proc, dc }) {
   switch (proc.tool) {
     case 'cash-bank': return <CashBankTool dc={dc} />
     case 'cash-cutoff': return <CashBankTool dc={dc} mode="cutoff" />
-    case 'party-sample': return <SamplingTab firm={dc.auditor} initialMode="party" initialArea={proc.area} {...common} />
-    case 'sales-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialArea="Revenue" {...common} />
-    case 'cogs-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialKind="Purchase Report" initialArea="COGS" {...common} />
-    case 'exp-sample': return <SamplingTab firm={dc.auditor} initialMode="expense" initialArea="Expenses" {...common} />
+    case 'party-sample': return <SamplingTab firm={dc.auditor} initialMode="party" initialArea={proc.area} lockArea {...common} />
+    case 'sales-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialArea="Revenue" lockArea {...common} />
+    case 'cogs-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialKind="Purchase Report" initialArea="COGS" lockArea {...common} />
+    case 'exp-sample': return <SamplingTab firm={dc.auditor} initialMode="expense" initialArea="Expenses" lockArea {...common} />
     case 'vouching': return <VouchingTab firm={dc.auditor} initialKind={proc.vouch || 'sales'} {...common} />
     case 'salary': return <SalaryTab {...common} />
     case 'gosi': return <GosiEosbTab clientName={dc.client} />
