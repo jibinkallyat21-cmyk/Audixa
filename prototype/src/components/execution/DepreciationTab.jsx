@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientAssets } from '../../utils/clientPayrollData'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, DataTable, Flags, Chip } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -25,6 +27,9 @@ const DEMO = [
 
 export default function DepreciationTab({ client, clientName }) {
   const showToast = useToast(); const me = currentUser()
+  const dc = useDemoClient()
+  // For the demo client the list is built from its own trial balance ledgers; otherwise the generic demo list.
+  const demoList = () => (dc.ready ? clientAssets(dc.ledgers) : DEMO)
   const [yearStart, setYearStart] = useState('2025-01-01'); const [yearEnd, setYearEnd] = useState('2025-12-31'); const [assets, setAssets] = useState([]); const [reTotal, setRe] = useState('')
   const patch = (id, p) => setAssets((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)))
   const priorStart = `${Number(yearStart.slice(0, 4)) - 1}${yearStart.slice(4)}`; const priorEnd = `${Number(yearEnd.slice(0, 4)) - 1}${yearEnd.slice(4)}`
@@ -37,7 +42,7 @@ export default function DepreciationTab({ client, clientName }) {
   }
   return (
     <div className="space-y-4">
-      <Card title="Year" right={<button onClick={() => setAssets(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => setAssets(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
+      <Card title="Year" right={<button onClick={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         <div className="grid gap-2 sm:grid-cols-3">
           <label className="text-[11px] font-semibold uppercase text-slate-500">Year start<input aria-label="Year start" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
           <label className="text-[11px] font-semibold uppercase text-slate-500">Year end<input aria-label="Year end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>

@@ -187,9 +187,9 @@ function Materiality({ ctx }) {
   )
 }
 
-export default function SamplingTab({ firm, client, clientName }) {
+export default function SamplingTab({ firm, client, clientName, initialMode = 'sales' }) {
   const me = currentUser()
-  const [mode, setMode] = useState('sales')
+  const [mode, setMode] = useState(initialMode)
   const ctx = { client, log: (title, description) => logEvent({ client, clientName, category: 'work', title, description, extra: { auditArea: 'Sampling', performedBy: me.name }, user: me }) }
   if (!firm) return <Card><p className="text-sm text-slate-500">Select a client first. The auditor on the proposal decides which sampling framework is used.</p></Card>
   if (firm === 'ABCPA') return <div className="space-y-3"><p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p><Materiality ctx={ctx} /></div>

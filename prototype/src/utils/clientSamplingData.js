@@ -49,9 +49,14 @@ export function clientLedger(ledgers) {
 // Receivable and payable parties: closing balances add up to the control ledgers (receivables debit, payables credit).
 export function clientParties(ledgers) {
   const rows = []
-  const add = (kind, names, sum, seed, code) => splitAmount(Math.abs(sum), names.length, seed).forEach((a, i) => { const closing = sum < 0 ? -a : a; rows.push([`${code}${String(i + 1).padStart(3, '0')}`, names[i], closing > 0 ? closing : 0, closing < 0 ? -closing : 0, closing]) })
-  add('ar', CUSTOMERS.slice(0, 6), total(ledgers, 'receivables'), 5, 'C')
-  add('ap', SUPPLIERS.slice(0, 5), total(ledgers, 'payables'), 9, 'S')
+  // After the trial balance is approved the control ledgers are already party-wise ("Trade Receivables - Al Noor Trading"): use those balances as they are.
+  const add = (group, names, seed, code) => {
+    const led = ledgers.filter((l) => l.group === group && Math.abs(l.closing) > 0.004)
+    const list = led.length > 1 ? led.map((l) => [l.name.includes(' - ') ? l.name.split(' - ').slice(1).join(' - ') : l.name, l.closing]) : (() => { const sum = total(ledgers, group); return splitAmount(Math.abs(sum), names.length, seed).map((a, i) => [names[i], sum < 0 ? -a : a]) })()
+    list.forEach(([name, closing], i) => rows.push([`${code}${String(i + 1).padStart(3, '0')}`, name, closing > 0 ? closing : 0, closing < 0 ? -closing : 0, closing]))
+  }
+  add('receivables', CUSTOMERS.slice(0, 6), 5, 'C')
+  add('payables', SUPPLIERS.slice(0, 5), 9, 'S')
   return { headers: ['Code', 'Particulars', 'Debits for the period', 'Credits for the period', 'Closing balance'], rows }
 }
 

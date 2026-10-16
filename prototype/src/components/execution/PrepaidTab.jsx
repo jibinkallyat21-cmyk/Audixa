@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientPrepaid } from '../../utils/clientPayrollData'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -22,6 +24,9 @@ const DEMO = [
 
 export default function PrepaidTab({ client, clientName }) {
   const showToast = useToast(); const me = currentUser()
+  const dc = useDemoClient()
+  // For the demo client the list is built from its own trial balance ledgers; otherwise the generic demo list.
+  const demoList = () => (dc.ready ? clientPrepaid(dc.ledgers) : DEMO)
   const [yearStart, setYearStart] = useState('2025-01-01'); const [yearEnd, setYearEnd] = useState('2025-12-31'); const [vatMode, setVatMode] = useState('WITHOUT VAT'); const [monthly, setMonthly] = useState(false)
   const [items, setItems] = useState([]); const patch = (id, p) => setItems((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)))
   const byCategory = useMemo(() => { const g = {}; items.forEach((i) => { (g[i.category] ||= []).push(i) }); return Object.fromEntries(Object.entries(g).map(([c, l]) => [c, prepaidSchedule(l, yearEnd, { monthly })])) }, [items, yearEnd, monthly])
@@ -34,7 +39,7 @@ export default function PrepaidTab({ client, clientName }) {
   }
   return (
     <div className="space-y-4">
-      <Card title="Accounting period" right={<button onClick={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
+      <Card title="Accounting period" right={<button onClick={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         <div className="grid gap-2 sm:grid-cols-4">
           <label className="text-[11px] font-semibold uppercase text-slate-500">From<input aria-label="Period from" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
           <label className="text-[11px] font-semibold uppercase text-slate-500">Year-end<input aria-label="Period year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>

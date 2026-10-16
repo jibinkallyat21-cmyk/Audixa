@@ -13,3 +13,10 @@ test('the corrected demo opening balances all agree to the previous year audited
   assert.equal(r.aligned, true)
   assert.equal(r.differences, 0)
 })
+
+test('the corrected demo trial balance balances and has nothing unmapped', () => {
+  const L = compactLedgers(demoCorrectedLedgers())
+  assert.equal(Math.round(L.reduce((n, l) => n + l.closing, 0) * 100), 0)
+  assert.equal(Math.round(L.reduce((n, l) => n + l.opening, 0) * 100), 0)
+  assert.equal(L.filter((l) => l.group === 'unmapped').length, 0)
+})

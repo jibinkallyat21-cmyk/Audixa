@@ -36,6 +36,11 @@ export function demoPayload(existing = true) {
   const gl = checkGL(ledgers, demoGLTransactions(ledgers))
   return { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', glRows: gl.partyRows, glStats: gl.stats, ...(existing ? {} : { pyFileName: 'Demo previous year audited trial balance.xlsx', pyLedgers: compactLedgers(demoPY()) }) }
 }
+// The corrected demo file: ledgers plus a general ledger that agrees to them (the party-wise balances are taken from it when the trial balance is approved).
+export function demoCorrected() {
+  const ledgers = compactLedgers(demoCorrectedLedgers()); const gl = checkGL(ledgers, demoGLTransactions(ledgers))
+  return [ledgers, { glRows: gl.partyRows, glStats: gl.stats }]
+}
 export { demoCorrectedLedgers }
 export const demoPYPayload = () => ({ fileName: 'Demo previous year audited trial balance.xlsx', ledgers: compactLedgers(demoPY()) })
 

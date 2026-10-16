@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientBis } from '../../utils/clientFsData'
 import { Download, FileSpreadsheet, Plus, Trash2 } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -59,7 +61,9 @@ export default function IfrsTBTab({ mode, client, clientName }) {
     const wb = await buildIfrsWorkbook({ tb: out.tb, ledgers: active, cogs: out.cogs, vat: out.vat, verification: out.verif, salesVat: out.sv, pending: out.pending, st: out.st, client: clientName || 'Company Name', period: { from: meta.from, to: meta.to }, mode, capital: capital.filter((c) => c.name || c.amount), vatReg: meta.vatReg, unresolvedNote: out.tb.diff !== 0 ? `NOT BALANCED - REVIEW REQUIRED. Unresolved difference ${money(out.tb.diff)} is shown as it is and listed as pending.` : '' })
     const url = URL.createObjectURL(await workbookToBlob(wb)); const a = document.createElement('a'); a.href = url; a.download = mode === 'disclaimer' ? 'IFRS_TB_Disclaimer_Audit.xlsx' : 'IFRS_TB.xlsx'; a.click(); URL.revokeObjectURL(url); showToast('Workbook downloaded')
   }
-  const useDemo = () => { if (mode === 'disclaimer' && source === 'bis') setBis(demoBIS.map(([name, amount, side]) => ({ name, amount, side }))); else { setLedgers(demoClientTB()); setFile(null) } setOut(null) }
+  const dc = useDemoClient()
+  // For the demo client the source is its own trial balance; otherwise the generic demo data.
+  const useDemo = () => { if (mode === 'disclaimer' && source === 'bis') setBis((dc.ready ? clientBis(dc.ledgers) : demoBIS).map(([name, amount, side]) => ({ name, amount, side }))); else { setLedgers(dc.ready ? dc.ledgers.map((l) => ({ ...l })) : demoClientTB()); setFile(null) } setOut(null) }
   return (
     <div className="space-y-4">
       {mode === 'disclaimer' && <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">Disclaimer audit: the IFRS TB is prepared from what the client provides, either a Trial Balance or a Basic Information Sheet (BIS). An unbalanced TB is documented as an unresolved difference and referred for review; a related-party / partner account is used only with support.</p>}
