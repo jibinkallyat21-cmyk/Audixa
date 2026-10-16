@@ -16,6 +16,7 @@ import PrepaidTab from '../../../components/execution/PrepaidTab'
 import DepreciationTab from '../../../components/execution/DepreciationTab'
 import EvidenceSchedule from '../../../components/execution/EvidenceSchedule'
 import AccrualsTab from '../../../components/execution/AccrualsTab'
+import PartyAreaTool from '../../../components/execution/PartyAreaTool'
 import RelatedVouching from '../../../components/execution/RelatedVouching'
 import RelatedPartyTool from '../../../components/execution/RelatedPartyTool'
 import { useDemoClient } from '../../../utils/useDemoClient'
@@ -75,6 +76,7 @@ function ToolBody({ proc, dc }) {
     case 'exp-sample': return <SamplingTab firm={dc.auditor} initialMode="expense" initialArea="Expenses" lockArea {...common} />
     case 'vouching': return <VouchingTab firm={dc.auditor} initialKind={proc.vouch || 'sales'} {...common} />
     case 'salary': return <SalaryTab {...common} />
+    case 'party-area': return <PartyAreaTool dc={dc} side={proc.side} />
     case 'payroll': return <PayrollTool dc={dc} common={common} />
     case 'related-vouching': return <RelatedVouching dc={dc} />
     case 'gosi': return <GosiEosbTab clientName={dc.client} />

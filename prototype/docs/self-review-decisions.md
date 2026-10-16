@@ -168,3 +168,11 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 ## Audit areas flow: visual tidy (built)
 
 - Same look, made consistent across the area list, area pages and procedure pages: one icon per kind of work (sampling, vouching, cut-off, documents, accounts), one status chip (Not started, In progress, Complete) in place of two, no repeated headings inside a procedure page, readable section titles and hints, evidence status chips in the app's colours, the cash and bank table kept inside the page width, and the footer at the bottom of the page.
+
+## Trade receivables and payables: one procedure, balance confirmation first, alternative audit procedure
+
+- Each of the two areas is now one procedure ("Samples, confirmations and alternative procedure") with two tabs: Sample list and Pick samples. The three separate vouching and documents procedures were removed; documents sit against each sampled party.
+- The balance confirmation is requested first. The alternative audit procedure (AAP) is switched on only when the client says it cannot confirm (reason required) or the team ticks the box per party. Ticking adds the AAP documents (ledger, open invoices, receipts or payments after the year end, proof of delivery or contract) to the requirement list; unticking removes those not yet answered (with a confirmation).
+- Tracing (code, `utils/aap.js`): every receipt or payment is traced to invoices by (1) the reference on the document, (2) amount equal to one invoice or exactly one combination (ambiguous = not traced), (3) ledger narration naming invoices whose open total equals the entry. Runs until the outstanding is settled or the last receipt. Any untraced lump sum, or invoice left unsettled, gives "Unable to verify" with the exact reason written for the client; the team sends it as a query. Payables use payments and the ledger debit side.
+- If it can be performed: the owner (who enabled it, else the associate) is asked to build the workbook. The prototype builds the workbook and a ZIP with the proposed folder tree (Client / Trade receivables|payables / Party / Ledger, Invoices, Receipts|Payments) and renamed files as placeholders.
+- Assumptions to confirm: one workbook per sampled party; folder layout as above. Real file storage in client folders is for the real backend (the prototype keeps no file bytes).

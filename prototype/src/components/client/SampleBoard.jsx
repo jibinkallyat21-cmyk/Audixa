@@ -3,12 +3,20 @@ import { Upload, ChevronDown, Check, Clock } from 'lucide-react'
 import StatusPill from '../shared/StatusPill'
 import RemarkThread from '../shared/RemarkThread'
 import { useToast } from '../shared/Toast'
-import { PORTAL_CLIENT, setItemStatus } from '../../utils/requirementsStore'
+import { PORTAL_CLIENT, setItemStatus, setAap } from '../../utils/requirementsStore'
 
 const D = { card: 'var(--c-card)', border: 'var(--c-border)', text: 'var(--c-text)', muted: 'var(--c-muted)', subtle: 'var(--c-subtle)', page: 'var(--c-page)' }
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const fmt = (d) => { if (!d) return ''; const t = new Date(`${d}T00:00:00Z`); return Number.isNaN(t.getTime()) ? d : t.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) }
 const DONE = ['Uploaded Processing', 'Under Review', 'Accepted']
+
+// Shown on a customer or supplier balance confirmation: the client says it cannot get one and gives the reason, which switches on the alternative procedure.
+function CannotConfirm({ it }) {
+  const showToast = useToast(); const [on, setOn] = useState(false); const [reason, setReason] = useState('')
+  const send = () => { const side = /payab/i.test(it.data.category || it.row?.ledger || '') ? 'payables' : 'receivables'; const n = setAap(PORTAL_CLIENT.slug, it.ref, true, { by: 'Client', reason: reason.trim(), side, party: it.data.party, balance: it.row?.amount || 0 }); setOn(false); showToast(`Sent. ${n} other documents are now needed instead of the confirmation`) }
+  if (!on) return <button onClick={() => setOn(true)} className="mt-3 text-sm font-semibold underline">We cannot get a confirmation from this party</button>
+  return <div className="mt-3 space-y-2"><textarea aria-label="Why the confirmation cannot be obtained" value={reason} onChange={(e) => setReason(e.target.value)} rows={2} placeholder="Tell us why a confirmation cannot be obtained" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-navy" /><div className="flex gap-2"><button disabled={!reason.trim()} onClick={send} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Send</button><button onClick={() => setOn(false)} className="text-sm font-semibold underline">Cancel</button></div></div>
+}
 
 function ItemRow({ it, wide }) {
   const showToast = useToast(); const [open, setOpen] = useState(false)
@@ -35,7 +43,7 @@ function ItemRow({ it, wide }) {
           </div>
         </td>
       </tr>
-      {open && <tr style={{ background: D.page }}><td colSpan={wide ? 7 : 8} className="px-4 py-4 text-sm leading-relaxed" style={{ color: D.text }}><b>What is needed: </b>{it.text.replace(/^(Sample|Item) \d+: /, '')}{it.alert ? <p className="mt-2 text-alert-red">Rejected: {it.alert}</p> : null}<div className="mt-4"><RemarkThread slug={PORTAL_CLIENT.slug} item={it} by="Client" /></div></td></tr>}
+      {open && <tr style={{ background: D.page }}><td colSpan={wide ? 7 : 8} className="px-4 py-4 text-sm leading-relaxed" style={{ color: D.text }}><b>What is needed: </b>{it.text.replace(/^(Sample|Item) \d+: /, '')}{it.alert ? <p className="mt-2 text-alert-red">Rejected: {it.alert}</p> : null}{it.data?.kind === 'party' && !it.aap?.enabled && canUpload ? <CannotConfirm it={it} /> : null}{it.aap?.enabled ? <p className="mt-3 text-amber">The balance confirmation was not possible. The documents listed under this party are needed instead.</p> : null}<div className="mt-4"><RemarkThread slug={PORTAL_CLIENT.slug} item={it} by="Client" /></div></td></tr>}
     </>
   )
 }

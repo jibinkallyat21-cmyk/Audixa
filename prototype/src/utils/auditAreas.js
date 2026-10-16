@@ -7,9 +7,7 @@ export const AREAS = [
     { id: 'cash-cutoff', label: 'Cash and bank cut-off', kind: 'tool', tool: 'cash-cutoff', desc: 'For each account, say how many items you want, pick them from the transactions around the year end, and send them to the client.' },
   ] },
   { id: 'receivables', section: 'Assets', label: 'Trade receivables', groups: ['receivables'], sampleAreas: ['ARAP', 'Trade receivables'], subMatch: /receiv|customer/i, blurb: 'Customers and what they owe', procedures: [
-    { id: 'receivables-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'receivables', desc: 'Statement of account or confirmation for each customer, and receipts after the year end.' },
-    { id: 'ar-sample', label: 'Sampling and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade receivables', desc: 'Select the customer balances to confirm and send them to the client.' },
-    { id: 'ar-vouching', label: 'Vouching', kind: 'tool', tool: 'vouching', vouch: 'party', desc: 'Check the confirmations and support received for the selected balances.' },
+    { id: 'ar-samples', label: 'Samples, confirmations and alternative procedure', kind: 'tool', tool: 'party-area', side: 'receivables', desc: 'Each sampled customer is asked for the balance confirmation first. If the client cannot confirm, or you tick the box, the alternative procedure documents are requested and tested.' },
   ] },
   { id: 'revenue', section: 'Income and expenses', label: 'Revenue (sales)', groups: ['revenue', 'otherIncome'], sampleAreas: ['Sales', 'Sales Return', 'Revenue', 'sales'], blurb: 'Sales and other income', procedures: [
     { id: 'sales-sample', label: 'Sampling', kind: 'tool', tool: 'sales-sample', area: 'Revenue', desc: 'Select the sales entries to test and send them to the client.' },
@@ -27,9 +25,7 @@ export const AREAS = [
     { id: 'exp-cutoff', label: 'Cut-off', kind: 'cutoff', area: 'expenses', desc: 'Pick expenses around the year end; the client supports each one.' },
   ] },
   { id: 'payables', section: 'Liabilities', label: 'Trade payables', groups: ['payables'], sampleAreas: ['ARAP', 'Trade payables'], subMatch: /payab|supplier/i, blurb: 'Suppliers and what is owed to them', procedures: [
-    { id: 'payables-evidence', label: 'Supporting documents', kind: 'tool', tool: 'evidence', evidence: 'payables', desc: 'Supplier statement or confirmation for each supplier, and payments after the year end.' },
-    { id: 'ap-sample', label: 'Sampling and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade payables', desc: 'Select the supplier balances to confirm and send them to the client.' },
-    { id: 'ap-vouching', label: 'Vouching', kind: 'tool', tool: 'vouching', vouch: 'party', desc: 'Check the confirmations and support received for the selected balances.' },
+    { id: 'ap-samples', label: 'Samples, confirmations and alternative procedure', kind: 'tool', tool: 'party-area', side: 'payables', desc: 'Each sampled supplier is asked for the balance confirmation first. If the client cannot confirm, or you tick the box, the alternative procedure documents are requested and tested.' },
   ] },
   { id: 'prepayments', section: 'Assets', label: 'Prepayments and other receivables', groups: ['prepayments', 'vat'], blurb: 'Paid in advance', procedures: [
     { id: 'prepaid', label: 'Prepaid expenses: schedule and supporting documents', kind: 'tool', tool: 'prepaid', desc: 'Work out the unexpired part of each prepayment at the year end, with the agreement, invoice and payment proof behind each one.' },
