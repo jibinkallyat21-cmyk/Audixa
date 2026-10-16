@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
-import { teamTasks } from '../../data/sampleData'
+import { useTeamScope } from '../../utils/teamScopeHook'
 
 const SECTIONS = [
   { priority: 'URGENT', heading: 'Urgent', tone: 'alert-red', note: 'Immediate partner sign-off impact', badgeStyle: 'bg-alert-red/10 text-alert-red border-alert-red/30' },
@@ -28,6 +28,7 @@ function loadDone() {
 export default function TeamTasks() {
   const navigate = useNavigate()
   const [done, setDone] = useState(loadDone)
+  const { tasks: teamTasks, demo } = useTeamScope()
 
   const toggleTask = (id) => {
     setDone((prev) => {
@@ -49,7 +50,7 @@ export default function TeamTasks() {
       <PageTransition>
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold text-navy">My Tasks — Today (05 Nov 2024)</h1>
+            <h1 className="text-2xl font-bold text-navy">My Tasks — Today ({demo ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '05 Nov 2024'})</h1>
             <span className="flex items-center gap-1.5 rounded-full border border-amber/40 bg-amber/10 px-3 py-1.5 text-xs font-semibold text-amber">
               <Sparkles className="h-3.5 w-3.5" />
               AI Prioritised — Tasks ranked by deadline proximity and engagement risk

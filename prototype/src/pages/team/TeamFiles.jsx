@@ -6,7 +6,7 @@ import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
 import AuditTypeChip from '../../components/shared/AuditTypeChip'
-import { teamFiles, teamPortfolioStats } from '../../data/sampleData'
+import { useTeamScope } from '../../utils/teamScopeHook'
 
 const AUDIT_TYPE_LABEL = { Proper: 'Proper Audit', Disclaimer: 'Disclaimer' }
 
@@ -202,8 +202,9 @@ function FileRow({ f, idx }) {
 export default function TeamFiles() {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const { files: scopeFiles, stats: teamPortfolioStats } = useTeamScope()
 
-  const visibleFiles = teamFiles.filter((f) => f.isDemo).filter((f) => {
+  const visibleFiles = scopeFiles.filter((f) => {
     if (!FILE_MATCHERS[filter](f)) return false
     if (search && !f.client.toLowerCase().includes(search.toLowerCase()) && !f.code.toLowerCase().includes(search.toLowerCase())) return false
     return true
@@ -221,7 +222,7 @@ export default function TeamFiles() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-navy/10 px-3 py-1.5 text-xs font-semibold text-navy">
-                {teamPortfolioStats.totalActive} Active Files
+                {teamPortfolioStats.totalActive} Active {teamPortfolioStats.totalActive === 1 ? 'File' : 'Files'}
               </span>
               <span className="rounded-full bg-emerald/10 px-3 py-1.5 text-xs font-semibold text-emerald">
                 89.4% Complete

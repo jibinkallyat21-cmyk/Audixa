@@ -5,7 +5,8 @@ import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { useToast } from '../../../components/shared/Toast'
-import { teamDeliverables } from '../../../data/sampleData'
+import { teamDeliverables, teamFiles } from '../../../data/sampleData'
+import { useDemoLoaded } from '../../../utils/demoData'
 import { getAllClientUploads, onUploadsChange } from '../../../data/clientUploads'
 
 const { draftAfs, finalAfs, qawaem, timeline } = teamDeliverables
@@ -75,6 +76,8 @@ function ClientSignedDocumentsPanel() {
 }
 
 export default function TeamWorkspaceDeliverables() {
+  const demo = useDemoLoaded()
+  const demoFile = demo ? teamFiles.find((f) => f.isDemo) : null
   const activeIndex = timeline.findIndex((t) => t.status === 'active')
   const progressPercent = (activeIndex / (timeline.length - 1)) * 100
   const showToast = useToast()
@@ -92,8 +95,8 @@ export default function TeamWorkspaceDeliverables() {
         <div className="space-y-6">
           <div className="flex flex-col gap-5 lg:flex-row">
             <SectionCard title="Draft Financial Statements" chip="In Preparation" chipTone="bg-amber/10 text-amber border-amber/30">
-              <p className="text-sm font-semibold text-navy">Draft AFS — Al-Marai Logistics JSC — FY2024</p>
-              <p className="mt-2 text-xs text-slate-500">{draftAfs.note}</p>
+              <p className="text-sm font-semibold text-navy">Draft AFS — {demoFile ? demoFile.client : 'Al-Marai Logistics JSC'}{demoFile ? '' : ' — FY2024'}</p>
+              <p className="mt-2 text-xs text-slate-500">{demo ? 'Draft financial statements are available once the testing stages are complete.' : draftAfs.note}</p>
               <button
                 disabled
                 title="Available after all procedures completed and self-review cleared"
