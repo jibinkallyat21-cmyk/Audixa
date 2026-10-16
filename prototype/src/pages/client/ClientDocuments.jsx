@@ -457,7 +457,7 @@ export default function ClientDocuments() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
             {demoOn && <button
-              onClick={() => { const n = uploadDemoDocuments(PORTAL_CLIENT.slug); showToast(n ? `${n} demo documents uploaded for the audit team to review` : 'Nothing is waiting for an upload') }}
+              onClick={() => { const n = uploadDemoDocuments(PORTAL_CLIENT.slug); showToast(n ? `${n} demo documents uploaded for the audit team to review` : rec ? 'Every requirement already has a document. Reject one in the team portal to upload it again.' : 'The requirement list has not been issued yet. Approve the trial balance in the team portal first.') }}
               className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50"
               style={{ color: D.text }}
             >
