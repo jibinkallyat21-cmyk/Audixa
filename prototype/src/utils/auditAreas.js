@@ -4,6 +4,7 @@
 export const AREAS = [
   { id: 'cash', section: 'Assets', label: 'Cash and cash equivalents', groups: ['cash'], sampleAreas: ['bank', 'cash'], blurb: 'Bank and cash balances', procedures: [
     { id: 'cash-accounts', label: 'Cash and bank accounts', kind: 'tool', tool: 'cash-bank', desc: 'Every account in one list: confirmation, statements, trial balance against the statement, a reconciliation only where they differ, and the cut-off for each account.' },
+    { id: 'cash-cutoff', label: 'Cash and bank cut-off', kind: 'tool', tool: 'cash-cutoff', desc: 'For each account, say how many items you want, pick them from the transactions around the year end, and send them to the client.' },
   ] },
   { id: 'receivables', section: 'Assets', label: 'Trade receivables', groups: ['receivables'], sampleAreas: ['ARAP', 'Trade receivables'], subMatch: /receiv|customer/i, blurb: 'Customers and what they owe', procedures: [
     { id: 'ar-sample', label: 'Sample and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade receivables', desc: 'Select the customer balances to confirm and send them to the client.' },
