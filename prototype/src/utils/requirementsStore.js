@@ -3,6 +3,7 @@ import { useStore, readStore, writeStore } from './store.js'
 import { logEvent } from './auditLog.js'
 import { withDemoDocuments } from './demoDocuments.js'
 import { withSampleRequirements } from './sampleRequests.js'
+import { withReminders } from './sampleTracking.js'
 
 const KEY = 'requirements:issued'
 // The client portal demo client is not one of the team's files, so it is offered as an extra MISCPA engagement.
@@ -29,6 +30,13 @@ export function addSampleRequirements(slug, args) {
   const { rec, added } = withSampleRequirements(cur, args)
   if (added) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Samples sent to the client', `${added} sample${added === 1 ? '' : 's'} for ${args.label || args.area}${args.approvedBy ? `, approved by ${args.approvedBy}` : ''}`, 'doc-request') }
   return added
+}
+// The audit team reminds the client about items still owed: they are marked with the date and the count, and the client sees it.
+export function sendReminders(slug, refs) {
+  const all = readStore(KEY, {}); const cur = all[slug]; if (!cur || !refs.length) return 0
+  const { rec, count } = withReminders(cur, refs)
+  if (count) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Reminder sent to the client', `${count} item${count === 1 ? '' : 's'} still waiting for the client`, 'doc-request') }
+  return count
 }
 export function uploadDemoDocuments(slug) {
   const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return 0

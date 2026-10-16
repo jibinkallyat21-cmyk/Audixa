@@ -48,6 +48,7 @@ import TeamDashboard from './pages/team/TeamDashboard'
 import TeamFiles from './pages/team/TeamFiles'
 import TeamWorkspaceRequirements from './pages/team/workspace/TeamWorkspaceRequirements'
 import TeamWorkspaceQueries from './pages/team/workspace/TeamWorkspaceQueries'
+import TeamWorkspaceSummary from './pages/team/workspace/TeamWorkspaceSummary'
 import TeamWorkspaceAreas from './pages/team/workspace/TeamWorkspaceAreas'
 import TeamWorkspaceProcedures from './pages/team/workspace/TeamWorkspaceProcedures'
 import TeamWorkspaceDeliverables from './pages/team/workspace/TeamWorkspaceDeliverables'
@@ -147,6 +148,7 @@ function AnimatedRoutes() {
         <Route path="/team/workspace/queries" element={<TeamWorkspaceQueries />} />
         <Route path="/team/workspace/procedures" element={<TeamWorkspaceProcedures />} />
         <Route path="/team/workspace/areas" element={<TeamWorkspaceAreas />} />
+        <Route path="/team/workspace/summary" element={<TeamWorkspaceSummary />} />
         <Route path="/team/workspace/working-tb" element={<TeamWorkspaceWorkingTB />} />
         <Route path="/team/workspace/deliverables" element={<TeamWorkspaceDeliverables />} />
         <Route path="/team/workspace/audit-trail" element={<TeamWorkspaceAuditTrail />} />

@@ -2,33 +2,33 @@
 // tool, a cut-off test, a document the client sends (checked against the requirement list), or a plain procedure the team records notes against.
 // groups = the trial balance groups (tbCore) that make up the area.
 export const AREAS = [
-  { id: 'cash', label: 'Cash and cash equivalents', groups: ['cash'], blurb: 'Bank and cash balances', procedures: [
+  { id: 'cash', label: 'Cash and cash equivalents', groups: ['cash'], sampleAreas: ['bank', 'cash'], blurb: 'Bank and cash balances', procedures: [
     { id: 'bank-statements', label: 'Bank statements', kind: 'requirement', match: /bank statements/i, desc: 'The client uploads every bank statement for the audit period and the subsequent month.' },
     { id: 'bank-recon', label: 'Bank reconciliation', kind: 'requirement', match: /bank reconc/i, desc: 'The client uploads the year-end bank reconciliation. Items that clear after the year end are flagged to the file team.' },
     { id: 'confirmations', label: 'Bank and cash confirmations', kind: 'tool', tool: 'confirmation', desc: 'Compare each confirmation with the trial balance and check the document.' },
     { id: 'bank-cutoff', label: 'Bank cut-off', kind: 'cutoff', area: 'bank', desc: 'Pick transactions around the year end; the client supports each one.' },
     { id: 'cash-cutoff', label: 'Cash cut-off', kind: 'cutoff', area: 'cash', desc: 'Pick cash transactions around the year end; the client supports each one.' },
   ] },
-  { id: 'receivables', label: 'Trade receivables', groups: ['receivables'], blurb: 'Customers and what they owe', procedures: [
+  { id: 'receivables', label: 'Trade receivables', groups: ['receivables'], sampleAreas: ['ARAP', 'Trade receivables'], subMatch: /receiv|customer/i, blurb: 'Customers and what they owe', procedures: [
     { id: 'ar-sample', label: 'Sample and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade receivables', desc: 'Select the customer balances to confirm and send them to the client.' },
     { id: 'ar-vouching', label: 'Vouching', kind: 'tool', tool: 'vouching', vouch: 'party', desc: 'Check the confirmations and support received for the selected balances.' },
   ] },
-  { id: 'revenue', label: 'Revenue (sales)', groups: ['revenue', 'otherIncome'], blurb: 'Sales and other income', procedures: [
+  { id: 'revenue', label: 'Revenue (sales)', groups: ['revenue', 'otherIncome'], sampleAreas: ['Sales', 'Revenue', 'sales'], blurb: 'Sales and other income', procedures: [
     { id: 'sales-sample', label: 'Sales sample', kind: 'tool', tool: 'sales-sample', area: 'Revenue', desc: 'Select the sales entries to test and send them to the client.' },
     { id: 'sales-vouching', label: 'Sales vouching', kind: 'tool', tool: 'vouching', vouch: 'sales', desc: 'Compare each sampled invoice with its document: customer, date, net amount, invoice number.' },
     { id: 'sales-cutoff', label: 'Sales cut-off', kind: 'cutoff', area: 'sales', desc: 'Pick sales around the year end; the client supports each one.' },
   ] },
-  { id: 'cogs', label: 'Cost of sales and purchases', groups: ['cogs'], blurb: 'What the goods and services cost', procedures: [
+  { id: 'cogs', label: 'Cost of sales and purchases', groups: ['cogs'], sampleAreas: ['COGS', 'cogs'], blurb: 'What the goods and services cost', procedures: [
     { id: 'cogs-sample', label: 'Purchases sample', kind: 'tool', tool: 'cogs-sample', area: 'COGS', purchase: true, desc: 'Select the purchase entries to test and send them to the client.' },
     { id: 'cogs-vouching', label: 'Purchases vouching', kind: 'tool', tool: 'vouching', vouch: 'cogs', desc: 'Compare each sampled invoice with its document: supplier, date, net amount.' },
     { id: 'cogs-cutoff', label: 'Cost of sales cut-off', kind: 'cutoff', area: 'cogs', desc: 'Pick purchases around the year end; the client supports each one.' },
   ] },
-  { id: 'expenses', label: 'Operating expenses', groups: ['opex', 'finance'], blurb: 'Day to day costs', procedures: [
+  { id: 'expenses', label: 'Operating expenses', groups: ['opex', 'finance'], sampleAreas: ['Expenses', 'expenses'], blurb: 'Day to day costs', procedures: [
     { id: 'exp-sample', label: 'Expense sample', kind: 'tool', tool: 'exp-sample', area: 'Expenses', desc: 'Select the expense entries to test and send them to the client.' },
     { id: 'exp-vouching', label: 'Expense vouching', kind: 'tool', tool: 'vouching', vouch: 'expense', desc: 'Compare each sampled invoice with its document. The invoice number is not checked for expenses.' },
     { id: 'exp-cutoff', label: 'Expense cut-off', kind: 'cutoff', area: 'expenses', desc: 'Pick expenses around the year end; the client supports each one.' },
   ] },
-  { id: 'payables', label: 'Trade payables', groups: ['payables'], blurb: 'Suppliers and what is owed to them', procedures: [
+  { id: 'payables', label: 'Trade payables', groups: ['payables'], sampleAreas: ['ARAP', 'Trade payables'], subMatch: /payab|supplier/i, blurb: 'Suppliers and what is owed to them', procedures: [
     { id: 'ap-sample', label: 'Sample and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade payables', desc: 'Select the supplier balances to confirm and send them to the client.' },
     { id: 'ap-vouching', label: 'Vouching', kind: 'tool', tool: 'vouching', vouch: 'party', desc: 'Check the confirmations and support received for the selected balances.' },
   ] },
