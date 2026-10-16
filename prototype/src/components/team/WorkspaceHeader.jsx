@@ -14,6 +14,7 @@ import { useTB } from '../../context/TBContext'
 import { useTeamScope } from '../../utils/teamScopeHook'
 import { useIssuedLists } from '../../utils/requirementsStore'
 import { useAuditLog } from '../../utils/auditLog'
+import { useProcedureStatuses } from '../../utils/procedureStore'
 
 const TABS_BASE = [
   { id: 'requirements', label: 'Requirements', href: '/team/workspace/requirements' },
@@ -181,7 +182,8 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
   const { pendingAdjustments } = useTB()
 
   const openQueries = scope.demo ? scope.counts.openQueries : teamQueries.filter((q) => q.status === 'Open').length
-  const inProgressProcedures = scope.demo ? 0 : teamProcedures.filter((p) => p.status === 'In Progress').length
+  const procSaved = useProcedureStatuses(scope.demo ? scope.files[0].slug : 'sample-al-marai')
+  const inProgressProcedures = scope.demo ? Object.values(procSaved).filter((x) => x === 'In Progress').length : teamProcedures.filter((p) => p.status === 'In Progress').length
   const pbcTotal = scope.demo ? (issued[file.slug]?.itemCount || 0) : file.pbcTotal
   const trailCount = scope.demo ? log.filter((e) => e.clientName === file.client).length : 47
 

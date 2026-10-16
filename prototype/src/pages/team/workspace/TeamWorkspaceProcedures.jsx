@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Check, ChevronDown, FlaskConical, Lock, Send } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -17,6 +17,14 @@ import TeamELRequest from '../TeamELRequest'
 import TeamBasicDocuments from '../TeamBasicDocuments'
 import BasicDocsIntakeView from '../../../components/execution/BasicDocsIntakeView'
 import { teamUser } from '../../../data/sampleData'
+import { useTeamScope } from '../../../utils/teamScopeHook'
+import { useTBSubmissions } from '../../../utils/tbSubmissionStore'
+import { useProcedureStatuses, setSubStatus } from '../../../utils/procedureStore'
+import { buildProcedureData, effectiveStatuses } from '../../../utils/procedureData'
+import { useQueries } from '../../../utils/queriesStore'
+import { newQuery } from '../../../utils/queriesCore'
+import { logEvent } from '../../../utils/auditLog'
+import { currentUser } from '../../../utils/currentUser'
 
 /* ── Working tools: each opens inside its own audit procedure ── */
 const TOOLS = {
@@ -177,7 +185,7 @@ function AIFlagPanel({ flag, isLead, onApprove, onDismiss }) {
           transition={{ duration: 1.2, repeat: Infinity }}
           className="h-2 w-2 rounded-full bg-amber"
         />
-        <p className="text-xs font-bold uppercase tracking-wide text-amber">AI Query Draft — Pending Lead Approval</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-amber">{flag.computed ? 'Query Draft (from the trial balance figures)' : 'AI Query Draft'} — Pending Lead Approval</p>
       </div>
       <textarea
         value={text}
@@ -217,11 +225,11 @@ function AIFlagPanel({ flag, isLead, onApprove, onDismiss }) {
 }
 
 /* ── Sub-task row ── */
-function SubTaskRow({ sub, isLead, locked }) {
+function SubTaskRow({ sub, isLead, locked, status = 'Not Started', setStatus, info = [], flagDraft = null, onRaise }) {
   const showToast = useToast()
   const [hovered, setHovered] = useState(false)
-  const [status, setStatus] = useState('Not Started')
-  const [flagVisible, setFlagVisible] = useState(!!sub.aiFlag)
+  const aiFlag = flagDraft ? { id: `qd-${sub.id}`, draft: flagDraft, pending: true, computed: true } : sub.aiFlag
+  const [flagVisible, setFlagVisible] = useState(!!aiFlag)
 
   const advance = () => {
     if (locked) { showToast('Complete the previous procedure first'); return }
@@ -239,7 +247,7 @@ function SubTaskRow({ sub, isLead, locked }) {
       <div className={`flex items-center gap-3 px-5 py-3.5 transition-colors ${hovered ? 'bg-slate-50' : ''}`}>
         <span className={`h-2 w-2 shrink-0 rounded-full ${DOT_COLOR[status]}`} />
         <p className={`flex-1 text-sm ${locked ? 'text-slate-400' : 'text-navy'}`}>{sub.name}</p>
-        {sub.aiFlag && flagVisible && (
+        {aiFlag && flagVisible && (
           <motion.span
             animate={{ opacity: [1, 0.5, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
@@ -266,12 +274,17 @@ function SubTaskRow({ sub, isLead, locked }) {
           >
             <div className="bg-slate-50 px-5 pb-4 pt-2">
               <p className="text-xs leading-relaxed text-slate-500">{sub.desc}</p>
+              {info.length > 0 && (
+                <div className="mt-2 space-y-0.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                  {info.map((t, i) => <p key={i}>{t}</p>)}
+                </div>
+              )}
 
-              {sub.aiFlag && flagVisible && (
+              {aiFlag && flagVisible && (
                 <AIFlagPanel
-                  flag={sub.aiFlag}
+                  flag={aiFlag}
                   isLead={isLead}
-                  onApprove={() => { setFlagVisible(false); setStatus('Complete') }}
+                  onApprove={(text) => { if (onRaise) onRaise(sub, text); setFlagVisible(false); setStatus('Complete') }}
                   onDismiss={() => setFlagVisible(false)}
                 />
               )}
@@ -300,13 +313,13 @@ function SubTaskRow({ sub, isLead, locked }) {
 }
 
 /* ── Main procedure card ── */
-function ProcedureSection({ proc, seqIndex, allStatuses, onStatusChange, isLead }) {
+function ProcedureSection({ proc, seqIndex, allStatuses, subStatuses = {}, onStatusChange, isLead, data = null, onRaise }) {
   const [open, setOpen] = useState(seqIndex === 0)
 
   // A procedure is locked if the previous one hasn't started yet
   const locked = seqIndex > 0 && allStatuses[seqIndex - 1] === 'Not Started'
 
-  const completedSubs = proc.subTasks.filter((s) => allStatuses[`${proc.id}-${s.id}`] === 'Complete').length
+  const completedSubs = proc.subTasks.filter((s) => subStatuses[`${proc.id}-${s.id}`] === 'Complete').length
   const totalSubs = proc.subTasks.length
   const procStatus =
     completedSubs === totalSubs
@@ -388,9 +401,14 @@ function ProcedureSection({ proc, seqIndex, allStatuses, onStatusChange, isLead 
             {proc.subTasks.map((sub) => (
               <SubTaskRow
                 key={sub.id}
-                sub={sub}
+                sub={data ? { ...sub, aiFlag: null } : sub}
                 isLead={isLead}
                 locked={false}
+                status={subStatuses[`${proc.id}-${sub.id}`] || 'Not Started'}
+                setStatus={(st) => onStatusChange(`${proc.id}-${sub.id}`, st)}
+                info={data ? data.info[sub.id] || [] : []}
+                flagDraft={data ? data.flags[sub.id] || null : null}
+                onRaise={onRaise}
               />
             ))}
             {TOOLS[proc.id] && <ToolPanel tools={TOOLS[proc.id]} />}
@@ -404,15 +422,36 @@ function ProcedureSection({ proc, seqIndex, allStatuses, onStatusChange, isLead 
 export default function TeamWorkspaceProcedures() {
   const [role] = useTeamRole()
   const isLead = role === 'Audit Lead'
-  const [statuses, setStatuses] = useState({})
+  const scope = useTeamScope()
+  const demoFile = scope.demo ? scope.files[0] : null
+  const slug = demoFile ? demoFile.slug : 'sample-al-marai'
+  const tb = useTBSubmissions()[slug]
+  const saved = useProcedureStatuses(slug)
+  const { queries, upsert } = useQueries()
+  // For the demo client every sub-task shows figures from its own trial balance; step 1 is done in the trial balance review.
+  const data = useMemo(() => (demoFile && tb ? buildProcedureData({ cy: tb.ledgers || [], py: tb.pyLedgers || [], openingCheck: tb.openingCheck, approved: tb.status === 'Approved' }) : null), [demoFile, tb])
+  const statuses = useMemo(() => effectiveStatuses(saved, Object.fromEntries(Object.keys(data?.auto || {}).map((id) => [`${MAIN_PROCEDURES.find((p) => p.subTasks.some((x) => x.id === id))?.id}-${id}`, true]))), [saved, data])
+  const setStatus = (key, status) => setSubStatus(slug, key, status)
+  const raiseQuery = (sub, text) => {
+    if (!demoFile) return
+    const me = currentUser(); const today = new Date().toISOString().slice(0, 10)
+    const due = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)
+    const area = /^ap-1|^area-rev/.test(sub.id) ? 'Revenue' : 'Other'
+    const q = newQuery({ queries, client: demoFile.slug, clientName: demoFile.client, area, description: text, owner: me.name, dueDate: due, priority: 'Normal', raisedAt: today, raisedBy: me.name })
+    upsert(q)
+    logEvent({ client: demoFile.slug, clientName: demoFile.client, category: 'query', title: `${q.no}: query raised`, description: q.description, extra: { queryNo: q.no, area, owner: q.owner, due }, user: me })
+  }
 
   const procStatuses = MAIN_PROCEDURES.map((p) => {
-    const completedSubs = p.subTasks.filter((s) => statuses[`${p.id}-${s.id}`] === 'Complete').length
-    if (completedSubs === p.subTasks.length) return 'Complete'
-    if (completedSubs > 0) return 'In Progress'
+    const states = p.subTasks.map((s) => statuses[`${p.id}-${s.id}`] || 'Not Started')
+    if (states.every((x) => x === 'Complete')) return 'Complete'
+    if (states.some((x) => x === 'Complete' || x === 'In Progress')) return 'In Progress'
     return 'Not Started'
   })
 
+  const pendingDrafts = data
+    ? Object.keys(data.flags).filter((id) => { const p = MAIN_PROCEDURES.find((m) => m.subTasks.some((s) => s.id === id)); return p && statuses[`${p.id}-${id}`] !== 'Complete' }).length
+    : MAIN_PROCEDURES.reduce((acc, p) => acc + p.subTasks.filter((s) => s.aiFlag?.pending).length, 0)
   const totalComplete = procStatuses.filter((s) => s === 'Complete').length
   const overallPercent = Math.round((totalComplete / MAIN_PROCEDURES.length) * 100)
 
@@ -472,8 +511,11 @@ export default function TeamWorkspaceProcedures() {
                 proc={proc}
                 seqIndex={idx}
                 allStatuses={procStatuses}
-                onStatusChange={(id, status) => setStatuses((prev) => ({ ...prev, [id]: status }))}
+                subStatuses={statuses}
+                onStatusChange={setStatus}
                 isLead={isLead}
+                data={data}
+                onRaise={raiseQuery}
               />
             ))}
           </div>
@@ -484,18 +526,18 @@ export default function TeamWorkspaceProcedures() {
           </div>
 
           {/* Pending AI query drafts summary */}
-          {MAIN_PROCEDURES.some((p) => p.subTasks.some((s) => s.aiFlag?.pending)) && (
+          {pendingDrafts > 0 && (
             <div className="rounded-xl border border-amber/30 bg-amber/5 p-5">
               <div className="mb-3 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber" />
                 <h3 className="text-sm font-semibold text-navy">AI Query Drafts — Pending Lead Approval</h3>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
-                AI has flagged items during procedure review and drafted queries. These are held for lead approval before being shared with the client. Navigate to each sub-task to review and approve.
+                {data ? 'Items outside the usual range were found in the trial balance and queries were drafted from the figures.' : 'AI has flagged items during procedure review and drafted queries.'} These are held for lead approval before being shared with the client. Navigate to each sub-task to review and approve.
               </p>
               {isLead && (
                 <p className="mt-2 text-xs font-semibold text-amber">
-                  {MAIN_PROCEDURES.reduce((acc, p) => acc + p.subTasks.filter((s) => s.aiFlag?.pending).length, 0)} drafts awaiting your approval
+                  {pendingDrafts} {pendingDrafts === 1 ? 'draft' : 'drafts'} awaiting your approval
                 </p>
               )}
             </div>
