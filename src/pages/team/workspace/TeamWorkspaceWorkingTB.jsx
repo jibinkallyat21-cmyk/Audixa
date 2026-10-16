@@ -618,6 +618,8 @@ export default function TeamWorkspaceWorkingTB() {
                 </div>
               )}
 
+              {tbLines.length === 0 && <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">The working trial balance is the client's trial balance once you approve it under Audit Requirements.</p>}
+
               <TBStaffTable lines={tbLines} onAddAdj={(line) => setAdjModal(line)} filter={filter} search={search} reclassifyLine={reclassifyLine} />
 
               {/* Adjustments list */}

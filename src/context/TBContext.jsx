@@ -1,108 +1,71 @@
-import { createContext, useContext, useState } from 'react'
-import { initialTBLines, initialAdjustments } from '../data/workingTB'
+import { createContext, useContext, useMemo } from 'react'
 import { addActivityEvent } from '../data/activityLog'
+import { classifyByName } from '../data/workingTB'
+import { useStore } from '../utils/store'
+import { useTBSubmissions } from '../utils/tbSubmissionStore'
+import { DEMO_FILE } from '../utils/demoData'
 
 const TBContext = createContext(null)
 
+// The working trial balance is the client's trial balance once the audit team has approved it. Nothing is shown before that.
+const CATEGORY = {
+  cash: 'Current Assets', receivables: 'Current Assets', prepayments: 'Current Assets', inventory: 'Current Assets', vat: 'Current Assets',
+  ppeCost: 'Non-Current Assets', accDep: 'Non-Current Assets', intangibles: 'Non-Current Assets',
+  payables: 'Current Liabilities', accruals: 'Current Liabilities', related: 'Current Liabilities',
+  borrowings: 'Non-Current Liabilities', eosb: 'Non-Current Liabilities',
+  capital: 'Equity', reserves: 'Equity', re: 'Equity',
+  revenue: 'Revenue', otherIncome: 'Revenue', cogs: 'Cost of Sales', opex: 'Operating Expenses', tax: 'Operating Expenses', finance: 'Finance Costs',
+}
+const categoryOf = (l) => CATEGORY[l.group] || (/income|revenue|gain/i.test(l.name) ? 'Revenue' : /expense|cost|charges/i.test(l.name) ? 'Operating Expenses' : l.closing >= 0 ? 'Current Assets' : 'Current Liabilities')
+const withClosing = (line) => ({
+  ...line,
+  get closingBalance() { return this.openingBalance + this.currentYearDebit - this.currentYearCredit + this.adjustmentDebit - this.adjustmentCredit },
+})
+export const linesFromLedgers = (ledgers) => ledgers.map((l, i) => withClosing({
+  id: `tb-${l.code || i}-${i}`, ledgerCode: l.code || String(i + 1), ledgerName: l.name, category: categoryOf(l),
+  openingBalance: l.opening, currentYearDebit: l.debit, currentYearCredit: l.credit, adjustmentDebit: 0, adjustmentCredit: 0, zakatClassification: classifyByName(l.name),
+}))
+
 export function TBProvider({ children }) {
-  const [tbLines, setTBLines] = useState(initialTBLines)
-  const [adjustments, setAdjustments] = useState(initialAdjustments)
-  const [tbUploaded, setTBUploaded] = useState(true) // pre-populated for demo
+  const sub = useTBSubmissions()[DEMO_FILE.slug]
+  const [adjustments, setAdjustments] = useStore('workingtb:adjustments', [])
+  const [classOverrides, setClassOverrides] = useStore('workingtb:classOverrides', {})
+  const approved = sub?.status === 'Approved' && sub.ledgers?.length ? sub : null
+  const tbLines = useMemo(() => {
+    if (!approved) return []
+    return linesFromLedgers(approved.ledgers).map((line) => {
+      let dr = 0, cr = 0
+      adjustments.filter((a) => a.status === 'Approved by Client').forEach((a) => a.entries.filter((e) => e.ledgerCode === line.ledgerCode).forEach((e) => { dr += e.debit || 0; cr += e.credit || 0 }))
+      return withClosing({ ...line, adjustmentDebit: dr, adjustmentCredit: cr, zakatClassification: classOverrides[line.ledgerCode] || line.zakatClassification })
+    })
+  }, [approved, adjustments, classOverrides])
+  const tbUploaded = !!approved
 
   const pendingAdjustments = adjustments.filter((a) => a.status === 'Pending Client Approval')
 
   function approveAdjustment(adjId, clientNote = '') {
-    setAdjustments((prev) =>
-      prev.map((a) =>
-        a.id === adjId ? { ...a, status: 'Approved by Client', clientNote } : a
-      )
-    )
+    setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Approved by Client', clientNote } : a)))
     const adj = adjustments.find((a) => a.id === adjId)
-    if (adj) {
-      setTBLines((prev) =>
-        prev.map((line) => {
-          const entry = adj.entries.find((e) => e.ledgerCode === line.ledgerCode)
-          if (!entry) return line
-          return {
-            ...line,
-            adjustmentDebit: (line.adjustmentDebit || 0) + (entry.debit || 0),
-            adjustmentCredit: (line.adjustmentCredit || 0) + (entry.credit || 0),
-          }
-        })
-      )
-      addActivityEvent({
-        id: `act-adj-approve-${adjId}`,
-        icon: 'emerald',
-        description: `You approved adjustment ${adj.adjustmentRef} — trial balance updated`,
-        timestamp: new Date().toLocaleString('en-GB'),
-        section: 'Working TB',
-      })
-    }
+    if (adj) addActivityEvent({ id: `act-adj-approve-${adjId}`, icon: 'emerald', description: `You approved adjustment ${adj.adjustmentRef} — trial balance updated`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
   }
 
   function rejectAdjustment(adjId, clientNote = '') {
-    setAdjustments((prev) =>
-      prev.map((a) =>
-        a.id === adjId ? { ...a, status: 'Rejected by Client', clientNote } : a
-      )
-    )
+    setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Rejected by Client', clientNote } : a)))
     const adj = adjustments.find((a) => a.id === adjId)
-    if (adj) {
-      addActivityEvent({
-        id: `act-adj-reject-${adjId}`,
-        icon: 'red',
-        description: `You rejected adjustment ${adj.adjustmentRef}`,
-        timestamp: new Date().toLocaleString('en-GB'),
-        section: 'Working TB',
-      })
-    }
+    if (adj) addActivityEvent({ id: `act-adj-reject-${adjId}`, icon: 'red', description: `You rejected adjustment ${adj.adjustmentRef}`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
   }
 
   function postAdjustment(newAdj) {
     setAdjustments((prev) => [newAdj, ...prev])
-    addActivityEvent({
-      id: `act-adj-post-${newAdj.id}`,
-      icon: 'amber',
-      description: `Your auditor proposed adjustment ${newAdj.adjustmentRef} — awaiting your review`,
-      timestamp: new Date().toLocaleString('en-GB'),
-      section: 'Working TB',
-    })
+    addActivityEvent({ id: `act-adj-post-${newAdj.id}`, icon: 'amber', description: `Your auditor proposed adjustment ${newAdj.adjustmentRef} — awaiting your review`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
   }
 
   function reclassifyLine(ledgerCode, newClassification) {
-    setTBLines((prev) =>
-      prev.map((l) =>
-        l.ledgerCode === ledgerCode ? { ...l, zakatClassification: newClassification } : l
-      )
-    )
-  }
-
-  function uploadTB(newLines) {
-    setTBLines(newLines)
-    setTBUploaded(true)
-    addActivityEvent({
-      id: `act-tb-upload-${Date.now()}`,
-      icon: 'blue',
-      description: 'You uploaded your trial balance — FY2024',
-      timestamp: new Date().toLocaleString('en-GB'),
-      section: 'Working TB',
-    })
+    setClassOverrides((prev) => ({ ...prev, [ledgerCode]: newClassification }))
   }
 
   return (
-    <TBContext.Provider
-      value={{
-        tbLines,
-        adjustments,
-        pendingAdjustments,
-        tbUploaded,
-        approveAdjustment,
-        rejectAdjustment,
-        postAdjustment,
-        reclassifyLine,
-        uploadTB,
-      }}
-    >
+    <TBContext.Provider value={{ tbLines, adjustments, pendingAdjustments, tbUploaded, approveAdjustment, rejectAdjustment, postAdjustment, reclassifyLine }}>
       {children}
     </TBContext.Provider>
   )

@@ -33,5 +33,5 @@ export function loadDemoData(auditor = 'MISCPA') {
   logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio as a ${auditor} file; trial balance received, waiting for approval` })
 }
 export function clearDemoData() {
-  attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore(KEY, null)
+  attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore('workingtb:adjustments', []); writeStore('workingtb:classOverrides', {}); writeStore(KEY, null)
 }

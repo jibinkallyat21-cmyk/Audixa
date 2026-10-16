@@ -1,53 +1,53 @@
-// MIS (MISCPA) General Audit Requirements: the preset list from MIS_Req_list.xlsx, text kept as supplied.
+// MIS (MISCPA) General Audit Requirements: the preset list from MIS_Req_list.xlsx. Typos corrected and written in sentence case; meaning unchanged.
 // Which items apply to a client is decided from its trial balance (see utils/requirementsEngine.js).
 export const MIS_REQUIREMENTS = [
  {
   "id": "TB",
-  "title": "TRIAL BALANCE",
+  "title": "Trial balance",
   "items": [
    {
     "n": 1,
-    "text": "DETAILED TRIAL BALANCE FOR THE AUDIT PERIOD WITH OPENING BALANCE, CURRENT YAER DEBIT/CREDIT TRANSACTIONS AND CLOSING BALANCE. OPENING BALANCE OF TRIAL BALANCE NEED TO MATCH WITH PREVIOUS YEAR AUDIT REPORT."
+    "text": "Detailed trial balance for the audit period with opening balance, current year debit/credit transactions and closing balance. The opening balance of the trial balance needs to match the previous year audit report."
    },
    {
     "n": 2,
-    "text": "CONSOLIDATED TRIAL BALANCE NEED TO BE PROVIDED SHOWING INDIVIDUAL TRIAL BALANCE AND CONSOLIDATED FIGURES IF APPLICABLE"
+    "text": "Consolidated trial balance showing the individual trial balances and the consolidated figures, if applicable."
    }
   ]
  },
  {
   "id": "RP",
-  "title": "AMOUNT DUE TO/FROM RELATED PARTIES , SHAREHOLDERS, PARTNERS ETC",
+  "title": "Amounts due to/from related parties, shareholders, partners, etc.",
   "items": [
    {
     "n": 1,
-    "text": "LIST OF RELATED PARTIES WITH NATURE OF RELATION"
+    "text": "List of related parties with the nature of the relationship."
    },
    {
     "n": 2,
-    "text": "SOA/LEDGER STATEMENTS OF RELATED PARTIES FOR THE AUDIT PERIOD"
+    "text": "SOA/ledger statements of related parties for the audit period."
    },
    {
     "n": 3,
-    "text": "BALANCE CONFIRMATION FROM RELATED PARTIES"
+    "text": "Balance confirmation from related parties."
    }
   ]
  },
  {
   "id": "LN",
-  "title": "LOANS",
+  "title": "Loans",
   "items": [
    {
     "n": 1,
-    "text": "LOAN AGREEMENTS/LOAN SANCTION LETTERS"
+    "text": "Loan agreements/loan sanction letters."
    },
    {
     "n": 2,
-    "text": "LOAN STATEMENTS FOR THE AUDIT PERIOD"
+    "text": "Loan statements for the audit period."
    },
    {
     "n": 3,
-    "text": "BALANCE CONFIRMATION FROM RESPECTIVE FINANCIAL INSTITUTIONS/ ENTITIES FROM WHICH LOAN AVAILED"
+    "text": "Balance confirmation from the respective financial institutions/entities from which the loan was availed."
    }
   ]
  },
@@ -57,271 +57,271 @@ export const MIS_REQUIREMENTS = [
   "items": [
    {
     "n": 1,
-    "text": "QUARTERLY VAT COMPUTATION STATEMENTS IN EXCEL IF AVAILABLE"
+    "text": "Quarterly VAT computation statements in Excel, if available."
    },
    {
     "n": 2,
-    "text": "QUARTERLY VAT RETURNS"
+    "text": "Quarterly VAT returns."
    },
    {
     "n": 3,
-    "text": "QUARTERLY VAT PAYMENT RECEIPTS"
+    "text": "Quarterly VAT payment receipts."
    },
    {
     "n": 4,
-    "text": "VAT RECONCILIATION STATEMENTS IF SALES, OUTPUT VAT, INPUT VAT NOT MATCH WITH TRIAL BALANCE"
+    "text": "VAT reconciliation statements, if sales, output VAT or input VAT do not match the trial balance."
    }
   ]
  },
  {
   "id": "TP",
-  "title": "TRADE PAYABLES/ ADVANCE TO SUPPLIERS",
+  "title": "Trade payables / advances to suppliers",
   "items": [
    {
     "n": 1,
-    "text": "TRADE PAYABLES AGEING REPORT WITH SUBSEQUENT PAYMENTS OF OUT STANDING AMOUNTS TILL THE DATE OF SHARING REPORT"
+    "text": "Trade payables ageing report with subsequent payments of outstanding amounts up to the date of sharing the report."
    },
    {
     "n": 2,
-    "text": "EXPLANATION FOR TRADE PAYABLES LEDGER HAVING OPENING BALANCES AND NO MOVEMENT DURING THE YEAR"
+    "text": "Explanation for trade payables ledgers having opening balances and no movement during the year."
    },
    {
     "n": 3,
-    "text": "BALANCE CONFIRMATION FROM TRADE PAYABLES COVERING MORE THAN 50% OF TRADE PAYABLES IN VALUE OR SUBSEQUENT SOA'S SHOWING PAYMENT OF OUT STANDING AMOUNT AS ON THE END OF FINANCIAL YEAR"
+    "text": "Balance confirmation from trade payables covering more than 50% of trade payables in value, or subsequent SOAs showing payment of the outstanding amount as at the end of the financial year."
    },
    {
     "n": 4,
-    "text": "SUBSEQUENT PURCHASE DETAILS FOR ADVANCE TO SUPPLIERS AS ON THE END OF FINANCIAL YEAR"
+    "text": "Subsequent purchase details for advances to suppliers as at the end of the financial year."
    }
   ]
  },
  {
   "id": "FA",
-  "title": "FIXED ASSETS",
+  "title": "Fixed assets",
   "items": [
    {
     "n": 1,
-    "text": "DEPRECIATION SCHEDULE IF DEPRECIATION IS ALREADY BOOKED IN THE TRIAL BALANCE PROVIDED"
+    "text": "Depreciation schedule, if depreciation is already booked in the trial balance provided."
    },
    {
     "n": 2,
-    "text": "ALL INVOICES FOR ANY ADDITION OR DELETION IN FIXED ASSETS"
+    "text": "All invoices for any addition or deletion in fixed assets."
    },
    {
     "n": 3,
-    "text": "OWNERSHIP DOCUMENTS LIKE TITLE DEED IF ANY LAND & BUILDINGS IN THE FIXED ASSETS"
+    "text": "Ownership documents, such as the title deed, for any land and buildings in the fixed assets."
    },
    {
     "n": 4,
-    "text": "PROVIDE REPORT FROM TAMM IF THERE ANY MOTOR VEHICLES IN THE FIXED ASSETS ALONG WITH ISTEMARA"
+    "text": "Report from Tamm, along with the Istimara, if there are any motor vehicles in the fixed assets."
    }
   ]
  },
  {
   "id": "PP",
-  "title": "PREPAYMENTS",
+  "title": "Prepayments",
   "items": [
    {
     "n": 1,
-    "text": "PREPAYMENTS SCHEDULE IF PREPAYMENTS IS ALREADY BOOKED IN THE TRIAL BALANCE PROVIDED"
+    "text": "Prepayments schedule, if prepayments are already booked in the trial balance provided."
    },
    {
     "n": 2,
-    "text": "ALL INVOICES, CONTRACTS, OTHER SUPPORTING DOCUMENTS THAT ARE SUFFICIENT FOR PREPAYMENTS CALCULATION"
+    "text": "All invoices, contracts and other supporting documents sufficient for the prepayments calculation."
    }
   ]
  },
  {
   "id": "SA",
-  "title": "STAFF ADVANCES",
+  "title": "Staff advances",
   "items": [
    {
     "n": 1,
-    "text": "CONFIRMATION FROM RESPECTIVE STAFFS COVERING MORE THAN 50% OF STAFF ADVANCES"
+    "text": "Confirmation from the respective staff covering more than 50% of staff advances."
    }
   ]
  },
  {
   "id": "INV",
-  "title": "INVENTORY",
+  "title": "Inventory",
   "items": [
    {
     "n": 1,
-    "text": "PHYSICAL VERIFICATION REPORT OF INVENTORY PERFORMED BY MANAGEMENT WITH REASON FOR VARIATIONS"
+    "text": "Physical verification report of inventory performed by management, with reasons for variations."
    },
    {
     "n": 2,
-    "text": "EXPLANATIONS/SUPPORTING FOR IF THERE ANY STOCK ADJUSTMENTS IN THE TRIAL BALANCE"
+    "text": "Explanations/supporting documents for any stock adjustments in the trial balance."
    },
    {
     "n": 3,
-    "text": "INVENTORY MOVEMENT REPORT WITH OPENING, PURCHASE,PURCHASE RETURN, SALES, SALES RETURN, STOCK TRANSFER, STOCK ADJUSTMENTS, CLOSING BALANCE IN QUANTITY AND VALUE."
+    "text": "Inventory movement report with opening, purchases, purchase returns, sales, sales returns, stock transfers, stock adjustments and closing balance in quantity and value."
    },
    {
     "n": 4,
-    "text": "ITEM WISE CLOSING STOCK STATEMENTS HAVING NAME OF ITEM, QUANTITY, RATE AND CLOSING VALUE CERTIFIED BY THE MANAGEMENT"
+    "text": "Item-wise closing stock statement with the name of the item, quantity, rate and closing value, certified by management."
    },
    {
     "n": 5,
-    "text": "CLOSING WORK IN PROGESS CALCULATION IF APPLICABLE"
+    "text": "Closing work in progress calculation, if applicable."
    }
   ]
  },
  {
   "id": "TR",
-  "title": "TRADE RECEIVABLES/ADVANCE FROM CUSTOMERS",
+  "title": "Trade receivables / advances from customers",
   "items": [
    {
     "n": 1,
-    "text": "TRADE RECEIVABLES AGEING REPORT WITH SUBSEQUENT RECEIPTS OF OUT STANDING AMOUNTS TILL THE DATE OF SHARING REPORT"
+    "text": "Trade receivables ageing report with subsequent receipts of outstanding amounts up to the date of sharing the report."
    },
    {
     "n": 2,
-    "text": "EXPLANATION FOR TRADE RECEIVABLES LEDGER HAVING OPENING BALANCES AND NO MOVEMENT DURING THE YEAR"
+    "text": "Explanation for trade receivables ledgers having opening balances and no movement during the year."
    },
    {
     "n": 3,
-    "text": "BALANCE CONFIRMATION FROM TRADE RECEIVABLES COVERING MORE THAN 50% OF TRADE RECEVABLES IN VALUE OR SUBSEQUENT SOA'S SHOWING RECEIPT OF OUT STANDING AMOUNT AS ON THE END OF FINANCIAL YEAR"
+    "text": "Balance confirmation from trade receivables covering more than 50% of trade receivables in value, or subsequent SOAs showing receipt of the outstanding amount as at the end of the financial year."
    },
    {
     "n": 4,
-    "text": "SUBSEQUENT SALES DETAILS FOR ADVANCE FROM CUSTOMERS AS ON THE END OF FINANCIAL YEAR"
+    "text": "Subsequent sales details for advances from customers as at the end of the financial year."
    },
    {
     "n": 5,
-    "text": "ANALYSIS REPORT IF THERE ANY PROVSION FOR DOUBTFUL DEBTS BOOKED IN THE TRIAL BALANCE"
+    "text": "Analysis report, if there is any provision for doubtful debts booked in the trial balance."
    }
   ]
  },
  {
   "id": "CASH",
-  "title": "CASH",
+  "title": "Cash",
   "items": [
    {
     "n": 1,
-    "text": "CASH COUNT REPORT WITH REASONS FOR VARIATIONS IF ANY CERTIFIED BY THE MANAGEMENT IE . CASH BALANCE CONFIRMATION"
+    "text": "Cash count report certified by management, with reasons for any variations (i.e. cash balance confirmation)."
    }
   ]
  },
  {
   "id": "BANK",
-  "title": "BANK",
+  "title": "Bank",
   "items": [
    {
     "n": 1,
-    "text": "ALL BANK STATEMENTS COVERING THE AUDIT PERIOD AND SUBSEQUENT ONE MONTH"
+    "text": "All bank statements covering the audit period and the subsequent one month."
    },
    {
     "n": 2,
-    "text": "BANK RECONCILIATION STATEMENTS IF ANY"
+    "text": "Bank reconciliation statements, if any."
    },
    {
     "n": 3,
-    "text": "BANK CONFIRMATIONS"
+    "text": "Bank confirmations."
    }
   ]
  },
  {
   "id": "SALES",
-  "title": "SALES",
+  "title": "Sales",
   "items": [
    {
     "n": 1,
-    "text": "SALES & SALES RETURN REGISTER SHOWING INVOICE NUMBER, INVOICE DATE, NAME OF PARTY, TRN NO, SALE VALUE, OUT PUT VAT AND TOTAL INVOICE VALUE"
+    "text": "Sales and sales return register showing invoice number, invoice date, name of party, TRN, sale value, output VAT and total invoice value."
    },
    {
     "n": 2,
-    "text": "SALES RECONCILIATION STATEMENT IF THERE ANY VARIATION WITH SALES AS PER BOOKS AND VAT RETURNS"
+    "text": "Sales reconciliation statement, if there is any variation between sales as per the books and the VAT returns."
    },
    {
     "n": 3,
-    "text": "SALES/CREDIT NOTES SAMPLES COVERING MORE THAN 50% OF TOTAL VALUE. IF THE NUMBER OF INVOICES IS HIGHER WHILE APPLYING THIS RULE WE WILL SHARE LIST OF INVOICES FOR WHICH SAMPLES REQUIRED AFTER RECEIPT OF SALES REGISTER FROM YOUR END"
+    "text": "Samples of sales invoices/credit notes covering more than 50% of the total value. If the number of invoices is high when applying this rule, we will share the list of invoices for which samples are required after receiving the sales register from you."
    },
    {
     "n": 4,
-    "text": "SUPPORTING DOCUMENTS IF THERE EXPORT SALES OR ANY OTHER ZERO RATED SALES"
+    "text": "Supporting documents, if there are export sales or any other zero-rated sales."
    },
    {
     "n": 5,
-    "text": "SAMPLE CONTRACTS WITH CUSTOMERS, REVENUE RECOGNITION METHOD IF REVENUE IS FROM SERVICE CONTRACTS INVOLVING MATERIAL AND LABOUR"
+    "text": "Sample contracts with customers and the revenue recognition method, if revenue is from service contracts involving material and labour."
    }
   ]
  },
  {
   "id": "PUR",
-  "title": "PURCHASES",
+  "title": "Purchases",
   "items": [
    {
     "n": 1,
-    "text": "PURCHASES & PURCHASE RETURN REGISTER SHOWING INVOICE NUMBER, INVOICE DATE, NAME OF PARTY, TRN NO, SALE VALUE, OUT PUT VAT AND TOTAL INVOICE VALUE"
+    "text": "Purchases and purchase return register showing invoice number, invoice date, name of party, TRN, purchase value, input VAT and total invoice value."
    },
    {
     "n": 2,
-    "text": "PURCHASE/DEBIT NOTES SAMPLES COVERING MORE THAN 50% OF TOTAL VALUE. IF THE NUMBER OF INVOICES IS HIGHER WHILE APPLYING THIS RULE WE WILL SHARE LIST OF INVOICES FOR WHICH SAMPLES REQUIRED AFTER RECEIPT OF PURCHASE REGISTER FROM YOUR END"
+    "text": "Samples of purchase invoices/debit notes covering more than 50% of the total value. If the number of invoices is high when applying this rule, we will share the list of invoices for which samples are required after receiving the purchase register from you."
    },
    {
     "n": 3,
-    "text": "SUPPORTING DOCUMENTS IF THEIR IMPORT PURCHASES"
+    "text": "Supporting documents, if there are import purchases."
    }
   ]
  },
  {
   "id": "SAL",
-  "title": "SALARY",
+  "title": "Salary",
   "items": [
    {
     "n": 1,
-    "text": "MONTHLY PAYROLL REGISTER FOR ALL 12 MONTHS"
+    "text": "Monthly payroll register for all 12 months."
    },
    {
     "n": 2,
-    "text": "PAYMENT PROOF FOR SALARY DUE AS ON THE END OF FINANCIAL YEAR"
+    "text": "Payment proof for salary due as at the end of the financial year."
    },
    {
     "n": 3,
-    "text": "CLARIFICATIONS IF THERE ANY VARIATION IN SALARY AS PER BOOKS WITH MUDAD/GOSI"
+    "text": "Clarification of any variation between salary as per the books and MUDAD/GOSI."
    }
   ]
  },
  {
   "id": "RENT",
-  "title": "RENT",
+  "title": "Rent",
   "items": [
    {
     "n": 1,
-    "text": "ALL EJAR CONTRACTS AND PAYMENT COPY COVERING THE AUDIT PERIOD"
+    "text": "All Ejar contracts and payment copies covering the audit period."
    }
   ]
  },
  {
   "id": "EOSB",
-  "title": "EMPLOYEE END OF SERVICE BENEFITS (ESOB)",
+  "title": "Employee end of service benefits (EOSB)",
   "items": [
    {
     "n": 1,
-    "text": "ESOB SCHEDULE IF PROVISON IS CREATED IN THE TRIAL BALANCE PROVIDED"
+    "text": "EOSB schedule, if a provision is created in the trial balance provided."
    },
    {
     "n": 2,
-    "text": "LIST OF EMPLOYEES RESIGNED DURING THE AUDIT PERIOD WITH THEIR FINAL SETTLEMENT DETAILS"
+    "text": "List of employees who resigned during the audit period, with their final settlement details."
    }
   ]
  },
  {
   "id": "EXP",
-  "title": "EXPENSES OTHER THAN SALARY AND RENT",
+  "title": "Expenses other than salary and rent",
   "items": [
    {
     "n": 1,
-    "text": "SOA/LEDGER STATEMENTS OF INDIRECT EXPENSES COVERING MORE THAN 50% OF INDIRECT EXPENSES IN VALUE"
+    "text": "SOA/ledger statements of indirect expenses covering more than 50% of indirect expenses in value."
    },
    {
     "n": 2,
-    "text": "SAMPLE INVOICES COVERING MORE THAN 50% OF EXPENSES IN VALUE FROM THE ABOVE"
+    "text": "Sample invoices covering more than 50% of the expenses in value from the above."
    },
    {
     "n": 3,
-    "text": "IF THE NUMBER OF SAMPLES IS HIGHER WHILE APPLYING THE ABOVE RULE, WE WILL SHARE THE LIST OF SAMPLES AFTER RECEIVING SOA'S FROM YOUR END"
+    "text": "If the number of samples is high when applying the above rule, we will share the list of samples after receiving the SOAs from you."
    }
   ]
  }
