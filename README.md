@@ -37,6 +37,8 @@ data from `src/data/sampleData.js`.
 4. The execution tools (TB review, sampling and vouching, payroll and assets, IFRS trial balance and financial statements, query tracker,
    audit log, archive) are under the team's My Workspace > Audit Procedures. Their logic is pure code in `src/utils/*.js` with tests in `scripts/`.
 
+The full hand-over prompt for continuing the build is in `docs/HANDOVER_PROMPT.md`; the Rule Book, requirement lists and other source files are in `docs/source/`.
+
 `docs/execution-decisions.md` is the running list of every decision taken and every open question. Read it before changing rules.
 
 ## AI (Claude) endpoints
