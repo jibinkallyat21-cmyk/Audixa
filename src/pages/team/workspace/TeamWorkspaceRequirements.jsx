@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ChevronRight, Download, AlertCircle, Check, X, Info, Upload as UploadIcon, Plus, Sparkles, TableProperties } from 'lucide-react'
+import { ChevronDown, ChevronRight, Download, AlertCircle, Check, X, Info, Plus, Sparkles, TableProperties } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
@@ -9,76 +9,6 @@ import { useToast } from '../../../components/shared/Toast'
 import { useModal } from '../../../components/shared/Modal'
 import { useTeamRole } from '../../../hooks/useTeamRole'
 import { teamRequirementCategories, teamAuditTrail, getTeamFile } from '../../../data/sampleData'
-
-const MAX_FILE_MB = 50
-const ACCEPTED_EXTENSIONS = ['pdf', 'xlsx', 'xls', 'docx', 'doc', 'xml', 'csv', 'jpg', 'jpeg', 'png']
-
-function validateFile(file) {
-  const sizeMb = file.size / (1024 * 1024)
-  if (sizeMb > MAX_FILE_MB) {
-    return `File too large. Maximum size is ${MAX_FILE_MB}MB. Your file is ${sizeMb.toFixed(1)}MB.`
-  }
-  const ext = file.name.split('.').pop()?.toLowerCase()
-  if (!ACCEPTED_EXTENSIONS.includes(ext)) {
-    return 'File format not supported. Accepted formats: PDF, XLSX, DOCX, XML, CSV, JPG, PNG.'
-  }
-  return null
-}
-
-function UploadDropzone({ onUploaded }) {
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(false)
-  const inputRef = useState(() => `upload-${Math.random().toString(36).slice(2)}`)[0]
-
-  const handleFiles = (files) => {
-    const file = files?.[0]
-    if (!file) return
-    const err = validateFile(file)
-    if (err) {
-      setError(err)
-      setSuccess(false)
-      return
-    }
-    setError(null)
-    setSuccess(true)
-    setTimeout(() => onUploaded?.(file.name), 700)
-  }
-
-  return (
-    <div>
-      <label
-        htmlFor={inputRef}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault()
-          handleFiles(e.dataTransfer.files)
-        }}
-        className={`flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors ${
-          success ? 'border-emerald bg-emerald/10 text-emerald' : 'border-slate-300 text-navy hover:bg-slate-50'
-        }`}
-      >
-        {success ? <Check className="h-3.5 w-3.5" /> : <UploadIcon className="h-3.5 w-3.5" />}
-        {success ? 'Uploaded' : 'Upload File or Drag Here'}
-      </label>
-      <input id={inputRef} type="file" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="mt-2 flex items-start gap-2 rounded-md border border-alert-red/30 bg-alert-red/5 px-2.5 py-2 text-[11px] text-alert-red"
-          >
-            <span className="flex-1">{error}</span>
-            <button onClick={() => setError(null)} aria-label="Dismiss">
-              <X className="h-3 w-3" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
 
 function AIHintBox({ text }) {
   const showToast = useToast()
@@ -368,7 +298,10 @@ function RequirementRow({ item, index, onUpdateItem }) {
   const [flash, setFlash] = useState(false)
   const [open, setOpen] = useState(false)
   const filename = item.fileInfo?.split(' · ')[0] || ''
-  const canReview = item.status === 'Under Review' || item.status === 'Pending Client' || item.status === 'Uploaded Processing'
+  // The audit team reviews documents; uploading, replacing and re-uploading are client actions.
+  const canReview = item.status === 'Under Review' || item.status === 'Uploaded Processing'
+  const CLIENT_ONLY = ['Upload File or Drag Here', 'Re-upload', 'Re-upload Document']
+  const action = CLIENT_ONLY.includes(item.action) ? null : item.action === 'Replace / Details' ? 'View File' : item.action
 
   const handleAccept = () => {
     setFlash(true)
@@ -398,7 +331,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
     })
   }
 
-  const handleGenericAction = () => showToast(`${item.action} — ${item.name}`)
+  const handleGenericAction = () => showToast(`${action} — ${item.name}`)
 
   const hasFlag = !!item.aiFlag
   const hasDetail = hasFlag || !!item.rejectReason || !!item.fileInfo
@@ -459,26 +392,16 @@ function RequirementRow({ item, index, onUpdateItem }) {
               </button>
             </>
           )}
-          {item.action === 'Upload File or Drag Here' ? (
-            <UploadDropzone
-              onUploaded={(filename) => {
-                showToast(`${filename} uploaded — processing`)
-                logAuditEvent('Document Uploaded', `${filename} uploaded for ${item.name}`)
-                onUpdateItem({ status: 'Uploaded Processing', fileInfo: `${filename} · Processing`, tag: undefined })
-              }}
-            />
-          ) : (
+          {action ? (
             <button
-              onClick={item.status === 'Rejected' ? handleReject : handleGenericAction}
-              className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                item.status === 'Rejected'
-                  ? 'bg-alert-red text-white hover:bg-red-700'
-                  : 'border border-slate-300 text-navy hover:bg-slate-50'
-              }`}
+              onClick={handleGenericAction}
+              className="whitespace-nowrap rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:bg-slate-50"
             >
-              {item.action}
+              {action}
             </button>
-          )}
+          ) : !canReview && ['Pending Client', 'Rejected'].includes(item.status) ? (
+            <span className="whitespace-nowrap text-xs text-slate-400">{item.status === 'Rejected' ? 'Awaiting client re-upload' : 'Awaiting client upload'}</span>
+          ) : null}
           {item.status === 'Accepted' && (
             <button
               onClick={() => showToast(`Download starting — ${filename}`)}
