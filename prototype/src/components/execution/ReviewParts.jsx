@@ -56,13 +56,13 @@ export function Flags({ flags, empty = 'Nothing to flag.' }) {
 // ── Building blocks for roomy forms ─────────────────────────────────────
 export const INPUT = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 export function Field({ label, hint, children }) {
-  return <label className="block"><span className="text-xs font-medium text-slate-600">{label}</span><div className="mt-1.5">{children}</div>{hint && <span className="mt-1 block text-[11px] text-slate-400">{hint}</span>}</label>
+  return <label className="block"><span className="text-xs font-medium text-slate-600">{label}</span><div className="mt-1.5">{children}</div>{hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}</label>
 }
 export function FieldGrid({ children, cols = 3 }) {
   return <div className={`grid gap-4 sm:grid-cols-2 ${cols === 4 ? 'lg:grid-cols-4' : cols === 2 ? '' : 'lg:grid-cols-3'}`}>{children}</div>
 }
 export function Section({ title, hint, children }) {
-  return <div><div className="mb-3"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>{hint && <p className="mt-0.5 text-xs text-slate-400">{hint}</p>}</div>{children}</div>
+  return <div><div className="mb-3"><p className="text-sm font-semibold text-navy">{title}</p>{hint && <p className="mt-1 text-sm text-slate-500">{hint}</p>}</div>{children}</div>
 }
 // A tick box that looks like a button: easy to hit, easy to read.
 export function Toggle({ label, checked, onChange, tone = 'navy' }) {
