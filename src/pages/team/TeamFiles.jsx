@@ -96,11 +96,6 @@ function FileRow({ f, idx }) {
       <div className={`flex min-h-[64px] items-center gap-4 px-5 py-3 transition-colors ${hovered || expanded ? 'bg-slate-50' : ''}`}>
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <p className="truncate text-sm font-semibold text-navy">{f.client}</p>
-          {f.urgent && (
-            <span className="shrink-0 rounded-full border border-alert-red/40 bg-alert-red/10 px-2 py-0.5 text-[10px] font-bold text-alert-red">
-              URGENT
-            </span>
-          )}
         </div>
 
         <span className="hidden w-32 shrink-0 font-mono text-[11px] text-slate-400 md:block">{f.code}</span>
@@ -110,17 +105,24 @@ function FileRow({ f, idx }) {
           <AuditorChip auditor={f.auditor} />
         </div>
 
-        <span
-          className={`hidden w-44 shrink-0 truncate text-xs font-medium sm:block ${
-            f.attentionLevel === 'URGENT'
-              ? 'text-alert-red'
-              : f.attentionLevel === 'FINAL'
-              ? 'text-emerald'
-              : 'text-amber'
-          }`}
-        >
-          {f.shortAttention}
-        </span>
+        <div className="hidden w-44 shrink-0 flex-col items-start gap-1 sm:flex">
+          {f.urgent && (
+            <span className="rounded-full border border-alert-red/40 bg-alert-red/10 px-2 py-0.5 text-[10px] font-bold text-alert-red">
+              URGENT
+            </span>
+          )}
+          <span
+            className={`max-w-full truncate text-xs font-medium ${
+              f.attentionLevel === 'URGENT'
+                ? 'text-alert-red'
+                : f.attentionLevel === 'FINAL'
+                ? 'text-emerald'
+                : 'text-amber'
+            }`}
+          >
+            {f.shortAttention}
+          </span>
+        </div>
 
         <div className="flex w-40 shrink-0 justify-end">
         <button
