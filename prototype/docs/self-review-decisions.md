@@ -148,7 +148,7 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 
 ## IFRS financial statements: who needs them, which type, what the file holds (built)
 
-- ABCPA clients need the IFRS TB and statements only when engaged for zakat filing (the zakat service on the client profile); otherwise the page says they are not required. MISCPA clients always need the IFRS TB. The demo client is set up as engaged for zakat filing so the flow can be tried.
+- The IFRS TB and statements are needed only when the client is engaged for zakat filing (the zakat service on the client profile), for ABCPA and MISCPA files alike; otherwise the page says they are not required. The demo client is set up as engaged for zakat filing so the flow can be tried.
 - Only the audit type the client was engaged for is shown: IFRS TB for a proper audit, or for a disclaimer audit, never both.
 - The "Financial statements" tab (the MISCPA statutory format) is shown for MISCPA files only.
 - Exported file: Client TB, IFRS TB (only ledger name, closing balance of the year, closing balance of the previous year), Balance sheet, P&L, Statement of equity, then the schedules (prepaid, depreciation, EOSB, GOSI expense) and a "Schedule checks" sheet. The working sheets (IFRS TB working columns, mapping, adjustments, capital, COGS, reconciliation, pending list, VAT, verification) follow, because the statements are built from them and every figure must stay traceable. Schedules are in the proper audit file only.
