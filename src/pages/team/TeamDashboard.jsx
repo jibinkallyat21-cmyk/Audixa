@@ -244,7 +244,8 @@ export default function TeamDashboard() {
   const [escalationOpen, setEscalationOpen] = useState(false)
   const [meetOpen, setMeetOpen] = useState(false)
   const [escalWidgetExpanded, setEscalWidgetExpanded] = useState(false)
-  const urgentFiles = teamFiles.filter((f) => f.urgent).concat(teamFiles.filter((f) => !f.urgent)).slice(0, 5)
+  const demoFiles = teamFiles.filter((f) => f.isDemo)
+  const urgentFiles = demoFiles.slice(0, 5)
   const topTasks = teamTasks.slice(0, 4)
 
   return (

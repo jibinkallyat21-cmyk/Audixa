@@ -7,8 +7,8 @@ import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
-import { requirementCategories, getDocStatsForFY } from '../../data/sampleData'
-import { useIssuedLists, PORTAL_CLIENT } from '../../utils/requirementsStore'
+import { useIssuedLists, PORTAL_CLIENT, setItemStatus } from '../../utils/requirementsStore'
+import { DEMO_FILE } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
 // Flatten categories into a table-ready list with plain-language descriptions
@@ -20,32 +20,26 @@ const PLAIN_DESCRIPTIONS = {
   'REV-05': 'Sample e-invoices generated through the ZATCA system.',
 }
 
-function buildRows() {
+function rowsFromIssued(rec) {
   const rows = []
-  requirementCategories.forEach((cat) => {
-    rows.push({ type: 'category', id: cat.id, title: cat.title, completed: cat.completed, total: cat.total })
-    if (cat.items?.length) {
-      cat.items.forEach((item) => {
-        const filename = item.fileInfo?.split(' · ')[0] || ''
-        rows.push({
-          type: 'row',
-          categoryId: cat.id,
-          ref: item.ref,
-          name: item.name,
-          plainDesc: PLAIN_DESCRIPTIONS[item.ref] || 'Upload the requested document for your audit.',
-          status: item.status,
-          filename: filename || null,
-          action: item.action,
-          alert: item.alert,
-          tag: item.tag,
-        })
-      })
-    }
+  ;(rec?.categories || []).forEach((cat) => {
+    rows.push({ type: 'category', id: cat.id, title: cat.title, completed: cat.items.filter((i) => i.status === 'Accepted').length, total: cat.items.length })
+    cat.items.forEach((item) => rows.push({
+      type: 'row', categoryId: cat.id, ref: item.ref, name: item.text, plainDesc: cat.reason, status: item.status,
+      filename: item.filename || null, alert: item.alert, tag: null,
+    }))
   })
   return rows
 }
 
-const ALL_ROWS = buildRows()
+function docStats(rows) {
+  const items = rows.filter((r) => r.type === 'row')
+  const total = items.length
+  const approved = items.filter((r) => r.status === 'Accepted').length
+  const submitted = items.filter((r) => ['Accepted', 'Under Review', 'Uploaded Processing'].includes(r.status)).length
+  const needsCorrection = items.filter((r) => r.status === 'Rejected').length
+  return { total, submitted, approved, needsCorrection, stillNeeded: total - submitted, isComplete: total > 0 && approved === total }
+}
 
 const STATUS_COLORS = {
   Accepted: 'emerald',
@@ -113,7 +107,7 @@ function TableRow({ row, highlighted }) {
         <span className="w-20 shrink-0 font-mono text-xs" style={{ color: D.subtle }}>{row.ref}</span>
         {/* Name */}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold truncate" style={{ color: D.text }}>{row.name}</p>
+          <p className="line-clamp-2 break-words text-sm font-semibold" title={row.name} style={{ color: D.text }}>{row.name}</p>
           {row.tag && <span className="mt-0.5 inline-block text-[10px] font-semibold text-amber">{row.tag}</span>}
         </div>
         {/* What We Need */}
@@ -141,13 +135,11 @@ function TableRow({ row, highlighted }) {
               <Eye className="h-3 w-3" /> View
             </button>
           ) : canUpload ? (
-            <button
-              onClick={() => showToast('File picker opened — select your document')}
-              className={`${btnBase} bg-brand text-white hover:bg-[#D12C35]`}
-            >
+            <label className={`${btnBase} cursor-pointer bg-brand text-white hover:bg-[#D12C35]`}>
+              <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) { setItemStatus(PORTAL_CLIENT.slug, row.ref, { status: 'Uploaded Processing', filename: f.name }); showToast(`${f.name} uploaded`) } }} />
               <Upload className="h-3 w-3" />
               {isRejected ? 'Re-upload' : 'Upload'}
-            </button>
+            </label>
           ) : (
             <button
               className={btnBase}
@@ -336,35 +328,13 @@ const STATUS_FILTER_MAP = {
   'under-review': ['Under Review', 'Uploaded Processing'],
 }
 
-function IssuedRequirements({ D }) {
-  const rec = useIssuedLists()[PORTAL_CLIENT.slug]
-  const [open, setOpen] = useState({})
-  if (!rec) return null
-  return (
-    <div className="rounded-xl p-4" style={{ border: `1px solid ${D.border}`, background: D.card }}>
-      <p className="text-sm font-semibold" style={{ color: D.text }}>Requirement list from your auditor (MISCPA)</p>
-      <p className="mt-0.5 text-xs" style={{ color: D.muted }}>{rec.itemCount} documents in {rec.categories.length} areas, chosen from your trial balance. Issued {new Date(rec.issuedAt).toLocaleDateString()}.</p>
-      <div className="mt-3 space-y-2">
-        {rec.categories.map((c) => (
-          <div key={c.id} className="rounded-lg" style={{ border: `1px solid ${D.border}` }}>
-            <button onClick={() => setOpen((o) => ({ ...o, [c.id]: !o[c.id] }))} aria-expanded={!!open[c.id]} className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-semibold" style={{ color: D.text }}>
-              <span className="min-w-0 break-words">{c.title}</span><span className="shrink-0 font-normal" style={{ color: D.muted }}>{c.items.length} item{c.items.length === 1 ? '' : 's'}</span>
-            </button>
-            {open[c.id] && c.items.map((i) => (
-              <p key={i.ref} className="flex gap-3 px-3 py-2 text-xs" style={{ borderTop: `1px solid ${D.border}`, color: D.muted }}><span className="w-14 shrink-0 font-mono font-semibold" style={{ color: D.text }}>{i.ref}</span><span className="min-w-0 break-words">{i.text}</span></p>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export default function ClientDocuments() {
   const showToast = useToast()
   const { isDark } = useTheme()
   const { selectedFY } = useClientFY()
-  const engRef = ENGAGEMENT_REFS[selectedFY]
+  const rec = useIssuedLists()[PORTAL_CLIENT.slug]
+  const ALL_ROWS = useMemo(() => rowsFromIssued(rec), [rec])
+  const engRef = rec ? DEMO_FILE.code : ENGAGEMENT_REFS[selectedFY]
   const [searchParams, setSearchParams] = useSearchParams()
   const [bulkOpen, setBulkOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -415,7 +385,7 @@ export default function ClientDocuments() {
     })
   }
 
-  const { total, submitted, approved, stillNeeded, needsCorrection, isComplete } = getDocStatsForFY(selectedFY)
+  const { total, submitted, approved, stillNeeded, needsCorrection, isComplete } = docStats(ALL_ROWS)
 
   // When searching: auto-expand categories that have matches; otherwise respect expanded set
   const matchingCategoryIds = useMemo(() => {
@@ -428,7 +398,7 @@ export default function ClientDocuments() {
       )) ids.add(row.categoryId)
     })
     return ids
-  }, [search])
+  }, [search, ALL_ROWS])
 
   const visibleCategoryIds = search
     ? matchingCategoryIds
@@ -464,8 +434,6 @@ export default function ClientDocuments() {
               <span className="rounded-md px-3 py-1 text-xs font-semibold" style={{ border: `1px solid ${D.border}`, color: D.muted, background: D.card }}>{engRef}</span>
             </div>
           </div>
-
-          <IssuedRequirements D={D} />
 
           {/* Bento stat cards */}
           <motion.div key={selectedFY} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="grid grid-cols-12 gap-3">
@@ -511,8 +479,10 @@ export default function ClientDocuments() {
             </button>
           </div>
 
+          {!rec && <div className="rounded-xl p-8 text-center text-sm" style={{ border: `1px dashed ${D.border}`, color: D.muted }}>No requirement list has been issued yet. Load the demo data from the Engagement Dashboard to see one.</div>}
+
           {/* Table */}
-          <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
+          {rec && <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
             {/* Table header */}
             <div className="hidden items-center gap-3 px-4 py-2.5 md:flex" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderBottom: `1px solid ${D.border}` }}>
               <span className="w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide" style={{ color: D.subtle }}>Ref #</span>
@@ -566,7 +536,7 @@ export default function ClientDocuments() {
                 <TableRow key={row.ref} row={row} highlighted={row.ref === highlightRef} />
               )
             })}
-          </div>
+          </div>}
         </div>
       </PageTransition>
 

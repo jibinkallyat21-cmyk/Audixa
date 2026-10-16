@@ -16,8 +16,8 @@ export function issueList(file, built, { by = 'Audit team', source = '' } = {}) 
   try { logEvent({ clientName: file.client, category: 'requirements', title: 'Requirement list issued', description: `${file.client}: ${built.itemCount} requirements in ${built.categories.length} categories (${file.auditor})` }) } catch { /* log is optional */ }
   return rec
 }
-export function setItemStatus(slug, ref, status) {
+export function setItemStatus(slug, ref, patch) {
   const all = readStore(KEY, {}); const rec = all[slug]; if (!rec) return
-  writeStore(KEY, { ...all, [slug]: { ...rec, categories: rec.categories.map((c) => ({ ...c, items: c.items.map((i) => (i.ref === ref ? { ...i, status } : i)) })) } })
+  writeStore(KEY, { ...all, [slug]: { ...rec, categories: rec.categories.map((c) => ({ ...c, items: c.items.map((i) => (i.ref === ref ? { ...i, ...(typeof patch === 'string' ? { status: patch } : patch) } : i)) })) } })
 }
 export const withdrawList = (slug) => { const all = { ...readStore(KEY, {}) }; delete all[slug]; writeStore(KEY, all) }
