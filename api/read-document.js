@@ -109,6 +109,15 @@ const DOCS = {
       notes,
     }),
   },
+  intake: {
+    describe: 'a client document uploaded to the client portal of an audit firm in Saudi Arabia: a signed proposal, Commercial Registration (CR), Articles of Association (AOA), previous year audit report, Zakat and tax certificate or return, VAT registration certificate, or a turnover statement / trial balance',
+    fields: 'detectedType (one of: proposal, cr, aoa, pyAudit, zakat, vat, tb, or other); legible (true if the text can be read); complete (true if all pages appear present); confidence (0 to 1, how sure you are of the type and the fields); legalName (the company name exactly as written, in English if both languages are present); crNumber; vatNumber (digits only); validUntil (expiry date, ISO yyyy-mm-dd; convert Hijri to Gregorian); fyYear (the financial year the document relates to, as a 4-digit year); signaturePresent and stampPresent (for a signed proposal); signatoryAuthorised (null unless the document states the signatory authority); fee (the audit fee stated on a proposal, excluding VAT); periodFrom and periodTo (ISO dates); isLatestAmended (null unless it states the amendment status); hasOpinion, hasFS, hasNotes (for an audit report); coversFullPeriod and hasTotals (for a trial balance or turnover statement).',
+    schema: obj({
+      detectedType: str, legible: nullableBool, complete: nullableBool, confidence: numOrNull, legalName: str, crNumber: str, vatNumber: str, validUntil: str, fyYear: intOrNull,
+      signaturePresent: nullableBool, stampPresent: nullableBool, signatoryAuthorised: nullableBool, fee: numOrNull, periodFrom: str, periodTo: str, isLatestAmended: nullableBool,
+      hasOpinion: nullableBool, hasFS: nullableBool, hasNotes: nullableBool, coversFullPeriod: nullableBool, hasTotals: nullableBool, notes,
+    }),
+  },
   signedEL: {
     describe: 'a signed engagement letter (EL) returned by the client, with company stamps and signatures',
     fields: 'totalPages (number of pages in the EL); pagesWithStamp (list of page numbers that carry a company stamp or seal); lastPageStamp (true if the last page carries a company stamp, false if not, null if you cannot tell); lastPageSignature (true if a handwritten or digital signature is visible on the last page, false if none, null if you cannot tell or it is unclear); signedBy (the printed name of the signatory next to the signature, if shown); signatoryCapacity (the capacity stated, for example shareholder, manager, general manager of the parent company). Never decide whether the signature is genuine; only report what is visible.',
