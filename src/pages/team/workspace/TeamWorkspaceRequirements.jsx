@@ -8,7 +8,10 @@ import StatusPill from '../../../components/shared/StatusPill'
 import { useToast } from '../../../components/shared/Toast'
 import { useModal } from '../../../components/shared/Modal'
 import { useTeamRole } from '../../../hooks/useTeamRole'
-import { teamRequirementCategories, teamAuditTrail, getTeamFile } from '../../../data/sampleData'
+import { useSearchParams } from 'react-router-dom'
+import { teamRequirementCategories, teamAuditTrail, getTeamFile, teamFiles } from '../../../data/sampleData'
+import RequirementsListView from '../../../components/execution/RequirementsListView'
+import { PORTAL_CLIENT } from '../../../utils/requirementsStore'
 
 function AIHintBox({ text }) {
   const showToast = useToast()
@@ -797,6 +800,11 @@ function ReviewPointsSection({ canRaise }) {
 }
 
 export default function TeamWorkspaceRequirements() {
+  const [params, setParams] = useSearchParams()
+  const fileOptions = [...teamFiles, PORTAL_CLIENT]
+  const slug = params.get('file') || 'al-marai'
+  const selected = fileOptions.find((f) => f.slug === slug) || teamFiles[0]
+  const isMis = selected.auditor === 'MISCPA'
   const file = getTeamFile('al-marai')
   const percent = Math.round((file.pbcDone / file.pbcTotal) * 1000) / 10
   const showToast = useToast()
@@ -838,7 +846,18 @@ export default function TeamWorkspaceRequirements() {
   return (
     <AuditTeamLayout title="File Workspace">
       <PageTransition>
-        <WorkspaceHeader fileSlug="al-marai" />
+        {teamFiles.some((f) => f.slug === selected.slug) && <WorkspaceHeader fileSlug={selected.slug} />}
+
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+          <label htmlFor="req-client" className="text-xs font-semibold text-navy">Client</label>
+          <select id="req-client" value={selected.slug} onChange={(e) => setParams({ file: e.target.value })} className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-xs text-navy outline-none focus:border-navy">
+            {fileOptions.map((f) => <option key={f.slug} value={f.slug}>{f.client} ({f.auditor})</option>)}
+          </select>
+          <p className="text-xs text-slate-500">The requirement list follows the auditor the client is allocated to.</p>
+        </div>
+
+        {isMis ? <RequirementsListView file={selected} /> : (<>
+        <RequirementsListView file={selected} />
 
         <div className="space-y-6">
           {/* PBC health bar */}
@@ -953,6 +972,7 @@ export default function TeamWorkspaceRequirements() {
             )}
           </div>
         </div>
+        </>)}
       </PageTransition>
     </AuditTeamLayout>
   )
