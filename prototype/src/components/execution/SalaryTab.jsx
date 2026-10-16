@@ -3,7 +3,7 @@ import AutoDemo from './AutoDemo'
 import { useDemoClient } from '../../utils/useDemoClient'
 import { clientSalarySources, clientContributors, clientTbMonthly, tbSalaries } from '../../utils/clientPayrollData'
 import { Download, FileSpreadsheet, Loader2 } from 'lucide-react'
-import { Card, Chip, DataTable, Flags } from './ReviewParts'
+import { Card, Chip, DataTable, Flags, Field, FieldGrid, Stat, Empty, PrimaryButton, SecondaryButton } from './ReviewParts'
 import { useToast } from '../shared/Toast'
 import { logEvent } from '../../utils/auditLog'
 import { currentUser } from '../../utils/currentUser'
@@ -12,7 +12,6 @@ import { mapRows } from '../../utils/eosb.js'
 import { TARGETS, buildAllMonths, employeeControl, calcValidation, monthTotals, sourceReconciliation, completeness, tbReconciliation, matchContributors, employeeStatusTests, finalStatus, monthLabel } from '../../utils/salary'
 import { readScheduleWorkbook, buildSalaryWorkbook } from '../../utils/payrollExcel'
 
-const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined || n === '' ? '' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const chip = (s) => <Chip value={s === 'MATCHED' || s === 'READY FOR AUDITOR' ? 'Pass' : s === 'NOT MATCHED' ? 'Fail' : 'Unclear'} />
@@ -63,50 +62,78 @@ export default function SalaryTab({ client, clientName }) {
   // For the demo client the schedules are its own salaries and wages ledger spread over 12 months; otherwise the generic demo files.
   const useDemo = () => { if (dc.ready) { setSources(clientSalarySources(dc.ledgers)); setContrib(clientContributors(dc.ledgers)); setP((x) => ({ ...x, tbMonthly: clientTbMonthly(dc.ledgers), tbTotal: String(tbSalaries(dc.ledgers)) })) } else { setSources(demoSources()); setContrib(demoContrib); setP((x) => ({ ...x, tbMonthly: { '2025-01': 20450, '2025-02': 19800 }, tbTotal: '' })) } setOut(null) }
   const months = [...new Set(sources.flatMap((s) => buildAllMonths([s]).records.map((r) => r.month).filter(Boolean)))].sort()
+  const unmapped = sources.reduce((n, s2) => n + s2.headers.filter((h) => !s2.mapping[h]).length, 0)
+  const fileBtn = (children, onChange, multiple = false) => <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50">{children}<input type="file" multiple={multiple} accept=".xlsx" className="hidden" onChange={onChange} /></label>
+  const exceptionCount = out ? out.control.length + out.calc.length + (out.status?.exceptions.length || 0) + out.built.exceptions.length : 0
+  const good = out && out.final.status === 'READY FOR AUDITOR'
   return (
-    <div className="space-y-4">
-      <Card title="1. Audit period and TB" right={<button onClick={useDemo} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={useDemo} />
-        <div className="grid gap-2 sm:grid-cols-4">
-          <label className="text-xs font-medium text-slate-600">Audit period start<input aria-label="Audit period start" type="date" value={p.auditStart} onChange={(e) => setP({ ...p, auditStart: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-xs font-medium text-slate-600">Audit period end<input aria-label="Audit period end" type="date" value={p.auditEnd} onChange={(e) => setP({ ...p, auditEnd: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-xs font-medium text-slate-600">Amount compared with the TB<select aria-label="TB basis" value={p.basis} onChange={(e) => setP({ ...p, basis: e.target.value })} className={`${INP} mt-1 w-full font-normal normal-case`}><option value="total">Total Salary (gross)</option><option value="net">Net Payable</option></select></label>
-          <label className="text-xs font-medium text-slate-600">TB Salary – total<input aria-label="TB Salary total" type="number" value={p.tbTotal} onChange={(e) => setP({ ...p, tbTotal: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
-        </div>
-        {months.length > 0 && <div className="mt-2"><p className="mb-1 text-xs text-slate-500">TB Salary by month (leave blank if not available; a blank month is not treated as zero)</p><div className="flex flex-wrap gap-2">{months.map((m) => <label key={m} className="text-xs text-slate-500">{monthLabel(m)}<input aria-label={`TB ${m}`} type="number" value={p.tbMonthly[m] ?? ''} onChange={(e) => setP({ ...p, tbMonthly: { ...p.tbMonthly, [m]: e.target.value } })} className={`${INP} ml-1 w-28`} /></label>)}</div></div>}
-        <p className="mt-2 text-xs text-slate-400">The amount basis for the TB comparison is for the reviewer to confirm (Rule Book step 11).</p>
+    <div className="space-y-6">
+      <Card title="Step 1 · Audit period and the trial balance figure" subtitle="Tell the tool which months to expect and what the trial balance shows for salaries."
+        right={<SecondaryButton onClick={useDemo}>{dc.ready ? "Use the client's data" : 'Use demo data'}</SecondaryButton>}><AutoDemo run={useDemo} />
+        <FieldGrid cols={4}>
+          <Field label="Audit period starts"><input aria-label="Audit period start" type="date" value={p.auditStart} onChange={(e) => setP({ ...p, auditStart: e.target.value })} className={`${INP} w-full`} /></Field>
+          <Field label="Audit period ends"><input aria-label="Audit period end" type="date" value={p.auditEnd} onChange={(e) => setP({ ...p, auditEnd: e.target.value })} className={`${INP} w-full`} /></Field>
+          <Field label="Compare the trial balance with" hint="The reviewer confirms this (Rule Book step 11)"><select aria-label="TB basis" value={p.basis} onChange={(e) => setP({ ...p, basis: e.target.value })} className={`${INP} w-full`}><option value="total">Total salary (gross)</option><option value="net">Net payable</option></select></Field>
+          <Field label="Salaries in the trial balance (whole year)"><input aria-label="TB Salary total" type="number" value={p.tbTotal} onChange={(e) => setP({ ...p, tbTotal: e.target.value })} className={`${INP} w-full`} /></Field>
+        </FieldGrid>
+        {months.length > 0 && (
+          <details className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4"><summary className="cursor-pointer text-sm font-semibold text-navy">Month-by-month trial balance figures (optional)</summary>
+            <p className="mt-2 text-sm text-slate-500">Leave a month blank if you do not have it; a blank month is never treated as zero.</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-6">{months.map((m) => <Field key={m} label={monthLabel(m)}><input aria-label={`TB ${m}`} type="number" value={p.tbMonthly[m] ?? ''} onChange={(e) => setP({ ...p, tbMonthly: { ...p.tbMonthly, [m]: e.target.value } })} className={`${INP} w-full`} /></Field>)}</div>
+          </details>
+        )}
       </Card>
-      <Card title="2. Client salary schedules (Excel, one or many files)" right={<label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50">{busy === 'src' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}Add files<input type="file" multiple accept=".xlsx" className="hidden" onChange={(e) => { addFiles([...(e.target.files || [])]); e.target.value = '' }} /></label>}>
-        {sources.length === 0 && <p className="text-xs text-slate-400">No files yet. Every sheet that looks like a schedule becomes a source. Nothing in the client file is changed.</p>}
-        <div className="space-y-2">{sources.map((s, si) => (
-          <details key={`${s.fileId}-${s.sheetName}`} className="rounded-lg border border-slate-100 p-2" open={sources.length <= 3}>
-            <summary className="cursor-pointer text-sm font-semibold text-navy">{s.fileId} · {s.fileName} · sheet "{s.sheetName}" · {s.rows.length} rows</summary>
-            <div className="mt-2 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">{s.headers.map((h) => (
-              <label key={h} className={`flex items-center justify-between gap-1 text-[11px] ${s.mapping[h] ? 'text-slate-500' : 'text-amber'}`}>{h}
-                <select aria-label={`Map ${h} in ${s.fileId} ${s.sheetName}`} value={s.mapping[h] || ''} onChange={(e) => setMap(si, h, e.target.value)} className={SEL}><option value="">Not mapped – REVIEW</option>{TARGETS.map((t) => <option key={t}>{t}</option>)}</select></label>))}</div>
-          </details>))}</div>
-        {err && <p className="mt-2 text-xs text-alert-red">{err}</p>}
+
+      <Card title="Step 2 · The client's salary schedules" subtitle="Excel files, one or many. Every sheet that looks like a schedule becomes a source. Nothing in the client's file is changed."
+        right={fileBtn(<>{busy === 'src' ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}Add files</>, (e) => { addFiles([...(e.target.files || [])]); e.target.value = '' }, true)}>
+        {sources.length === 0 ? <Empty>No schedules yet. Add the client's salary files, or press “{dc.ready ? "Use the client's data" : 'Use demo data'}”.</Empty> : (
+          <>
+            <div className="grid gap-3 sm:grid-cols-3"><Stat label="Schedules loaded" value={sources.length} /><Stat label="Employee rows" value={sources.reduce((n, x) => n + x.rows.length, 0)} /><Stat label="Columns still to map" value={unmapped} tone={unmapped ? 'amber' : 'green'} /></div>
+            <details className="rounded-xl border border-slate-200 bg-white" open={sources.length <= 2}><summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-navy">Show the schedules and how their columns were read</summary>
+              <div className="space-y-4 border-t border-slate-100 px-5 py-5">{sources.map((s2, si) => (
+                <details key={`${s2.fileId}-${s2.sheetName}`} className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-navy">{s2.fileId} · {s2.fileName} <span className="font-normal text-slate-500">· sheet “{s2.sheetName}” · {s2.rows.length} rows</span></summary>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{s2.headers.map((h) => (
+                    <Field key={h} label={h} hint={s2.mapping[h] ? undefined : 'Not mapped: review'}><select aria-label={`Map ${h} in ${s2.fileId} ${s2.sheetName}`} value={s2.mapping[h] || ''} onChange={(e) => setMap(si, h, e.target.value)} className={`${INP} w-full`}><option value="">Not mapped: review</option>{TARGETS.map((t) => <option key={t}>{t}</option>)}</select></Field>))}</div>
+                </details>))}</div>
+            </details>
+          </>
+        )}
+        {err && <p className="text-sm text-alert-red">{err}</p>}
       </Card>
-      <Card title="3. Contributor lists (for the employee status tests)">
-        <div className="flex flex-wrap items-center gap-3">
-          {['active', 'inactive'].map((l) => <label key={l} className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50">{busy === l ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}{l === 'active' ? 'Active' : 'Inactive'} contributors list<input type="file" accept=".xlsx" className="hidden" onChange={(e) => { addContrib(l, e.target.files?.[0]); e.target.value = '' }} /></label>)}
-          <span className="text-xs text-slate-500">Active {contrib.active.length} · Inactive {contrib.inactive.length}</span>
-        </div>
+
+      <Card title="Step 3 · Who is on the contributor lists" subtitle="Used for the employee status tests (joined, left, not on the list)."
+        right={<>{['active', 'inactive'].map((l) => <span key={l}>{fileBtn(<>{busy === l ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}{l === 'active' ? 'Active' : 'Inactive'} list</>, (e) => { addContrib(l, e.target.files?.[0]); e.target.value = '' })}</span>)}</>}>
+        <div className="grid gap-3 sm:grid-cols-2"><Stat label="Active contributors" value={contrib.active.length} tone={contrib.active.length ? 'green' : 'navy'} /><Stat label="Inactive contributors" value={contrib.inactive.length} /></div>
       </Card>
-      <button onClick={run} disabled={!sources.length} className="rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-40">Build the salary schedule</button>
+
+      <div className="flex items-center gap-4"><PrimaryButton onClick={run} disabled={!sources.length}>Build the salary schedule</PrimaryButton>{!sources.length && <span className="text-sm text-slate-500">Add at least one schedule first.</span>}</div>
+
       {out && (
-        <div className="space-y-3">
-          <Card><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm text-navy">Final status: {chip(out.final.status)} <b>{out.final.status}</b></p><button onClick={download} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white"><Download className="h-3.5 w-3.5" />Download the workbook</button></div>
-            {out.final.blockers.length > 0 && <div className="mt-2"><Flags flags={out.final.blockers} /></div>}</Card>
-          <Card title="Monthly totals and TB reconciliation">
-            <DataTable columns={[{ key: 'm', label: 'Month', render: (r) => monthLabel(r.month) }, { key: 'count', label: 'Employees' }, { key: 'total', label: 'Total salary', render: (r) => money(r.total) }, { key: 'net', label: 'Net payable', render: (r) => money(r.net) }, { key: 'tb', label: 'TB Salary', render: (r) => (r.tb === null ? '—' : money(r.tb)) }, { key: 'diff', label: 'Difference', render: (r) => (r.difference === null ? '—' : money(r.difference)) }, { key: 'st', label: 'Status', render: (r) => chip(r.status) }]}
+        <div className="space-y-6">
+          <div className={`rounded-2xl border px-6 py-5 ${good ? 'border-emerald/30 bg-emerald/5' : 'border-amber/30 bg-amber/5'}`}>
+            <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Final status</p><p className={`mt-1 text-2xl font-bold ${good ? 'text-emerald' : 'text-amber'}`}>{out.final.status}</p></div>
+              <PrimaryButton onClick={download}><Download className="h-4 w-4" />Download the workbook</PrimaryButton></div>
+            {out.final.blockers.length > 0 && <div className="mt-4"><Flags flags={out.final.blockers} /></div>}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat label="Employee-months" value={out.built.records.length} />
+            <Stat label="Schedule total" value={money(out.recon.schedule)} />
+            <Stat label="Trial balance" value={out.recon.tbTotal === null ? 'Not provided' : money(out.recon.tbTotal)} />
+            <Stat label="Difference" value={out.recon.difference === null ? '—' : out.recon.difference === 0 ? 'None' : money(out.recon.difference)} tone={out.recon.difference === 0 ? 'green' : 'red'} />
+          </div>
+          <Card title="Month by month against the trial balance" subtitle={`Overall: ${out.recon.status}${out.recon.cause ? ` – ${out.recon.cause}` : ''}`}>
+            <DataTable columns={[{ key: 'm', label: 'Month', render: (r) => monthLabel(r.month) }, { key: 'count', label: 'Employees' }, { key: 'total', label: 'Total salary', render: (r) => money(r.total) }, { key: 'net', label: 'Net payable', render: (r) => money(r.net) }, { key: 'tb', label: 'Trial balance', render: (r) => (r.tb === null ? '—' : money(r.tb)) }, { key: 'diff', label: 'Difference', render: (r) => (r.difference === null ? '—' : money(r.difference)) }, { key: 'st', label: 'Status', render: (r) => chip(r.status) }]}
               rows={out.totals.map((t, i) => ({ ...t, ...out.recon.monthly[i] }))} />
-            <p className="mt-2 text-sm text-navy">Overall: schedule {money(out.recon.schedule)} vs TB {out.recon.tbTotal === null ? 'not provided' : money(out.recon.tbTotal)} {chip(out.recon.status)} {out.recon.status}{out.recon.cause ? ` – ${out.recon.cause}` : ''}</p>
           </Card>
-          <Card title="Period completeness"><DataTable columns={[{ key: 'm', label: 'Month', render: (r) => monthLabel(r.month) }, { key: 'received', label: 'Received', render: (r) => <Chip value={r.received ? 'Pass' : 'Fail'} /> }, { key: 'schedules', label: 'Schedules' }, { key: 'd', label: 'Duplicate', render: (r) => (r.duplicateSchedule ? 'REVIEW REQUIRED' : '') }]} rows={out.comp.matrix} />{!out.comp.periodKnown && <Flags flags={['The audit period was not provided, so expected months could not be established.']} />}</Card>
-          <Card title={`Exceptions (${out.control.length + out.calc.length + (out.status?.exceptions.length || 0) + out.built.exceptions.length})`}>
-            <DataTable columns={[{ key: 'type', label: 'Type' }, { key: 'employee', label: 'Employee' }, { key: 'month', label: 'Month', render: (r) => (r.month ? monthLabel(r.month) : '') }, { key: 'detail', label: 'Detail' }, { key: 'status', label: 'Status' }]} rows={[...out.built.exceptions, ...out.control, ...out.calc, ...(out.status?.exceptions || [])]} />
+          <Card title="Are all the months there?" subtitle="One schedule per month of the audit period.">
+            <DataTable columns={[{ key: 'm', label: 'Month', render: (r) => monthLabel(r.month) }, { key: 'received', label: 'Received', render: (r) => <Chip value={r.received ? 'Pass' : 'Fail'} /> }, { key: 'schedules', label: 'Schedules' }, { key: 'd', label: 'Duplicate', render: (r) => (r.duplicateSchedule ? 'Review required' : '') }]} rows={out.comp.matrix} />
+            {!out.comp.periodKnown && <Flags flags={['The audit period was not provided, so expected months could not be established.']} />}
           </Card>
-          {out.status && (out.status.groupA.length > 0 || out.status.groupB.length > 0) && <Card title="Left-date groups"><p className="text-xs text-slate-500">Group A (left the day before the audit period): {out.status.groupA.map((g) => g.employee).join(', ') || 'none'} · Group B (left before or during): {out.status.groupB.map((g) => g.employee).join(', ') || 'none'}</p></Card>}
+          <Card title={`Exceptions (${exceptionCount})`} subtitle={exceptionCount ? 'Things the reviewer should look at.' : 'Nothing found.'}>
+            {exceptionCount > 0 && <DataTable columns={[{ key: 'type', label: 'Type' }, { key: 'employee', label: 'Employee' }, { key: 'month', label: 'Month', render: (r) => (r.month ? monthLabel(r.month) : '') }, { key: 'detail', label: 'Detail' }, { key: 'status', label: 'Status' }]} rows={[...out.built.exceptions, ...out.control, ...out.calc, ...(out.status?.exceptions || [])]} />}
+          </Card>
+          {out.status && (out.status.groupA.length > 0 || out.status.groupB.length > 0) && <Card title="Employees who left"><p className="text-sm text-slate-600">Group A (left the day before the audit period): <b className="text-navy">{out.status.groupA.map((g) => g.employee).join(', ') || 'none'}</b></p><p className="text-sm text-slate-600">Group B (left before or during): <b className="text-navy">{out.status.groupB.map((g) => g.employee).join(', ') || 'none'}</b></p></Card>}
         </div>
       )}
     </div>
