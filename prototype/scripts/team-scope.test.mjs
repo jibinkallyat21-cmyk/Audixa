@@ -37,3 +37,12 @@ test('activity comes from this client\'s audit log only', () => {
   assert.equal(s.notifications.length, 1); assert.equal(s.auditTrail.length, 1)
 })
 test('relativeTime', () => { assert.equal(relativeTime('2026-10-15T10:00:00Z', now), 'Yesterday') })
+
+import { withDemoDocuments } from '../src/utils/demoDocuments.js'
+test('demo documents fill only what is waiting for the client', () => {
+  const rec = { categories: [{ items: [{ ref: 'A', status: 'Pending Client' }, { ref: 'B', status: 'Accepted' }, { ref: 'C', status: 'Rejected', alert: 'x' }, { ref: 'D', status: 'Under Review' }] }] }
+  const { rec: out, count } = withDemoDocuments(rec)
+  assert.equal(count, 2)
+  assert.deepEqual(out.categories[0].items.map((i) => i.status), ['Uploaded Processing', 'Accepted', 'Uploaded Processing', 'Under Review'])
+  assert.equal(out.categories[0].items[2].alert, '')
+})
