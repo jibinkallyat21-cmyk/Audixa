@@ -82,3 +82,18 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - Clients upload under any file name; the app shows each document under a standard name: `<Area> - <Item> - <Document type>.<ext>` and keeps the original name beside it.
 - Assumption to confirm: agreement applies to Rent and the three insurance categories only.
 - Built for prepaid expenses (`src/utils/evidence.js`, `EvidenceDocs.jsx`). Not yet built for other areas; payment proof is not needed for every area.
+
+### Evidence rules: other areas (built, parts are assumptions to confirm)
+
+- Fixed asset additions: invoice (required) and payment proof (required).
+- Accruals: contract or engagement letter (if applicable), invoice or statement (required), payment after the year end (required). New tool "Accruals and supporting documents"; it ties the listed accruals to the trial balance.
+- Vouching: sales: invoice required, delivery or contract proof and receipt proof if applicable (status "Supported" when no payment proof is needed and none is given). Purchases and expenses: supplier invoice and payment proof required. AR / AP confirmations are unchanged.
+- Same matching and statuses as prepaid; every flag is decided by a person.
+
+### ABCPA related party transactions (built)
+
+- Tool under Audit areas, Related parties. ABCPA files only.
+- The person chooses how many transactions above and how many below materiality (nothing preset). Materiality is suggested as 0.5% of revenue at 80% and can be typed over.
+- Flagged transactions are picked first (round amount, just below materiality, same party/date/amount twice, vague description, close to the year end with a large amount). The weekend (Friday, Saturday) is a weak indicator only. Then the largest above materiality, and a seeded random choice below. Flags are indicators computed by code; an AI reading of descriptions can only explain them, a person decides.
+- A picked transaction already sent as a sample or cut-off item from another area is shown as "Already tested in <area> (<item>)" with a link to that exact line in Samples sent / Cut-off sent. It is not asked from the client again. Match = same reference, or same date and amount when no reference.
+- Demo: the related party list and the listed transactions stand in for the client's declaration.
