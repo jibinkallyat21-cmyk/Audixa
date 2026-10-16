@@ -61,7 +61,7 @@ export async function buildPrepaidWorkbook({ byCategory, yearStart, yearEnd, vat
 
 // ── Depreciation ─────────────────────────────────────────────────────────
 // assets: [{cls, name, date, rate, opening, addition, disposal, openingAcc, onDisposal}] ; the template layout is reproduced.
-export async function buildDepreciationWorkbook({ assets, yearStart, yearEnd, priorStart, priorEnd, adjustments = {}, classes = [...DEP_CLASSES], useTemplateMethod = true, client = '' }) {
+export async function buildDepreciationWorkbook({ assets, yearStart, yearEnd, priorStart, priorEnd, adjustments = {}, classes = [...DEP_CLASSES], useTemplateMethod = true, client = '', invoices = [] }) {
   const ExcelJS = await loadExcelJS(); const wb = new ExcelJS.Workbook()
   const ws = wb.addWorksheet('Depreciation ', { pageSetup: { paperSize: 9, orientation: 'portrait' }, views: [{ zoomScale: 55 }] })
   const ye = yearEnd.split('-').reverse().join('.')
@@ -103,5 +103,11 @@ export async function buildDepreciationWorkbook({ assets, yearStart, yearEnd, pr
   const rn = wb.addWorksheet('Review Notes'); rn.getRow(1).values = ['Item', 'Result', 'Finding', 'Action']; rn.getRow(1).eachCell((c) => { c.fill = NAVY; c.font = white })
   if (!notes.length) rn.addRow(['All items', 'Agrees', 'No rate differences, missing classes or date problems were found.', ''])
   notes.forEach((n) => rn.addRow([n.item, n.result, n.note, n.action])); rn.columns.forEach((c, i) => { c.width = [30, 14, 80, 40][i] }); rn.eachRow((row) => row.eachCell((c) => { c.font = { ...TNR, ...(c.font || {}) } }))
+  // The invoices the client sent, how each was treated, and the standard name its file is kept under.
+  if (invoices.length) {
+    const si = wb.addWorksheet('Source invoices'); si.getRow(1).values = ['Invoice', 'Supplier', 'Date', 'Description', 'Net amount', 'VAT %', 'Class', 'Treatment', 'Payment proof', 'Invoice file (standard name)', 'Uploaded as']; si.getRow(1).eachCell((c) => { c.fill = NAVY; c.font = white })
+    invoices.forEach((i, n) => { const inv = i.docs.find((d) => d.part === 'invoice'); const ext = (String(inv?.original || '').match(/\.([A-Za-z0-9]{2,5})$/) || [])[1] || 'pdf'; si.getRow(n + 2).values = [i.invoiceNo, i.supplier, i.date, i.description, i.net, i.vatPct, i.cls || 'Not classified', i.asset ? 'Asset addition' : 'Not capitalised', i.docs.some((d) => d.part === 'payment') ? 'Received' : 'Not received', `Fixed assets - ${i.supplier} ${i.invoiceNo} - Tax invoice.${ext}`, inv?.original || ''] })
+    ;[16, 22, 12, 44, 14, 8, 28, 16, 14, 56, 28].forEach((w, k) => { si.getColumn(k + 1).width = w })
+  }
   wb.worksheets.forEach((w, i) => { w.orderNo = i }); return wb
 }

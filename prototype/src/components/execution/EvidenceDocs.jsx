@@ -33,7 +33,22 @@ export default function EvidenceDocs({ area, subject, parts, docs, result, decis
         </div>
       )}
       {result.checks.length > 0 && (
-        <ul className="mt-3 space-y-1">{result.checks.map((c) => <li key={c.label} className="flex items-start gap-2 text-xs text-slate-600">{c.ok ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" /> : <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber" />}<span><b className="text-navy">{c.label}</b>: {c.detail}</span></li>)}</ul>
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+          <div className="flex items-center justify-between gap-2 bg-slate-50 px-4 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">What the documents show against the schedule</p>
+            <span className="text-xs text-slate-500">{result.checks.filter((c) => c.ok).length} of {result.checks.length} agree</span>
+          </div>
+          <table className="w-full text-left text-sm">
+            <thead><tr className="border-t border-slate-100 text-xs font-semibold text-slate-500"><th className="px-4 py-2">Check</th><th className="px-4 py-2">Document</th><th className="px-4 py-2">Schedule</th><th className="px-4 py-2 text-right">Result</th></tr></thead>
+            <tbody>{result.checks.map((c) => (
+              <tr key={c.label} className={`border-t border-slate-100 ${c.ok ? '' : 'bg-amber/5'}`}>
+                <td className="px-4 py-2.5 font-medium text-navy">{c.label}</td>
+                <td className="px-4 py-2.5 tabular-nums text-navy">{c.found ?? '—'}</td>
+                <td className="px-4 py-2.5 tabular-nums text-slate-600">{c.expected ?? '—'}</td>
+                <td className="px-4 py-2.5 text-right">{c.ok ? <span className="inline-flex items-center gap-1 rounded-full bg-emerald/10 px-2.5 py-1 text-xs font-semibold text-emerald"><CheckCircle2 className="h-3.5 w-3.5" />Agrees</span> : <span className="inline-flex items-center gap-1 rounded-full bg-amber/10 px-2.5 py-1 text-xs font-semibold text-amber"><AlertTriangle className="h-3.5 w-3.5" />Differs</span>}</td>
+              </tr>))}</tbody>
+          </table>
+        </div>
       )}
       {result.status !== 'Not received' && (
         <div className="mt-3 flex flex-wrap items-center gap-2">

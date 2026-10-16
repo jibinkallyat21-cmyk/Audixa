@@ -4,6 +4,7 @@ import { logEvent } from './auditLog.js'
 import { withDemoDocuments } from './demoDocuments.js'
 import { withSampleRequirements } from './sampleRequests.js'
 import { withReminders } from './sampleTracking.js'
+import { aapSamples } from './aap.js'
 import { withBankRequirements, withReconRequest, withCutoffMigration } from './bankAccounts.js'
 
 const KEY = 'requirements:issued'
@@ -38,6 +39,29 @@ export function sendReminders(slug, refs) {
   const { rec, count } = withReminders(cur, refs)
   if (count) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Reminder sent to the client', `${count} item${count === 1 ? '' : 's'} still waiting for the client`, 'doc-request') }
   return count
+}
+// Alternative audit procedure on one receivable or payable sample: turned on by the client (cannot confirm, with a reason) or by the team (the tick box).
+// Turning it on adds the alternative-procedure requirements for that party; turning it off removes the ones the client has not answered (and all of them when force is set).
+export function setAap(slug, ref, on, { by = 'Audit team', reason = '', side = 'receivables', party = '', balance = 0, force = false } = {}) {
+  const all = readStore(KEY, {}); const rec = all[slug]; if (!rec) return 0
+  const area = side === 'receivables' ? 'Trade receivables' : 'Trade payables'; const at = new Date().toISOString()
+  let cur = rec
+  const found = rec.categories.flatMap((c) => c.items).find((i) => i.ref === ref); if (!found) return 0
+  if (on) {
+    if (found.aap?.enabled) return 0
+    const categories = rec.categories.map((c) => ({ ...c, items: c.items.map((i) => (i.ref !== ref ? i : { ...i, aap: { enabled: true, by, reason, at }, ...(by === 'Client' ? { status: 'Uploaded Processing', explanationOnly: true, alert: '', remarks: [...(i.remarks || []), { by: 'Client', at, text: `We cannot obtain a balance confirmation. Reason: ${reason}` }] } : {}) })) }))
+    cur = { ...rec, categories }
+    const { rec: next, added } = withSampleRequirements(cur, { area, sub: `AAP ${area}`, label: `Alternative audit procedure: ${area}`, group: 'samples', samples: aapSamples({ side, party, balance, parentRef: ref, area }), approvedBy: by === 'Client' ? 'the audit team (the client could not confirm)' : by })
+    writeStore(KEY, { ...all, [slug]: next }); log(rec.client, 'Alternative audit procedure enabled', `${party}: ${by === 'Client' ? `the client cannot confirm the balance (${reason})` : `enabled by ${by}`}; ${added} requirements added`, 'doc-request'); return added
+  }
+  const answered = ['Uploaded Processing', 'Under Review', 'Accepted']; let n = 0
+  const categories = rec.categories.map((c) => ({ ...c, items: c.items.filter((i) => { const mine = i.data?.parentRef === ref; if (mine && (force || !answered.includes(i.status))) { n++; return false } return true }).map((i) => { if (i.ref !== ref) return i; const { aap: _aap, ...rest } = i; return rest }) })).filter((c) => c.items.length)
+  writeStore(KEY, { ...all, [slug]: { ...rec, categories, itemCount: categories.reduce((k, c) => k + c.items.length, 0) } }); log(rec.client, 'Alternative audit procedure turned off', `${party}: ${n} requirements removed`, 'doc-request'); return n
+}
+// Keep notes on the sample (the test result, when the client was told, when the workbook was built).
+export function patchAap(slug, ref, patch) {
+  const all = readStore(KEY, {}); const rec = all[slug]; if (!rec) return
+  writeStore(KEY, { ...all, [slug]: { ...rec, categories: rec.categories.map((c) => ({ ...c, items: c.items.map((i) => (i.ref === ref ? { ...i, aap: { ...(i.aap || {}), ...patch } } : i)) })) } })
 }
 // The team removes samples or cut-off items it sent (a block that ends up empty goes too). Items the client has already uploaded against are removed with it.
 export function removeSampleItems(slug, categoryId, refs) {

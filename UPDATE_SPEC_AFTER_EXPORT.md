@@ -130,3 +130,15 @@ Q9, Q27, Q46 (to be answered). The documents each area needs (section 5, assumpt
 6. Client not engaged for zakat: IFRS TB page says not required (both auditors); MISCPA shows the Financial statements tab only; ABCPA shows nothing else.
 7. IFRS workbook has the sheets in section 8 in that order; the IFRS TB sheet has three columns; a schedule that differs from the trial balance is flagged and the preparer can be told.
 8. Related parties appear as their own section in the audit areas and their own group in the requirement list.
+
+## Addendum: AR / AP restructure and the alternative audit procedure
+
+- `auditAreas`: receivables and payables each have one procedure (`ar-samples`, `ap-samples`, tool `party-area`), tabs Sample list and Pick samples. Old ids `receivables-evidence`, `ar-sample`, `ar-vouching` and the payables equivalents are removed.
+- New: `utils/aap.js` (documents, tracing, failure text, demo data; tests in `scripts/aap.test.mjs`), `utils/aapExcel.js` (workbook, folder plan, ZIP; dependency `jszip`), `components/execution/PartySamples.jsx`, `PartyAreaTool.jsx`, `requirementsStore.setAap/patchAap`, client control "We cannot get a confirmation" in `components/client/SampleBoard.jsx`, confirmation request wording in `utils/sampleItems.js`.
+- Backend to add in the real app: store the client's uploaded files in the client folder (Client / Trade receivables|payables / Party / Ledger, Invoices, Receipts|Payments), rename to the standard names, read real invoice, receipt and ledger data instead of `demoAapData`, and create the workbook server side.
+
+## Addendum: fixed assets built from the client's invoices
+
+- `utils/assetInvoices.js` (tests: `scripts/assetInvoices.test.mjs`): suggests the asset class from the invoice wording, queries repairs or maintenance, leaves unknown wording unclassified; builds one schedule line per confirmed invoice; compares invoice total with TB additions.
+- `components/execution/AssetInvoices.jsx` in the fixed assets tool: each invoice and its payment proof are viewable (renamed to standard names), class and "treat as asset" are confirmed by a person, then "Create the asset lines". `assetsExcel.js` adds a "Source invoices" sheet to the depreciation workbook.
+- Real app: read the invoices (OCR or reader) instead of `demoAssetInvoices`; same confirm-then-build flow.

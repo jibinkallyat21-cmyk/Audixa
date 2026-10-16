@@ -42,22 +42,22 @@ export function checkEvidence(line, docs, company, parts = []) {
   const checks = []
   if (!src) return { status: 'Not received', source: null, checks, vendor: '' }
   const f = src.fields || {}
-  checks.push({ label: 'Company name', ok: same(f.company, company), detail: `Document: ${f.company || 'not shown'}` })
-  checks.push({ label: 'Net amount', ok: f.net !== undefined && f.net !== '' && near(f.net, line.amount), detail: `Document: ${f.net ?? 'not shown'} · Schedule: ${line.amount}` })
+  checks.push({ label: 'Company name', ok: same(f.company, company), found: f.company || 'Not shown', expected: company, detail: `Document: ${f.company || 'not shown'}` })
+  checks.push({ label: 'Net amount', ok: f.net !== undefined && f.net !== '' && near(f.net, line.amount), found: f.net ?? 'Not shown', expected: line.amount, detail: `Document: ${f.net ?? 'not shown'} · Schedule: ${line.amount}` })
   if (line.start || line.end) {
-    checks.push({ label: 'Period starts', ok: f.start === line.start, detail: `Document: ${f.start || 'not shown'} · Schedule: ${line.start || 'blank'}` })
-    checks.push({ label: 'Period ends', ok: f.end === line.end, detail: `Document: ${f.end || 'not shown'} · Schedule: ${line.end || 'blank'}` })
+    checks.push({ label: 'Period starts', ok: f.start === line.start, found: f.start || 'Not shown', expected: line.start || 'Blank', detail: `Document: ${f.start || 'not shown'} · Schedule: ${line.start || 'blank'}` })
+    checks.push({ label: 'Period ends', ok: f.end === line.end, found: f.end || 'Not shown', expected: line.end || 'Blank', detail: `Document: ${f.end || 'not shown'} · Schedule: ${line.end || 'blank'}` })
   }
-  if (line.date) checks.push({ label: 'Date', ok: f.date === line.date, detail: `Document: ${f.date || 'not shown'} · Schedule: ${line.date}` })
+  if (line.date) checks.push({ label: 'Date', ok: f.date === line.date, found: f.date || 'Not shown', expected: line.date, detail: `Document: ${f.date || 'not shown'} · Schedule: ${line.date}` })
   const others = docs.filter((d) => d !== src && d.part !== 'payment' && d.fields?.vendor)
-  checks.push({ label: 'Counterparty name', ok: !!f.vendor && (!line.vendor || same(f.vendor, line.vendor)) && others.every((d) => same(d.fields.vendor, f.vendor)), detail: `Document: ${f.vendor || 'not shown'}${line.vendor ? ` · Schedule: ${line.vendor}` : ''}${others.length ? ' · same on the other documents' : ''}` })
+  checks.push({ label: 'Counterparty name', ok: !!f.vendor && (!line.vendor || same(f.vendor, line.vendor)) && others.every((d) => same(d.fields.vendor, f.vendor)), found: f.vendor || 'Not shown', expected: line.vendor || (others.length ? 'Same on the other documents' : 'Not on the schedule'), detail: `Document: ${f.vendor || 'not shown'}${line.vendor ? ` · Schedule: ${line.vendor}` : ''}${others.length ? ' · same on the other documents' : ''}` })
   const figuresOk = checks.every((c) => c.ok)
   let payOk = null
   if (pay) {
     const p = pay.fields || {}; const gross = r2((Number(line.amount) || 0) * (1 + (Number(line.vatPct) || 0) / 100))
     const amountOk = line.payMode === 'upto' ? Number(p.paid) > 0 && Number(p.paid) <= gross + 0.005 : near(p.paid, gross)   // 'upto': a part payment is fine (a later receipt or repayment)
     payOk = amountOk && same(p.company, company) && (!f.vendor || same(p.vendor, f.vendor))
-    checks.push({ label: 'Payment proof', ok: payOk, detail: `Paid ${p.paid ?? 'not shown'} to ${p.vendor || 'not shown'} · Expected ${line.payMode === 'upto' ? `up to ${gross}` : gross} to ${f.vendor || 'the counterparty'}` })
+    checks.push({ label: 'Payment proof', ok: payOk, found: `${p.paid ?? 'Not shown'} to ${p.vendor || 'not shown'}`, expected: `${line.payMode === 'upto' ? 'up to ' : ''}${gross} to ${f.vendor || 'the counterparty'}`, detail: `Paid ${p.paid ?? 'not shown'} to ${p.vendor || 'not shown'} · Expected ${line.payMode === 'upto' ? `up to ${gross}` : gross} to ${f.vendor || 'the counterparty'}` })
   }
   const needsPay = parts.some((x) => x.part === 'payment' && x.need === 'Required')
   const status = !figuresOk || payOk === false ? 'Mismatch' : pay ? 'Supported and paid' : needsPay ? 'Supported, payment not shown' : 'Supported'

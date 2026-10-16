@@ -37,7 +37,7 @@ export default function RelatedPartyTool({ dc }) {
   const [mat, setMat] = useState(''); const [nAbove, setNAbove] = useState(''); const [nBelow, setNBelow] = useState(''); const [res, setRes] = useState(null)
   const stored = useLiveMateriality(dc)
   const suggested = stored ? sampleMateriality(stored.materiality) : revenue > 0 ? materialityFromRevenue(revenue, 0.5).used : null
-  const materiality = mat !== '' ? Number(mat) : suggested
+  const materiality = !stored && mat !== '' ? Number(mat) : suggested
   if (dc.auditor !== 'ABCPA') return <Empty>Related party transaction testing in this tool follows the ABCPA method. This file is audited under {dc.auditor}; record the work in your notes below.</Empty>
   const ok = materiality > 0 && nAbove !== '' && nBelow !== '' && Number(nAbove) >= 0 && Number(nBelow) >= 0
   const run = () => { const r = pickRelated(txs, { materiality, nAbove: Number(nAbove), nBelow: Number(nBelow) }); setRes(r); logEvent({ client: dc.slug, clientName: dc.client, category: 'work', title: 'Related party transactions picked', description: `${r.above.length} above and ${r.below.length} below materiality; ${r.counts.flagged} flagged in the listing`, extra: { auditArea: 'Related parties', performedBy: me.name }, user: me }) }
@@ -49,7 +49,7 @@ export default function RelatedPartyTool({ dc }) {
       <Card title="Related party transactions" subtitle="From the client's related party listing (stands in for the client's declaration). Choose how many to test; unusual ones are picked first.">
         <p className="text-xs text-slate-500">Related parties on the file: {RELATED_PARTIES.map((p) => `${p.name} (${p.relation})`).join(', ')}.</p>
         <FieldGrid cols={3}>
-          <Field label="Materiality" hint={stored ? `From the file summary: SR ${money(stored.materiality)}, 80% used` : suggested ? `Suggested ${money(suggested)}: 0.5% of revenue, 80% used. Set materiality in the file summary.` : 'Enter it'}><input aria-label="Materiality" type="number" value={mat} placeholder={suggested ? String(suggested) : ''} onChange={(e) => { setMat(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>
+          {stored ? <p className="self-end pb-2 text-sm text-slate-600 sm:col-span-1">Materiality SR {money(stored.materiality)} (file summary); 80% used for sampling.</p> : <Field label="Materiality" hint={stored ? `From the file summary: SR ${money(stored.materiality)}, 80% used` : suggested ? `Suggested ${money(suggested)}: 0.5% of revenue, 80% used. Set materiality in the file summary.` : 'Enter it'}><input aria-label="Materiality" type="number" value={mat} placeholder={suggested ? String(suggested) : ''} onChange={(e) => { setMat(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>}
           <Field label="How many above materiality"><input aria-label="Number above materiality" type="number" min="0" value={nAbove} onChange={(e) => { setNAbove(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>
           <Field label="How many below materiality"><input aria-label="Number below materiality" type="number" min="0" value={nBelow} onChange={(e) => { setNBelow(e.target.value); setRes(null) }} className={INP + ' w-full'} /></Field>
         </FieldGrid>
