@@ -50,7 +50,7 @@ export function loadDemoData(auditor = 'MISCPA', existing = true) {
   attach(true, auditor)
   // Demo data stands in for the client's upload: the trial balance and general ledger are already received and wait for the audit team's approval.
   submitTB(DEMO_FILE, demoPayload(existing))
-  saveClientProfile({ id: DEMO_FILE.slug, client: DEMO_FILE.client, auditor, auditType: 'Proper', services: { audit: { opted: true, fee: null } }, source: 'demo', createdBy: 'Demo data', createdDate: new Date().toISOString().slice(0, 10) })
+  saveClientProfile({ id: DEMO_FILE.slug, client: DEMO_FILE.client, auditor, auditType: 'Proper', services: { audit: { opted: true, fee: null }, zakat: { opted: true, fee: null } }, source: 'demo', createdBy: 'Demo data', createdDate: new Date().toISOString().slice(0, 10) })
   writeStore(KEY, { at: new Date().toISOString(), auditor, existing })
   logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio as a ${auditor} file; trial balance and general ledger received, waiting for approval` })
 }

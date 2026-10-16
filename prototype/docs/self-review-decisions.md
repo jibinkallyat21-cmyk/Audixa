@@ -145,3 +145,11 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 ## Laptop screens (built)
 
 - On screens narrower than 1440px the whole app scales down in steps (15px, 14px at 1280px, 13px at 1100px base size), the same effect as zooming the browser out, so every page keeps its layout. The workspace tabs stay on one line. Wide monitors are unchanged.
+
+## IFRS financial statements: who needs them, which type, what the file holds (built)
+
+- ABCPA clients need the IFRS TB and statements only when engaged for zakat filing (the zakat service on the client profile); otherwise the page says they are not required. MISCPA clients always need the IFRS TB. The demo client is set up as engaged for zakat filing so the flow can be tried.
+- Only the audit type the client was engaged for is shown: IFRS TB for a proper audit, or for a disclaimer audit, never both.
+- The "Financial statements" tab (the MISCPA statutory format) is shown for MISCPA files only.
+- Exported file: Client TB, IFRS TB (only ledger name, closing balance of the year, closing balance of the previous year), Balance sheet, P&L, Statement of equity, then the schedules (prepaid, depreciation, EOSB, GOSI expense) and a "Schedule checks" sheet. The working sheets (IFRS TB working columns, mapping, adjustments, capital, COGS, reconciliation, pending list, VAT, verification) follow, because the statements are built from them and every figure must stay traceable. Schedules are in the proper audit file only.
+- Every schedule is checked against the trial balance (prepaid, fixed asset cost and accumulated depreciation, depreciation charge, EOSB provision, GOSI expense where the trial balance has a GOSI ledger). A difference is flagged, listed in the pending sheet, and the page offers "Tell <name>": the person who prepared that schedule (from the audit log; otherwise the file's associate) is notified. Nothing is adjusted to force an agreement. Assumption to confirm: who is told for which schedule.

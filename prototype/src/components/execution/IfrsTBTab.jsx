@@ -12,6 +12,8 @@ import { readTBWorkbook } from '../../utils/tbExcel'
 import { toLedgers } from '../../utils/tbCore'
 import { IFRS, buildIfrsTB, statements, cogsSchedule, vatReconciliation, verification, salesVsVat, pendingList, proposeBalancing } from '../../utils/ifrs'
 import { buildIfrsWorkbook } from '../../utils/ifrsExcel'
+import { buildSchedules, scheduleOwner } from '../../utils/fsSchedules'
+import { useAuditLog } from '../../utils/auditLog'
 import { demoClientTB, demoBIS } from '../../data/demoFS'
 
 const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
@@ -48,6 +50,14 @@ export default function IfrsTBTab({ mode, client, clientName }) {
   const bisLedgers = useMemo(() => bis.filter((b) => b.name && b.amount !== '').map((b, i) => { const a = Math.abs(Number(b.amount)) * (b.side === 'Cr' ? -1 : 1); return { code: `BIS${i + 1}`, name: b.name, opening: 0, debit: a > 0 ? a : 0, credit: a < 0 ? -a : 0, closing: a, closingSupplied: true } }), [bis])
   const active = mode === 'disclaimer' && source === 'bis' ? bisLedgers : ledgers
   const live = useMemo(() => (active.length ? buildIfrsTB({ ledgers: active, overrides, entries }) : null), [active, overrides, entries])
+  // Supporting schedules (proper audit, the client's own trial balance): each one is checked against the trial balance; a difference is flagged and sent to whoever prepared it.
+  const dcs = useDemoClient(); const auditLog = useAuditLog(); const [notified, setNotified] = useState({})
+  const fromClient = mode === 'proper' && dcs.ready && active.length > 0 && active.length === dcs.ledgers.length
+  const schedules = useMemo(() => {
+    if (!fromClient) return null
+    const sc = buildSchedules(active); return { ...sc, checks: sc.checks.map((c) => ({ ...c, owner: scheduleOwner(c.area, auditLog, clientName, dcs.file?.associate || '') })) }
+  }, [fromClient, active, auditLog, clientName, dcs.file])
+  const notify = (c) => { logEvent({ client, clientName, category: 'work', title: `Schedule does not agree to the trial balance: ${c.label}`, description: `Schedule ${money(c.schedule)} · trial balance ${money(c.tb)} · difference ${money(c.diff)}. Sent to ${c.owner} to explain or correct.`, extra: { auditArea: 'Financial statements', assignedTo: c.owner, performedBy: me.name }, user: me }); setNotified((x) => ({ ...x, [c.id]: true })); showToast(`${c.owner} has been told`) }
   const setEntry = (i, p) => setEntries((l) => l.map((e, k) => (k === i ? { ...e, ...p } : e)))
   const setLeg = (i, j, p) => setEntries((l) => l.map((e, k) => (k === i ? { ...e, legs: e.legs.map((g, m) => (m === j ? { ...g, ...p } : g)) } : e)))
   const proposal = live && live.diff !== 0 ? proposeBalancing(live.diff, bal.code, bal.support) : null
@@ -59,13 +69,14 @@ export default function IfrsTBTab({ mode, client, clientName }) {
     const verif = verification([{ label: 'Salary (salary schedule total)', code: 'P103', schedule: ver.salary }, { label: 'Audit and consultation fees (engagement letter)', code: 'P103', schedule: ver.fees }, { label: 'Capital (AOA / CR)', code: 'E101', schedule: ver.capital || capital.reduce((n, c) => n + (Number(c.amount) || 0), 0) || '' }], tb)
     const sv = salesVsVat(tb.rows.find((r) => r.code === 'P101')?.final ?? 0, ver.vatBase)
     const extra = [...verif.filter((v) => v.pending).map((v) => v.pending), ...(sv.pending ? [sv.pending] : []), ...(proposal?.pending ? [proposal.pending] : [])]
-    const pending = pendingList({ tb, ledgers: active, adj: tb.adj, extra, mode })
+    const schedExtra = (schedules?.checks || []).filter((c) => !c.ok).map((c) => ({ category: 'Schedule difference', area: c.label, observation: `Schedule ${c.schedule} against the trial balance ${c.tb}: difference ${c.diff}.`, needed: 'Explain or correct the schedule or the trial balance', owner: c.owner, priority: 'High', amount: c.diff, sheet: 'Schedule checks' }))
+    const pending = pendingList({ tb, ledgers: active, adj: tb.adj, extra: [...extra, ...schedExtra], mode })
     const st = statements(tb); setOut({ tb, cogs, vat, verif, sv, pending, st, entries: allEntries })
     logEvent({ client, clientName, category: 'work', title: `IFRS TB prepared (${mode === 'disclaimer' ? 'disclaimer audit' : 'proper audit'})`, description: `${tb.status}; ${pending.length} pending items`, extra: { auditArea: 'Financial statements', performedBy: me.name }, user: me })
   }
   const download = async () => {
-    const wb = await buildIfrsWorkbook({ tb: out.tb, ledgers: active, cogs: out.cogs, vat: out.vat, verification: out.verif, salesVat: out.sv, pending: out.pending, st: out.st, client: clientName || 'Company Name', period: { from: meta.from, to: meta.to }, mode, capital: capital.filter((c) => c.name || c.amount), vatReg: meta.vatReg, unresolvedNote: out.tb.diff !== 0 ? `NOT BALANCED - REVIEW REQUIRED. Unresolved difference ${money(out.tb.diff)} is shown as it is and listed as pending.` : '' })
-    const url = URL.createObjectURL(await workbookToBlob(wb)); const a = document.createElement('a'); a.href = url; a.download = mode === 'disclaimer' ? 'IFRS_TB_Disclaimer_Audit.xlsx' : 'IFRS_TB.xlsx'; a.click(); URL.revokeObjectURL(url); showToast('Workbook downloaded')
+    const wb = await buildIfrsWorkbook({ tb: out.tb, ledgers: active, cogs: out.cogs, vat: out.vat, verification: out.verif, salesVat: out.sv, pending: out.pending, st: out.st, client: clientName || 'Company Name', period: { from: meta.from, to: meta.to }, mode, capital: capital.filter((c) => c.name || c.amount), vatReg: meta.vatReg, schedules, unresolvedNote: out.tb.diff !== 0 ? `NOT BALANCED - REVIEW REQUIRED. Unresolved difference ${money(out.tb.diff)} is shown as it is and listed as pending.` : '' })
+    const url = URL.createObjectURL(await workbookToBlob(wb)); const a = document.createElement('a'); a.href = url; a.download = mode === 'disclaimer' ? 'IFRS_TB_Disclaimer_Audit.xlsx' : 'IFRS_Financial_Statements_Proper_Audit.xlsx'; a.click(); URL.revokeObjectURL(url); showToast('Workbook downloaded')
   }
   const dc = useDemoClient()
   // For the demo client the source is its own trial balance; otherwise the generic demo data.
@@ -131,6 +142,20 @@ export default function IfrsTBTab({ mode, client, clientName }) {
                 <SecondaryButton onClick={() => setCapital((l) => [...l, { name: '', amount: '' }])}><Plus className="h-4 w-4" />Add a shareholder</SecondaryButton></div>
             </Section>
           </Card>
+
+          {schedules && (
+            <Card title="Schedule checks" subtitle="Each schedule must agree to the trial balance. A difference is flagged, listed as pending in the workbook, and sent to the team member who prepared that schedule. Nothing is adjusted to force an agreement.">
+              <div className="overflow-x-auto rounded-xl border border-slate-200"><table className="w-full text-left text-sm">
+                <thead><tr className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">{['Schedule', 'Schedule', 'Trial balance', 'Difference', 'Result', 'Prepared by', ''].map((h, i) => <th key={i} className={`px-4 py-3 ${i > 0 && i < 4 ? 'text-right' : ''}`}>{h}</th>)}</tr></thead>
+                <tbody>{schedules.checks.map((c, k) => (
+                  <tr key={c.id} className={`border-t border-slate-100 ${k % 2 ? 'bg-slate-50' : ''}`}>
+                    <td className="px-4 py-3 text-navy">{c.label}</td><td className="px-4 py-3 text-right tabular-nums text-navy">{money(c.schedule)}</td><td className="px-4 py-3 text-right tabular-nums text-navy">{money(c.tb)}</td>
+                    <td className={`px-4 py-3 text-right font-semibold tabular-nums ${c.ok ? 'text-emerald' : 'text-alert-red'}`}>{c.ok ? 'None' : money(c.diff)}</td>
+                    <td className="px-4 py-3"><Chip value={c.ok ? 'Pass' : 'Fail'} /></td><td className="px-4 py-3 text-slate-600">{c.owner}</td>
+                    <td className="px-4 py-3 text-right">{!c.ok && (notified[c.id] ? <span className="text-xs font-semibold text-emerald">Told {c.owner}</span> : <button onClick={() => notify(c)} className="rounded-lg border border-alert-red/40 px-3 py-1.5 text-xs font-semibold text-alert-red hover:bg-alert-red/5">Tell {c.owner}</button>)}</td>
+                  </tr>))}</tbody></table></div>
+              {schedules.mismatches.length === 0 ? <p className="text-sm font-medium text-emerald">Every schedule agrees to the trial balance.</p> : <Flags flags={[`${schedules.mismatches.length} schedule${schedules.mismatches.length === 1 ? '' : 's'} do not agree to the trial balance.`]} />}
+            </Card>)}
 
           {diffBanner && (
             <Card title={`Unresolved difference: ${money(live.diff)}`} subtitle={`The IFRS TB does not balance. It is never forced: no suspense, rounding or plug account.${mode === 'disclaimer' ? ' In a disclaimer audit the difference may relate to a related-party or partner current account, but only with support.' : ''}`}>
