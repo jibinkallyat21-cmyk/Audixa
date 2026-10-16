@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Check, ChevronDown, FlaskConical, Lock, Send } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -464,6 +465,7 @@ export default function TeamWorkspaceProcedures() {
         <WorkspaceHeader fileSlug="al-marai" />
 
         <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm"><p className="text-sm text-slate-600">Prefer to work account by account? <b className="text-navy">Audit areas</b> lists each area with its accounts and procedures, including the cut-off.</p><Link to="/team/workspace/areas" className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">Open audit areas</Link></div>
           {/* Overview bar */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">

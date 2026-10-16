@@ -23,13 +23,13 @@ const DEMO = {
   party: [{ party: 'Al Noor Trading', category: 'Trade Payable', fileName: 'confirm_alnoor.pdf', received: true }, { party: 'Gulf Supplies', category: 'Trade Payable', fileName: '', received: false }],
 }
 
-export default function VouchingTab({ firm, client, clientName }) {
+export default function VouchingTab({ firm, client, clientName, initialKind = 'sales' }) {
   const showToast = useToast(); const me = currentUser()
   const dc = useDemoClient(); const issued = useIssuedLists()[dc.slug]
   // For the demo client the list starts from the samples that were sent to the client; a sample counts as received once the client has uploaded against it.
   const clientRows = useMemo(() => (dc.isDemo(client) ? vouchingRowsFromSamples(issued) : null), [dc, client, issued])
   const demoRows = (k) => (clientRows && clientRows[k].length ? clientRows[k] : DEMO[k])
-  const [kind, setKind] = useState('sales'); const [rows, setRows] = useState({ sales: [], cogs: [], expense: [], party: [] }); const [total, setTotal] = useState('')
+  const [kind, setKind] = useState(initialKind); const [rows, setRows] = useState({ sales: [], cogs: [], expense: [], party: [] }); const [total, setTotal] = useState('')
   const list = rows[kind]
   const setList = (fn) => setRows((r) => ({ ...r, [kind]: fn(r[kind]) }))
   const patch = (id, p) => setList((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)))

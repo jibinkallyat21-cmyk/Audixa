@@ -52,8 +52,8 @@ function Mapping({ file, setFile, keys }) {
 const save = async (wb, name, showToast) => { const url = URL.createObjectURL(await workbookToBlob(wb)); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url); showToast('Workbook downloaded') }
 
 // ── MISCPA ────────────────────────────────────────────────────────────────
-function SalesPurchase({ ctx }) {
-  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [kind, setKind] = useState('Sales Report'); const [res, setRes] = useState(null)
+function SalesPurchase({ ctx, initialKind = 'Sales Report' }) {
+  const dc = useDemoClient(); const showToast = useToast(); const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [kind, setKind] = useState(initialKind); const [res, setRes] = useState(null)
   const load = async (f, buffer) => { setBusy(true); setRes(null); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), SALES_FIELDS)), name: f?.name || (dc.ready ? `${dc.client} sales register` : 'Demo sales report.xlsx') }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
   const run = () => { const h = file.mapping.taxable; if (!h) return; const r = sampleSalesPurchase(file.rows.map((x) => ({ taxable: toNum(x.values[h]) ?? 0 }))); setRes(r); ctx.log(`${kind} sampled`, `${r.selectedIds.length} of ${file.rows.length} entries selected, ${pct(r.coverage)} of taxable value`) }
   return (
@@ -230,7 +230,7 @@ function Materiality({ ctx, initialArea = 'Revenue' }) {
   )
 }
 
-export default function SamplingTab({ firm, client, clientName, initialMode = 'sales', initialArea = 'Revenue' }) {
+export default function SamplingTab({ firm, client, clientName, initialMode = 'sales', initialArea = 'Revenue', initialKind = 'Sales Report' }) {
   const me = currentUser()
   const [mode, setMode] = useState(initialMode)
   const ctx = { client, log: (title, description) => logEvent({ client, clientName, category: 'work', title, description, extra: { auditArea: 'Sampling', performedBy: me.name }, user: me }) }
@@ -240,7 +240,7 @@ export default function SamplingTab({ firm, client, clientName, initialMode = 's
     <div className="space-y-3">
       <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">MISCPA file: the 50% rule books apply. The materiality method is for ABCPA files and is not shown.</p>
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1">{[['sales', 'Sales / Purchase'], ['expense', 'Expenses'], ['party', 'AR / AP / Advances']].map(([id, l]) => <button key={id} onClick={() => setMode(id)} className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${mode === id ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>{l}</button>)}</div>
-      {mode === 'sales' && <SalesPurchase ctx={ctx} />}{mode === 'expense' && <Expense ctx={ctx} />}{mode === 'party' && <Parties ctx={ctx} />}
+      {mode === 'sales' && <SalesPurchase ctx={ctx} initialKind={initialKind} />}{mode === 'expense' && <Expense ctx={ctx} />}{mode === 'party' && <Parties ctx={ctx} />}
     </div>
   )
 }

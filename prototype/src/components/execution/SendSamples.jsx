@@ -11,16 +11,16 @@ import { useDemoClient } from '../../utils/useDemoClient'
 
 // After a person has looked at the selected sample, this sends it to the client: one requirement per sample (the client uploads against each one) or,
 // where the nature is an explanation, one query per sample. Nothing reaches the client until the button is pressed.
-export default function SendSamples({ area, label, items, client }) {
+export default function SendSamples({ area, label, items, client, group }) {
   const showToast = useToast(); const dc = useDemoClient(); const { queries, setQueries } = useQueries()
   const [route, setRoute] = useState(defaultRoute(items)); const [done, setDone] = useState('')
   if (!dc.isDemo(client) || !items.length) return null
   const me = currentUser()
   const send = () => {
     if (route === 'requirement') {
-      const n = addSampleRequirements(dc.slug, { area, label, samples: items.map(({ key, text, data }) => ({ key, text, data })), approvedBy: me.name })
+      const n = addSampleRequirements(dc.slug, { area, label, group, samples: items.map(({ key, text, data, row, subgroup }) => ({ key, text, data, row, subgroup })), approvedBy: me.name })
       if (n < 0) { showToast('The requirement list has not been issued yet. Approve the trial balance first.'); return }
-      setDone(n ? `${n} sample requirement${n === 1 ? '' : 's'} added to the client's requirement list.` : 'These samples are already on the client\'s requirement list.')
+      setDone(n ? `${n} ${group === 'cutoff' ? 'cut-off item' : 'sample requirement'}${n === 1 ? '' : 's'} added to the client's requirement list.` : 'These samples are already on the client\'s requirement list.')
       if (n) logEvent({ client: dc.slug, clientName: dc.client, category: 'doc-request', title: `${label}: samples approved and sent`, description: `${n} samples sent as requirements`, user: me })
     } else {
       const today = new Date().toISOString().slice(0, 10); const due = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)

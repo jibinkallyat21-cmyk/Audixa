@@ -19,6 +19,7 @@ import { useProcedureStatuses } from '../../utils/procedureStore'
 const TABS_BASE = [
   { id: 'requirements', label: 'Requirements', href: '/team/workspace/requirements' },
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries' },
+  { id: 'areas', label: 'Audit areas', href: '/team/workspace/areas' },
   { id: 'procedures', label: 'Procedures', href: '/team/workspace/procedures' },
   { id: 'working-tb', label: 'Working TB', href: '/team/workspace/working-tb' },
   { id: 'deliverables', label: 'Deliverables', href: '/team/workspace/deliverables' },

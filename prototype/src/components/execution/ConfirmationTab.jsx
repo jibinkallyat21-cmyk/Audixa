@@ -60,7 +60,7 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
     const url = URL.createObjectURL(await workbookToBlob(wb)); const a = document.createElement('a'); a.href = url; a.download = 'Cash_Bank_Confirmation.xlsx'; a.click(); URL.revokeObjectURL(url); showToast('Workbook downloaded')
     logEvent({ client, clientName, category: 'work', title: 'Cash and bank confirmation workbook prepared', description: `${rows.length} confirmations, status ${completion.status}`, extra: { auditArea: 'Cash and bank', performedBy: me.name }, user: me })
   }
-  const [openId, setOpenId] = useState(null)
+  const [openId, setOpenId] = useState(null); const [tabs, setTabs] = useState({}); const tb = (c) => (c.available ? tabs[c.id] || 'amounts' : 'letter')
   const matched = rows.filter((c) => c.overall === 'Confirmed / Matched').length
   const attention = rows.length - matched
   const load = () => { const list = demoItems().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })); setItems(list); setOpenId(list[0]?.id || null) }
@@ -94,23 +94,29 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
               <span className="text-slate-400">{open ? '▲' : '▼'}</span>
             </button>
             {open && (
-              <div className="space-y-8 border-t border-slate-100 bg-slate-50 px-6 py-6">
-                <Section title="1. The confirmation" hint="Which letter this is and whether it came in.">
+              <div className="space-y-6 border-t border-slate-100 bg-slate-50 px-6 py-6">
+                <div className="flex flex-wrap gap-2" role="tablist">{[['letter', 'The letter'], ['amounts', 'Amounts'], ['checks', 'Document checks'], ['result', 'Result']].filter(([id]) => c.available || id === 'letter').map(([id, l]) => <button key={id} role="tab" aria-selected={tb(c) === id} onClick={() => setTabs((t) => ({ ...t, [c.id]: id }))} className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${tb(c) === id ? 'bg-navy text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{l}</button>)}</div>
+                  {tb(c) === 'letter' && (
+                <Section title="The confirmation" hint="Which letter this is and whether it came in.">
                   <FieldGrid>
                     <Field label="Description"><input aria-label="Description" value={c.label} onChange={(e) => patch(c.id, { label: e.target.value })} className={INPUT} /></Field>
                     <Field label="Client file name"><input aria-label="Client file name" value={c.fileName} onChange={(e) => patch(c.id, { fileName: e.target.value })} className={INPUT} /></Field>
                     <div className="flex items-end"><Toggle label="Confirmation received" checked={c.available} onChange={(v) => patch(c.id, { available: v })} /></div>
                   </FieldGrid>
                 </Section>
+                  )}
                 {c.available && (<>
-                  <Section title="2. Compare the amounts" hint="The difference is worked out for you.">
+                  {tb(c) === 'amounts' && (
+                  <Section title="Compare the amounts" hint="The difference is worked out for you.">
                     <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr]">
                       <Field label="Amount in the trial balance"><input aria-label="TB amount" type="number" value={c.tbAmount} onChange={(e) => patch(c.id, { tbAmount: e.target.value })} className={INPUT} /></Field>
                       <Field label="Amount confirmed"><input aria-label="Confirmed amount" type="number" value={c.amount} onChange={(e) => patch(c.id, { amount: e.target.value })} className={INPUT} /></Field>
                       <div className={`rounded-xl border px-5 py-3 ${d === null ? 'border-slate-200 bg-white' : d === 0 ? 'border-emerald/30 bg-emerald/5' : 'border-alert-red/30 bg-alert-red/5'}`}><p className="text-xs font-medium text-slate-500">Difference</p><p className={`mt-1 text-xl font-bold ${d === null ? 'text-slate-400' : d === 0 ? 'text-emerald' : 'text-alert-red'}`}>{d === null ? '—' : d === 0 ? 'None' : money(d)}</p></div>
                     </div>
                   </Section>
-                  <Section title="3. Names and date on the letter">
+                  )}
+                  {tb(c) === 'letter' && (
+                  <Section title="Names and date on the letter">
                     <FieldGrid>
                       <Field label="As at date"><input aria-label="As at date" type="date" value={c.asAt} onChange={(e) => patch(c.id, { asAt: e.target.value })} className={INPUT} /></Field>
                       <Field label="Client name on the confirmation"><input aria-label="Client name on the confirmation" value={c.clientName} onChange={(e) => patch(c.id, { clientName: e.target.value })} className={INPUT} /></Field>
@@ -118,7 +124,9 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
                       {c.type === 'Bank' && <Field label="Bank in the trial balance description"><input aria-label="Bank in the TB description" value={c.tbBank} onChange={(e) => patch(c.id, { tbBank: e.target.value })} className={INPUT} /></Field>}
                     </FieldGrid>
                   </Section>
-                  <Section title="4. Check the document" hint="Tick what you can see on the letter.">
+                  )}
+                  {tb(c) === 'checks' && (
+                  <Section title="Check the document" hint="Tick what you can see on the letter.">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                       <Toggle label={c.type === 'Cash' ? 'Company seal present' : 'Bank stamp present'} checked={c.sealPresent} onChange={(v) => patch(c.id, { sealPresent: v })} />
                       <Toggle label="Authorised signature present" checked={c.signaturePresent} onChange={(v) => patch(c.id, { signaturePresent: v })} />
@@ -129,7 +137,9 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
                       <Toggle label="Provided by the client (not direct from the bank)" tone="red" checked={c.clientProvided} onChange={(v) => patch(c.id, { clientProvided: v })} />
                     </div>
                   </Section>
-                  <Section title="5. Result">
+                  )}
+                  {tb(c) === 'result' && (<>
+                  <Section title="Result">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{CONF_TESTS.map((t) => <div key={t} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">{t}<Chip value={c.tests[t] === 'Not Applicable' ? 'Not provided' : c.tests[t]} /></div>)}</div>
                     {Object.entries(c.reasons).length > 0 && <div className="mt-4"><Flags flags={Object.entries(c.reasons).map(([k, v]) => `${k}: ${v}`)} /></div>}
                   </Section>
@@ -155,6 +165,7 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
                     </Section>
                   )}
                   {c.flags.length > 0 && <Flags flags={c.flags} />}
+                  </>)}
                 </>)}
                 <div className="flex justify-end"><button onClick={() => { setItems((l) => l.filter((x) => x.id !== c.id)); setOpenId(null) }} aria-label="Remove confirmation" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-alert-red"><Trash2 className="h-4 w-4" />Remove this confirmation</button></div>
               </div>
