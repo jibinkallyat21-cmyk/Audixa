@@ -11,7 +11,7 @@ export default function DemoDataCard({ D }) {
         <Database className="mt-0.5 h-4 w-4 shrink-0" style={{ color: D.muted }} />
         <div className="min-w-0">
           <p className="text-sm font-semibold" style={{ color: D.text }}>Demo data {loaded && <span className="ml-1 text-xs font-medium text-emerald">loaded</span>}</p>
-          <p className="text-xs" style={{ color: D.muted }}>{loaded ? 'This client now appears as a file in the Execution Team portal (Files, Requirements) with its requirement list issued.' : 'Adds this client as a file in the Execution Team portal so you can see how it looks to the audit team.'}</p>
+          <p className="text-xs" style={{ color: D.muted }}>{loaded ? "This client now appears as a file in the Execution Team portal. Upload the trial balance under Requirement List to start." : 'Adds this client as a file in the Execution Team portal so you can see how it looks to the audit team.'}</p>
         </div>
       </div>
       <button onClick={() => { if (loaded) { clearDemoData(); showToast('Demo data removed') } else { loadDemoData(); showToast('Demo data loaded. Open the Execution Team portal to see the file.') } }}

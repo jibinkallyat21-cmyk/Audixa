@@ -1,10 +1,8 @@
 // Demo data switch for the client portal. Loading it adds the demo client as a file in the execution team's portfolio
-// and issues its MISCPA requirement list from the demo trial balance, so the team side shows what a real file would.
+// The requirement list is NOT issued here: the client uploads a trial balance first and the audit team approves it.
 import { teamFiles } from '../data/sampleData.js'
-import { MIS_REQUIREMENTS } from '../data/misRequirements.js'
-import { demoPY, demoCY } from '../data/demoTB.js'
-import { buildIssuedList } from './requirementsEngine.js'
-import { issueList, withdrawList, PORTAL_CLIENT } from './requirementsStore.js'
+import { withdrawList, PORTAL_CLIENT } from './requirementsStore.js'
+import { clearTB } from './tbSubmissionStore.js'
 import { useStore, readStore, writeStore } from './store.js'
 import { logEvent } from './auditLog.js'
 
@@ -26,11 +24,9 @@ export const useDemoLoaded = () => !!useStore(KEY, null)[0]
 
 export function loadDemoData() {
   attach(true)
-  const built = buildIssuedList(MIS_REQUIREMENTS, demoCY(demoPY()))
-  issueList(DEMO_FILE, built, { by: 'Demo data', source: 'Demo trial balance' })
   writeStore(KEY, { at: new Date().toISOString() })
-  logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio with ${built.itemCount} requirements` })
+  logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio; waiting for the client's trial balance` })
 }
 export function clearDemoData() {
-  attach(false); withdrawList(DEMO_FILE.slug); writeStore(KEY, null)
+  attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore(KEY, null)
 }

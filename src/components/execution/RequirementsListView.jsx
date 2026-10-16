@@ -8,6 +8,7 @@ import { toLedgers, detectBranches, consolidate } from '../../utils/tbCore'
 import { readTBWorkbook } from '../../utils/tbExcel'
 import { buildIssuedList, presetList } from '../../utils/requirementsEngine'
 import { useIssuedLists, issueList, withdrawList } from '../../utils/requirementsStore'
+import { useTBSubmissions, approveTB, returnTB } from '../../utils/tbSubmissionStore'
 
 const BTN = 'inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold'
 
@@ -52,6 +53,9 @@ function MisList({ file }) {
   const [overrides, setOverrides] = useState({})
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const sub = useTBSubmissions()[file.slug]
+  const clientTB = sub && ['Submitted', 'Approved'].includes(sub.status) && sub.ledgers?.length ? sub : null
+  const [reason, setReason] = useState('')
 
   const useDemo = () => { setLedgers(demoCY(demoPY())); setSrc('Demo trial balance'); setOverrides({}); setErr(''); setMulti(false) }
   const onFile = async (f) => {
@@ -66,14 +70,17 @@ function MisList({ file }) {
     } catch (e) { setErr(e.message || 'Could not read the file.') }
     setBusy(false)
   }
-  const built = useMemo(() => (ledgers ? buildIssuedList(MIS_REQUIREMENTS, ledgers, { consolidated: multi, overrides }) : null), [ledgers, multi, overrides])
+  const effLedgers = clientTB ? clientTB.ledgers : ledgers
+  const effMulti = clientTB ? detectBranches(clientTB.ledgers, 1).multi : multi
+  const built = useMemo(() => (effLedgers ? buildIssuedList(MIS_REQUIREMENTS, effLedgers, { consolidated: effMulti, overrides }) : null), [effLedgers, effMulti, overrides])
   const preset = useMemo(() => presetList(MIS_REQUIREMENTS), [])
   const toggle = (c) => setOverrides((o) => {
     const next = { ...o }; const want = !c.include
     if (want === c.applies) delete next[c.id]; else next[c.id] = want
     return next
   })
-  const issue = () => { const r = issueList(file, built, { source: src }); showToast(`${r.itemCount} requirements issued to ${file.client}`) }
+  const issue = () => { const r = issueList(file, built, { source: clientTB ? `Client TB: ${clientTB.fileName}` : src }); if (clientTB) approveTB(file); showToast(`${r.itemCount} requirements issued to ${file.client}`) }
+  const sendBack = () => { if (!reason.trim()) { setErr('Give the client a reason for returning the trial balance.'); return }; returnTB(file, reason.trim()); withdrawList(file.slug); setReason(''); setErr(''); showToast('Trial balance returned to the client') }
 
   return (
     <div className="space-y-4">
@@ -83,13 +90,27 @@ function MisList({ file }) {
             <p className="flex items-center gap-2 text-sm font-semibold text-navy">MISCPA general audit requirements <AuditorChip auditor="MISCPA" /></p>
             <p className="mt-0.5 text-xs text-slate-500">{file.client}. The full preset list is shown first; once the trial balance is read, only the relevant requirements are kept.</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {!clientTB && <div className="flex flex-wrap gap-2">
             <label className={`${BTN} cursor-pointer border border-slate-300 text-navy hover:bg-slate-50`}>{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}Analyse trial balance (Excel)
               <input type="file" accept=".xlsx" className="hidden" onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} /></label>
             <button onClick={useDemo} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo trial balance</button>
-          </div>
+          </div>}
         </div>
         {err && <p className="mt-2 text-xs text-alert-red">{err}</p>}
+        {clientTB && (
+          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+            <p className="font-semibold text-navy">Client trial balance: {clientTB.fileName} · {clientTB.ledgers.length} ledgers · {clientTB.status === 'Approved' ? `Approved by ${sub.approvedBy}` : 'Format check passed, waiting for your approval'}</p>
+            {(clientTB.warnings || []).map((w) => <p key={w} className="mt-1 text-amber">{w}</p>)}
+            {clientTB.status === 'Submitted' && (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <input aria-label="Reason for returning" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason, if the trial balance is to be returned" className="min-w-[220px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />
+                <button onClick={sendBack} className={`${BTN} border border-slate-300 text-navy hover:bg-white`}><Undo2 className="h-3.5 w-3.5" />Return to client</button>
+              </div>
+            )}
+          </div>
+        )}
+        {!clientTB && sub?.status === 'Returned' && <p className="mt-2 text-xs text-amber">Returned to the client: {sub.returnReason}. Waiting for a new upload.</p>}
+        {!clientTB && !sub && <p className="mt-2 text-xs text-slate-500">The client has not uploaded a trial balance yet. Their requirement list stays hidden until you approve one.</p>}
         {src && <p className="mt-2 text-xs text-slate-500">Trial balance: {src}{multi ? ' · several branches / entities, consolidated first' : ''}.</p>}
       </div>
 
@@ -99,7 +120,7 @@ function MisList({ file }) {
             <p className="text-sm font-semibold text-emerald">Issued to the client: {issued.itemCount} requirements in {issued.categories.length} categories · {new Date(issued.issuedAt).toLocaleString()}</p>
             <button onClick={() => { withdrawList(file.slug); showToast('Issued list withdrawn') }} className={`${BTN} border border-slate-300 text-navy hover:bg-white`}><Undo2 className="h-3.5 w-3.5" />Withdraw</button>
           </div>
-          <p className="mt-1 text-xs text-slate-500">The client sees this list under Documents in their portal. Re-issue after a change to replace it.</p>
+          <p className="mt-1 text-xs text-slate-500">The client sees this list under Requirement List in their portal. Re-issue after a change to replace it.</p>
         </div>
       )}
 
@@ -114,7 +135,7 @@ function MisList({ file }) {
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-navy">{built.itemCount} requirements in {built.categories.length} of {built.analysis.length} categories apply to this client</p>
-            <button onClick={issue} className={`${BTN} bg-brand text-white shadow-sm hover:bg-[#D12C35]`}><Send className="h-3.5 w-3.5" />{issued ? 'Re-issue to client' : 'Issue to client'}</button>
+            <button onClick={issue} className={`${BTN} bg-brand text-white shadow-sm hover:bg-[#D12C35]`}><Send className="h-3.5 w-3.5" />{clientTB?.status === 'Submitted' ? 'Approve trial balance and issue list' : issued ? 'Re-issue to client' : 'Issue to client'}</button>
           </div>
           {built.analysis.filter((c) => c.include).map((c) => {
             const items = built.categories.find((x) => x.id === c.id).items
