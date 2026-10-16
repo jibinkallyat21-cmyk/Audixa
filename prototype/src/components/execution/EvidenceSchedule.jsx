@@ -20,7 +20,7 @@ export default function EvidenceSchedule({ dc, areaId }) {
   const count = (s) => results.filter((r) => r.status === s).length
   return (
     <div className="space-y-4">
-      <Card title={`${cfg.label}: supporting documents`} subtitle="Each balance is backed by the documents this area needs. The figures are matched to the trial balance; a person accepts or raises each one.">
+      <Card title={`${cfg.label}: ${cfg.subject}`} subtitle="The figures on each document are matched to the trial balance. A person accepts each one or raises it with the client.">
         <div className="grid gap-3 sm:grid-cols-4"><Stat label="Lines" value={lines.length} /><Stat label="Supported" value={results.filter((r) => /^Supported/.test(r.status)).length} tone="green" /><Stat label="Mismatch" value={count('Mismatch')} tone={count('Mismatch') ? 'red' : 'green'} /><Stat label="Not received" value={count('Not received')} /></div>
         <div className="space-y-5">{lines.map((l, i) => (
           <div key={l.id} className="rounded-xl border border-slate-200 bg-slate-50 p-5">

@@ -54,26 +54,26 @@ export default function CashBankTool({ dc, mode = 'accounts' }) {
   const agreed = rows.filter((r) => r.status === 'Agreed' || r.status === 'Reconciled').length
   return (
     <div className="space-y-6">
-      <Card title="Cash and bank accounts" subtitle="Every account in one list: its documents, the trial balance against the statement, and its cut-off. Open an account to work on it."
+      <Card title="Accounts" subtitle="Open an account to work on its documents, balances and reconciliation."
         right={<span className="rounded-full bg-emerald/10 px-3 py-1.5 text-xs font-semibold text-emerald">{requested ? 'Requested from the client automatically' : 'Waiting for the requirement list'}</span>}>
         <div className="grid gap-3 sm:grid-cols-4"><Stat label="Accounts" value={accounts.length} /><Stat label="Agreed" value={agreed} tone="green" /><Stat label="Need attention" value={rows.filter((r) => r.diff !== null && r.diff !== 0).length} tone={rows.some((r) => r.diff) ? 'red' : 'green'} /><Stat label="Year-end" value={yearEnd.split('-').reverse().join('-')} /></div>
         <div className="max-w-xs"><Field label="Year-end"><input aria-label="Year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={INPUT} /></Field></div>
         <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-left text-sm">
-            <thead><tr className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">{['Account', 'Trial balance', 'Confirmation', 'Statement: current period', 'Statement: subsequent period', 'Statement closing', 'Difference', 'Cut-off', 'Status', ''].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr></thead>
+            <thead><tr className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">{['Account', 'Trial balance', 'Confirmation', 'Statement (year)', 'Statement (next month)', 'Closing per statement', 'Difference', 'Cut-off', 'Status', ''].map((h) => <th key={h} className="px-3 py-3">{h}</th>)}</tr></thead>
             <tbody>{rows.map((r, k) => {
-              const cell = (doc) => { const it = r.docs[doc]; if (doc !== 'conf' && r.type === 'Cash') return <span className="text-xs text-slate-400">Not needed</span>; return <div className="space-y-1"><Pill s={docStatus(it)} />{it && received(it) && <button onClick={() => { setOpen(r.code); setTabs((t) => ({ ...t, [r.code]: 'docs' })); setView((v) => ({ ...v, [r.code]: doc })) }} className="flex items-center gap-1 text-xs font-semibold text-navy hover:underline"><Eye className="h-3 w-3" />View</button>}</div> }
+              const cell = (doc) => { const it = r.docs[doc]; if (doc !== 'conf' && r.type === 'Cash') return <span className="text-xs text-slate-400">Not needed</span>; const st = docStatus(it); const short = { 'Waiting for the client': 'Waiting', 'Uploaded: to review': 'To review' }; return <div className="space-y-1"><Pill s={{ ...st, text: short[st.text] || st.text }} />{it && received(it) && <button onClick={() => { setOpen(r.code); setTabs((t) => ({ ...t, [r.code]: 'docs' })); setView((v) => ({ ...v, [r.code]: doc })) }} className="flex items-center gap-1 text-xs font-semibold text-navy hover:underline"><Eye className="h-3 w-3" />View</button>}</div> }
               const cutDone = r.cut.filter((i) => received(i)).length
               return (
                 <tr key={r.code} className={`border-t border-slate-100 align-top ${k % 2 ? 'bg-slate-50' : 'bg-white'}`}>
-                  <td className="px-4 py-3"><p className="font-semibold text-navy">{r.name}</p><p className="text-xs text-slate-400">{r.type} · {r.code}</p></td>
-                  <td className="px-4 py-3 tabular-nums text-navy">{money(r.tb)}</td>
-                  <td className="px-4 py-3">{cell('conf')}</td><td className="px-4 py-3">{cell('cy')}</td><td className="px-4 py-3">{cell('sub')}</td>
-                  <td className="px-4 py-3 tabular-nums text-navy">{r.closing === null ? '—' : money(r.closing)}</td>
-                  <td className={`px-4 py-3 font-semibold tabular-nums ${r.diff === null ? 'text-slate-400' : r.diff === 0 ? 'text-emerald' : 'text-alert-red'}`}>{r.diff === null ? '—' : r.diff === 0 ? 'None' : money(r.diff)}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500">{r.cut.length ? `${cutDone} of ${r.cut.length} uploaded` : 'Not started'}<Link to="?area=cash&proc=cash-cutoff" className="mt-1 block font-semibold text-navy hover:underline">Do the cut-off</Link></td>
-                  <td className="px-4 py-3"><span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${TONE[overallTone(r.status)]}`}>{r.status}</span></td>
-                  <td className="px-4 py-3"><button aria-label={`Open ${r.name}`} onClick={() => setOpen(open === r.code ? null : r.code)} className="text-slate-400 hover:text-navy">{open === r.code ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}</button></td>
+                  <td className="min-w-[170px] px-3 py-3"><p className="font-semibold text-navy">{r.name}</p><p className="text-xs text-slate-400">{r.type} · {r.code}</p></td>
+                  <td className="whitespace-nowrap px-3 py-3 tabular-nums text-navy">{money(r.tb)}</td>
+                  <td className="px-3 py-3">{cell('conf')}</td><td className="px-3 py-3">{cell('cy')}</td><td className="px-3 py-3">{cell('sub')}</td>
+                  <td className="px-3 py-3 tabular-nums text-navy">{r.closing === null ? '—' : money(r.closing)}</td>
+                  <td className={`px-3 py-3 font-semibold tabular-nums ${r.diff === null ? 'text-slate-400' : r.diff === 0 ? 'text-emerald' : 'text-alert-red'}`}>{r.diff === null ? '—' : r.diff === 0 ? 'None' : money(r.diff)}</td>
+                  <td className="min-w-[110px] whitespace-nowrap px-3 py-3 text-xs text-slate-500">{r.cut.length ? `${cutDone} of ${r.cut.length} uploaded` : 'Not started'}<Link to="?area=cash&proc=cash-cutoff" className="mt-1 block font-semibold text-navy hover:underline">Do the cut-off</Link></td>
+                  <td className="px-3 py-3"><span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${TONE[overallTone(r.status)]}`}>{r.status}</span></td>
+                  <td className="px-3 py-3"><button aria-label={`Open ${r.name}`} onClick={() => setOpen(open === r.code ? null : r.code)} className="text-slate-400 hover:text-navy">{open === r.code ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}</button></td>
                 </tr>) })}</tbody>
           </table>
         </div>

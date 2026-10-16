@@ -251,7 +251,7 @@ export default function AuditTeamLayout({ title, children }) {
         <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
           <TeamHeader title={title} />
           <main className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
-            <div className="px-4 py-6 sm:px-8 sm:py-8"><DemoGate>{children}</DemoGate></div>
+            <div className="flex-1 px-4 py-6 sm:px-8 sm:py-8"><DemoGate>{children}</DemoGate></div>
             <Footer />
           </main>
         </div>

@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams, Link, Navigate } from 'react-router-dom'
 import { useLiveMateriality } from '../../../utils/materialityStore'
-import { ChevronRight, ArrowRight, Wrench, Scissors, FileText, PenLine, CheckCircle2 } from 'lucide-react'
+import { ChevronRight, ArrowRight, Wrench, Scissors, FileText, PenLine, CheckCircle2, ListChecks, ScanSearch, FolderOpen, Landmark } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
-import { Card, Chip, DataTable, Empty, SecondaryButton, PrimaryButton } from '../../../components/execution/ReviewParts'
+import { Card, DataTable, Empty, SecondaryButton, PrimaryButton } from '../../../components/execution/ReviewParts'
 import CutOffTool from '../../../components/execution/CutOffTool'
 import CashBankTool from '../../../components/execution/CashBankTool'
 import SamplingTab from '../../../components/execution/SamplingTab'
@@ -27,6 +27,11 @@ import { fileSummary } from '../../../utils/sampleTracking'
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const KIND = { tool: [Wrench, 'Working tool'], cutoff: [Scissors, 'Cut-off'], requirement: [FileText, 'From the client'], notes: [PenLine, 'Your notes'] }
 const STATUSES = ['Not Started', 'In Progress', 'Complete']
+// One icon per kind of work, so the procedures of every area look alike: sampling, vouching, cut-off, documents, accounts.
+const iconOf = (proc) => (/cut-?off/i.test(proc.label) ? Scissors : /sampling/i.test(proc.label) ? ListChecks : /vouching/i.test(proc.label) ? ScanSearch : /accounts?\b/i.test(proc.label) && proc.tool === 'cash-bank' ? Landmark : /documents|schedule/i.test(proc.label) ? FolderOpen : KIND[proc.kind][0])
+const STATUS_CHIP = { Complete: 'border-emerald/30 bg-emerald/10 text-emerald', 'In Progress': 'border-amber/30 bg-amber/10 text-amber', 'Not Started': 'border-slate-300 bg-slate-100 text-slate-500' }
+const ProcIcon = ({ proc, className }) => { const I = iconOf(proc); return <I className={className} /> }
+const StatusChip = ({ status }) => <span className={`inline-block whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold ${STATUS_CHIP[status]}`}>{status}</span>
 const DONE = ['Uploaded Processing', 'Under Review', 'Accepted']
 
 function Crumbs({ parts }) {
@@ -96,8 +101,8 @@ function AreaList({ dc, statuses, issued }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><h2 className="text-xl font-bold text-navy">Audit areas</h2><p className="mt-1 text-sm text-slate-500">Laid out like the financial statements. Pick an area to see its accounts and the procedures to follow. Every figure comes from {dc.client}'s trial balance.</p></div>
-        <div className="min-w-[240px] rounded-xl border border-slate-200 bg-white px-5 py-3"><div className="mb-1.5 flex justify-between text-xs"><span className="font-medium text-slate-600">{total.done} of {total.total} procedures done</span><span className="text-slate-400">{total.total ? Math.round((total.done / total.total) * 100) : 0}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald" style={{ width: `${total.total ? (total.done / total.total) * 100 : 0}%` }} /></div></div>
+        <div className="max-w-2xl"><h2 className="text-xl font-bold text-navy">Audit areas</h2><p className="mt-1 text-sm text-slate-500">Laid out like the financial statements. Pick an area to see its accounts and the procedures to follow. Every figure comes from {dc.client}'s trial balance.</p></div>
+        <div className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 sm:w-80"><div className="mb-1.5 flex justify-between text-xs"><span className="font-medium text-slate-600">{total.done} of {total.total} procedures done</span><span className="text-slate-400">{total.total ? Math.round((total.done / total.total) * 100) : 0}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald" style={{ width: `${total.total ? (total.done / total.total) * 100 : 0}%` }} /></div></div>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap gap-2" role="tablist">{FILTERS.map(([id, l]) => <button key={id} role="tab" aria-selected={filter === id} onClick={() => setFilter(id)} className={`rounded-full px-4 py-2 text-sm font-semibold ${filter === id ? 'bg-navy text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{l}</button>)}</div>
@@ -140,16 +145,16 @@ function AreaView({ area, dc, statuses, issued }) {
         <div className="space-y-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Procedures</p>
           {area.procedures.map((p) => {
-            const [Icon, kindLabel] = KIND[p.kind]; const st = statuses[procStatusKey(area.id, p.id)] || 'Not Started'; const cs = clientStatus(p, area, issued)
+            const [, kindLabel] = KIND[p.kind]; const st = statuses[procStatusKey(area.id, p.id)] || 'Not Started'; const cs = clientStatus(p, area, issued)
             return (
               <Link key={p.id} to={`?area=${area.id}&proc=${p.id}`} className="group flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy"><Icon className="h-5 w-5" /></div>
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy"><ProcIcon proc={p} className="h-5 w-5" /></div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2"><h3 className="text-base font-semibold text-navy">{p.label}</h3><span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">{kindLabel}</span></div>
                   <p className="mt-1 text-sm text-slate-500">{p.desc}</p>
                   {cs && <p className={`mt-2 text-sm font-medium ${cs.tone === 'green' ? 'text-emerald' : cs.tone === 'amber' ? 'text-amber' : 'text-slate-400'}`}>{cs.text}{cs.file ? ` · ${cs.file}` : ''}</p>}
                 </div>
-                <div className="flex shrink-0 items-center gap-3"><Chip value={st === 'Complete' ? 'Pass' : st === 'In Progress' ? 'Unclear' : 'Not provided'} /><span className="hidden text-sm text-slate-500 sm:block">{st}</span><ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-navy" /></div>
+                <div className="flex shrink-0 items-center gap-3"><StatusChip status={st} /><ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-navy" /></div>
               </Link>
             )
           })}
@@ -161,12 +166,11 @@ function AreaView({ area, dc, statuses, issued }) {
 
 function ProcView({ area, proc, dc, statuses, issued }) {
   const key = procStatusKey(area.id, proc.id); const st = statuses[key] || 'Not Started'; const note = statuses[`note:${key}`] || ''; const cs = clientStatus(proc, area, issued)
-  const [Icon] = KIND[proc.kind]
   return (
     <div className="space-y-6">
       <Crumbs parts={[{ label: 'Audit areas', to: '?' }, { label: area.label, to: `?area=${area.id}` }, { label: proc.label }]} />
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-4"><div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy/10 text-navy"><Icon className="h-6 w-6" /></div><div><h2 className="text-xl font-bold text-navy">{proc.label}</h2><p className="mt-1 max-w-2xl text-sm text-slate-500">{proc.desc}</p></div></div>
+        <div className="flex items-start gap-4"><div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy/10 text-navy"><ProcIcon proc={proc} className="h-6 w-6" /></div><div><h2 className="text-xl font-bold text-navy">{proc.label}</h2><p className="mt-1 max-w-2xl text-sm text-slate-500">{proc.desc}</p></div></div>
         <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1" role="group" aria-label="Status">{STATUSES.map((s) => <button key={s} onClick={() => setSubStatus(dc.slug, key, s)} className={`rounded-lg px-4 py-2 text-sm font-semibold ${st === s ? (s === 'Complete' ? 'bg-emerald text-white shadow-sm' : 'bg-white text-navy shadow-sm') : 'text-slate-500 hover:text-navy'}`}>{s}</button>)}</div>
       </div>
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Eye, FileText, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react'
 import { PART_LABEL, standardName } from '../../utils/evidence'
 
-const TONE = { Supported: 'bg-emerald-50 text-emerald-700', 'Supported and paid': 'bg-emerald-50 text-emerald-700', 'Supported, payment not shown': 'bg-amber-50 text-amber-700', Mismatch: 'bg-red-50 text-alert-red', 'Not received': 'bg-slate-100 text-slate-600' }
+const TONE = { Supported: 'bg-emerald/10 text-emerald', 'Supported and paid': 'bg-emerald/10 text-emerald', 'Supported, payment not shown': 'bg-amber/10 text-amber', Mismatch: 'bg-alert-red/10 text-alert-red', 'Not received': 'bg-slate-100 text-slate-500' }
 
 // The documents behind one schedule line, renamed to a standard name, with a viewer that shows what was read from the document and how it compares with the line.
 export default function EvidenceDocs({ area, subject, parts, docs, result, decision, onDecide }) {
@@ -12,7 +12,7 @@ export default function EvidenceDocs({ area, subject, parts, docs, result, decis
     <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-navy">Supporting documents</p>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${TONE[result.status]}`}>{result.status}</span>
+        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${TONE[result.status]}`}>{result.status}</span>
       </div>
       <div className="divide-y divide-slate-100">
         {parts.map(({ part, need, label }) => { const d = docs.find((x) => x.part === part); const nm = label || PART_LABEL[part]; return (

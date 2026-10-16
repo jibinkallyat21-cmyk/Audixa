@@ -253,10 +253,10 @@ export default function SamplingTab({ firm, client, clientName, initialMode = 's
   const [mode, setMode] = useState(initialMode)
   const ctx = { client, log: (title, description) => logEvent({ client, clientName, category: 'work', title, description, extra: { auditArea: 'Sampling', performedBy: me.name }, user: me }) }
   if (!firm) return <Card><p className="text-sm text-slate-500">Select a client first. The auditor on the proposal decides which sampling framework is used.</p></Card>
-  if (firm === 'ABCPA') return <div className="space-y-3"><p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p><Materiality ctx={ctx} initialArea={initialArea} lockArea={lockArea} /></div>
+  if (firm === 'ABCPA') return <div className="space-y-6">{!lockArea && <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">ABCPA file: the materiality method applies. The 50% rule books are for MISCPA files and are not shown.</p>}<Materiality ctx={ctx} initialArea={initialArea} lockArea={lockArea} /></div>
   return (
     <div className="space-y-3">
-      <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">MISCPA file: the 50% rule books apply. The materiality method is for ABCPA files and is not shown.</p>
+      <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">MISCPA file: the 50% rule books apply. The materiality method is for ABCPA files and is not shown.</p>
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1">{[['sales', 'Sales / Purchase'], ['expense', 'Expenses'], ['party', 'AR / AP / Advances']].map(([id, l]) => <button key={id} onClick={() => setMode(id)} className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${mode === id ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>{l}</button>)}</div>
       {mode === 'sales' && <SalesPurchase ctx={ctx} initialKind={initialKind} />}{mode === 'expense' && <Expense ctx={ctx} />}{mode === 'party' && <Parties ctx={ctx} />}
     </div>
