@@ -10,6 +10,8 @@ import { currentUser } from '../../utils/currentUser'
 import { workbookToBlob } from '../../utils/eosbExcel'
 import { PREPAID_CATEGORIES, NO_VAT_CATEGORIES, prepaidSchedule, prepaidChecks, adjustingEntry } from '../../utils/prepaidDep'
 import { buildPrepaidWorkbook } from '../../utils/assetsExcel'
+import EvidenceDocs from './EvidenceDocs'
+import { prepaidParts, checkPrepaidEvidence, demoPrepaidDocs } from '../../utils/evidence'
 
 const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
@@ -26,7 +28,7 @@ export default function PrepaidTab({ client, clientName }) {
   const showToast = useToast(); const me = currentUser()
   const dc = useDemoClient()
   // For the demo client the list is built from its own trial balance ledgers; otherwise the generic demo list.
-  const demoList = () => (dc.ready ? clientPrepaid(dc.ledgers) : DEMO)
+  const demoList = () => { const l = dc.ready ? clientPrepaid(dc.ledgers) : DEMO; const co = dc.ready ? dc.client || clientName : clientName; const docs = demoPrepaidDocs(l, co); return l.map((x, i) => ({ ...x, docs: docs[i] })) }
   const [yearStart, setYearStart] = useState('2025-01-01'); const [yearEnd, setYearEnd] = useState('2025-12-31'); const [vatMode, setVatMode] = useState('WITHOUT VAT'); const [monthly, setMonthly] = useState(false)
   const [items, setItems] = useState([]); const patch = (id, p) => setItems((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)))
   const byCategory = useMemo(() => { const g = {}; items.forEach((i) => { (g[i.category] ||= []).push(i) }); return Object.fromEntries(Object.entries(g).map(([c, l]) => [c, prepaidSchedule(l, yearEnd, { monthly })])) }, [items, yearEnd, monthly])
@@ -65,6 +67,7 @@ export default function PrepaidTab({ client, clientName }) {
               <Field label="Paid during the year"><input aria-label="Paid during the year" type="number" value={it.paid} onChange={(e) => patch(it.id, { paid: e.target.value })} className={INP + ' w-full'} /></Field>
             </FieldGrid>
             <div className="mt-4"><Field label="Source document" hint="Invoice number, date, payment reference"><input aria-label="Source document" value={it.source} onChange={(e) => patch(it.id, { source: e.target.value })} className={INP + ' w-full'} /></Field></div>
+            {it.docs && <EvidenceDocs area="Prepaid" subject={it.particulars || 'Prepaid item'} parts={prepaidParts(it.category)} docs={it.docs} result={checkPrepaidEvidence(it, it.docs, dc.ready ? dc.client || clientName : clientName)} decision={it.decision} onDecide={(d) => { patch(it.id, { decision: d }); logEvent({ client, clientName, category: 'work', title: `Prepaid evidence ${d === 'Accepted' ? 'accepted' : 'raised with the client'}`, description: it.particulars, extra: { auditArea: 'Prepaid expenses', performedBy: me.name }, user: me }) }} />}
             {r && <div className="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-navy">{r.error ? <span className="text-amber">{r.error}</span> : <div className="grid gap-3 sm:grid-cols-4"><span>Days of cover<br /><b>{r.totalDays}</b></span><span>Days after year-end<br /><b>{r.prepaidDays}</b></span><span>Expense for the year<br /><b>{money(r.expense)}</b></span><span>Prepaid at year-end<br /><b>{money(r.prepaid)}</b></span></div>}</div>}
           </div>) })}</div>
       </Card>

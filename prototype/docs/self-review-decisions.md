@@ -70,3 +70,15 @@ These are working in `prototype/` with demo data. Treat them as requirements; th
 
 ## Supporting documents per item (evidence rules), being agreed one area at a time
 - **Prepaid expenses.** Each prepaid line needs (A) the agreement or the invoice, whichever shows the amount, the period and the name, and (B) payment proof. Checks against the prepaid schedule line: company name, vendor name, net amount, period start and end. Payment proof = any document that validates the payment (bank statement entry, payment voucher, transfer or SADAD receipt, cheque with clearing, and so on). Status per line: supported and paid / supported, payment not shown / mismatch / not received. Code compares; AI only reads a document it cannot parse; a person decides every flag. (Source: Self-Review, prepaid items 135 and 137; payment proof added by the audit lead.)
+
+## Supporting documents per item (evidence rules)
+
+Agreed with the audit lead, prepaid first; the other areas follow the same pattern and are listed for confirmation.
+
+- Each schedule line is backed by: the agreement (if the item has one), the tax invoice (a government receipt for fee categories outside VAT), and payment proof where the area needs payment.
+- The figures (company name, vendor name, net amount, cover start and end) are read from the agreement or the invoice, whichever shows them, and compared with the schedule line.
+- Payment proof = anything that validates the payment (bank statement entry, payment voucher, transfer or SADAD receipt, cheque with clearing). It is checked for company, vendor and the amount paid (net plus VAT).
+- Status per line: Supported and paid / Supported, payment not shown / Mismatch / Not received. A person decides every line (accept, or raise with the client). Code compares; AI only reads a document code cannot parse.
+- Clients upload under any file name; the app shows each document under a standard name: `<Area> - <Item> - <Document type>.<ext>` and keeps the original name beside it.
+- Assumption to confirm: agreement applies to Rent and the three insurance categories only.
+- Built for prepaid expenses (`src/utils/evidence.js`, `EvidenceDocs.jsx`). Not yet built for other areas; payment proof is not needed for every area.
