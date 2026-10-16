@@ -7,9 +7,9 @@ import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
-import { useIssuedLists, PORTAL_CLIENT, setItemStatus } from '../../utils/requirementsStore'
+import { useIssuedLists, PORTAL_CLIENT, setItemStatus, uploadDemoDocuments } from '../../utils/requirementsStore'
 import TBUploadStep from '../../components/client/TBUploadStep'
-import { DEMO_FILE } from '../../utils/demoData'
+import { DEMO_FILE, useDemoLoaded } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
 function rowsFromIssued(rec) {
@@ -314,6 +314,8 @@ export default function ClientDocuments() {
   const { isDark } = useTheme()
   const { selectedFY } = useClientFY()
   const rec = useIssuedLists()[PORTAL_CLIENT.slug]
+  const demoOn = useDemoLoaded()
+  const showToast = useToast()
   const ALL_ROWS = useMemo(() => rowsFromIssued(rec), [rec])
   const engRef = rec ? DEMO_FILE.code : ENGAGEMENT_REFS[selectedFY]
   const [searchParams, setSearchParams] = useSearchParams()
@@ -453,12 +455,21 @@ export default function ClientDocuments() {
                 style={{ border: `1px solid ${D.border}`, background: D.card, color: D.text }}
               />
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+            {demoOn && <button
+              onClick={() => { const n = uploadDemoDocuments(PORTAL_CLIENT.slug); showToast(n ? `${n} demo documents uploaded for the audit team to review` : 'Nothing is waiting for an upload') }}
+              className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+              style={{ color: D.text }}
+            >
+              Upload demo documents
+            </button>}
             <button
               onClick={() => setBulkOpen(true)}
               className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
             >
               <Upload className="h-4 w-4" /> Bulk Upload PBC Documents
             </button>
+            </div>
           </div>
           </>)}
 
