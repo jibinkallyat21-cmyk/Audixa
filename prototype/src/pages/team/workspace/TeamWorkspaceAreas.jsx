@@ -49,6 +49,7 @@ function ToolBody({ proc, dc }) {
   const common = { client: dc.slug, clientName: dc.client }
   switch (proc.tool) {
     case 'cash-bank': return <CashBankTool dc={dc} />
+    case 'cash-cutoff': return <CashBankTool dc={dc} mode="cutoff" />
     case 'party-sample': return <SamplingTab firm={dc.auditor} initialMode="party" initialArea={proc.area} {...common} />
     case 'sales-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialArea="Revenue" {...common} />
     case 'cogs-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialKind="Purchase Report" initialArea="COGS" {...common} />

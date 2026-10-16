@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Eye, Check, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, Field, FieldGrid, Section, Toggle, Flags, Stat, Empty, PrimaryButton, SecondaryButton, INPUT } from './ReviewParts'
 import CutOffTool from './CutOffTool'
@@ -22,10 +23,10 @@ const overallTone = (t) => (t === 'Agreed' || t === 'Reconciled' ? 'green' : /ne
 
 // Every cash and bank account on one page: what the client has sent for it (confirmation, statement for the year, statement for the subsequent period),
 // the trial balance against the statement, a reconciliation only where they differ, and the cut-off for that account.
-export default function CashBankTool({ dc }) {
+export default function CashBankTool({ dc, mode = 'accounts' }) {
   const showToast = useToast(); const me = currentUser(); const rec = useIssuedLists()[dc.slug]
   const accounts = useMemo(() => bankAccountsFrom(dc.ledgers), [dc.ledgers]); const txns = useMemo(() => clientBankTxns(dc.ledgers).byCode, [dc.ledgers])
-  const [yearEnd, setYearEnd] = useState('2025-12-31'); const [open, setOpen] = useState(null); const [tabs, setTabs] = useState({}); const [view, setView] = useState({}); const [edit, setEdit] = useState({}); const [rejecting, setRejecting] = useState(''); const [reason, setReason] = useState('')
+  const [yearEnd, setYearEnd] = useState('2025-12-31'); const [open, setOpen] = useState(accounts.length === 1 ? accounts[0].code : null); const [tabs, setTabs] = useState({}); const [view, setView] = useState({}); const [edit, setEdit] = useState({}); const [rejecting, setRejecting] = useState(''); const [reason, setReason] = useState('')
   const patch = (code, p) => setEdit((e) => ({ ...e, [code]: { ...e[code], ...p } }))
   const requested = (rec?.categories || []).some((c) => c.id === 'BANKACC')
 
@@ -45,6 +46,12 @@ export default function CashBankTool({ dc }) {
   const decide = (it, status) => { setItemStatus(dc.slug, it.ref, status === 'Accepted' ? { status, alert: '' } : { status, alert: reason }); setRejecting(''); setReason(''); showToast(`${it.ref} ${status === 'Accepted' ? 'accepted' : 'rejected'}`) }
 
   if (!accounts.length) return <Empty>This trial balance has no cash or bank balance.</Empty>
+  if (mode === 'cutoff') return (
+    <div className="space-y-6">
+      <p className="rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600">The cut-off is done for each cash and bank account on its own. For each account, enter how many items you want ({dc.auditor === 'ABCPA' ? 'debits and credits from the subsequent statement' : 'the same number before and after the year end'}), pick them, then approve to send them to the client. Each account gets its own block on the client's list.</p>
+      {rows.map((r) => <CutOffTool key={r.code} area={r.type === 'Cash' ? 'cash' : 'bank'} client={dc.slug} firm={dc.auditor} txnsOverride={txns[r.code] || null} sub={`${r.type} ${r.code}`} label={`${r.type}: ${r.name}`} />)}
+    </div>
+  )
   const agreed = rows.filter((r) => r.status === 'Agreed' || r.status === 'Reconciled').length
   return (
     <div className="space-y-6">
@@ -65,7 +72,7 @@ export default function CashBankTool({ dc }) {
                   <td className="px-4 py-3">{cell('conf')}</td><td className="px-4 py-3">{cell('cy')}</td><td className="px-4 py-3">{cell('sub')}</td>
                   <td className="px-4 py-3 tabular-nums text-navy">{r.closing === null ? '—' : money(r.closing)}</td>
                   <td className={`px-4 py-3 font-semibold tabular-nums ${r.diff === null ? 'text-slate-400' : r.diff === 0 ? 'text-emerald' : 'text-alert-red'}`}>{r.diff === null ? '—' : r.diff === 0 ? 'None' : money(r.diff)}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500">{r.cut.length ? `${cutDone} of ${r.cut.length} uploaded` : 'Not started'}</td>
+                  <td className="px-4 py-3 text-xs text-slate-500">{r.cut.length ? `${cutDone} of ${r.cut.length} uploaded` : 'Not started'}<Link to="?area=cash&proc=cash-cutoff" className="mt-1 block font-semibold text-navy hover:underline">Do the cut-off</Link></td>
                   <td className="px-4 py-3"><span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${TONE[overallTone(r.status)]}`}>{r.status}</span></td>
                   <td className="px-4 py-3"><button aria-label={`Open ${r.name}`} onClick={() => setOpen(open === r.code ? null : r.code)} className="text-slate-400 hover:text-navy">{open === r.code ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}</button></td>
                 </tr>) })}</tbody>
