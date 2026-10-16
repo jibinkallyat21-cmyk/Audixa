@@ -8,6 +8,7 @@ import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
 import { useIssuedLists, PORTAL_CLIENT, setItemStatus } from '../../utils/requirementsStore'
+import TBUploadStep from '../../components/client/TBUploadStep'
 import { DEMO_FILE } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 
@@ -435,6 +436,7 @@ export default function ClientDocuments() {
             </div>
           </div>
 
+          {rec && (<>
           {/* Bento stat cards */}
           <motion.div key={selectedFY} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="grid grid-cols-12 gap-3">
             {[
@@ -478,8 +480,9 @@ export default function ClientDocuments() {
               <Upload className="h-4 w-4" /> Bulk Upload PBC Documents
             </button>
           </div>
+          </>)}
 
-          {!rec && <div className="rounded-xl p-8 text-center text-sm" style={{ border: `1px dashed ${D.border}`, color: D.muted }}>No requirement list has been issued yet. Load the demo data from the Engagement Dashboard to see one.</div>}
+          {!rec && <TBUploadStep D={D} />}
 
           {/* Table */}
           {rec && <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
