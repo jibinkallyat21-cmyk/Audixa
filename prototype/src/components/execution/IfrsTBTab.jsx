@@ -14,8 +14,8 @@ import { IFRS, buildIfrsTB, statements, cogsSchedule, vatReconciliation, verific
 import { buildIfrsWorkbook } from '../../utils/ifrsExcel'
 import { demoClientTB, demoBIS } from '../../data/demoFS'
 
-const SEL = 'rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-navy outline-none focus:border-navy'
-const INP = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
+const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined || n === '' ? '' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const MAP = [['code', 'Code'], ['name', 'Name'], ['opening', 'Opening'], ['debit', 'Debit'], ['credit', 'Credit'], ['closing', 'Closing']]
 
@@ -67,7 +67,7 @@ export default function IfrsTBTab({ mode, client, clientName }) {
   return (
     <div className="space-y-4">
       {mode === 'disclaimer' && <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">Disclaimer audit: the IFRS TB is prepared from what the client provides, either a Trial Balance or a Basic Information Sheet (BIS). An unbalanced TB is documented as an unresolved difference and referred for review; a related-party / partner account is used only with support.</p>}
-      <Card title="1. Source" right={<button onClick={useDemo} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={useDemo} />
+      <Card title="1. Source" right={<button onClick={useDemo} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={useDemo} />
         {mode === 'disclaimer' && <div className="mb-2 flex gap-3 text-sm text-navy">{[['tb', 'Client Trial Balance'], ['bis', 'Basic Information Sheet (BIS)']].map(([v, l]) => <label key={v} className="flex items-center gap-1"><input type="radio" checked={source === v} onChange={() => { setSource(v); setOut(null) }} />{l}</label>)}</div>}
         {source === 'tb' || mode !== 'disclaimer' ? <TBSource file={file} setFile={setFile} onLedgers={(l) => { setLedgers(l); setOut(null) }} /> : (
           <div className="space-y-1.5">{bis.map((b, i) => <div key={i} className="flex gap-1.5"><input aria-label="BIS item" placeholder="Item" value={b.name} onChange={(e) => setBis((l) => l.map((x, k) => (k === i ? { ...x, name: e.target.value } : x)))} className={`${INP} w-64`} /><input aria-label="BIS amount" type="number" value={b.amount} onChange={(e) => setBis((l) => l.map((x, k) => (k === i ? { ...x, amount: e.target.value } : x)))} className={`${INP} w-36`} /><select aria-label="BIS side" value={b.side} onChange={(e) => setBis((l) => l.map((x, k) => (k === i ? { ...x, side: e.target.value } : x)))} className={SEL}><option>Dr</option><option>Cr</option></select><button aria-label="Remove BIS item" onClick={() => setBis((l) => l.filter((_, k) => k !== i))} className="p-1 text-slate-400"><Trash2 className="h-3.5 w-3.5" /></button></div>)}
@@ -92,7 +92,7 @@ export default function IfrsTBTab({ mode, client, clientName }) {
             {live.adj.booked.filter((e) => e.kind === 'Reclassification').map((e) => <p key={e.id} className="text-xs text-navy">Automatic {e.id}: {e.description}</p>)}
           </Card>
           <Card title="4. Schedule checks">
-            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">{[['salary', 'Salary schedule total'], ['fees', 'Audit & consultation fees'], ['capital', 'Capital per AOA / CR (or the table below)'], ['vatBase', 'VAT return sales base'], ['closing', 'Closing stock (client figure)']].map(([k, l]) => <label key={k} className="text-[11px] font-semibold uppercase text-slate-500">{l}<input aria-label={l} type="number" value={ver[k]} onChange={(e) => setVer({ ...ver, [k]: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>)}</div>
+            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">{[['salary', 'Salary schedule total'], ['fees', 'Audit & consultation fees'], ['capital', 'Capital per AOA / CR (or the table below)'], ['vatBase', 'VAT return sales base'], ['closing', 'Closing stock (client figure)']].map(([k, l]) => <label key={k} className="text-xs font-medium text-slate-600">{l}<input aria-label={l} type="number" value={ver[k]} onChange={(e) => setVer({ ...ver, [k]: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>)}</div>
             <p className="mt-1 text-xs text-slate-500">If a schedule figure differs and the cause is unknown, the IFRS TB keeps the Client TB figure and the gap goes to the pending list. A closing stock typed here is labelled "client figure, support pending".</p>
             <div className="mt-2 space-y-1">{capital.map((c, i) => <div key={i} className="flex gap-1.5"><input aria-label="Shareholder" placeholder="Shareholder (AOA / CR)" value={c.name} onChange={(e) => setCapital((l) => l.map((x, k) => (k === i ? { ...x, name: e.target.value } : x)))} className={`${INP} w-64`} /><input aria-label="Shareholder capital" type="number" placeholder="Capital" value={c.amount} onChange={(e) => setCapital((l) => l.map((x, k) => (k === i ? { ...x, amount: e.target.value } : x)))} className={`${INP} w-36`} /></div>)}<button onClick={() => setCapital((l) => [...l, { name: '', amount: '' }])} className="text-xs font-semibold text-navy">+ shareholder</button></div>
           </Card>

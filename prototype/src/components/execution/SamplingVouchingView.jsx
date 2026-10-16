@@ -6,7 +6,7 @@ import SamplingTab from './SamplingTab'
 import VouchingTab from './VouchingTab'
 import ConfirmationTab from './ConfirmationTab'
 
-const SEL = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 
 // Process 3.4. Audit Team portal.
 export default function SamplingVouchingView({ embedded = false, initialTab = 'sampling', initialMode = 'sales' }) {
@@ -20,7 +20,7 @@ export default function SamplingVouchingView({ embedded = false, initialTab = 's
         <p className="mt-1 text-sm text-slate-500">Process 3.4. The auditor on the proposal decides the framework: MISCPA uses the 50% rule books, ABCPA the materiality method. They are never mixed.</p>
       </div>}
       <div className="flex flex-wrap items-center gap-3">
-        <label htmlFor="sv-client" className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Client</label>
+        <label htmlFor="sv-client" className="text-xs font-medium text-slate-600">Client</label>
         <select id="sv-client" value={pid} onChange={(e) => setPid(e.target.value)} className={`${SEL} min-w-[260px]`}><option value="">Select a client</option>{profiles.map((p) => <option key={p.id} value={p.id}>{p.client} ({p.auditor})</option>)}</select>
         {firm && <span className="rounded-full bg-navy/10 px-3 py-1 text-xs font-bold text-navy">{FIRMS[firm].legalName}</span>}
       </div>

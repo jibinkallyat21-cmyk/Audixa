@@ -14,7 +14,7 @@ import { PY_BS_LINES, PY_PL_LINES, buildFS } from '../../utils/fsPrep'
 import { buildFSWorkbook } from '../../utils/fsExcel'
 import { demoClientTB, demoPYAFS } from '../../data/demoFS'
 
-const INP = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined || n === '' ? '' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const AFS_TO_FS = { cash: 'cash', receivables: 'ar', prepayments: 'prepaid', inventory: 'inventory', ppe: 'tangible', intangibles: 'intangible', payables: 'ap', accruals: 'accrued', borrowings: 'loans', eosb: 'eosb', capital: 'capital', reserves: 'statRes', re: 're' }
 
@@ -40,7 +40,7 @@ export default function FSPrepTab({ client, clientName }) {
   const st = out?.fs.st
   return (
     <div className="space-y-4">
-      <Card title="1. Current-year trial balance" right={<button onClick={() => { loadDemo() }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => { loadDemo() }} />
+      <Card title="1. Current-year trial balance" right={<button onClick={() => { loadDemo() }} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={() => { loadDemo() }} />
         <TBSource file={file} setFile={setFile} onLedgers={(l) => { setLedgers(l); setOut(null) }} />
         <p className="mt-2 text-xs text-slate-500">Debit positive, credit negative. The closing balance is recomputed (opening + debit − credit) and compared with the supplied closing.</p>
         <label className="mt-2 block text-xs text-slate-500">Reporting date <input aria-label="Reporting date" value={period} onChange={(e) => setPeriod(e.target.value)} className={`${INP} ml-1 w-40`} /></label>
@@ -52,7 +52,7 @@ export default function FSPrepTab({ client, clientName }) {
         <details className="mt-2"><summary className="cursor-pointer text-xs font-semibold text-navy">Previous-year income statement lines (optional)</summary><div className="mt-2 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">{PY_PL_LINES.map(([k, l]) => <label key={k} className="flex items-center justify-between gap-2 text-[11px] text-slate-500">{l}<input aria-label={`PY ${l}`} type="number" value={py.pl[k] ?? ''} onChange={(e) => setPy({ ...py, pl: { ...py.pl, [k]: e.target.value } })} className={`${INP} w-32`} /></label>)}</div></details>
       </Card>
       <Card title="3. Auditor inputs (each is labelled as an assumption)">
-        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">{[['depreciation', 'Depreciation for the year'], ['taxPaid', 'Zakat / tax paid'], ['dividends', 'Dividends'], ['reserveTransfer', 'Transfer to reserve'], ['otherEquity', 'Other equity movement'], ['capitalChange', 'Capital change']].map(([k, l]) => <label key={k} className="text-[11px] font-semibold uppercase text-slate-500">{l}<input aria-label={l} type="number" value={inputs[k]} onChange={(e) => setInputs({ ...inputs, [k]: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>)}</div>
+        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">{[['depreciation', 'Depreciation for the year'], ['taxPaid', 'Zakat / tax paid'], ['dividends', 'Dividends'], ['reserveTransfer', 'Transfer to reserve'], ['otherEquity', 'Other equity movement'], ['capitalChange', 'Capital change']].map(([k, l]) => <label key={k} className="text-xs font-medium text-slate-600">{l}<input aria-label={l} type="number" value={inputs[k]} onChange={(e) => setInputs({ ...inputs, [k]: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>)}</div>
       </Card>
       <button onClick={run} disabled={!ledgers.length} className="rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-40">Prepare the financial statements</button>
       {out && (

@@ -12,8 +12,8 @@ import { mapRows } from '../../utils/eosb.js'
 import { TARGETS, buildAllMonths, employeeControl, calcValidation, monthTotals, sourceReconciliation, completeness, tbReconciliation, matchContributors, employeeStatusTests, finalStatus, monthLabel } from '../../utils/salary'
 import { readScheduleWorkbook, buildSalaryWorkbook } from '../../utils/payrollExcel'
 
-const SEL = 'rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-navy outline-none focus:border-navy'
-const INP = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
+const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined || n === '' ? '' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const chip = (s) => <Chip value={s === 'MATCHED' || s === 'READY FOR AUDITOR' ? 'Pass' : s === 'NOT MATCHED' ? 'Fail' : 'Unclear'} />
 
@@ -65,12 +65,12 @@ export default function SalaryTab({ client, clientName }) {
   const months = [...new Set(sources.flatMap((s) => buildAllMonths([s]).records.map((r) => r.month).filter(Boolean)))].sort()
   return (
     <div className="space-y-4">
-      <Card title="1. Audit period and TB" right={<button onClick={useDemo} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={useDemo} />
+      <Card title="1. Audit period and TB" right={<button onClick={useDemo} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={useDemo} />
         <div className="grid gap-2 sm:grid-cols-4">
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Audit period start<input aria-label="Audit period start" type="date" value={p.auditStart} onChange={(e) => setP({ ...p, auditStart: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Audit period end<input aria-label="Audit period end" type="date" value={p.auditEnd} onChange={(e) => setP({ ...p, auditEnd: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Amount compared with the TB<select aria-label="TB basis" value={p.basis} onChange={(e) => setP({ ...p, basis: e.target.value })} className={`${INP} mt-1 w-full font-normal normal-case`}><option value="total">Total Salary (gross)</option><option value="net">Net Payable</option></select></label>
-          <label className="text-[11px] font-semibold uppercase text-slate-500">TB Salary – total<input aria-label="TB Salary total" type="number" value={p.tbTotal} onChange={(e) => setP({ ...p, tbTotal: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Audit period start<input aria-label="Audit period start" type="date" value={p.auditStart} onChange={(e) => setP({ ...p, auditStart: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Audit period end<input aria-label="Audit period end" type="date" value={p.auditEnd} onChange={(e) => setP({ ...p, auditEnd: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Amount compared with the TB<select aria-label="TB basis" value={p.basis} onChange={(e) => setP({ ...p, basis: e.target.value })} className={`${INP} mt-1 w-full font-normal normal-case`}><option value="total">Total Salary (gross)</option><option value="net">Net Payable</option></select></label>
+          <label className="text-xs font-medium text-slate-600">TB Salary – total<input aria-label="TB Salary total" type="number" value={p.tbTotal} onChange={(e) => setP({ ...p, tbTotal: e.target.value })} className={`${INP} mt-1 w-full font-normal`} /></label>
         </div>
         {months.length > 0 && <div className="mt-2"><p className="mb-1 text-xs text-slate-500">TB Salary by month (leave blank if not available; a blank month is not treated as zero)</p><div className="flex flex-wrap gap-2">{months.map((m) => <label key={m} className="text-xs text-slate-500">{monthLabel(m)}<input aria-label={`TB ${m}`} type="number" value={p.tbMonthly[m] ?? ''} onChange={(e) => setP({ ...p, tbMonthly: { ...p.tbMonthly, [m]: e.target.value } })} className={`${INP} ml-1 w-28`} /></label>)}</div></div>}
         <p className="mt-2 text-xs text-slate-400">The amount basis for the TB comparison is for the reviewer to confirm (Rule Book step 11).</p>

@@ -3,7 +3,7 @@ import AutoDemo from './AutoDemo'
 import { useDemoClient } from '../../utils/useDemoClient'
 import { clientAssets } from '../../utils/clientPayrollData'
 import { Download, Plus, Trash2 } from 'lucide-react'
-import { Card, DataTable, Flags, Chip } from './ReviewParts'
+import { Card, DataTable, Flags, Chip, Field, FieldGrid } from './ReviewParts'
 import { useToast } from '../shared/Toast'
 import { logEvent } from '../../utils/auditLog'
 import { currentUser } from '../../utils/currentUser'
@@ -11,7 +11,7 @@ import { workbookToBlob } from '../../utils/eosbExcel'
 import { DEP_CLASSES, EXTRA_CLASSES, depSchedule, depReview, depChecks } from '../../utils/prepaidDep'
 import { buildDepreciationWorkbook } from '../../utils/assetsExcel'
 
-const INP = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const CLASSES = [...DEP_CLASSES, ...EXTRA_CLASSES]
 const rateOf = (cls) => CLASSES.find((c) => c.name === cls)?.rate ?? ''
@@ -42,27 +42,28 @@ export default function DepreciationTab({ client, clientName }) {
   }
   return (
     <div className="space-y-4">
-      <Card title="Year" right={<button onClick={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
+      <Card title="Year" right={<button onClick={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         <div className="grid gap-2 sm:grid-cols-3">
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Year start<input aria-label="Year start" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Year end<input aria-label="Year end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Adjusted to retained earnings (optional)<input aria-label="Retained earnings adjustment" type="number" value={reTotal} onChange={(e) => setRe(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Year start<input aria-label="Year start" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Year end<input aria-label="Year end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Adjusted to retained earnings (optional)<input aria-label="Retained earnings adjustment" type="number" value={reTotal} onChange={(e) => setRe(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
         </div>
         <p className="mt-1 text-xs text-slate-500">Straight line on cost. New additions are pro-rated from the date available for use to the year-end, inclusive, ÷ 365. Existing rows keep their existing rate; any that differ from the class rate are flagged, not changed.</p>
       </Card>
       <Card title="Assets" right={<button onClick={() => setAssets((l) => [...l, blank()])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add asset</button>}>
         {assets.length === 0 && <p className="text-xs text-slate-400">No assets yet. Keep the template names and opening balances for existing assets. If an item does not fit a class, say so; nothing is guessed.</p>}
-        <div className="space-y-2">{assets.map((a, i) => (
-          <div key={a.id} className="rounded-lg border border-slate-100 p-2">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <select aria-label="Class" value={a.cls} onChange={(e) => patch(a.id, { cls: e.target.value, rate: a.opening > 0 ? a.rate : rateOf(e.target.value) })} className={`${INP} w-56`}>{CLASSES.map((c) => <option key={c.name}>{c.name}</option>)}</select>
-              <input aria-label="Asset name" placeholder="Asset" value={a.name} onChange={(e) => patch(a.id, { name: e.target.value })} className={`${INP} w-44`} />
-              <input aria-label="Purchase date" type="date" value={a.date} onChange={(e) => patch(a.id, { date: e.target.value })} className={`${INP} w-36`} />
-              <input aria-label="Rate" type="number" step="0.01" placeholder="Rate" value={a.rate} onChange={(e) => patch(a.id, { rate: e.target.value })} className={`${INP} w-20`} />
-              {[['opening', 'Opening cost'], ['addition', 'Addition'], ['disposal', 'Disposal'], ['openingAcc', 'Opening acc. dep.'], ['onDisposal', 'On disposal']].map(([k, l]) => <input key={k} aria-label={`${l} for ${a.name || 'asset'}`} type="number" placeholder={l} value={a[k]} onChange={(e) => patch(a.id, { [k]: e.target.value })} className={`${INP} w-28`} />)}
-              <button aria-label="Remove asset" onClick={() => setAssets((l) => l.filter((x) => x.id !== a.id))} className="ml-auto rounded p-1 text-slate-400 hover:text-alert-red"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
-            <p className="mt-1 text-xs text-navy">{sched.rows[i]?.I === null ? <span className="text-amber">{sched.rows[i].flag}</span> : <>Closing cost {money(sched.rows[i]?.G)} · charge <b>{money(sched.rows[i]?.I)}</b> · closing acc. dep. {money(sched.rows[i]?.K)} · closing WDV <b>{money(sched.rows[i]?.M)}</b></>}</p>
+        <div className="space-y-5">{assets.map((a, i) => (
+          <div key={a.id} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div className="mb-4 flex items-center justify-between gap-3"><p className="text-sm font-semibold text-navy">{a.name || 'New asset'}</p>
+              <button aria-label="Remove asset" onClick={() => setAssets((l) => l.filter((x) => x.id !== a.id))} className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-alert-red"><Trash2 className="h-4 w-4" />Remove</button></div>
+            <FieldGrid cols={4}>
+              <Field label="Asset class"><select aria-label="Class" value={a.cls} onChange={(e) => patch(a.id, { cls: e.target.value, rate: a.opening > 0 ? a.rate : rateOf(e.target.value) })} className={INP + ' w-full'}>{CLASSES.map((c) => <option key={c.name}>{c.name}</option>)}</select></Field>
+              <Field label="Asset name"><input aria-label="Asset name" value={a.name} onChange={(e) => patch(a.id, { name: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="Available for use from"><input aria-label="Purchase date" type="date" value={a.date} onChange={(e) => patch(a.id, { date: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="Depreciation rate" hint="0.25 = 25% a year"><input aria-label="Rate" type="number" step="0.01" value={a.rate} onChange={(e) => patch(a.id, { rate: e.target.value })} className={INP + ' w-full'} /></Field>
+              {[['opening', 'Opening cost'], ['addition', 'Addition in the year'], ['disposal', 'Disposal in the year'], ['openingAcc', 'Opening accumulated depreciation'], ['onDisposal', 'Depreciation on disposal']].map(([k, l]) => <Field key={k} label={l}><input aria-label={`${l} for ${a.name || 'asset'}`} type="number" value={a[k]} onChange={(e) => patch(a.id, { [k]: e.target.value })} className={INP + ' w-full'} /></Field>)}
+            </FieldGrid>
+            <div className="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-navy">{sched.rows[i]?.I === null ? <span className="text-amber">{sched.rows[i].flag}</span> : <div className="grid gap-3 sm:grid-cols-4"><span>Closing cost<br /><b>{money(sched.rows[i]?.G)}</b></span><span>Charge for the year<br /><b>{money(sched.rows[i]?.I)}</b></span><span>Closing accumulated depreciation<br /><b>{money(sched.rows[i]?.K)}</b></span><span>Closing book value<br /><b>{money(sched.rows[i]?.M)}</b></span></div>}</div>
           </div>))}</div>
       </Card>
       {assets.length > 0 && (

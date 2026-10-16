@@ -15,7 +15,7 @@ import { readTBWorkbook, buildTBReviewWorkbook } from '../../utils/tbExcel'
 import { workbookToBlob } from '../../utils/eosbExcel'
 import { demoPY, demoCY, demoAFS } from '../../data/demoTB'
 
-const SEL = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const MAP_FIELDS = [['code', 'Code'], ['name', 'Name'], ['opening', 'Opening'], ['debit', 'Debit'], ['credit', 'Credit'], ['closing', 'Closing'], ['branch', 'Branch / entity']]
 const money = (n) => (n === null || n === undefined ? '' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const key = (l) => (l.code || l.name).toLowerCase()
@@ -141,7 +141,7 @@ export default function TBReviewView() {
 
       <Card title="1. Engagement">
         <div className="grid gap-2 sm:grid-cols-3">
-          <div><label htmlFor="tb-client" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">Client</label><select id="tb-client" value={pid} onChange={(e) => setPid(e.target.value)} className={`${SEL} w-full`}><option value="">Select a client</option>{profiles.map((x) => <option key={x.id} value={x.id}>{x.client}</option>)}</select></div>
+          <div><label htmlFor="tb-client" className="mb-1 block text-xs font-medium text-slate-600">Client</label><select id="tb-client" value={pid} onChange={(e) => setPid(e.target.value)} className={`${SEL} w-full`}><option value="">Select a client</option>{profiles.map((x) => <option key={x.id} value={x.id}>{x.client}</option>)}</select></div>
           <FieldInput input={{ path: 'currency', label: 'Reporting currency' }} fields={p} onChange={(k, v) => setP({ ...p, [k]: v })} />
           <FieldInput input={{ path: 'tolerance', label: 'Tolerance for differences', type: 'number' }} fields={p} onChange={(k, v) => setP({ ...p, [k]: v })} />
           <FieldInput input={{ path: 'cyFrom', label: 'Current period from', type: 'date' }} fields={p} onChange={(k, v) => setP({ ...p, [k]: v })} />
@@ -149,11 +149,11 @@ export default function TBReviewView() {
           <div className="flex items-end"><label className="flex items-center gap-2 text-sm text-navy"><input type="checkbox" checked={p.interim} onChange={(e) => setP({ ...p, interim: e.target.checked })} className="h-4 w-4 accent-navy" />The TB is for an interim period</label></div>
           <FieldInput input={{ path: 'pyFrom', label: 'Prior period from', type: 'date' }} fields={p} onChange={(k, v) => setP({ ...p, [k]: v })} />
           <FieldInput input={{ path: 'pyTo', label: 'to', type: 'date' }} fields={p} onChange={(k, v) => setP({ ...p, [k]: v })} />
-          <div><label htmlFor="tb-conv" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">Signs in the source files</label><select id="tb-conv" value={p.convention} onChange={(e) => setP({ ...p, convention: e.target.value })} className={`${SEL} w-full`}><option value="drPositive">Debit positive, credit negative</option><option value="crPositive">Credit positive (converted)</option></select></div>
+          <div><label htmlFor="tb-conv" className="mb-1 block text-xs font-medium text-slate-600">Signs in the source files</label><select id="tb-conv" value={p.convention} onChange={(e) => setP({ ...p, convention: e.target.value })} className={`${SEL} w-full`}><option value="drPositive">Debit positive, credit negative</option><option value="crPositive">Credit positive (converted)</option></select></div>
         </div>
       </Card>
 
-      <Card title="2. Trial balances" right={<button onClick={useDemo} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={useDemo} />
+      <Card title="2. Trial balances" right={<button onClick={useDemo} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={useDemo} />
         {demo ? <p className="rounded-lg bg-amber/10 px-3 py-2 text-xs text-amber">Demo data is loaded: a prior-year TB, a current-year TB with deliberate issues, and a prior-year AFS.</p> : (
           <div className="grid gap-3 md:grid-cols-2">
             <FileBlock title="Prior-year audited TB" file={files.py} busy={busy === 'py'} onFile={(f) => load('py', f)} onMap={(i, k, h) => setMap('py', i, k, h)} />

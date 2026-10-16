@@ -3,7 +3,7 @@ import AutoDemo from './AutoDemo'
 import { useDemoClient } from '../../utils/useDemoClient'
 import { clientPrepaid } from '../../utils/clientPayrollData'
 import { Download, Plus, Trash2 } from 'lucide-react'
-import { Card, DataTable, Flags } from './ReviewParts'
+import { Card, DataTable, Flags, Field, FieldGrid } from './ReviewParts'
 import { useToast } from '../shared/Toast'
 import { logEvent } from '../../utils/auditLog'
 import { currentUser } from '../../utils/currentUser'
@@ -11,7 +11,7 @@ import { workbookToBlob } from '../../utils/eosbExcel'
 import { PREPAID_CATEGORIES, NO_VAT_CATEGORIES, prepaidSchedule, prepaidChecks, adjustingEntry } from '../../utils/prepaidDep'
 import { buildPrepaidWorkbook } from '../../utils/assetsExcel'
 
-const INP = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-navy outline-none focus:border-navy'
+const INP = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
 const money = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const blank = (category = PREPAID_CATEGORIES[0]) => ({ id: Math.random().toString(36).slice(2), category, particulars: '', amount: '', start: '', end: '', opening: '', paid: '', vatPct: NO_VAT_CATEGORIES.includes(category) ? 0 : 15, source: '' })
 const DEMO = [
@@ -39,32 +39,33 @@ export default function PrepaidTab({ client, clientName }) {
   }
   return (
     <div className="space-y-4">
-      <Card title="Accounting period" right={<button onClick={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
+      <Card title="Accounting period" right={<button onClick={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         <div className="grid gap-2 sm:grid-cols-4">
-          <label className="text-[11px] font-semibold uppercase text-slate-500">From<input aria-label="Period from" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Year-end<input aria-label="Period year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
-          <label className="text-[11px] font-semibold uppercase text-slate-500">Basis<select aria-label="VAT basis" value={vatMode} onChange={(e) => setVatMode(e.target.value)} className={`${INP} mt-1 w-full font-normal normal-case`}><option>WITHOUT VAT</option><option>WITH VAT</option></select></label>
+          <label className="text-xs font-medium text-slate-600">From<input aria-label="Period from" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Year-end<input aria-label="Period year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
+          <label className="text-xs font-medium text-slate-600">Basis<select aria-label="VAT basis" value={vatMode} onChange={(e) => setVatMode(e.target.value)} className={`${INP} mt-1 w-full font-normal normal-case`}><option>WITHOUT VAT</option><option>WITH VAT</option></select></label>
           <label className="flex items-end gap-2 pb-2 text-sm text-navy"><input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} className="h-4 w-4 accent-navy" />Monthly allocation</label>
         </div>
         <p className="mt-1 text-xs text-slate-500">WITHOUT VAT: for a VAT-registered client whose input VAT is recoverable. Choose WITH VAT when the client is not registered or VAT is not recoverable; amounts are then entered VAT-inclusive. Government fees outside VAT are 0%; commercial rent 15%; residential rent exempt.</p>
       </Card>
       <Card title="Prepaid items" right={<button onClick={() => setItems((l) => [...l, blank()])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add item</button>}>
         {items.length === 0 && <p className="text-xs text-slate-400">No items yet. Add each payment that covers a period beyond the year-end. Fully consumed items are not prepaid.</p>}
-        <div className="space-y-2">{items.map((it) => { const r = rowOf(it.id); return (
-          <div key={it.id} className="rounded-lg border border-slate-100 p-2">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <select aria-label="Category" value={it.category} onChange={(e) => patch(it.id, { category: e.target.value, vatPct: NO_VAT_CATEGORIES.includes(e.target.value) ? 0 : it.vatPct })} className={`${INP} w-52`}>{PREPAID_CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
-              <input aria-label="Particulars" placeholder="Particulars / policy number" value={it.particulars} onChange={(e) => patch(it.id, { particulars: e.target.value })} className={`${INP} w-52`} />
-              <input aria-label="Amount excl. VAT" type="number" placeholder="Amount (excl. VAT)" value={it.amount} onChange={(e) => patch(it.id, { amount: e.target.value })} className={`${INP} w-36`} />
-              <input aria-label="Start date" type="date" value={it.start} onChange={(e) => patch(it.id, { start: e.target.value })} className={`${INP} w-36`} /><input aria-label="End date" type="date" value={it.end} onChange={(e) => patch(it.id, { end: e.target.value })} className={`${INP} w-36`} />
-              <input aria-label="Opening prepaid" type="number" placeholder="Opening prepaid" value={it.opening} onChange={(e) => patch(it.id, { opening: e.target.value })} className={`${INP} w-32`} /><input aria-label="Paid during the year" type="number" placeholder="Paid during year" value={it.paid} onChange={(e) => patch(it.id, { paid: e.target.value })} className={`${INP} w-32`} />
-              <input aria-label="VAT percent" type="number" placeholder="VAT %" value={it.vatPct} onChange={(e) => patch(it.id, { vatPct: e.target.value })} className={`${INP} w-20`} />
-              <button aria-label="Remove item" onClick={() => setItems((l) => l.filter((x) => x.id !== it.id))} className="ml-auto rounded p-1 text-slate-400 hover:text-alert-red"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-3">
-              <input aria-label="Source document" placeholder="Source document (invoice no., date, payment reference)" value={it.source} onChange={(e) => patch(it.id, { source: e.target.value })} className={`${INP} min-w-[300px] flex-1`} />
-              {r && (r.error ? <span className="text-xs text-amber">{r.error}</span> : <span className="text-xs text-navy">Days {r.totalDays} · after year-end {r.prepaidDays} · expense <b>{money(r.expense)}</b> · prepaid <b>{money(r.prepaid)}</b></span>)}
-            </div>
+        <div className="space-y-5">{items.map((it) => { const r = rowOf(it.id); return (
+          <div key={it.id} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div className="mb-4 flex items-center justify-between gap-3"><p className="text-sm font-semibold text-navy">{it.particulars || 'New prepaid item'}</p>
+              <button aria-label="Remove item" onClick={() => setItems((l) => l.filter((x) => x.id !== it.id))} className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-alert-red"><Trash2 className="h-4 w-4" />Remove</button></div>
+            <FieldGrid cols={4}>
+              <Field label="Category"><select aria-label="Category" value={it.category} onChange={(e) => patch(it.id, { category: e.target.value, vatPct: NO_VAT_CATEGORIES.includes(e.target.value) ? 0 : it.vatPct })} className={INP + ' w-full'}>{PREPAID_CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select></Field>
+              <Field label="Particulars / policy number"><input aria-label="Particulars" value={it.particulars} onChange={(e) => patch(it.id, { particulars: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="Amount (excluding VAT)"><input aria-label="Amount excl. VAT" type="number" value={it.amount} onChange={(e) => patch(it.id, { amount: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="VAT %"><input aria-label="VAT percent" type="number" value={it.vatPct} onChange={(e) => patch(it.id, { vatPct: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="Cover starts"><input aria-label="Start date" type="date" value={it.start} onChange={(e) => patch(it.id, { start: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="Cover ends"><input aria-label="End date" type="date" value={it.end} onChange={(e) => patch(it.id, { end: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="Opening prepaid"><input aria-label="Opening prepaid" type="number" value={it.opening} onChange={(e) => patch(it.id, { opening: e.target.value })} className={INP + ' w-full'} /></Field>
+              <Field label="Paid during the year"><input aria-label="Paid during the year" type="number" value={it.paid} onChange={(e) => patch(it.id, { paid: e.target.value })} className={INP + ' w-full'} /></Field>
+            </FieldGrid>
+            <div className="mt-4"><Field label="Source document" hint="Invoice number, date, payment reference"><input aria-label="Source document" value={it.source} onChange={(e) => patch(it.id, { source: e.target.value })} className={INP + ' w-full'} /></Field></div>
+            {r && <div className="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-navy">{r.error ? <span className="text-amber">{r.error}</span> : <div className="grid gap-3 sm:grid-cols-4"><span>Days of cover<br /><b>{r.totalDays}</b></span><span>Days after year-end<br /><b>{r.prepaidDays}</b></span><span>Expense for the year<br /><b>{money(r.expense)}</b></span><span>Prepaid at year-end<br /><b>{money(r.prepaid)}</b></span></div>}</div>}
           </div>) })}</div>
       </Card>
       {items.length > 0 && (
