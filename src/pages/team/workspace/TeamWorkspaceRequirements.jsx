@@ -801,9 +801,9 @@ function ReviewPointsSection({ canRaise }) {
 
 export default function TeamWorkspaceRequirements() {
   const [params, setParams] = useSearchParams()
-  const fileOptions = teamFiles.some((f) => f.slug === PORTAL_CLIENT.slug) ? [...teamFiles] : [...teamFiles, PORTAL_CLIENT]
-  const slug = params.get('file') || 'al-marai'
-  const selected = fileOptions.find((f) => f.slug === slug) || teamFiles[0]
+  const fileOptions = teamFiles.filter((f) => f.isDemo)
+  const slug = params.get('file') || PORTAL_CLIENT.slug
+  const selected = fileOptions.find((f) => f.slug === slug) || fileOptions[0] || PORTAL_CLIENT
   const isMis = selected.auditor === 'MISCPA'
   const file = getTeamFile('al-marai')
   const percent = Math.round((file.pbcDone / file.pbcTotal) * 1000) / 10

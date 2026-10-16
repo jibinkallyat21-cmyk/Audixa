@@ -19,6 +19,7 @@ import {
   Minimize2,
 } from 'lucide-react'
 import { AnalytixMark } from '../shared/AnalytixLogo'
+import DemoGate from '../shared/DemoGate'
 import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
 import { useTheme } from '../../context/ThemeContext'
@@ -578,6 +579,7 @@ function ClientHeader({ title }) {
 
 /* ─── Layout ─── */
 function ClientLayoutInner({ title, children, fullHeight }) {
+  const isDash = useLocation().pathname === '/client/dashboard'
   return (
     <SidebarDrawerProvider>
       <div className="flex h-screen w-full overflow-hidden" style={{ background: D.pageBg }}>
@@ -588,7 +590,7 @@ function ClientLayoutInner({ title, children, fullHeight }) {
             className={`client-main min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-6 ${fullHeight ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`}
             style={{ background: D.pageBg }}
           >
-            {children}
+            {isDash ? children : <DemoGate client>{children}</DemoGate>}
           </main>
         </div>
       </div>

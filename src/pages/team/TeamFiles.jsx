@@ -203,7 +203,7 @@ export default function TeamFiles() {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
 
-  const visibleFiles = teamFiles.filter((f) => {
+  const visibleFiles = teamFiles.filter((f) => f.isDemo).filter((f) => {
     if (!FILE_MATCHERS[filter](f)) return false
     if (search && !f.client.toLowerCase().includes(search.toLowerCase()) && !f.code.toLowerCase().includes(search.toLowerCase())) return false
     return true

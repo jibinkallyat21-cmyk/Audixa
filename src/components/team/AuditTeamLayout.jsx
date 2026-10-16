@@ -17,6 +17,7 @@ import ExitDemoButton from '../shared/ExitDemoButton'
 import ThemeToggle from '../shared/ThemeToggle'
 import { SidebarDrawerProvider, HamburgerButton, MobileSidebarWrap } from '../shared/SidebarDrawer'
 import QuickChatWidget from '../shared/QuickChatWidget'
+import DemoGate from '../shared/DemoGate'
 import { useTeamRole } from '../../hooks/useTeamRole'
 import { teamUser, teamNotifications } from '../../data/sampleData'
 
@@ -243,7 +244,7 @@ export default function AuditTeamLayout({ title, children }) {
         <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
           <TeamHeader title={title} />
           <main className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
-            <div className="px-4 py-6 sm:px-8 sm:py-8">{children}</div>
+            <div className="px-4 py-6 sm:px-8 sm:py-8"><DemoGate>{children}</DemoGate></div>
             <Footer />
           </main>
         </div>

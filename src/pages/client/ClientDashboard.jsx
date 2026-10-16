@@ -655,10 +655,17 @@ function ActivityTicker({ events }) {
 
 /* ─── Main Dashboard ─── */
 import DemoDataCard from '../../components/client/DemoDataCard'
-export default function ClientDashboard() {
+import { useDemoLoaded } from '../../utils/demoData'
+import { useIssuedLists, PORTAL_CLIENT } from '../../utils/requirementsStore'
+function ClientDashboardLive() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
-  const fyData = getFYData(selectedFY)
-  const baseEvents = getActivityEvents(selectedFY).slice(0, 8)
+  const rec = useIssuedLists()[PORTAL_CLIENT.slug]
+  const issuedItems = (rec?.categories || []).flatMap((c) => c.items.map((i) => ({ ref: i.ref, name: i.text, status: i.status, uploadedOn: i.filename || '', reviewer: 'Audit team' })))
+  const count = (...st) => issuedItems.filter((i) => st.includes(i.status))
+  const OUTSTANDING = count('Pending Client', 'Rejected', 'Action Required')
+  const UNDER_REVIEW = count('Under Review', 'Uploaded Processing')
+  const fyData = { ...getFYData(selectedFY), stats: { totalRequirements: issuedItems.length, documentsAccepted: count('Accepted').length, pendingAction: OUTSTANDING.length, underVerification: UNDER_REVIEW.length, openQueries: 0 } }
+  const baseEvents = rec ? [{ id: 'issued', description: `Requirement list issued: ${rec.itemCount} documents requested`, icon: 'blue', timestamp: new Date(rec.issuedAt).toLocaleString(), section: 'Milestones' }] : []
   const [liveEvents, setLiveEvents] = useState([])
   const recentEvents = [...liveEvents, ...baseEvents]
   const [meetingModal, setMeetingModal] = useState(false)
@@ -693,7 +700,7 @@ export default function ClientDashboard() {
                   total={fyData.stats.totalRequirements}
                   accepted={fyData.stats.documentsAccepted}
                   fy={selectedFY}
-                  hold={selectedFY === 'FY2024' ? clientPortal.onHold : null}
+                  hold={null}
                 />
 
                 {/* 2×2 expandable stat grid */}
@@ -712,7 +719,7 @@ export default function ClientDashboard() {
                     value={fyData.stats.pendingAction}
                     sub={fyData.stats.pendingAction > 0 ? 'Action needed' : 'All clear'}
                     accent="#F59E0B"
-                    items={OUTSTANDING_ITEMS.slice(0, fyData.stats.pendingAction)}
+                    items={OUTSTANDING.map(({ ref, name }) => ({ ref, name }))}
                     linkTo="/client/documents"
                     statusParam="outstanding"
                   />
@@ -721,7 +728,7 @@ export default function ClientDashboard() {
                     value={fyData.stats.underVerification}
                     sub="By audit team"
                     accent="#818CF8"
-                    items={UNDER_REVIEW_DOCS.slice(0, fyData.stats.underVerification).map(d => ({ ref: d.ref, name: d.name }))}
+                    items={UNDER_REVIEW.map(d => ({ ref: d.ref, name: d.name }))}
                     linkTo="/client/documents"
                     statusParam="under-review"
                   />
@@ -730,7 +737,7 @@ export default function ClientDashboard() {
                     value={fyData.stats.openQueries}
                     sub="Open queries"
                     accent="#E63946"
-                    items={OPEN_QUERIES.slice(0, fyData.stats.openQueries)}
+                    items={[]}
                     linkTo="/client/queries"
                   />
                 </div>
@@ -827,8 +834,23 @@ export default function ClientDashboard() {
       <AnimatePresence>
         {meetingModal && <RequestMeetingModal onClose={() => setMeetingModal(false)} onRecord={recordEvent} />}
         {escalationModal && <EscalationModal onClose={() => setEscalationModal(false)} onRecord={recordEvent} />}
-        {underReviewModal && <UnderReviewModal docs={UNDER_REVIEW_DOCS} onClose={() => setUnderReviewModal(false)} />}
+        {underReviewModal && <UnderReviewModal docs={UNDER_REVIEW} onClose={() => setUnderReviewModal(false)} />}
       </AnimatePresence>
+    </ClientLayout>
+  )
+}
+
+export default function ClientDashboard() {
+  const loaded = useDemoLoaded()
+  if (loaded) return <ClientDashboardLive />
+  return (
+    <ClientLayout title="Engagement Dashboard">
+      <PageTransition>
+        <div className="mx-auto max-w-2xl space-y-4 py-6">
+          <DemoDataCard D={D} />
+          <p className="rounded-2xl p-8 text-center text-sm" style={{ border: `1px dashed ${D.border}`, color: D.muted }}>No engagement is set up yet. Load the demo data to see how the portal looks for a client.</p>
+        </div>
+      </PageTransition>
     </ClientLayout>
   )
 }
