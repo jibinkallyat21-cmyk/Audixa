@@ -141,3 +141,7 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - Remarks on every requirement, sample and cut-off item: the client explains what the transaction is, the audit team replies, as a thread. Where the client has no document, "Send as explanation (no document)" sends the explanation alone and the item goes to the team for review (the rule: a short explanation is required even with a document, mandatory without one). Client remarks appear in the audit log and the team's notifications.
 
 - Cut-off requests made before the cut-off was done account by account sat in one all-bank block and repeated the same transactions. They are moved to their own account's block; a transaction asked twice is kept once (the copy the client progressed furthest). This runs automatically when the requirement list opens.
+
+## Laptop screens (built)
+
+- On screens narrower than 1440px the whole app scales down in steps (15px, 14px at 1280px, 13px at 1100px base size), the same effect as zooming the browser out, so every page keeps its layout. The workspace tabs stay on one line. Wide monitors are unchanged.
