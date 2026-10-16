@@ -21,7 +21,7 @@ function ItemRow({ it, wide }) {
         <td className="px-4 py-3.5 text-sm" style={{ color: D.text }}>{r.description || '—'}{wide && r.ref ? <span className="block text-xs" style={{ color: D.muted }}>Ref. {r.ref}</span> : null}</td>
         {!wide && <td className="px-4 py-3.5 text-sm" style={{ color: D.text }}>{r.ref || '—'}</td>}
         <td className="px-4 py-3.5 text-right text-sm font-semibold tabular-nums" style={{ color: D.text }}>{r.amount !== undefined ? money(r.amount) : '—'}</td>
-        <td className="px-4 py-3.5"><StatusPill status={it.status} /></td>
+        <td className="px-4 py-3.5"><StatusPill status={it.status} />{it.remindedAt && canUpload ? <span className="mt-1 block text-xs text-amber">Reminder from the audit team, {fmt(it.remindedAt.slice(0, 10))}</span> : null}</td>
         <td className="px-4 py-3.5 text-right">
           <div className="flex items-center justify-end gap-2">
             <button onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label="What is needed" className="rounded-md p-1.5 hover:bg-slate-100" style={{ color: D.muted }}><ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} /></button>

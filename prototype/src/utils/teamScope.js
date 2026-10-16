@@ -4,6 +4,7 @@
 import { openingCheck } from './openingCheck.js'
 import { flagsFromCheck } from './openingReview.js'
 import { isOpen, isOverdue, awaitingReview } from './queriesCore.js'
+import { overdueItems } from './sampleTracking.js'
 
 const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`
 const DOC_REVIEW = ['Uploaded Processing', 'Under Review']
@@ -43,6 +44,8 @@ export function buildTeamScope({ file, tb, issued, queries = [], log = [], now =
   if (overdueQ.length) add('URGENT', `${plural(overdueQ.length, 'query', 'queries')} overdue for a client reply`, 'Today', '/team/workspace/queries')
   if (docsToReview.length) add('HIGH', `Review ${plural(docsToReview.length, 'uploaded document')} on the requirement list`, 'This week', '/team/workspace/requirements')
   if (replyQ.length) add('HIGH', `Review the client's reply on ${plural(replyQ.length, 'query', 'queries')}`, 'This week', '/team/workspace/queries')
+  const owed = overdueItems(issued?.[slug], now, 3)
+  if (owed.length) add('HIGH', `${plural(owed.length, 'sample or cut-off item')} waiting more than 3 days for the client: send a reminder`, 'This week', '/team/workspace/requirements')
   if (nearDeadline) add('HIGH', `Statutory deadline ${file.statutoryDue} is within 30 days`, file.statutoryDue, '/team/files')
 
   const urgent = tasks.some((t) => t.priority === 'URGENT') ? 1 : 0

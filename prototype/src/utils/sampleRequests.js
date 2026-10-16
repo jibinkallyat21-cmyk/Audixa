@@ -5,7 +5,7 @@ const slugOf = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]+/g, '-').replac
 
 // samples: [{ key, text, data?, row?: { ref, date, ledger, description, amount }, subgroup? }]
 // key = a stable identifier of the item (invoice number, ledger line), so approving the same item twice does not duplicate it.
-export function withSampleRequirements(rec, { area, label = area, group = 'samples', samples = [], approvedBy = '', note = '' }) {
+export function withSampleRequirements(rec, { area, label = area, group = 'samples', samples = [], approvedBy = '', note = '', at = new Date().toISOString() }) {
   const cut = group === 'cutoff'
   const id = `${cut ? 'cut' : 'smp'}-${slugOf(area).toLowerCase()}`
   const cats = rec.categories || []
@@ -13,7 +13,7 @@ export function withSampleRequirements(rec, { area, label = area, group = 'sampl
   const known = new Set((cur?.items || []).map((i) => i.sampleKey))
   let n = (cur?.items || []).length
   const fresh = samples.filter((s) => s.key !== undefined && !known.has(s.key))
-  const items = fresh.map((s) => ({ ref: `${cut ? 'CUT' : 'SMP'}-${slugOf(area)}-${String(++n).padStart(2, '0')}`, text: `${cut ? 'Item' : 'Sample'} ${n}: ${s.text}`, status: 'Pending Client', sample: true, sampleKey: s.key, ...(s.data ? { data: s.data } : {}), ...(s.row ? { row: s.row } : {}), ...(s.subgroup ? { subgroup: s.subgroup } : {}) }))
+  const items = fresh.map((s) => ({ ref: `${cut ? 'CUT' : 'SMP'}-${slugOf(area)}-${String(++n).padStart(2, '0')}`, text: `${cut ? 'Item' : 'Sample'} ${n}: ${s.text}`, status: 'Pending Client', sample: true, sampleKey: s.key, sentBy: approvedBy, sentAt: at, ...(s.data ? { data: s.data } : {}), ...(s.row ? { row: s.row } : {}), ...(s.subgroup ? { subgroup: s.subgroup } : {}) }))
   if (!items.length) return { rec, added: 0 }
   const reason = cut
     ? `Items picked around the year end for ${label}${approvedBy ? ` and approved by ${approvedBy}` : ''}. For each item please upload the invoice or supporting document, or explain the transaction${note ? `. ${note}` : ''}.`

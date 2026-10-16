@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ChevronRight, Download, Check, X, Info } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
+import SamplesSent from '../../../components/execution/SamplesSent'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import StatusPill from '../../../components/shared/StatusPill'
@@ -438,9 +439,10 @@ const STATUS_OPTIONS = ['all', 'Accepted', 'Under Review', 'Rejected', 'Pending 
 
 // The issued list for one client, reviewed with the same row layout as every other file: Accept, Reject with a reason, view file.
 function IssuedReview({ rec, slug }) {
+  const [view, setView] = useState('documents')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const categories = rec.categories.map((c) => {
+  const categories = rec.categories.filter((c) => !c.group).map((c) => {
     const done = c.items.filter((i) => i.status === 'Accepted').length
     const statusColor = done === c.items.length ? 'emerald' : c.items.some((i) => ['Under Review', 'Uploaded Processing', 'Rejected'].includes(i.status)) ? 'amber' : 'grey'
     return {
@@ -456,8 +458,11 @@ function IssuedReview({ rec, slug }) {
     if (patch.status === 'Accepted') out.alert = ''
     setItemStatus(slug, ref, out)
   }
+  const nSamples = rec.categories.filter((c) => c.group === 'samples').reduce((n, c) => n + c.items.length, 0), nCut = rec.categories.filter((c) => c.group === 'cutoff').reduce((n, c) => n + c.items.length, 0)
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2" role="tablist">{[['documents', 'Documents', rec.categories.filter((c) => !c.group).reduce((n, c) => n + c.items.length, 0)], ['samples', 'Samples sent', nSamples], ['cutoff', 'Cut-off sent', nCut]].map(([id, l, n]) => <button key={id} role="tab" aria-selected={view === id} onClick={() => setView(id)} className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${view === id ? 'bg-navy text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{l} <span className={`ml-1.5 rounded-full px-2 py-0.5 text-xs ${view === id ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{n}</span></button>)}</div>
+      {view !== 'documents' ? <SamplesSent rec={rec} slug={slug} group={view} /> : <>
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requirements..." className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />
         <select aria-label="Status filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-navy outline-none focus:border-navy">
@@ -465,6 +470,7 @@ function IssuedReview({ rec, slug }) {
         </select>
       </div>
       {categories.map((c) => <CategorySection key={c.id} category={c} onUpdateItem={onUpdate} statusFilter={statusFilter} searchQuery={search} />)}
+      </>}
     </div>
   )
 }
