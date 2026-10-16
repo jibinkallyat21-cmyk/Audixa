@@ -6,7 +6,7 @@ import { requirementsFor } from '../../data/firmRequirements'
 import { detectBranches } from '../../utils/tbCore'
 import { buildIssuedList, presetList } from '../../utils/requirementsEngine'
 import { useIssuedLists, issueList, withdrawList } from '../../utils/requirementsStore'
-import { applyPartyBreakdown, readGLWorkbook, demoGLRows } from '../../utils/partyBreakdown'
+import { applyPartyBreakdown } from '../../utils/partyBreakdown'
 import { partyKindOf } from '../../utils/tbFormat'
 import { useTBSubmissions, approveTB, returnTB, setTBLedgers } from '../../utils/tbSubmissionStore'
 
@@ -54,7 +54,6 @@ function MisList({ file, renderIssued }) {
   const clientTB = sub && ['Submitted', 'Approved'].includes(sub.status) && sub.ledgers?.length ? sub : null
   const [reason, setReason] = useState('')
   const [adjust, setAdjust] = useState(false)
-  const [gl, setGl] = useState(null)
 
   const effLedgers = clientTB ? clientTB.ledgers : null
   const effMulti = clientTB ? detectBranches(clientTB.ledgers, 1).multi : false
@@ -65,18 +64,14 @@ function MisList({ file, renderIssued }) {
     return next
   })
   const issue = () => {
+    if (glResult) applyGL()
     // The client's approved trial balance is the detailed trial balance requirement (item 1 of the Trial Balance category).
     const withTB = { ...built, categories: built.categories.map((c) => (c.id === 'TB' ? { ...c, items: c.items.map((i, n) => (n === 0 ? { ...i, status: 'Accepted', filename: clientTB.fileName } : i)) } : c)) }
     const r = issueList(file, withTB, { source: `Client TB: ${clientTB.fileName}` }); if (clientTB) approveTB(file); showToast(`${r.itemCount} requirements issued to ${file.client}`)
   }
-  const readGL = async (f) => {
-    if (!f) return
-    setBusy(true); setErr('')
-    try { const r = await readGLWorkbook(await f.arrayBuffer()); if (!r.ok) setErr(`The general ledger needs these columns: ${r.missing.join(', ')}.`); else setGl({ name: f.name, ...applyPartyBreakdown(clientTB.ledgers, r.rows) }) } catch { setErr('The general ledger file could not be read.') }
-    setBusy(false)
-  }
-  const demoGL = () => setGl({ name: 'Demo general ledger.xlsx', ...applyPartyBreakdown(clientTB.ledgers, demoGLRows(clientTB.ledgers)) })
-  const applyGL = () => { setTBLedgers(file, gl.ledgers, { partyWise: { file: gl.name, summary: gl.summary, appliedAt: new Date().toISOString() } }); setGl(null); showToast('Party-wise balances applied to the trial balance') }
+  // The client supplies the general ledger with the trial balance; the party-wise balances are worked out from it.
+  const glResult = useMemo(() => (clientTB?.glRows?.length && !clientTB.partyWise ? applyPartyBreakdown(clientTB.ledgers, clientTB.glRows) : null), [clientTB])
+  const applyGL = () => { setTBLedgers(file, glResult.ledgers, { partyWise: { file: clientTB.glFileName, summary: glResult.summary, appliedAt: new Date().toISOString() } }); showToast('Party-wise balances applied to the trial balance') }
   const sendBack = () => { if (!reason.trim()) { setErr('Give the client a reason for returning the trial balance.'); return }; returnTB(file, reason.trim()); withdrawList(file.slug); setReason(''); setErr(''); showToast('Trial balance returned to the client') }
 
   return (
@@ -100,20 +95,12 @@ function MisList({ file, renderIssued }) {
                 <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
                   <p className="font-semibold text-navy">General ledger: party-wise balances</p>
                   {clientTB.partyWise ? <p className="mt-1 text-emerald">Applied from {clientTB.partyWise.file}: {clientTB.partyWise.summary.filter((s) => s.replaced).map((s) => `${s.line} (${s.parties} parties)`).join(', ')}.</p>
-                    : <p className="mt-1">{left ? `${left} control line${left === 1 ? '' : 's'} (receivables, payables, advances) still show one group balance. Upload the general ledger dump to replace them with party-wise balances.` : 'No receivable, payable or advance lines to break down.'}</p>}
-                  {left > 0 && !clientTB.partyWise && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <label className={`${BTN} cursor-pointer border border-slate-300 text-navy hover:bg-slate-50`}>{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}Upload general ledger (Excel)
-                        <input type="file" accept=".xlsx" className="hidden" onChange={(e) => { readGL(e.target.files?.[0]); e.target.value = '' }} /></label>
-                      <button onClick={demoGL} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo general ledger</button>
-                    </div>
-                  )}
-                  {gl && (
+                    : <p className="mt-1">{left ? `The client's general ledger (${clientTB.glFileName || 'not supplied'}) gives the party-wise balances for ${left} line${left === 1 ? '' : 's'} that are still one balance in the trial balance. They are applied when you approve, or you can apply them now.` : 'No receivable, payable or advance lines to break down.'}</p>}
+                  {glResult && (
                     <div className="mt-2 overflow-x-auto">
                       <table className="w-full text-left"><thead><tr className="text-slate-400"><th className="py-1 pr-3 font-semibold">Line</th><th className="pr-3 font-semibold">Parties</th><th className="pr-3 text-right font-semibold">General ledger</th><th className="pr-3 text-right font-semibold">Trial balance</th><th className="text-right font-semibold">Difference</th></tr></thead>
-                        <tbody>{gl.summary.map((s) => <tr key={s.line} className="border-t border-slate-100"><td className="py-1 pr-3">{s.line}</td><td className="pr-3">{s.parties || 'not in the general ledger'}</td><td className="pr-3 text-right">{s.glTotal === null ? '' : s.glTotal.toLocaleString()}</td><td className="pr-3 text-right">{s.tbClosing.toLocaleString()}</td><td className={`text-right ${s.difference ? 'font-semibold text-alert-red' : ''}`}>{s.difference === null ? '' : s.difference.toLocaleString()}</td></tr>)}</tbody></table>
-                      {gl.unmatched.length > 0 && <p className="mt-1 text-amber">General ledger accounts not matched to a trial balance line: {gl.unmatched.join(', ')}.</p>}
-                      <button onClick={applyGL} className={`${BTN} mt-2 bg-navy text-white`}>Apply party-wise balances</button>
+                        <tbody>{glResult.summary.map((s) => <tr key={s.line} className="border-t border-slate-100"><td className="py-1 pr-3">{s.line}</td><td className="pr-3">{s.parties || 'not in the general ledger'}</td><td className="pr-3 text-right">{s.glTotal === null ? '' : s.glTotal.toLocaleString()}</td><td className="pr-3 text-right">{s.tbClosing.toLocaleString()}</td><td className={`text-right ${s.difference ? 'font-semibold text-alert-red' : ''}`}>{s.difference === null ? '' : s.difference.toLocaleString()}</td></tr>)}</tbody></table>
+                      <button onClick={applyGL} className={`${BTN} mt-2 bg-navy text-white`}>Apply party-wise balances now</button>
                     </div>
                   )}
                 </div>

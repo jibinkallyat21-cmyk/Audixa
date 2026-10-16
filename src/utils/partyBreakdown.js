@@ -62,6 +62,23 @@ export function applyPartyBreakdown(ledgers, glRows) {
   return { ledgers: out, summary, unmatched }
 }
 
+const fmt = (n) => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 })
+
+// The client's general ledger must back every receivable / payable / advance line in the trial balance with party balances that add up to it.
+// Returns { ok, errors, rows } where rows are the party rows for those lines only (what is kept).
+export function checkGLAgainstTB(tbLedgers, glRows) {
+  const errors = []; const keep = []
+  const control = tbLedgers.filter((l) => partyKindOf(l.name))
+  for (const l of control) {
+    const rows = glRows.filter((r) => same(l, r.account))
+    if (!rows.length) { errors.push(`The general ledger has no party balances for "${l.name}", which is in your trial balance.`); continue }
+    const total = rows.reduce((n, r) => n + r.balance, 0)
+    if (Math.abs(total - l.closing) > 1) errors.push(`The general ledger parties for "${l.name}" add up to ${fmt(total)}, but the trial balance shows ${fmt(l.closing)} (difference ${fmt(total - l.closing)}).`)
+    keep.push(...rows)
+  }
+  return { ok: errors.length === 0, errors, rows: keep }
+}
+
 // Demo general ledger for the lines of a trial balance: three parties per line that add up to the line.
 export function demoGLRows(ledgers) {
   const rows = []; const names = { ar: ['Al Noor Trading', 'Gulf Supplies Co', 'Desert Retail'], ap: ['Najd Wholesale', 'Red Sea Imports', 'Eastern Parts'], advCust: ['Al Noor Trading', 'Desert Retail', 'Jeddah Stores'], advSupp: ['Najd Wholesale', 'Eastern Parts', 'Red Sea Imports'] }

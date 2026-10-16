@@ -29,3 +29,16 @@ test('demo general ledger adds up to the lines exactly', () => {
   const r = applyPartyBreakdown(tb, demoGLRows(tb))
   assert.ok(r.summary.filter((s) => s.replaced).every((s) => s.difference === 0))
 })
+
+import { checkGLAgainstTB } from '../src/utils/partyBreakdown.js'
+test('general ledger check: matching passes, missing and mismatching lines are named', () => {
+  const ok = checkGLAgainstTB(tb, demoGLRows(tb))
+  assert.equal(ok.ok, true); assert.ok(ok.rows.length >= 6)
+  const missing = checkGLAgainstTB(tb, demoGLRows(tb).filter((r) => r.account !== 'Trade Payables'))
+  assert.equal(missing.ok, false); assert.ok(missing.errors[0].includes('Trade Payables'))
+  const off = checkGLAgainstTB(tb, demoGLRows(tb).map((r) => (r.account === 'Trade Receivables' && r.party === 'Al Noor Trading' ? { ...r, balance: r.balance + 50 } : r)))
+  assert.equal(off.ok, false); assert.ok(off.errors[0].includes('difference 50'))
+})
+test('no control lines in the trial balance: nothing required from the general ledger', () => {
+  assert.deepEqual(checkGLAgainstTB([L('1001', 'Cash at Bank', 0, 5, 0)], []), { ok: true, errors: [], rows: [] })
+})
