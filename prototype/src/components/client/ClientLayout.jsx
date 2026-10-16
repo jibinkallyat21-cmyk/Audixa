@@ -1,3 +1,4 @@
+import { PORTAL_CLIENT } from '../../utils/requirementsStore'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
@@ -248,7 +249,7 @@ function QuickChatFloat() {
                     <p className="text-sm font-semibold text-white leading-tight">Engagement Team</p>
                     <div className="flex items-center gap-1.5">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
-                      <span className="text-[10px] text-white/40 truncate">Kingdom Retail Holdings LLC · {CHAT_GROUP.length} members</span>
+                      <span className="text-[10px] text-white/40 truncate">{PORTAL_CLIENT.client} · {CHAT_GROUP.length} members</span>
                     </div>
                   </div>
                 </div>
@@ -444,7 +445,7 @@ function ClientNameBadge() {
           KR
         </div>
         {/* Name */}
-        <span className="relative z-10 text-sm font-bold text-white/90 whitespace-nowrap">Kingdom Retail Holdings LLC</span>
+        <span className="relative z-10 text-sm font-bold text-white/90 whitespace-nowrap">{PORTAL_CLIENT.client}</span>
       </motion.div>
     </div>
   )

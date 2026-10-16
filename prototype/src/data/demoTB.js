@@ -16,7 +16,7 @@ export function demoCY(py = demoPY()) {
   const open = (l) => (/^[4-6]/.test(l.code) ? 0 : l.code === '3100' ? l.closing + profit : l.closing)
   const cy = py.map((l) => row(l.code, l.name, open(l), 0, 0))
   const mv = (code, d, c) => { const l = cy.find((x) => x.code === code); l.debit = d; l.credit = c; l.closing = l.opening + d - c }
-  mv('1001', 2350000, 2180000); mv('1100', 2300000, 2210000); mv('4001', 0, 2400000); mv('5001', 1700000, 0); mv('1200', 0, 40000)
+  mv('1001', 2350000, 2205200); mv('1100', 2300000, 2210000); mv('4001', 0, 2400000); mv('5001', 1700000, 0); mv('1200', 0, 40000)
   mv('6001', 400000, 0); mv('6002', 96000, 0); mv('6003', 45000, 0); mv('1501', 0, 12000); mv('1511', 0, 33000); mv('6004', 7200, 0)
   mv('2001', 1800000, 1760000); mv('2100', 60000, 83000)
   // deliberate issues for the demo
@@ -27,12 +27,12 @@ export function demoCY(py = demoPY()) {
   return cy
 }
 // Same demo year, corrected: the receivables / retained earnings opening difference is removed, the near-duplicate bank ledger and the unmapped
-// consultancy income ledger are dropped, and the bank payments carry the 40,200 the year's entries were short by, so the trial balance balances
+// consultancy income ledger are dropped, and the bank payments carry the 15,000 that the dropped consultancy income ledger had offset, so the trial balance balances
 // and every opening balance agrees to the previous year audited trial balance. Nothing is flagged.
 export function demoCorrectedLedgers() {
   const fix = { 1100: -7500, 3100: 7500 }
   return demoCY(demoPY()).filter((l) => !['1002', '9001'].includes(l.code)).map((l) => {
-    const opening = l.opening + (fix[l.code] || 0); const credit = l.code === '1001' ? l.credit + 40200 : l.credit
+    const opening = l.opening + (fix[l.code] || 0); const credit = l.code === '1001' ? l.credit + 15000 : l.credit
     return { ...l, opening, credit, closing: opening + l.debit - credit }
   })
 }

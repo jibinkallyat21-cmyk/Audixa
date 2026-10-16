@@ -5,6 +5,7 @@ import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { useToast } from '../../../components/shared/Toast'
+import { workingTbTally } from '../../../utils/tbFormat'
 import { useTB } from '../../../context/TBContext'
 import { calculateZakat, ZAKAT_CLASSIFICATIONS } from '../../../utils/zakatCalculator'
 
@@ -131,7 +132,7 @@ function TBStaffTable({ lines, onAddAdj, filter, search, reclassifyLine }) {
             <td colSpan={8} className="px-4 py-3 text-xs font-bold uppercase tracking-wider">TOTAL</td>
             <td className="px-3 py-3 text-right font-mono font-bold">
               {fmt(lines.reduce((s, l) => s + getClosingBalance(l), 0))}
-              <span className="ml-2 rounded-sm bg-emerald/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald">Balanced ✓</span>
+              {(() => { const t = workingTbTally(lines.map((l) => ({ ...l, openingBalance: l.openingBalance, adjustmentDebit: l.adjustmentDebit || 0, adjustmentCredit: l.adjustmentCredit || 0 }))); return t.ok ? <span className="ml-2 rounded-sm bg-emerald/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald">Balanced ✓</span> : <span className="ml-2 rounded-sm bg-alert-red/20 px-1.5 py-0.5 text-[9px] font-bold text-alert-red">Does not balance by {fmt(Math.abs(t.closing) > 1 ? t.closing : t.diff)} ✗</span> })()}
             </td>
             <td />
           </tr>

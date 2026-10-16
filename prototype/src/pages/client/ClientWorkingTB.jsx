@@ -1,9 +1,11 @@
+import { PORTAL_CLIENT } from '../../utils/requirementsStore'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Download, CheckCircle2, XCircle, ChevronDown, ChevronUp, AlertTriangle, X } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
+import { workingTbTally } from '../../utils/tbFormat'
 import { useTB, formatUpdated } from '../../context/TBContext'
 import { useClientFY } from '../../context/ClientFYContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -115,8 +117,7 @@ function TBTable({ lines }) {
             })}
             {/* Grand total */}
             {(() => {
-              const totalCB = lines.reduce((s, l) => s + getClosingBalance(l), 0)
-              const isBalanced = Math.abs(totalCB) < 0.01
+              const tally = workingTbTally(lines); const isBalanced = tally.ok
               return (
                 <tr className="bg-navy text-white">
                   <td colSpan={2} className="px-4 py-3 text-xs font-bold uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '0.1em' }}>TOTAL</td>
@@ -127,7 +128,7 @@ function TBTable({ lines }) {
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-bold tracking-widest bg-red-500/20 text-red-400" style={{ letterSpacing: '0.12em' }}>
-                        Imbalanced ✗
+                        Does not balance by {fmt(Math.abs(tally.closing) > 1 ? tally.closing : tally.diff)} ✗
                       </span>
                     )}
                   </td>
@@ -342,7 +343,7 @@ export default function ClientWorkingTB() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-2xl font-bold" style={{ color: D.text }}>Working Trial Balance</h1>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium" style={{ color: D.muted }}>Kingdom Retail Holdings LLC — {selectedFY}</span>
+              <span className="text-sm font-medium" style={{ color: D.muted }}>{PORTAL_CLIENT.client} — {selectedFY}</span>
               {isCurrentFY ? (
                 <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: D.subtle }}>{lastUpdated ? `Last updated: ${formatUpdated(lastUpdated)}` : 'Not yet approved'}</span>
               ) : (

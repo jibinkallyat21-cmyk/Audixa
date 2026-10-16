@@ -10,7 +10,9 @@ import { applyPartyBreakdown } from '../../utils/partyBreakdown'
 import { partyKindOf } from '../../utils/tbFormat'
 import OpeningBalanceCheck from './OpeningBalanceCheck'
 import { useTBSubmissions, approveTB, returnTB, setTBLedgers } from '../../utils/tbSubmissionStore'
+import { tbTally } from '../../utils/tbFormat'
 
+const n0 = (n) => Number(n).toLocaleString()
 const BTN = 'inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold'
 
 function Items({ items }) {
@@ -65,6 +67,7 @@ function MisList({ file, renderIssued }) {
     return next
   })
   const issue = () => {
+    if (clientTB && !tbTally(clientTB.ledgers).ok) { setErr('The trial balance does not tally, so it cannot be accepted. Return it to the client.'); return }
     if (glResult) applyGL()
     // The client's approved trial balance is the detailed trial balance requirement (item 1 of the Trial Balance category).
     const withTB = { ...built, categories: built.categories.map((c) => (c.id === 'TB' ? { ...c, items: c.items.map((i, n) => (n === 0 ? { ...i, status: 'Accepted', filename: clientTB.fileName } : i)) } : c)) }
@@ -73,7 +76,8 @@ function MisList({ file, renderIssued }) {
   // The client supplies the general ledger with the trial balance; the party-wise balances are worked out from it.
   const glResult = useMemo(() => (clientTB?.glRows?.length && !clientTB.partyWise ? applyPartyBreakdown(clientTB.ledgers, clientTB.glRows) : null), [clientTB])
   const [opening, setOpening] = useState({ ready: false, summary: null })
-  const openingOk = !clientTB || clientTB.status === 'Approved' || opening.ready
+  const tally = useMemo(() => (clientTB ? tbTally(clientTB.ledgers) : null), [clientTB])
+  const openingOk = !clientTB || clientTB.status === 'Approved' || (opening.ready && tally.ok)
   const applyGL = () => { setTBLedgers(file, glResult.ledgers, { partyWise: { file: clientTB.glFileName, summary: glResult.summary, appliedAt: new Date().toISOString() } }); showToast('Party-wise balances applied to the trial balance') }
   const sendBack = () => { if (!reason.trim()) { setErr('Give the client a reason for returning the trial balance.'); return }; returnTB(file, reason.trim()); withdrawList(file.slug); setReason(''); setErr(''); showToast('Trial balance returned to the client') }
 
@@ -115,6 +119,11 @@ function MisList({ file, renderIssued }) {
                 </div>
               )
             })()}
+            <div className={`mt-3 rounded-lg border p-3 ${tally.ok ? 'border-emerald/30 bg-emerald/5' : 'border-alert-red/40 bg-alert-red/5'}`}>
+              <p className={`font-semibold ${tally.ok ? 'text-emerald' : 'text-alert-red'}`}>Tally check: {tally.ok ? 'the trial balance tallies' : 'the trial balance does not tally'}</p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-4">{[['Opening balances', tally.opening], ['Total debits', tally.debit], ['Total credits', tally.credit], ['Closing balances', tally.closing]].map(([l, v]) => <span key={l} className="rounded-md bg-white px-3 py-2 text-slate-600">{l}<br /><b className="text-navy">{n0(Math.round(v * 100) / 100)}</b></span>)}</div>
+              {!tally.ok && <div className="mt-2 space-y-2"><p className="text-alert-red">{tally.message}</p>{clientTB.status === 'Submitted' && <button onClick={() => setReason(tally.message)} className={`${BTN} border border-slate-300 text-navy hover:bg-white`}>Use this as the reason to return it</button>}</div>}
+            </div>
             <OpeningBalanceCheck file={file} sub={clientTB} onChange={setOpening} />
             {clientTB.status === 'Submitted' && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -153,7 +162,7 @@ function MisList({ file, renderIssued }) {
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-navy">{built.itemCount} requirements in {built.categories.length} of {built.analysis.length} categories apply to this client</p>
-            <button onClick={issue} disabled={!openingOk} title={openingOk ? '' : 'Confirm the opening balance check first'} className={`${BTN} bg-brand text-white shadow-sm hover:bg-[#D12C35] disabled:opacity-40`}><Send className="h-3.5 w-3.5" />{clientTB?.status === 'Submitted' ? 'Approve trial balance and issue list' : issued ? 'Re-issue to client' : 'Issue to client'}</button>
+            <button onClick={issue} disabled={!openingOk} title={openingOk ? '' : tally && !tally.ok ? 'The trial balance does not tally' : 'Confirm the opening balance check first'} className={`${BTN} bg-brand text-white shadow-sm hover:bg-[#D12C35] disabled:opacity-40`}><Send className="h-3.5 w-3.5" />{clientTB?.status === 'Submitted' ? 'Approve trial balance and issue list' : issued ? 'Re-issue to client' : 'Issue to client'}</button>
           </div>
           {built.analysis.filter((c) => c.include).map((c) => {
             const found = built.categories.find((x) => x.id === c.id)

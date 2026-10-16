@@ -1,3 +1,4 @@
+import { PORTAL_CLIENT } from './utils/requirementsStore'
 import './utils/demoData.js'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
@@ -113,7 +114,7 @@ function AnimatedRoutes() {
     <>
       {location.pathname === '/' && <CinematicIntro />}
       {location.pathname.startsWith('/client') && getPortal() === 'client' && (
-        <ClientGreeting name="Karim Rahman" company="Kingdom Retail Holdings LLC" />
+        <ClientGreeting name="Karim Rahman" company={PORTAL_CLIENT.client} />
       )}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
