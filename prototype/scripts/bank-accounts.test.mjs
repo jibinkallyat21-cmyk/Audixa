@@ -39,3 +39,15 @@ test('requirement list grouped by area', () => {
   const g = groupRequirements(r); assert.deepEqual(g.map((x) => x.id), ['cash', 'receivables', 'payables', 'revenue'])
   assert.equal(g[0].docs.length, 1); assert.equal(g[0].cutoff[0].items[0].ref, 'C1'); assert.equal(g[1].samples[0].items[0].ref, 'A2'); assert.equal(g[2].samples[0].items[0].ref, 'A1'); assert.equal(g[3].counts.accepted, 1)
 })
+import { withCutoffMigration } from '../src/utils/bankAccounts.js'
+test('old all-bank cut-off block is moved to the account and duplicates are removed', () => {
+  const it = (ref, key, status) => ({ ref, sampleKey: key, status, row: { ledger: accs[0].name } })
+  const r = { categories: [
+    { id: 'cut-bank', title: 'Cut-off: Bank', group: 'cutoff', area: 'bank', items: [it('CUT-BANK-01', 'a', 'Pending Client'), it('CUT-BANK-02', 'b', 'Accepted'), { ref: 'CUT-BANK-03', sampleKey: 'z', status: 'Pending Client', row: { ledger: 'Other bank' } }] },
+    { id: 'cut-bank-1001', title: 'Cut-off: Bank: x', group: 'cutoff', area: 'bank', items: [it('CUT-BANK-1001-01', 'a', 'Pending Client'), it('CUT-BANK-1001-02', 'b', 'Pending Client')] }] }
+  const m = withCutoffMigration(r, accs); assert.equal(m.changed, true)
+  const own = m.rec.categories.find((c) => c.id === 'cut-bank-1001'); assert.equal(own.items.length, 2)
+  assert.equal(own.items.find((i) => i.sampleKey === 'b').status, 'Accepted')           // the further-progressed copy is kept
+  assert.deepEqual(m.rec.categories.find((c) => c.id === 'cut-bank').items.map((i) => i.ref), ['CUT-BANK-03'])   // a ledger not in the list stays
+  assert.equal(withCutoffMigration(m.rec, accs).changed, false)
+})

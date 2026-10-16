@@ -4,7 +4,7 @@ import { logEvent } from './auditLog.js'
 import { withDemoDocuments } from './demoDocuments.js'
 import { withSampleRequirements } from './sampleRequests.js'
 import { withReminders } from './sampleTracking.js'
-import { withBankRequirements, withReconRequest } from './bankAccounts.js'
+import { withBankRequirements, withReconRequest, withCutoffMigration } from './bankAccounts.js'
 
 const KEY = 'requirements:issued'
 // The client portal demo client is not one of the team's files, so it is offered as an extra MISCPA engagement.
@@ -57,8 +57,9 @@ export function postRemark(slug, ref, text, { by = 'Client', explanationOnly = f
 // The team asks for the documents of each cash and bank account (and, only when a statement differs from the books, its reconciliation).
 export function requestBankDocuments(slug, accounts, yearEnd) {
   const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return -1
-  const { rec, added, changed } = withBankRequirements(cur, accounts, yearEnd)
-  if (changed) writeStore(KEY, { ...all, [slug]: rec })
+  const step = withBankRequirements(cur, accounts, yearEnd); const mig = withCutoffMigration(step.rec, accounts)
+  const { added } = step; const rec = mig.rec
+  if (step.changed || mig.changed) writeStore(KEY, { ...all, [slug]: rec })
   if (added) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Bank documents requested', `${added} documents requested for ${accounts.length} cash and bank account${accounts.length === 1 ? '' : 's'}`, 'doc-request') }
   return added
 }
