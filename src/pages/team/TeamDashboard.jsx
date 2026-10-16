@@ -172,17 +172,17 @@ function HoverFileRow({ f, navigate, idx }) {
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: idx * 0.05, duration: 0.25 }}
-        className={`flex flex-wrap items-center gap-3 py-3 transition-colors ${hovered ? '-mx-2 rounded-lg bg-slate-50 px-2' : ''}`}
+        className={`flex items-center gap-3 py-3 transition-colors ${hovered ? '-mx-2 rounded-lg bg-slate-50 px-2' : ''}`}
       >
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-navy">{f.client}</p>
           <p className="font-mono text-[10px] text-slate-400">{f.code}</p>
         </div>
-        <AuditorChip auditor={f.auditor} />
-        <AuditTypeChip type={AUDIT_TYPE_LABEL[f.auditType] || f.auditType} />
-        <span className="hidden text-xs text-slate-500 sm:inline">{f.stage}</span>
+        <div className="flex w-20 shrink-0 justify-center"><AuditorChip auditor={f.auditor} /></div>
+        <div className="hidden w-28 shrink-0 justify-center md:flex"><AuditTypeChip type={AUDIT_TYPE_LABEL[f.auditType] || f.auditType} /></div>
+        <span className="hidden w-32 shrink-0 truncate text-xs text-slate-500 xl:block">{f.stage}</span>
         <span
-          className={`text-xs font-medium ${
+          className={`hidden w-36 shrink-0 truncate text-xs font-medium sm:block ${
             f.attentionLevel === 'URGENT'
               ? 'text-alert-red'
               : f.attentionLevel === 'FINAL'
@@ -194,7 +194,7 @@ function HoverFileRow({ f, navigate, idx }) {
         </span>
         <button
           onClick={() => navigate('/team/workspace')}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
+          className="inline-flex w-14 shrink-0 items-center justify-end gap-1 text-xs font-semibold text-brand hover:underline"
         >
           Open <ArrowRight className="h-3 w-3" />
         </button>
@@ -389,6 +389,14 @@ export default function TeamDashboard() {
               <span className="text-[11px] text-slate-400">Hover a row for details</span>
             </div>
 
+            <div className="mb-1 flex items-center gap-3 border-b border-slate-100 pb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <span className="min-w-0 flex-1">Client / File</span>
+              <span className="w-20 shrink-0 text-center">Auditor</span>
+              <span className="hidden w-28 shrink-0 text-center md:block">Audit Type</span>
+              <span className="hidden w-32 shrink-0 xl:block">Stage</span>
+              <span className="hidden w-36 shrink-0 sm:block">Attention</span>
+              <span className="w-14 shrink-0 text-right">Action</span>
+            </div>
             <div className="space-y-0">
               {urgentFiles.map((f, idx) => (
                 <HoverFileRow key={f.code} f={f} navigate={navigate} idx={idx} />

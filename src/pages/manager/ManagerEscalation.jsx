@@ -72,18 +72,28 @@ export default function ManagerEscalation() {
           {/* Tier 1 */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className={`overflow-hidden rounded-xl border-l-4 ${TIER_STYLE[1].border} border-y border-r border-slate-200 bg-white shadow-sm`}>
             <div className={`px-5 py-3 text-sm font-bold ${TIER_STYLE[1].header}`}>Tier 1 — Approaching Deadline — Within 5 Days</div>
+                        <div className="hidden items-center gap-4 border-b border-slate-100 bg-slate-50 px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400 md:flex">
+              <span className="min-w-0 flex-1">Client</span>
+              <span className="w-36 shrink-0">Revenue Band</span>
+              <span className="w-24 shrink-0">Due</span>
+              <span className="w-28 shrink-0">Lead</span>
+              <span className="w-36 shrink-0 text-center">Status</span>
+              <span className="w-44 shrink-0 text-right">Action</span>
+            </div>
             <div className="divide-y divide-slate-50">
               {filterBand(escalationTier1).map((f) => (
-                <div key={f.client} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
-                  <div>
-                    <p className="text-sm font-semibold text-navy">{f.client}</p>
-                    <p className="text-xs text-slate-400">
-                      {f.band} · Due {f.due} · Lead: {f.lead}
-                    </p>
+                <div key={f.client} className="flex min-h-[56px] items-center gap-4 px-5 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-navy">{f.client}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[1].chip}`}>{f.daysRemaining} days remaining</span>
-                    <button onClick={() => navigate('/manager/status-board')} className="rounded-lg border border-navy/30 px-3.5 py-1.5 text-xs font-semibold text-navy hover:bg-navy/5">
+                  <span className="hidden w-36 shrink-0 truncate text-xs text-slate-500 md:block">{f.band}</span>
+                  <span className="hidden w-24 shrink-0 text-xs text-slate-500 md:block">{f.due}</span>
+                  <span className="hidden w-28 shrink-0 truncate text-xs text-slate-500 md:block">{f.lead}</span>
+                  <div className="flex w-36 shrink-0 justify-center">
+                    <span className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-semibold rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[1].chip}`}>{f.daysRemaining} days remaining</span>
+                  </div>
+                  <div className="flex w-44 shrink-0 justify-end">
+                  <button onClick={() => navigate('/manager/status-board')} className="whitespace-nowrap rounded-lg border border-navy/30 px-3.5 py-1.5 text-xs font-semibold text-navy hover:bg-navy/5">
                       Review
                     </button>
                   </div>
@@ -95,6 +105,14 @@ export default function ManagerEscalation() {
           {/* Tier 2 */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.08 }} className={`overflow-hidden rounded-xl border-l-4 ${TIER_STYLE[2].border} border-y border-r border-slate-200 bg-white shadow-sm`}>
             <div className={`px-5 py-3 text-sm font-bold ${TIER_STYLE[2].header}`}>Tier 2 — Overdue — Past Deadline</div>
+                        <div className="hidden items-center gap-4 border-b border-slate-100 bg-slate-50 px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400 md:flex">
+              <span className="min-w-0 flex-1">Client</span>
+              <span className="w-36 shrink-0">Revenue Band</span>
+              <span className="w-24 shrink-0">Due</span>
+              <span className="w-28 shrink-0">Lead</span>
+              <span className="w-36 shrink-0 text-center">Status</span>
+              <span className="w-44 shrink-0 text-right">Action</span>
+            </div>
             <div className="divide-y divide-slate-50">
               <AnimatePresence>
                 {filterBand(tier2).map((f) => (
@@ -104,19 +122,21 @@ export default function ManagerEscalation() {
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5"
+                    className="flex min-h-[56px] items-center gap-4 px-5 py-3"
                   >
-                    <div>
-                      <p className="text-sm font-semibold text-navy">{f.client}</p>
-                      <p className="text-xs text-slate-400">
-                        {f.band} · Due {f.due} · Lead: {f.lead}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-navy">{f.client}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[2].chip}`}>{f.daysOverdue} days overdue</span>
-                      <button
+                    <span className="hidden w-36 shrink-0 truncate text-xs text-slate-500 md:block">{f.band}</span>
+                    <span className="hidden w-24 shrink-0 text-xs text-slate-500 md:block">{f.due}</span>
+                    <span className="hidden w-28 shrink-0 truncate text-xs text-slate-500 md:block">{f.lead}</span>
+                    <div className="flex w-36 shrink-0 justify-center">
+                      <span className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-semibold rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[2].chip}`}>{f.daysOverdue} days overdue</span>
+                    </div>
+                    <div className="flex w-44 shrink-0 justify-end">
+                    <button
                         onClick={() => handleEscalateToTier3(f)}
-                        className="rounded-lg bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
+                        className="whitespace-nowrap rounded-lg bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                       >
                         Escalate
                       </button>
@@ -130,6 +150,14 @@ export default function ManagerEscalation() {
           {/* Tier 3 */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.16 }} className={`overflow-hidden rounded-xl border-l-4 ${TIER_STYLE[3].border} border-y border-r border-slate-200 bg-white shadow-sm`}>
             <div className={`px-5 py-3 text-sm font-bold ${TIER_STYLE[3].header}`}>Tier 3 — Critical — Escalated to Management</div>
+                        <div className="hidden items-center gap-4 border-b border-slate-100 bg-slate-50 px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400 md:flex">
+              <span className="min-w-0 flex-1">Client</span>
+              <span className="w-36 shrink-0">Revenue Band</span>
+              <span className="w-24 shrink-0">Due</span>
+              <span className="w-28 shrink-0">Lead</span>
+              <span className="w-36 shrink-0 text-center">Status</span>
+              <span className="w-44 shrink-0 text-right">Action</span>
+            </div>
             <div className="divide-y divide-slate-50">
               <AnimatePresence>
                 {filterBand(tier3).map((f) => (
@@ -139,20 +167,22 @@ export default function ManagerEscalation() {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35 }}
-                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5"
+                    className="flex min-h-[56px] items-center gap-4 px-5 py-3"
                   >
-                    <div>
-                      <p className="text-sm font-semibold text-navy">{f.client}</p>
-                      <p className="text-xs text-slate-400">
-                        {f.band} · Due {f.due} · Lead: {f.lead}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-navy">{f.client}</p>
                       {f.note && <p className="mt-0.5 text-xs font-semibold text-alert-red">{f.note}</p>}
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[3].chip}`}>{f.daysOverdue} days overdue</span>
-                      <button
+                    <span className="hidden w-36 shrink-0 truncate text-xs text-slate-500 md:block">{f.band}</span>
+                    <span className="hidden w-24 shrink-0 text-xs text-slate-500 md:block">{f.due}</span>
+                    <span className="hidden w-28 shrink-0 truncate text-xs text-slate-500 md:block">{f.lead}</span>
+                    <div className="flex w-36 shrink-0 justify-center">
+                      <span className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-semibold rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${TIER_STYLE[3].chip}`}>{f.daysOverdue} days overdue</span>
+                    </div>
+                    <div className="flex w-44 shrink-0 justify-end">
+                    <button
                         onClick={() => handleEscalateToManagement(f)}
-                        className="rounded-lg bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
+                        className="whitespace-nowrap rounded-lg bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-brand/20 hover:bg-[#D12C35]"
                       >
                         Escalate to Management
                       </button>
@@ -171,21 +201,26 @@ export default function ManagerEscalation() {
                 <Sparkles className="h-3 w-3" /> AI
               </span>
             </div>
-            <div className="space-y-2">
+            <div>
+              <div className="hidden items-center gap-4 border-b border-slate-100 pb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400 md:flex">
+                <span className="min-w-0 flex-1">Client</span>
+                <span className="w-32 shrink-0">Lead</span>
+                <span className="w-44 shrink-0">Projected Breach</span>
+                <span className="w-28 shrink-0 text-right">Action</span>
+              </div>
               {filterBand(predictiveRisk.map((r) => ({ ...r, band: 'All Revenue Bands' }))).map((r) => (
-                <div key={r.client} className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-50 py-2.5 last:border-0">
-                  <div>
-                    <p className="text-sm font-semibold text-navy">{r.client}</p>
-                    <p className="text-xs text-slate-400">
-                      Lead: {r.lead} · Projected breach: {r.projectedBreach}
-                    </p>
+                <div key={r.client} className="flex min-h-[48px] items-center gap-4 border-b border-slate-50 py-2.5 last:border-0">
+                  <p className="min-w-0 flex-1 truncate text-sm font-semibold text-navy">{r.client}</p>
+                  <span className="hidden w-32 shrink-0 truncate text-xs text-slate-500 md:block">{r.lead}</span>
+                  <span className="hidden w-44 shrink-0 text-xs text-slate-500 md:block">{r.projectedBreach}</span>
+                  <div className="flex w-28 shrink-0 justify-end">
+                    <button
+                      onClick={() => navigate('/manager/status-board')}
+                      className="rounded-lg border border-amber/40 px-3.5 py-1.5 text-xs font-semibold text-amber hover:bg-amber/5"
+                    >
+                      Monitor
+                    </button>
                   </div>
-                  <button
-                    onClick={() => navigate('/manager/status-board')}
-                    className="rounded-lg border border-amber/40 px-3.5 py-1.5 text-xs font-semibold text-amber hover:bg-amber/5"
-                  >
-                    Monitor
-                  </button>
                 </div>
               ))}
             </div>

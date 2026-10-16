@@ -71,37 +71,45 @@ export default function TeamTasks() {
                 </div>
 
                 <div>
+                  <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50 px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    <span className="w-4 shrink-0" />
+                    <span className="w-20 shrink-0 text-center">Priority</span>
+                    <span className="hidden w-28 shrink-0 text-center md:block">Client</span>
+                    <span className="min-w-0 flex-1">Task</span>
+                    <span className="hidden w-36 shrink-0 sm:block">Deadline</span>
+                    <span className="w-20 shrink-0 text-right">Action</span>
+                  </div>
                   {tasks.map((task, idx) => (
                     <motion.div
                       key={task.id}
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05, duration: 0.25 }}
-                      className="flex items-start gap-3 border-b border-slate-50 px-5 py-4 last:border-0"
+                      className="flex min-h-[56px] items-center gap-4 border-b border-slate-50 px-5 py-3 last:border-0"
                     >
                       <input
                         type="checkbox"
                         checked={!!done[task.id]}
                         onChange={() => toggleTask(task.id)}
-                        className="mt-1 h-4 w-4 rounded border-slate-300"
+                        className="h-4 w-4 shrink-0 rounded border-slate-300"
                       />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${section.badgeStyle}`}>
-                            {task.priority}
-                          </span>
-                          <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                            {task.client}
-                          </span>
-                        </div>
-                        <p className={`mt-1.5 text-sm ${done[task.id] ? 'text-slate-400 line-through' : 'text-navy'}`}>
-                          {task.description}
-                        </p>
-                        <p className="mt-1 text-[11px] font-medium text-slate-400">{task.deadline}</p>
+                      <div className="w-20 shrink-0">
+                        <span className={`inline-flex w-full justify-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${section.badgeStyle}`}>
+                          {task.priority}
+                        </span>
                       </div>
+                      <div className="hidden w-28 shrink-0 md:block">
+                        <span className="inline-flex w-full justify-center truncate rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                          {task.client}
+                        </span>
+                      </div>
+                      <p className={`min-w-0 flex-1 text-sm ${done[task.id] ? 'text-slate-400 line-through' : 'text-navy'}`}>
+                        {task.description}
+                      </p>
+                      <p className="hidden w-36 shrink-0 text-[11px] font-medium text-slate-400 sm:block">{task.deadline}</p>
                       <button
                         onClick={() => navigate('/team/workspace/requirements')}
-                        className="shrink-0 whitespace-nowrap text-xs font-semibold text-brand hover:underline"
+                        className="w-20 shrink-0 whitespace-nowrap text-right text-xs font-semibold text-brand hover:underline"
                       >
                         Go to File
                       </button>

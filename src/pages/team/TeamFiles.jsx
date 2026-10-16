@@ -93,7 +93,7 @@ function FileRow({ f, idx }) {
       onMouseLeave={() => { if (!expanded) setHovered(false) }}
     >
       {/* Summary row */}
-      <div className={`flex flex-wrap items-center gap-3 px-5 py-4 transition-colors ${hovered || expanded ? 'bg-slate-50' : ''}`}>
+      <div className={`flex min-h-[64px] items-center gap-4 px-5 py-3 transition-colors ${hovered || expanded ? 'bg-slate-50' : ''}`}>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold text-navy">{f.client}</p>
@@ -107,10 +107,12 @@ function FileRow({ f, idx }) {
           <p className="mt-0.5 text-[11px] text-slate-400">{f.stage}</p>
         </div>
 
-        <AuditorChip auditor={f.auditor} />
+        <div className="flex w-24 shrink-0 justify-center">
+          <AuditorChip auditor={f.auditor} />
+        </div>
 
         <span
-          className={`text-xs font-medium ${
+          className={`hidden w-44 shrink-0 truncate text-xs font-medium sm:block ${
             f.attentionLevel === 'URGENT'
               ? 'text-alert-red'
               : f.attentionLevel === 'FINAL'
@@ -121,9 +123,10 @@ function FileRow({ f, idx }) {
           {f.shortAttention}
         </span>
 
+        <div className="flex w-40 shrink-0 justify-end">
         <button
           onClick={handleEnterWorkspace}
-          className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
+          className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
             expanded
               ? 'bg-brand text-white'
               : 'bg-navy text-white hover:bg-[#0a1628]'
@@ -134,6 +137,7 @@ function FileRow({ f, idx }) {
             <ChevronRight className="h-3.5 w-3.5" />
           </motion.span>
         </button>
+        </div>
       </div>
 
       {/* Hover-expanded file details */}
@@ -271,11 +275,11 @@ export default function TeamFiles() {
           {/* File list */}
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             {/* List header */}
-            <div className="grid grid-cols-[1fr,auto,auto,auto] items-center gap-4 border-b border-slate-100 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              <span>Client / File</span>
-              <span>Auditor</span>
-              <span>Attention</span>
-              <span />
+            <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <span className="min-w-0 flex-1">Client / File</span>
+              <span className="w-24 shrink-0 text-center">Auditor</span>
+              <span className="hidden w-44 shrink-0 sm:block">Attention</span>
+              <span className="w-40 shrink-0 text-right">Action</span>
             </div>
 
             {visibleFiles.length === 0 ? (
