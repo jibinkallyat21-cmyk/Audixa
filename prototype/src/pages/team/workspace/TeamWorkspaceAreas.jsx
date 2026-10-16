@@ -16,6 +16,7 @@ import PrepaidTab from '../../../components/execution/PrepaidTab'
 import DepreciationTab from '../../../components/execution/DepreciationTab'
 import EvidenceSchedule from '../../../components/execution/EvidenceSchedule'
 import AccrualsTab from '../../../components/execution/AccrualsTab'
+import RelatedVouching from '../../../components/execution/RelatedVouching'
 import RelatedPartyTool from '../../../components/execution/RelatedPartyTool'
 import { useDemoClient } from '../../../utils/useDemoClient'
 import { useIssuedLists } from '../../../utils/requirementsStore'
@@ -47,6 +48,17 @@ function clientStatus(proc, area, issued) {
   return null
 }
 
+// Salary, GOSI, end of service and their supporting documents in one place.
+function PayrollTool({ dc, common }) {
+  const [tab, setTab] = useState('salary')
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2" role="tablist">{[['salary', 'Salary schedule'], ['gosi', 'GOSI and end of service'], ['docs', 'Supporting documents']].map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${tab === id ? 'bg-navy text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{l}</button>)}</div>
+      {tab === 'salary' && <SalaryTab {...common} />}{tab === 'gosi' && <GosiEosbTab clientName={dc.client} />}{tab === 'docs' && <EvidenceSchedule dc={dc} areaId="payroll" />}
+    </div>
+  )
+}
+
 function ToolBody({ proc, dc }) {
   const common = { client: dc.slug, clientName: dc.client }
   switch (proc.tool) {
@@ -58,6 +70,8 @@ function ToolBody({ proc, dc }) {
     case 'exp-sample': return <SamplingTab firm={dc.auditor} initialMode="expense" initialArea="Expenses" lockArea {...common} />
     case 'vouching': return <VouchingTab firm={dc.auditor} initialKind={proc.vouch || 'sales'} {...common} />
     case 'salary': return <SalaryTab {...common} />
+    case 'payroll': return <PayrollTool dc={dc} common={common} />
+    case 'related-vouching': return <RelatedVouching dc={dc} />
     case 'gosi': return <GosiEosbTab clientName={dc.client} />
     case 'prepaid': return <PrepaidTab {...common} />
     case 'depreciation': return <DepreciationTab {...common} />

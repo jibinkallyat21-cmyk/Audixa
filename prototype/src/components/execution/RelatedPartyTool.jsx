@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Flag, ExternalLink } from 'lucide-react'
 import { Card, Empty, Field, FieldGrid, PrimaryButton, Stat } from './ReviewParts'
 import SendSamples from './SendSamples'
+import SentItems from './SentItems'
 import { useIssuedLists } from '../../utils/requirementsStore'
 import { clientRelatedTransactions, pickRelated, testedElsewhere, RELATED_PARTIES } from '../../utils/relatedParty'
 import { materialityFromRevenue } from '../../utils/sampling'
@@ -44,6 +45,7 @@ export default function RelatedPartyTool({ dc }) {
   const toSend = picked.filter((t) => !testedElsewhere(t, rec).length).map((t) => ({ key: `RP:${t.ref}`, nature: 'document', subgroup: t.sub, row: { ref: t.ref, date: t.date, ledger: t.ledger, description: `${t.party}: ${t.description}`, amount: t.amount }, text: `Related party transaction ${t.ref} with ${t.party} dated ${fmtDate(t.date)}, ${t.description}, SAR ${money(t.amount)}: upload the invoice or agreement, proof of payment or receipt, and a short explanation of the business reason` }))
   return (
     <div className="space-y-6">
+      <SentItems slug={dc.slug} area="Related parties" group="samples" />
       <Card title="Related party transactions" subtitle="From the client's related party listing (stands in for the client's declaration). Choose how many to test; unusual ones are picked first.">
         <p className="text-xs text-slate-500">Related parties on the file: {RELATED_PARTIES.map((p) => `${p.name} (${p.relation})`).join(', ')}.</p>
         <FieldGrid cols={3}>

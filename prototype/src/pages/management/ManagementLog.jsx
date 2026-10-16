@@ -5,6 +5,7 @@ import ManagementLayout from '../../components/management/ManagementLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
 import { mgmtAuditLog, mgmtLogEventFilters } from '../../data/sampleData'
+import AuditLogView from '../../components/execution/AuditLogView'
 
 const DEPT_TABS = ['All', 'ABCPA', 'MISCPA']
 
@@ -24,7 +25,7 @@ const DEPT_TONE = {
 export default function ManagementLog() {
   const showToast = useToast()
   const [dept, setDept] = useState('All')
-  const [eventFilter, setEventFilter] = useState('All Events')
+  const [eventFilter, setEventFilter] = useState('All Events'); const [view, setView] = useState('firm')
 
   const filtered = useMemo(() => {
     return mgmtAuditLog.filter((e) => {
@@ -37,7 +38,8 @@ export default function ManagementLog() {
   return (
     <ManagementLayout title="Audit Log">
       <PageTransition>
-        <div className="space-y-6">
+        <div className="mb-4 flex gap-1 rounded-lg bg-slate-100 p-1" role="tablist">{[['firm', 'Firm events'], ['trail', 'Audit trail (every file, newest first)']].map(([id, l]) => <button key={id} role="tab" aria-selected={view === id} onClick={() => setView(id)} className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${view === id ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>{l}</button>)}</div>
+        {view === 'trail' ? <AuditLogView /> : <div className="space-y-6">
           <div>
             <h1 className="text-xl font-bold text-navy">Audit Log — Firm-Wide Event Trail</h1>
             <p className="mt-1 text-sm text-slate-500">Management Events View — ABCPA + MISCPA Combined</p>
@@ -152,7 +154,7 @@ export default function ManagementLog() {
               </button>
             </div>
           </div>
-        </div>
+        </div>}
       </PageTransition>
     </ManagementLayout>
   )

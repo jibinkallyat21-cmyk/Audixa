@@ -95,6 +95,7 @@ import ManagementDashboard from './pages/management/ManagementDashboard'
 import ManagementAnalytics from './pages/management/ManagementAnalytics'
 import ManagementFinancials from './pages/management/ManagementFinancials'
 import ManagementPerformance from './pages/management/ManagementPerformance'
+import FOAuditLog from './pages/frontoffice/FOAuditLog'
 import ManagementLog from './pages/management/ManagementLog'
 import ManagementNotifications from './pages/management/ManagementNotifications'
 
@@ -199,6 +200,7 @@ function AnimatedRoutes() {
         <Route path="/fo/chat" element={<Navigate to="/fo/dashboard" replace />} />
         <Route path="/fo/client-documents" element={<FOClientDocuments />} />
         <Route path="/fo/el-queries" element={<FOELQueries />} />
+        <Route path="/fo/audit-log" element={<FOAuditLog />} />
         <Route path="/fo/notifications" element={<FONotifications />} />
 
         

@@ -1,3 +1,4 @@
+import RecentActivityCard from '../../components/shared/RecentActivityCard'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -446,6 +447,7 @@ export default function ManagerDashboard() {
             </div>
           </div>
         </div>
+        <div className="mt-6"><RecentActivityCard title="Recent activity across the firm" logHref="/manager/audit-log" /></div>
       </PageTransition>
 
       <AnimatePresence>

@@ -145,3 +145,22 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 ## Laptop screens (built)
 
 - On screens narrower than 1440px the whole app scales down in steps (15px, 14px at 1280px, 13px at 1100px base size), the same effect as zooming the browser out, so every page keeps its layout. The workspace tabs stay on one line. Wide monitors are unchanged.
+
+## IFRS financial statements: who needs them, which type, what the file holds (built)
+
+- The IFRS TB and statements are needed only when the client is engaged for zakat filing (the zakat service on the client profile), for ABCPA and MISCPA files alike; otherwise the page says they are not required. The demo client is set up as engaged for zakat filing so the flow can be tried.
+- Only the audit type the client was engaged for is shown: IFRS TB for a proper audit, or for a disclaimer audit, never both.
+- The "Financial statements" tab (the MISCPA statutory format) is shown for MISCPA files only.
+- Exported file: Client TB, IFRS TB (only ledger name, closing balance of the year, closing balance of the previous year), Balance sheet, P&L, Statement of equity, then the schedules (prepaid, depreciation, EOSB, GOSI expense) and a "Schedule checks" sheet. The working sheets (IFRS TB working columns, mapping, adjustments, capital, COGS, reconciliation, pending list, VAT, verification) follow, because the statements are built from them and every figure must stay traceable. Schedules are in the proper audit file only.
+- Every schedule is checked against the trial balance (prepaid, fixed asset cost and accumulated depreciation, depreciation charge, EOSB provision, GOSI expense where the trial balance has a GOSI ledger). A difference is flagged, listed in the pending sheet, and the page offers "Tell <name>": the person who prepared that schedule (from the audit log; otherwise the file's associate) is notified. Nothing is adjusted to force an agreement. Assumption to confirm: who is told for which schedule.
+
+## Samples and cut-off stay, can be added to or deleted; activity in every portal (built)
+
+- Whatever has been sent to the client for a cut-off or a sample shows at the top of that tool every time it is opened ("Already sent to the client"), with a delete button on each item and "Delete all". Deleting an item the client already uploaded against asks for a second confirmation and removes the upload from the list. Samples sent as queries are not removed by this.
+- To add more, pick again: the cut-off tool no longer offers transactions that were already sent ("Pick more items"), and the sampling tools never send an item twice.
+- The audit log is one shared log, shown newest first by the time of the event everywhere. Every portal now has it: the client (Activity Log), audit team and manager (Audit Log), front office (new Audit Log page), management (new "Audit trail" tab on its Audit Log). Recent activity from the same log is on the audit team, client, manager, front office and management dashboards.
+
+## Audit areas: one place for documents, sampling and vouching and cut-off apart; related parties on their own (built)
+
+- Each area is arranged the same way: what can be done together is one procedure (the schedule or documents of the area, with the supporting documents inside it), then Sampling, then Vouching of the samples, then Cut-off, each its own procedure where the area has them. Cash and cash equivalents: accounts (documents, confirmations, statements, reconciliation) and cut-off. Trade receivables and payables: supporting documents, sampling and confirmations, vouching. Revenue, cost of sales, expenses: sampling, vouching, cut-off. Prepayments, fixed assets, accruals: the schedule and its supporting documents. Payroll: salary, GOSI, end of service and supporting documents in one tool. Borrowings, inventory, equity: supporting documents. The separate "notes" procedures of those areas are gone; each procedure page already has a notes and conclusion box. Zakat and tax and unclassified accounts keep their notes procedure.
+- Related parties are separate: their own section in the audit areas (Supporting documents, Sampling of transactions, Vouching) and their own group ("Related Parties", after Non Current Liabilities) in the requirement list, for the client and for the audit team.

@@ -10,9 +10,9 @@ const BLUE = { ...ARIAL, color: { argb: 'FF0000FF' } }, GREENF = { ...ARIAL, col
 const finish = (ws, widths) => { widths?.forEach((w, i) => { ws.getColumn(i + 1).width = w }); ws.eachRow((r) => r.eachCell((c) => { c.font = { ...ARIAL, ...(c.font || {}) } })) }
 const head = (row, n) => { for (let j = 1; j <= n; j++) { const c = row.getCell(j); c.fill = NAVY; c.font = { ...ARIAL, bold: true, color: { argb: 'FFFFFFFF' } }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true } } }
 
-export async function buildIfrsWorkbook({ tb, ledgers, entries = [], cogs, vat, verification = [], salesVat = null, pending = [], st, client = 'Company Name', period = {}, mode = 'proper', capital = [], equityInputs = {}, vatReg = '', unresolvedNote = '' }) {
+export async function buildIfrsWorkbook({ tb, ledgers, entries = [], cogs, vat, verification = [], salesVat = null, pending = [], st, client = 'Company Name', period = {}, mode = 'proper', capital = [], equityInputs = {}, vatReg = '', unresolvedNote = '', schedules = null }) {
   const ExcelJS = await loadExcelJS(); const wb = new ExcelJS.Workbook()
-  const names = ['IFRS TB', 'BS', 'P and L', 'Statement of equity', 'Capital', 'COGS', 'IFRS Adjustment Entries', 'Reconciliation', 'Pending - Audit Review', 'Client TB Mapping', 'Client TB', 'VAT Reconciliation', 'Verification']
+  const names = ['Client TB', 'IFRS TB', 'BS', 'P and L', 'Statement of equity', ...(schedules ? ['Prepaid', 'Depreciation', 'EOSB', 'GOSI Expense', 'Schedule checks'] : []), 'IFRS TB Working', 'Capital', 'COGS', 'IFRS Adjustment Entries', 'Reconciliation', 'Pending - Audit Review', 'Client TB Mapping', 'VAT Reconciliation', 'Verification']
   const S = Object.fromEntries(names.map((n) => [n, wb.addWorksheet(n)]))
   const cy = (String(period.to || '').match(/\d{4}/) || ['2025'])[0]; const py = String(Number(cy) - 1)
   const n = ledgers.length
@@ -39,7 +39,7 @@ export async function buildIfrsWorkbook({ tb, ledgers, entries = [], cogs, vat, 
   finish(ae, [7, 9, 18, 10, 40, 16, 16, 60, 16, 16, 44, 40]); ae.views = [{ state: 'frozen', ySplit: 1 }]
 
   // IFRS TB
-  const it = S['IFRS TB']; it.getCell('A1').value = client; it.getCell('F1').value = client; it.getCell('A2').value = `Trial Balance for the period from ${period.from || `01 Jan ${cy}`} to ${period.to || `31 Dec ${cy}`}`; if (vatReg) { it.getCell('D2').value = 'VAT Reg '; it.getCell('E2').value = vatReg }
+  const it = S['IFRS TB Working']; it.getCell('A1').value = client; it.getCell('F1').value = client; it.getCell('A2').value = `Trial Balance for the period from ${period.from || `01 Jan ${cy}`} to ${period.to || `31 Dec ${cy}`}`; if (vatReg) { it.getCell('D2').value = 'VAT Reg '; it.getCell('E2').value = vatReg }
   it.getRow(3).values = ['Account Name in English', Number(cy), Number(py), 'Remarks', 'IFRS code', 'IFRS classification', 'Client TB Dr', 'Client TB Cr', 'Adjustments Dr', 'Adjustments Cr', 'Final Dr', 'Final Cr', 'Account check']; head(it.getRow(3), 13)
   const rowOf = {}; let k = 4
   tb.rows.forEach((a) => { if (!a.count && !a.adjDr && !a.adjCr && !a.added) { /* keep every template account visible */ }
@@ -56,7 +56,36 @@ export async function buildIfrsWorkbook({ tb, ledgers, entries = [], cogs, vat, 
   it.getCell(`A${tr + 5}`).value = `The ${py} column is the opening balance of each account, mapped the same way (no prior-year statements were supplied). Totals can differ from client plus adjustments when an entry offsets an opposite balance inside one IFRS line (proof lines are on the Reconciliation sheet). No suspense, rounding or plug account is used.`
   if (unresolvedNote) it.getCell(`A${tr + 6}`).value = unresolvedNote
   finish(it, [46, 18, 18, 40, 10, 24, 16, 16, 16, 16, 16, 16, 14]); it.views = [{ state: 'frozen', ySplit: 3 }]
-  const ref = (code, col = 'B') => `'IFRS TB'!${col}${rowOf[code]}`
+  const ref = (code, col = 'B') => `'IFRS TB Working'!${col}${rowOf[code]}`
+
+  // IFRS TB as issued: the ledger name, the closing balance of the year and the closing balance of the previous year (the working columns are on 'IFRS TB Working').
+  const ft = S['IFRS TB']; ft.getCell('A1').value = client; ft.getCell('A2').value = `Trial Balance for the period from ${period.from || `01 Jan ${cy}`} to ${period.to || `31 Dec ${cy}`}`
+  ft.getRow(4).values = ['Ledger name', `Closing balance ${cy}`, `Closing balance ${py}`]; head(ft.getRow(4), 3)
+  tb.rows.forEach((a, i) => { const k2 = 5 + i; ft.getRow(k2).values = [a.name, { formula: `'IFRS TB Working'!B${rowOf[a.code]}` }, { formula: `'IFRS TB Working'!C${rowOf[a.code]}` }]; ft.getCell(k2, 2).numFmt = NUM; ft.getCell(k2, 3).numFmt = NUM })
+  const ftTot = 5 + tb.rows.length; ft.getCell(`A${ftTot}`).value = 'Total'; ;['B', 'C'].forEach((L) => { ft.getCell(`${L}${ftTot}`).value = { formula: `SUM(${L}5:${L}${ftTot - 1})` }; ft.getCell(`${L}${ftTot}`).numFmt = NUM })
+  ft.getRow(ftTot).eachCell({ includeEmpty: true }, (c) => { c.fill = NAVY; c.font = { ...ARIAL, bold: true, color: { argb: 'FFFFFFFF' } } })
+  finish(ft, [52, 22, 22]); ft.views = [{ state: 'frozen', ySplit: 4 }]
+
+  // Schedules behind the statements, and whether each one agrees to the trial balance
+  if (schedules) {
+    const hdr = (w, vals) => { w.getRow(1).values = vals; head(w.getRow(1), vals.length) }
+    const pp = S.Prepaid; hdr(pp, ['Category', 'Particulars', 'Start', 'End', 'Amount (excl. VAT)', 'Opening', 'Paid', 'Expense for the year', 'Prepaid at year end'])
+    schedules.prepaid.rows.forEach((x, i) => { pp.getRow(2 + i).values = [x.category, x.particulars, x.start, x.end, Number(x.amount) || 0, Number(x.opening) || 0, Number(x.paid) || 0, x.expense, x.prepaid]; for (let j = 5; j <= 9; j++) pp.getCell(2 + i, j).numFmt = NUM })
+    const ppT = 2 + schedules.prepaid.rows.length; pp.getCell(`A${ppT}`).value = 'Total'; ;['E', 'F', 'G', 'H', 'I'].forEach((L) => { pp.getCell(`${L}${ppT}`).value = { formula: `SUM(${L}2:${L}${ppT - 1})` }; pp.getCell(`${L}${ppT}`).numFmt = NUM }); finish(pp, [30, 34, 12, 12, 18, 14, 14, 20, 20])
+    const dp = S.Depreciation; hdr(dp, ['Class', 'Asset', 'Available from', 'Rate', 'Opening cost', 'Additions', 'Disposals', 'Closing cost', 'Opening acc. dep.', 'Charge', 'Closing acc. dep.', 'Closing WDV'])
+    schedules.dep.rows.forEach((x, i) => { dp.getRow(2 + i).values = [x.cls, x.name, x.date, x.rate, x.opening, x.addition, x.disposal, x.G, x.openingAcc, x.I, x.K, x.M]; for (let j = 5; j <= 12; j++) if (j !== 4) dp.getCell(2 + i, j).numFmt = NUM; dp.getCell(2 + i, 4).numFmt = '0%' })
+    const dpT = 2 + schedules.dep.rows.length; dp.getCell(`A${dpT}`).value = 'Total'; ;['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].forEach((L) => { dp.getCell(`${L}${dpT}`).value = { formula: `SUM(${L}2:${L}${dpT - 1})` }; dp.getCell(`${L}${dpT}`).numFmt = NUM }); finish(dp, [28, 28, 14, 8, 16, 14, 14, 16, 18, 14, 18, 16])
+    const eo = S.EOSB; hdr(eo, ['Employee', 'Joining', 'Basic', 'Housing', 'Opening provision', 'Provision at year end', 'Charge for the year'])
+    schedules.staff.forEach((x, i) => { eo.getRow(2 + i).values = [x.name, x.joining, x.basic, x.housing, x.opening || 0, x.closing, x.charge]; for (let j = 3; j <= 7; j++) eo.getCell(2 + i, j).numFmt = NUM })
+    const eoT = 2 + schedules.staff.length; eo.getCell(`A${eoT}`).value = 'Total'; ;['E', 'F', 'G'].forEach((L) => { eo.getCell(`${L}${eoT}`).value = { formula: `SUM(${L}2:${L}${eoT - 1})` }; eo.getCell(`${L}${eoT}`).numFmt = NUM }); finish(eo, [30, 14, 14, 14, 20, 22, 20])
+    const gs = S['GOSI Expense']; hdr(gs, ['Employee', 'Name', 'Month', 'GOSI salary', 'GOSI expense', 'Late fee', 'Expense with late fee', 'Payable at year end', 'MUDAD', 'Difference'])
+    schedules.gosi.rows.forEach((x, i) => { gs.getRow(2 + i).values = [x.employeeId, x.name, x.month, x.gosiSalary, x.gosiExpense, x.lateFee || 0, x.gosiExpenseWithLate, x.isPayable ? 'Yes' : '', x.mudad, x.difference]; for (let j = 4; j <= 10; j++) if (j !== 8) gs.getCell(2 + i, j).numFmt = NUM })
+    const gsT = 2 + schedules.gosi.rows.length; gs.getCell(`A${gsT}`).value = 'Expense for the year (months before the year-end month)'; gs.getCell(`G${gsT}`).value = schedules.gosi.expenseTotal; gs.getCell(`G${gsT}`).numFmt = NUM; gs.getCell(`A${gsT + 1}`).value = 'Payable at the year end'; gs.getCell(`G${gsT + 1}`).value = schedules.gosi.payable; gs.getCell(`G${gsT + 1}`).numFmt = NUM; finish(gs, [14, 28, 12, 14, 14, 12, 20, 18, 14, 14])
+    const sc = S['Schedule checks']; hdr(sc, ['Check', 'Schedule', 'Trial balance', 'Difference', 'Result', 'Prepared by', 'Action'])
+    schedules.checks.forEach((c, i) => { const k3 = 2 + i; sc.getRow(k3).values = [c.label, c.schedule, c.tb, { formula: `ROUND(B${k3}-C${k3},2)` }, { formula: `IF(D${k3}=0,"Agrees","DOES NOT AGREE")` }, c.owner || '', c.ok ? '' : `Difference ${c.diff}: ${c.owner || 'the preparer'} to explain or correct the schedule or the trial balance`]; ;[2, 3, 4].forEach((j) => { sc.getCell(k3, j).numFmt = NUM }); if (!c.ok) sc.getRow(k3).eachCell({ includeEmpty: true }, (cell) => { cell.fill = RED }) })
+    sc.getCell(`A${schedules.checks.length + 3}`).value = 'A schedule that does not agree to the trial balance is flagged and the preparer is told. Nothing is adjusted to force an agreement.'
+    finish(sc, [56, 18, 18, 16, 18, 22, 70])
+  }
 
   // BS
   const bs = S.BS; bs.getCell('B1').value = client; bs.getCell('B2').value = `Statement of Financial Position as on 31 December ${cy}`; bs.getCell('D4').value = Number(cy); bs.getCell('E4').value = Number(py)
@@ -134,13 +163,13 @@ export async function buildIfrsWorkbook({ tb, ledgers, entries = [], cogs, vat, 
   const rc = S.Reconciliation; rc.getRow(1).values = ['Check', 'Result', 'Detail']; head(rc.getRow(1), 3)
   const live = [['Client TB closing balances sum to nil', `IF(ROUND('Client TB'!F${lastCT + 1},2)=0,"Pass","Fail")`, `'Client TB'!F${lastCT + 1}`], ['Client TB debit = credit (movements)', `IF(ROUND('Client TB'!D${lastCT + 1}-'Client TB'!E${lastCT + 1},2)=0,"Pass","Fail")`, `'Client TB'!D${lastCT + 1}-'Client TB'!E${lastCT + 1}`],
     ['No Client TB account is unmapped', `IF(COUNTIF('Client TB Mapping'!F2:F${mpLast},"UNMAPPED")=0,"Pass","Fail")`, `COUNTIF('Client TB Mapping'!F2:F${mpLast},"UNMAPPED")`], ['Mapped total equals Client TB total', `IF(ROUND(SUM('Client TB Mapping'!E2:E${mpLast})-'Client TB'!F${lastCT + 1},2)=0,"Pass","Fail")`, `SUM('Client TB Mapping'!E2:E${mpLast})-'Client TB'!F${lastCT + 1}`],
-    ['Adjustment debits = credits', `IF(ROUND('IFRS TB'!I${tr}-'IFRS TB'!J${tr},2)=0,"Pass","Fail")`, `'IFRS TB'!I${tr}-'IFRS TB'!J${tr}`], ['Account by account: Client ± adjustments = Final', `IF(ROUND(SUMPRODUCT(ABS('IFRS TB'!M4:M${tr - 1})),2)=0,"Pass","Fail")`, `SUMPRODUCT(ABS('IFRS TB'!M4:M${tr - 1}))`],
-    ['Final debit = credit', `IF(ROUND('IFRS TB'!K${tr}-'IFRS TB'!L${tr},2)=0,"Pass","Fail")`, `'IFRS TB'!K${tr}-'IFRS TB'!L${tr}`], ['Balance sheet balances (cy and py)', `IF(AND(BS!D47=0,BS!E47=0),"Pass","Fail")`, 'BS!D47'], ['Statement of equity agrees to the balance sheet', `IF('Statement of equity'!F14=0,"Pass","Fail")`, "'Statement of equity'!F14"], ['P&L result agrees to the P&L accounts', `IF('P and L'!D20=0,"Pass","Fail")`, "'P and L'!D20"],
+    ['Adjustment debits = credits', `IF(ROUND('IFRS TB Working'!I${tr}-'IFRS TB Working'!J${tr},2)=0,"Pass","Fail")`, `'IFRS TB Working'!I${tr}-'IFRS TB Working'!J${tr}`], ['Account by account: Client ± adjustments = Final', `IF(ROUND(SUMPRODUCT(ABS('IFRS TB Working'!M4:M${tr - 1})),2)=0,"Pass","Fail")`, `SUMPRODUCT(ABS('IFRS TB Working'!M4:M${tr - 1}))`],
+    ['Final debit = credit', `IF(ROUND('IFRS TB Working'!K${tr}-'IFRS TB Working'!L${tr},2)=0,"Pass","Fail")`, `'IFRS TB Working'!K${tr}-'IFRS TB Working'!L${tr}`], ['Balance sheet balances (cy and py)', `IF(AND(BS!D47=0,BS!E47=0),"Pass","Fail")`, 'BS!D47'], ['Statement of equity agrees to the balance sheet', `IF('Statement of equity'!F14=0,"Pass","Fail")`, "'Statement of equity'!F14"], ['P&L result agrees to the P&L accounts', `IF('P and L'!D20=0,"Pass","Fail")`, "'P and L'!D20"],
     ['COGS schedule agrees to the IFRS TB', 'IF(COGS!C16=0,"Pass","Review")', 'COGS!C16'], ['Net VAT agrees to the VAT reconciliation', `IF('VAT Reconciliation'!F${vl + 4}=0,"Pass","Review")`, `'VAT Reconciliation'!F${vl + 4}`], ['Capital agrees to the IFRS TB', `IF(Capital!G${cpLast + 4}=0,"Pass","Review")`, `Capital!G${cpLast + 4}`]]
   live.forEach(([c, f, d], i) => { rc.getRow(2 + i).values = [c, { formula: f }, { formula: d }]; rc.getCell(2 + i, 3).numFmt = NUM })
   const last = 2 + live.length; rc.getCell(`A${last + 1}`).value = 'No suspense, plug or rounding account exists'; rc.getCell(`B${last + 1}`).value = ledgers.some((l) => /suspense|plug|rounding differ/i.test(l.name)) ? 'Fail' : 'Pass'
   rc.getCell(`A${last + 3}`).value = 'Summary'; rc.getCell(`A${last + 3}`).font = { ...ARIAL, bold: true }
-  ;[['Total Client TB (absolute debits)', { formula: `'IFRS TB'!G${tr}` }], ['Total IFRS TB (final debits)', { formula: `'IFRS TB'!K${tr}` }], ['Total IFRS adjustments (debits)', { formula: `'IFRS TB'!I${tr}` }], ['Final balancing status', { formula: `'IFRS TB'!B${tr + 2}` }]].forEach(([l, f], i) => { rc.getCell(`A${last + 4 + i}`).value = l; rc.getCell(`B${last + 4 + i}`).value = f; rc.getCell(`B${last + 4 + i}`).numFmt = NUM })
+  ;[['Total Client TB (absolute debits)', { formula: `'IFRS TB Working'!G${tr}` }], ['Total IFRS TB (final debits)', { formula: `'IFRS TB Working'!K${tr}` }], ['Total IFRS adjustments (debits)', { formula: `'IFRS TB Working'!I${tr}` }], ['Final balancing status', { formula: `'IFRS TB Working'!B${tr + 2}` }]].forEach(([l, f], i) => { rc.getCell(`A${last + 4 + i}`).value = l; rc.getCell(`B${last + 4 + i}`).value = f; rc.getCell(`B${last + 4 + i}`).numFmt = NUM })
   rc.getCell(`A${last + 9}`).value = 'Key reclassifications and adjustments'; rc.getCell(`A${last + 9}`).font = { ...ARIAL, bold: true }
   tb.adj.booked.forEach((e, i) => { rc.getCell(`A${last + 10 + i}`).value = `${e.id}: ${e.description}` })
   finish(rc, [58, 40, 24])

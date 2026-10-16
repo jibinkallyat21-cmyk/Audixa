@@ -56,7 +56,7 @@ export function buildTeamScope({ file, tb, issued, queries = [], log = [], now =
     { id: 'ai-flags', tone: 'alert-red', count: flagCount, title: flagCount ? `${plural(flagCount, 'Flagged Ledger')} — Awaiting Your Approval` : 'No flags awaiting your approval', icon: 'ShieldAlert', note: flagCount ? 'The opening balance check flagged these ledgers. Your approval is required before the trial balance is accepted.' : 'Nothing is flagged on this file right now.', action: 'Review Flags', route: '/team/workspace/requirements' },
     { id: 'deadlines', tone: 'amber', title: nearDeadline ? '1 File Approaching Deadline' : 'No Files Approaching Deadline', icon: 'Clock', action: 'View Files', route: '/team/files' },
   ]
-  const own = log.filter((e) => e.clientName === file.client)
+  const own = log.filter((e) => e.clientName === file.client).sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0))
   const activity = own.slice(0, 5).map((e) => ({ id: e.id, client: e.clientName, event: e.description ? `${e.title}: ${e.description}` : e.title, timestamp: relativeTime(e.at, now) }))
   const notifications = own.filter((e) => e.category === 'client-response').slice(0, 8).map((e) => ({ id: e.id, icon: 'FileText', title: e.title, message: e.description || e.title, client: e.clientName, timestamp: relativeTime(e.at, now), action: { label: 'Open', route: '/team/workspace/requirements', tone: 'red' }, unread: true }))
   const statusNotifications = own.filter((e) => e.category !== 'client-response').slice(0, 8).map((e) => ({ id: e.id, title: e.title, message: e.description || e.title, timestamp: relativeTime(e.at, now) }))
