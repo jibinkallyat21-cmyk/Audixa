@@ -8,6 +8,7 @@ import { buildIssuedList, presetList } from '../../utils/requirementsEngine'
 import { useIssuedLists, issueList, withdrawList } from '../../utils/requirementsStore'
 import { applyPartyBreakdown } from '../../utils/partyBreakdown'
 import { partyKindOf } from '../../utils/tbFormat'
+import { openingCheck } from '../../utils/openingCheck'
 import { useTBSubmissions, approveTB, returnTB, setTBLedgers } from '../../utils/tbSubmissionStore'
 
 const BTN = 'inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold'
@@ -54,6 +55,8 @@ function MisList({ file, renderIssued }) {
   const clientTB = sub && ['Submitted', 'Approved'].includes(sub.status) && sub.ledgers?.length ? sub : null
   const [reason, setReason] = useState('')
   const [adjust, setAdjust] = useState(false)
+  const [openConfirmed, setOpenConfirmed] = useState(false)
+  const [openNote, setOpenNote] = useState('')
 
   const effLedgers = clientTB ? clientTB.ledgers : null
   const effMulti = clientTB ? detectBranches(clientTB.ledgers, 1).multi : false
@@ -67,10 +70,14 @@ function MisList({ file, renderIssued }) {
     if (glResult) applyGL()
     // The client's approved trial balance is the detailed trial balance requirement (item 1 of the Trial Balance category).
     const withTB = { ...built, categories: built.categories.map((c) => (c.id === 'TB' ? { ...c, items: c.items.map((i, n) => (n === 0 ? { ...i, status: 'Accepted', filename: clientTB.fileName } : i)) } : c)) }
-    const r = issueList(file, withTB, { source: `Client TB: ${clientTB.fileName}` }); if (clientTB) approveTB(file); showToast(`${r.itemCount} requirements issued to ${file.client}`)
+    const r = issueList(file, withTB, { source: `Client TB: ${clientTB.fileName}` }); if (clientTB) approveTB(file, 'Audit team', { confirmed: true, differences: oc?.differences || 0, firstYear: !!clientTB.firstYear, note: openNote.trim() }); showToast(`${r.itemCount} requirements issued to ${file.client}`)
   }
   // The client supplies the general ledger with the trial balance; the party-wise balances are worked out from it.
   const glResult = useMemo(() => (clientTB?.glRows?.length && !clientTB.partyWise ? applyPartyBreakdown(clientTB.ledgers, clientTB.glRows) : null), [clientTB])
+  // Opening balances against the previous year audited trial balance: checked and confirmed by the audit team before the trial balance is accepted.
+  const oc = useMemo(() => (clientTB?.pyLedgers?.length ? openingCheck(clientTB.pyLedgers, clientTB.ledgers) : null), [clientTB])
+  const needsNote = !!clientTB && (clientTB.firstYear || (oc && !oc.aligned))
+  const openingOk = !clientTB || clientTB.status === 'Approved' || (openConfirmed && (!needsNote || openNote.trim().length > 0) && (!!oc || clientTB.firstYear))
   const applyGL = () => { setTBLedgers(file, glResult.ledgers, { partyWise: { file: clientTB.glFileName, summary: glResult.summary, appliedAt: new Date().toISOString() } }); showToast('Party-wise balances applied to the trial balance') }
   const sendBack = () => { if (!reason.trim()) { setErr('Give the client a reason for returning the trial balance.'); return }; returnTB(file, reason.trim()); withdrawList(file.slug); setReason(''); setErr(''); showToast('Trial balance returned to the client') }
 
@@ -106,6 +113,26 @@ function MisList({ file, renderIssued }) {
                 </div>
               )
             })()}
+            <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+              <p className="font-semibold text-navy">Opening balances against the previous year audited trial balance</p>
+              {clientTB.firstYear && <p className="mt-1 text-amber">The client says this is their first audit, so no previous year audited trial balance was supplied.</p>}
+              {!clientTB.firstYear && !oc && <p className="mt-1 text-alert-red">No previous year audited trial balance was supplied. Return the trial balance to the client.</p>}
+              {oc && (
+                <div className="mt-1 overflow-x-auto">
+                  <p className={oc.aligned ? 'text-emerald' : 'text-alert-red'}>{oc.aligned ? `All opening balances agree with ${clientTB.pyFileName || 'the previous year audited trial balance'}.` : `${oc.differences} area${oc.differences === 1 ? '' : 's'} do not agree with ${clientTB.pyFileName || 'the previous year audited trial balance'}.`}</p>
+                  <table className="mt-2 w-full text-left"><thead><tr className="text-slate-400"><th className="py-1 pr-3 font-semibold">Area</th><th className="pr-3 text-right font-semibold">PY audited closing</th><th className="pr-3 text-right font-semibold">CY opening</th><th className="pr-3 text-right font-semibold">Difference</th><th className="font-semibold">Result</th></tr></thead>
+                    <tbody>{oc.lines.map((l) => <tr key={l.label} className="border-t border-slate-100"><td className="py-1 pr-3">{l.label}</td><td className="pr-3 text-right">{l.pyClosing.toLocaleString()}</td><td className="pr-3 text-right">{l.cyOpening.toLocaleString()}</td><td className={`pr-3 text-right ${l.status === 'Difference' ? 'font-semibold text-alert-red' : ''}`}>{l.difference.toLocaleString()}</td><td className={l.status === 'Difference' ? 'font-semibold text-alert-red' : 'text-emerald'}>{l.status === 'Difference' ? 'Differs' : 'Agrees'}</td></tr>)}</tbody></table>
+                  {oc.ledgerDiffs.length > 0 && <ul className="mt-2 list-disc space-y-0.5 pl-5 text-slate-600">{oc.ledgerDiffs.slice(0, 8).map((g) => <li key={g.name}>{g.name}: {g.status === 'Missing in CY' ? 'in last year but not in this year' : `last year closing ${Number(g.pyClosing).toLocaleString()}, this year opening ${Number(g.cyOpening).toLocaleString()} (difference ${Number(g.diffTb).toLocaleString()})`}</li>)}</ul>}
+                  {!oc.re || oc.re.status === 'Difference' ? <p className="mt-1 text-amber">Retained earnings roll-forward: expected {Number(oc.re.expected).toLocaleString()}, opening {Number(oc.re.cyOpening).toLocaleString()}.</p> : null}
+                </div>
+              )}
+              {clientTB.status === 'Submitted' ? (
+                <div className="mt-2 space-y-2">
+                  <label className="flex items-start gap-2 text-slate-700"><input type="checkbox" className="mt-0.5" checked={openConfirmed} onChange={(e) => setOpenConfirmed(e.target.checked)} />I have checked the opening balances against the previous year audited trial balance{needsNote ? ' and recorded the explanation below' : ''}.</label>
+                  {needsNote && <input aria-label="Opening balance explanation" value={openNote} onChange={(e) => setOpenNote(e.target.value)} placeholder={clientTB.firstYear ? 'How the opening balances were verified (first-year audit)' : 'Explanation received for the differences'} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />}
+                </div>
+              ) : clientTB.openingCheck && <p className="mt-2 text-emerald">Confirmed by {clientTB.approvedBy}{clientTB.openingCheck.note ? `: ${clientTB.openingCheck.note}` : '.'}</p>}
+            </div>
             {clientTB.status === 'Submitted' && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input aria-label="Reason for returning" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason, if the trial balance is to be returned" className="min-w-[220px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-navy" />
@@ -141,7 +168,7 @@ function MisList({ file, renderIssued }) {
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-navy">{built.itemCount} requirements in {built.categories.length} of {built.analysis.length} categories apply to this client</p>
-            <button onClick={issue} className={`${BTN} bg-brand text-white shadow-sm hover:bg-[#D12C35]`}><Send className="h-3.5 w-3.5" />{clientTB?.status === 'Submitted' ? 'Approve trial balance and issue list' : issued ? 'Re-issue to client' : 'Issue to client'}</button>
+            <button onClick={issue} disabled={!openingOk} title={openingOk ? '' : 'Confirm the opening balance check first'} className={`${BTN} bg-brand text-white shadow-sm hover:bg-[#D12C35] disabled:opacity-40`}><Send className="h-3.5 w-3.5" />{clientTB?.status === 'Submitted' ? 'Approve trial balance and issue list' : issued ? 'Re-issue to client' : 'Issue to client'}</button>
           </div>
           {built.analysis.filter((c) => c.include).map((c) => {
             const items = built.categories.find((x) => x.id === c.id).items
