@@ -64,7 +64,11 @@ function MisList({ file, renderIssued }) {
     if (want === c.applies) delete next[c.id]; else next[c.id] = want
     return next
   })
-  const issue = () => { const r = issueList(file, built, { source: `Client TB: ${clientTB.fileName}` }); if (clientTB) approveTB(file); showToast(`${r.itemCount} requirements issued to ${file.client}`) }
+  const issue = () => {
+    // The client's approved trial balance is the detailed trial balance requirement (item 1 of the Trial Balance category).
+    const withTB = { ...built, categories: built.categories.map((c) => (c.id === 'TB' ? { ...c, items: c.items.map((i, n) => (n === 0 ? { ...i, status: 'Accepted', filename: clientTB.fileName } : i)) } : c)) }
+    const r = issueList(file, withTB, { source: `Client TB: ${clientTB.fileName}` }); if (clientTB) approveTB(file); showToast(`${r.itemCount} requirements issued to ${file.client}`)
+  }
   const readGL = async (f) => {
     if (!f) return
     setBusy(true); setErr('')
