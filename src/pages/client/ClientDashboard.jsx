@@ -9,7 +9,7 @@ import {
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import LifecycleStepper from '../../components/shared/LifecycleStepper'
-import { clientPortal } from '../../data/sampleData'
+import { clientPortal, teamFiles } from '../../data/sampleData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
 import { getActivityEvents } from '../../data/activityLog'
 import { raiseEscalation } from '../../utils/escalations'
@@ -655,8 +655,11 @@ function ActivityTicker({ events }) {
 
 /* ─── Main Dashboard ─── */
 import DemoDataCard from '../../components/client/DemoDataCard'
-import { useDemoLoaded } from '../../utils/demoData'
+import { useDemoLoaded, DEMO_FILE } from '../../utils/demoData'
 import { useIssuedLists, PORTAL_CLIENT } from '../../utils/requirementsStore'
+import { useAuditLog } from '../../utils/auditLog'
+import { useQueries } from '../../utils/queriesStore'
+import { useTBSubmissions } from '../../utils/tbSubmissionStore'
 function ClientDashboardLive() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const rec = useIssuedLists()[PORTAL_CLIENT.slug]
@@ -664,8 +667,27 @@ function ClientDashboardLive() {
   const count = (...st) => issuedItems.filter((i) => st.includes(i.status))
   const OUTSTANDING = count('Pending Client', 'Rejected', 'Action Required')
   const UNDER_REVIEW = count('Under Review', 'Uploaded Processing')
-  const fyData = { ...getFYData(selectedFY), stats: { totalRequirements: issuedItems.length, documentsAccepted: count('Accepted').length, pendingAction: OUTSTANDING.length, underVerification: UNDER_REVIEW.length, openQueries: 0 } }
-  const baseEvents = rec ? [{ id: 'issued', description: `Requirement list issued: ${rec.itemCount} documents requested`, icon: 'blue', timestamp: new Date(rec.issuedAt).toLocaleString(), section: 'Milestones' }] : []
+  const tbSub = useTBSubmissions()[PORTAL_CLIENT.slug]
+  const tbApproved = tbSub?.status === 'Approved'
+  const demoFile = teamFiles.find((f) => f.isDemo)
+  const initialsOf = (n) => String(n || '').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+  const team = demoFile ? [{ initials: initialsOf(demoFile.lead), name: demoFile.lead, role: 'Audit Lead', online: true, fileHandler: false }, { initials: initialsOf(demoFile.associate), name: demoFile.associate, role: 'Audit Associate', online: false, fileHandler: true }] : []
+  const stages = [
+    { id: 'acceptance', label: 'Engagement Acceptance', status: 'completed' },
+    { id: 'tb-acceptance', label: 'TB Acceptance', status: tbApproved ? 'completed' : 'active' },
+    { id: 'fieldwork', label: 'Audit Field Work', status: tbApproved ? 'active' : 'upcoming' },
+    { id: 'draft', label: 'Draft FS Review', status: 'upcoming' },
+    { id: 'signoff', label: 'Sign-off & Completion', status: 'upcoming' },
+    { id: 'filing', label: 'Regulatory Filing', status: 'upcoming' },
+  ]
+  const fyData = { ...getFYData(selectedFY), team, stages, stats: { totalRequirements: issuedItems.length, documentsAccepted: count('Accepted').length, pendingAction: OUTSTANDING.length, underVerification: UNDER_REVIEW.length, openQueries: openQs.length } }
+  const log = useAuditLog()
+  const SECTION = { 'doc-request': 'My Documents', 'client-response': 'My Documents', query: 'Auditor Questions', adjustment: 'Working TB', general: 'Milestones', demo: 'Milestones' }
+  const baseEvents = log.filter((e) => e.clientName === DEMO_FILE.client && SECTION[e.category]).slice(0, 8).map((e) => ({
+    id: e.id, icon: /reject|return/i.test(e.title) ? 'red' : /approved|accepted/i.test(e.title) ? 'emerald' : 'blue', section: SECTION[e.category],
+    description: e.description ? `${e.title}: ${e.description}` : e.title, timestamp: new Date(e.at).toLocaleString('en-GB'),
+  }))
+  const openQs = useQueries().queries.filter((q) => q.client === DEMO_FILE.slug && q.status !== 'Closed')
   const [liveEvents, setLiveEvents] = useState([])
   const recentEvents = [...liveEvents, ...baseEvents]
   const [meetingModal, setMeetingModal] = useState(false)
@@ -737,7 +759,7 @@ function ClientDashboardLive() {
                     value={fyData.stats.openQueries}
                     sub="Open queries"
                     accent="#E63946"
-                    items={[]}
+                    items={openQs.map((q) => ({ ref: q.no, name: q.description }))}
                     linkTo="/client/queries"
                   />
                 </div>

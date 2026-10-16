@@ -73,3 +73,5 @@ export function applyProfile(fields, profile, { onlyEmpty = false } = {}) {
   }
   return f
 }
+
+export function removeClientProfile(id) { writeStore(KEY, readStore(KEY, []).filter((p) => p.id !== id)) }

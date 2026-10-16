@@ -49,17 +49,11 @@ const NAV_ITEMS = [
 
 /* Chat group members (Analytix side) */
 const CHAT_GROUP = [
-  { id: 'tariq',  name: 'Tariq Al-Harbi',     initials: 'TH', color: '#2563EB', role: 'Audit Lead'         },
-  { id: 'nora',   name: 'Nora Hassan',          initials: 'NH', color: '#7C3AED', role: 'Audit Team'         },
-  { id: 'omar',   name: 'Omar Faisal',           initials: 'OF', color: '#D97706', role: 'Front Office'       },
-  { id: 'ashraf', name: 'Ashraf Bassas',         initials: 'AB', color: '#059669', role: 'Audit Manager'      },
+  { id: 'lead',  name: 'Fahad Al-Otaibi',   initials: 'FA', color: '#2563EB', role: 'Audit Lead'      },
+  { id: 'assoc', name: 'Khalid Bin-Salman', initials: 'KB', color: '#7C3AED', role: 'Audit Associate' },
 ]
 
-const QUICK_CHAT_MESSAGES = [
-  { senderId: 'tariq', timestamp: '10:42 AM', text: 'Please share the October bank statement when ready.' },
-  { senderId: 'me',    timestamp: '11:15 AM', text: 'Will upload by end of day, thank you.' },
-  { senderId: 'tariq', timestamp: '11:20 AM', text: 'Great — also please review the draft AFS when it arrives.' },
-]
+const QUICK_CHAT_MESSAGES = []
 
 /* ─── live clock ─── */
 function LiveClock({ isDark = true }) {

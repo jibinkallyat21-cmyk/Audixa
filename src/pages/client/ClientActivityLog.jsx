@@ -4,7 +4,8 @@ import { CheckCircle2, AlertCircle, FileText, TrendingUp, Download, Search } fro
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
-import { getActivityEvents } from '../../data/activityLog'
+import { useAuditLog } from '../../utils/auditLog'
+import { DEMO_FILE } from '../../utils/demoData'
 import { useClientFY } from '../../context/ClientFYContext'
 import { useTheme } from '../../context/ThemeContext'
 
@@ -36,7 +37,14 @@ export default function ClientActivityLog() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
 
-  const allEvents = getActivityEvents(selectedFY)
+  const log = useAuditLog()
+  const SECTION = { 'doc-request': 'My Documents', 'client-response': 'My Documents', query: 'Auditor Questions', adjustment: 'Working TB', general: 'Milestones', demo: 'Milestones' }
+  const ICON = { 'client-response': 'blue', 'doc-request': 'amber', query: 'amber', adjustment: 'navy', demo: 'emerald', general: 'emerald' }
+  // The client sees what happened on their own file, newest first.
+  const allEvents = log.filter((e) => e.clientName === DEMO_FILE.client && SECTION[e.category]).map((e) => ({
+    id: e.id, icon: /reject|return/i.test(e.title) ? 'red' : /approved|accepted/i.test(e.title) ? 'emerald' : ICON[e.category], section: SECTION[e.category],
+    description: e.description ? `${e.title}: ${e.description}` : e.title, timestamp: new Date(e.at).toLocaleString('en-GB'),
+  }))
   const filtered = allEvents.filter((e) => {
     if (filter !== 'All' && e.section !== filter) return false
     if (search && !e.description.toLowerCase().includes(search.toLowerCase())) return false

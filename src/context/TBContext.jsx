@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo } from 'react'
-import { addActivityEvent } from '../data/activityLog'
+import { logEvent } from '../utils/auditLog'
 import { classifyByName } from '../data/workingTB'
 import { useStore } from '../utils/store'
 import { useTBSubmissions } from '../utils/tbSubmissionStore'
@@ -54,18 +54,18 @@ export function TBProvider({ children }) {
   function approveAdjustment(adjId, clientNote = '') {
     setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Approved by Client', clientNote, updatedAt: new Date().toISOString() } : a)))
     const adj = adjustments.find((a) => a.id === adjId)
-    if (adj) addActivityEvent({ id: `act-adj-approve-${adjId}`, icon: 'emerald', description: `You approved adjustment ${adj.adjustmentRef} — trial balance updated`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
+    if (adj) logEvent({ client: DEMO_FILE.slug, clientName: DEMO_FILE.client, category: 'adjustment', title: `You approved adjustment ${adj.adjustmentRef} — trial balance updated` })
   }
 
   function rejectAdjustment(adjId, clientNote = '') {
     setAdjustments((prev) => prev.map((a) => (a.id === adjId ? { ...a, status: 'Rejected by Client', clientNote, updatedAt: new Date().toISOString() } : a)))
     const adj = adjustments.find((a) => a.id === adjId)
-    if (adj) addActivityEvent({ id: `act-adj-reject-${adjId}`, icon: 'red', description: `You rejected adjustment ${adj.adjustmentRef}`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
+    if (adj) logEvent({ client: DEMO_FILE.slug, clientName: DEMO_FILE.client, category: 'adjustment', title: `You rejected adjustment ${adj.adjustmentRef}` })
   }
 
   function postAdjustment(newAdj) {
     setAdjustments((prev) => [{ ...newAdj, updatedAt: new Date().toISOString() }, ...prev])
-    addActivityEvent({ id: `act-adj-post-${newAdj.id}`, icon: 'amber', description: `Your auditor proposed adjustment ${newAdj.adjustmentRef} — awaiting your review`, timestamp: new Date().toLocaleString('en-GB'), section: 'Working TB' })
+    logEvent({ client: DEMO_FILE.slug, clientName: DEMO_FILE.client, category: 'adjustment', title: `Your auditor proposed adjustment ${newAdj.adjustmentRef} — awaiting your review` })
   }
 
   function reclassifyLine(ledgerCode, newClassification) {
