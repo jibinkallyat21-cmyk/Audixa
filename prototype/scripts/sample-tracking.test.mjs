@@ -25,7 +25,7 @@ test('counts and blocks', () => {
   assert.deepEqual(countsOf([{ status: 'Accepted' }, { status: 'Rejected' }, { status: 'Uploaded Processing' }, { status: 'Pending Client' }]), { total: 4, waiting: 1, uploaded: 1, accepted: 1, rejected: 1 })
 })
 test('file summary: receivable and payable samples are told apart, attention list says what needs doing', () => {
-  const s = fileSummary({ areas: AREAS, ledgers: [], rec: mk(), statuses: { 'area:cash.bank-cutoff': 'Complete' }, queries: [{ status: 'Open', replied: 'Replied' }], now: new Date('2026-10-16T09:00:00Z') })
+  const s = fileSummary({ areas: AREAS, ledgers: [], rec: mk(), statuses: { 'area:cash.cash-accounts': 'Complete' }, queries: [{ status: 'Open', replied: 'Replied' }], now: new Date('2026-10-16T09:00:00Z') })
   assert.equal(s.rows.find((r) => r.id === 'receivables').sent, 1); assert.equal(s.rows.find((r) => r.id === 'payables').sent, 1); assert.equal(s.rows.find((r) => r.id === 'revenue').sent, 2)
   assert.equal(s.procedures.done, 1); assert.ok(s.attention.some((a) => /waited more than 3/.test(a))); assert.ok(s.attention.some((a) => /waiting for your review/.test(a)))
 })

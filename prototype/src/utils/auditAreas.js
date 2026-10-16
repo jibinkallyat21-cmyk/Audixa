@@ -3,11 +3,7 @@
 // groups = the trial balance groups (tbCore) that make up the area.
 export const AREAS = [
   { id: 'cash', section: 'Assets', label: 'Cash and cash equivalents', groups: ['cash'], sampleAreas: ['bank', 'cash'], blurb: 'Bank and cash balances', procedures: [
-    { id: 'bank-statements', label: 'Bank statements', kind: 'requirement', match: /bank statements/i, desc: 'The client uploads every bank statement for the audit period and the subsequent month.' },
-    { id: 'bank-recon', label: 'Bank reconciliation', kind: 'requirement', match: /bank reconc/i, desc: 'The client uploads the year-end bank reconciliation. Items that clear after the year end are flagged to the file team.' },
-    { id: 'confirmations', label: 'Bank and cash confirmations', kind: 'tool', tool: 'confirmation', desc: 'Compare each confirmation with the trial balance and check the document.' },
-    { id: 'bank-cutoff', label: 'Bank cut-off', kind: 'cutoff', area: 'bank', desc: 'Pick transactions around the year end; the client supports each one.' },
-    { id: 'cash-cutoff', label: 'Cash cut-off', kind: 'cutoff', area: 'cash', desc: 'Pick cash transactions around the year end; the client supports each one.' },
+    { id: 'cash-accounts', label: 'Cash and bank accounts', kind: 'tool', tool: 'cash-bank', desc: 'Every account in one list: confirmation, statements, trial balance against the statement, a reconciliation only where they differ, and the cut-off for each account.' },
   ] },
   { id: 'receivables', section: 'Assets', label: 'Trade receivables', groups: ['receivables'], sampleAreas: ['ARAP', 'Trade receivables'], subMatch: /receiv|customer/i, blurb: 'Customers and what they owe', procedures: [
     { id: 'ar-sample', label: 'Sample and confirmations', kind: 'tool', tool: 'party-sample', area: 'Trade receivables', desc: 'Select the customer balances to confirm and send them to the client.' },

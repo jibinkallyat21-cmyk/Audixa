@@ -18,7 +18,7 @@ test('area figures come from the ledgers; progress counts completed procedures',
   const cash = AREAS.find((a) => a.id === 'cash'); const f = areaFigures(cash, L)
   assert.equal(f.total, L.filter((l) => l.group === 'cash').reduce((n, l) => n + l.closing, 0)); assert.ok(f.ledgers.length >= 1)
   assert.equal(areaFigures(AREAS.find((a) => a.id === 'revenue'), L).total, -2400000)
-  const p = areaProgress(cash, { [procStatusKey('cash', 'bank-cutoff')]: 'Complete' }); assert.equal(p.done, 1); assert.equal(p.total, cash.procedures.length)
+  const p = areaProgress(cash, { [procStatusKey('cash', 'cash-accounts')]: 'Complete' }); assert.equal(p.done, 1); assert.equal(p.total, cash.procedures.length)
 })
 
 test('every trial balance ledger belongs to exactly one area and the areas add up to the whole trial balance', () => {

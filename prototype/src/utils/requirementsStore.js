@@ -4,6 +4,7 @@ import { logEvent } from './auditLog.js'
 import { withDemoDocuments } from './demoDocuments.js'
 import { withSampleRequirements } from './sampleRequests.js'
 import { withReminders } from './sampleTracking.js'
+import { withBankRequirements, withReconRequest } from './bankAccounts.js'
 
 const KEY = 'requirements:issued'
 // The client portal demo client is not one of the team's files, so it is offered as an extra MISCPA engagement.
@@ -37,6 +38,19 @@ export function sendReminders(slug, refs) {
   const { rec, count } = withReminders(cur, refs)
   if (count) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Reminder sent to the client', `${count} item${count === 1 ? '' : 's'} still waiting for the client`, 'doc-request') }
   return count
+}
+// The team asks for the documents of each cash and bank account (and, only when a statement differs from the books, its reconciliation).
+export function requestBankDocuments(slug, accounts, yearEnd) {
+  const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return -1
+  const { rec, added } = withBankRequirements(cur, accounts, yearEnd)
+  if (added) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Bank documents requested', `${added} documents requested for ${accounts.length} cash and bank account${accounts.length === 1 ? '' : 's'}`, 'doc-request') }
+  return added
+}
+export function requestReconciliation(slug, acc, idx, diff, yearEnd) {
+  const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return -1
+  const { rec, added } = withReconRequest(cur, acc, idx, diff, yearEnd)
+  if (added) { writeStore(KEY, { ...all, [slug]: rec }); log(cur.client, 'Bank reconciliation requested', `${acc.name}: difference ${diff}`, 'doc-request') }
+  return added
 }
 export function uploadDemoDocuments(slug) {
   const all = readStore(KEY, {}); const cur = all[slug]; if (!cur) return 0

@@ -12,12 +12,12 @@ const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 
 const num = (v) => (v === '' || v === null || v === undefined ? null : Number(v))
 
 // Cut-off for one area: the team says how many items, the app picks them by the firm's rule, a person approves, and the client is asked for each one.
-export default function CutOffTool({ area, client, firm: firmProp }) {
+export default function CutOffTool({ area, client, firm: firmProp, txnsOverride = null, sub = '', label = '' }) {
   const dc = useDemoClient(); const firm = dc.isDemo(client) ? dc.auditor : firmProp
   const [yearEnd, setYearEnd] = useState('2025-12-31'); const [n, setN] = useState(''); const [nDebit, setNDebit] = useState(''); const [nCredit, setNCredit] = useState('')
   const [file, setFile] = useState(null); const [busy, setBusy] = useState(false); const [picked, setPicked] = useState(null)
   const bankABC = firm === 'ABCPA' && area === 'bank'
-  const demoTxns = useMemo(() => (dc.isDemo(client) && dc.ready ? clientCutoffTxns(dc.ledgers)[area] || [] : []), [dc, client, area])
+  const demoTxns = useMemo(() => (txnsOverride || (dc.isDemo(client) && dc.ready ? clientCutoffTxns(dc.ledgers)[area] || [] : [])), [dc, client, area, txnsOverride])
   const uploaded = useMemo(() => {
     if (!file?.rows?.length || !file.mapping.date) return []; const m = file.mapping
     return file.rows.map((x) => ({ date: isoDate(x.values[m.date]), ref: m.ref ? String(x.values[m.ref] ?? '') : '', ledger: m.account ? String(x.values[m.account] ?? '') : areaLabel(area), description: m.description ? String(x.values[m.description] ?? '') : '', debit: toNum(x.values[m.debit]) ?? 0, credit: toNum(x.values[m.credit]) ?? 0 })).filter((t) => t.date)
@@ -33,7 +33,7 @@ export default function CutOffTool({ area, client, firm: firmProp }) {
     : 'MISCPA: the last items before the year end and the first items after it, the number you set for each side.'
   return (
     <div className="space-y-6">
-      <Card title={`${areaLabel(area)} cut-off`} subtitle={rule}>
+      <Card title={`${label || areaLabel(area)} cut-off`} subtitle={rule}>
         <Section title="1. Where the transactions come from">
           <div className="flex flex-wrap items-center gap-3">
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}{area === 'bank' ? 'Upload the bank statement or ledger (Excel)' : 'Upload the ledger (Excel)'}<input type="file" accept=".xlsx" className="hidden" onChange={(e) => { load(e.target.files?.[0]); e.target.value = '' }} /></label>
@@ -60,7 +60,7 @@ export default function CutOffTool({ area, client, firm: firmProp }) {
           {picked.picks.length === 0 ? <Empty>Nothing was picked. Check the year-end and the transactions.</Empty> : (
             <DataTable columns={[{ key: 'period', label: 'Period', render: (r) => <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${r.period === 'Before year end' ? 'bg-slate-100 text-slate-600' : 'bg-blue-50 text-blue-700'}`}>{r.period}</span> }, { key: 'date', label: 'Date' }, { key: 'ref', label: 'Reference' }, { key: 'ledger', label: 'Ledger' }, { key: 'description', label: 'Description' }, { key: 'debit', label: 'Debit', render: (r) => (r.debit ? money(r.debit) : '') }, { key: 'credit', label: 'Credit', render: (r) => (r.credit ? money(r.credit) : '') }]} rows={picked.picks} />
           )}
-          <SendSamples group="cutoff" area={area} label={areaLabel(area)} client={client} items={items} />
+          <SendSamples group="cutoff" area={area} sub={sub} label={label || areaLabel(area)} client={client} items={items} />
         </Card>
       )}
       {!picked && txns.length === 0 && <Empty>Upload the transactions to pick from.</Empty>}

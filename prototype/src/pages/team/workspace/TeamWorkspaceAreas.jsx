@@ -6,7 +6,7 @@ import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { Card, Chip, DataTable, Empty, SecondaryButton, PrimaryButton } from '../../../components/execution/ReviewParts'
 import CutOffTool from '../../../components/execution/CutOffTool'
-import ConfirmationTab from '../../../components/execution/ConfirmationTab'
+import CashBankTool from '../../../components/execution/CashBankTool'
 import SamplingTab from '../../../components/execution/SamplingTab'
 import VouchingTab from '../../../components/execution/VouchingTab'
 import SalaryTab from '../../../components/execution/SalaryTab'
@@ -48,7 +48,7 @@ function clientStatus(proc, area, issued) {
 function ToolBody({ proc, dc }) {
   const common = { client: dc.slug, clientName: dc.client }
   switch (proc.tool) {
-    case 'confirmation': return <ConfirmationTab {...common} legalName={dc.client} />
+    case 'cash-bank': return <CashBankTool dc={dc} />
     case 'party-sample': return <SamplingTab firm={dc.auditor} initialMode="party" initialArea={proc.area} {...common} />
     case 'sales-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialArea="Revenue" {...common} />
     case 'cogs-sample': return <SamplingTab firm={dc.auditor} initialMode="sales" initialKind="Purchase Report" initialArea="COGS" {...common} />

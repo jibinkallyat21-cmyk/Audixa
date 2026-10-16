@@ -97,3 +97,12 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - Flagged transactions are picked first (round amount, just below materiality, same party/date/amount twice, vague description, close to the year end with a large amount). The weekend (Friday, Saturday) is a weak indicator only. Then the largest above materiality, and a seeded random choice below. Flags are indicators computed by code; an AI reading of descriptions can only explain them, a person decides.
 - A picked transaction already sent as a sample or cut-off item from another area is shown as "Already tested in <area> (<item>)" with a link to that exact line in Samples sent / Cut-off sent. It is not asked from the client again. Match = same reference, or same date and amount when no reference.
 - Demo: the related party list and the listed transactions stand in for the client's declaration.
+
+## Cash and cash equivalents on one page (built)
+
+- One tool, "Cash and bank accounts", replaces the separate bank statements, bank reconciliation, confirmations and bank / cash cut-off procedures.
+- One row per cash or bank account in the trial balance: trial balance figure, confirmation (status and view), statement for the current period (status and view), statement for the subsequent period (status and view), statement closing balance, difference, cut-off progress, status.
+- The team asks the client for the documents account by account (confirmation, statement to the year end, statement for the month after). The general bank requests the client has not answered yet are replaced by these. Cash accounts need only a cash count or confirmation.
+- A bank reconciliation is requested only for an account whose statement closing balance differs from the trial balance, and it sits inside that account's row (Reconciliation tab). The confirmation checks (six tests) also sit inside the row.
+- Cut-off is done per account. The team enters the numbers for each bank (ABCPA: debits and credits; MISCPA: the number before and the same number after the year end). Each bank gets its own block on the client's cut-off list.
+- Not carried over: the cash denomination count of the old confirmation tool. Say if it is needed on the cash row.
