@@ -64,3 +64,7 @@ export function clientParties(ledgers) {
 export function clientConfirmations(ledgers) {
   return ledgers.filter((l) => l.group === 'cash' && Math.abs(Number(l.closing)) > 0.004).map((l) => ({ type: /cash (in|on)|petty/i.test(l.name) ? 'Cash' : 'Bank', label: l.name, tbAmount: Math.round(l.closing * 100) / 100, asAt: `${YEAR}-12-31`, tbBank: l.name }))
 }
+
+// What a bank statement for a bank ledger shows: it opens where the ledger opened, money in and out for the year, and closes where the ledger closes.
+// (In the prototype this stands in for reading the statement the client uploaded.)
+export const clientBankStatement = (ledger) => ({ opening: Math.round(ledger.opening * 100) / 100, credits: Math.round(ledger.debit * 100) / 100, debits: Math.round(ledger.credit * 100) / 100, closing: Math.round(ledger.closing * 100) / 100 })

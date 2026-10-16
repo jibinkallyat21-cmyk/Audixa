@@ -228,9 +228,9 @@ function AIFlagPanel({ flag, isLead, onApprove, onDismiss }) {
 // The working tool behind a sub-task, opened right under it. Sub-tasks without a tool say so and keep the person's own notes.
 const SUB_TOOLS = {
   'area-cash': { label: 'Open the cash and bank confirmations', C: () => <SamplingVouchingView embedded initialTab="confirm" /> },
-  'area-ar': { label: 'Open the receivables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" /> },
-  'area-ap': { label: 'Open the payables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" /> },
-  'area-rev': { label: 'Open the sales sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="sales" /> },
+  'area-ar': { label: 'Open the receivables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" initialArea="Trade receivables" /> },
+  'area-ap': { label: 'Open the payables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" initialArea="Trade payables" /> },
+  'area-rev': { label: 'Open the sales sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="sales" initialArea="Revenue" /> },
   'area-fa': { label: 'Open the depreciation schedule', C: () => <PayrollAssetsView embedded initialTab="dep" /> },
   'samp-1': { label: 'Open the sampling tool', C: () => <SamplingVouchingView embedded initialTab="sampling" /> },
   'samp-2': { label: 'Open the vouching tool', C: () => <SamplingVouchingView embedded initialTab="vouching" /> },
