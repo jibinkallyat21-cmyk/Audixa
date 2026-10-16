@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download, FileSpreadsheet, Plus, Trash2 } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -62,7 +63,7 @@ export default function IfrsTBTab({ mode, client, clientName }) {
   return (
     <div className="space-y-4">
       {mode === 'disclaimer' && <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">Disclaimer audit: the IFRS TB is prepared from what the client provides, either a Trial Balance or a Basic Information Sheet (BIS). An unbalanced TB is documented as an unresolved difference and referred for review; a related-party / partner account is used only with support.</p>}
-      <Card title="1. Source" right={<button onClick={useDemo} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+      <Card title="1. Source" right={<button onClick={useDemo} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={useDemo} />
         {mode === 'disclaimer' && <div className="mb-2 flex gap-3 text-sm text-navy">{[['tb', 'Client Trial Balance'], ['bis', 'Basic Information Sheet (BIS)']].map(([v, l]) => <label key={v} className="flex items-center gap-1"><input type="radio" checked={source === v} onChange={() => { setSource(v); setOut(null) }} />{l}</label>)}</div>}
         {source === 'tb' || mode !== 'disclaimer' ? <TBSource file={file} setFile={setFile} onLedgers={(l) => { setLedgers(l); setOut(null) }} /> : (
           <div className="space-y-1.5">{bis.map((b, i) => <div key={i} className="flex gap-1.5"><input aria-label="BIS item" placeholder="Item" value={b.name} onChange={(e) => setBis((l) => l.map((x, k) => (k === i ? { ...x, name: e.target.value } : x)))} className={`${INP} w-64`} /><input aria-label="BIS amount" type="number" value={b.amount} onChange={(e) => setBis((l) => l.map((x, k) => (k === i ? { ...x, amount: e.target.value } : x)))} className={`${INP} w-36`} /><select aria-label="BIS side" value={b.side} onChange={(e) => setBis((l) => l.map((x, k) => (k === i ? { ...x, side: e.target.value } : x)))} className={SEL}><option>Dr</option><option>Cr</option></select><button aria-label="Remove BIS item" onClick={() => setBis((l) => l.filter((_, k) => k !== i))} className="p-1 text-slate-400"><Trash2 className="h-3.5 w-3.5" /></button></div>)}

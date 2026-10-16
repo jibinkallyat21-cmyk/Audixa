@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, Chip, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -40,7 +41,7 @@ export default function VouchingTab({ firm, client, clientName }) {
     <div className="space-y-3">
       <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">{firm === 'ABCPA' ? 'ABCPA file: the Rule Book gives no separate vouching steps, so the same vouching tables are used. They will be replaced by the ABCPA-specific rules if those are supplied.' : firm === 'MISCPA' ? 'MISCPA file: vouching follows the Vouching Rule Book.' : 'Select a client to see the framework for the file.'}</p>
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1">{Object.entries(KINDS).map(([id, k]) => <button key={id} onClick={() => setKind(id)} className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${kind === id ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>{k.label}</button>)}</div>
-      <Card title={`${KINDS[kind].label} vouching – yellow samples that were received`} right={<div className="flex gap-3"><button onClick={() => setList(() => DEMO[kind].map((d) => ({ ...blank(kind), ...d })))} className="text-xs font-semibold text-slate-500 underline">Use demo samples</button><button onClick={() => setList((l) => [...l, blank(kind)])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add sample</button></div>}>
+      <Card title={`${KINDS[kind].label} vouching – yellow samples that were received`} right={<div className="flex gap-3"><button onClick={() => setList(() => DEMO[kind].map((d) => ({ ...blank(kind), ...d })))} className="text-xs font-semibold text-slate-500 underline">Use demo samples</button><button onClick={() => setList((l) => [...l, blank(kind)])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add sample</button></div>}><AutoDemo run={() => setList(() => DEMO[kind].map((d) => ({ ...blank(kind), ...d })))} />
         {kind !== 'party' && <label className="mb-2 block text-xs font-semibold text-slate-500">Total value of the population <input aria-label="Total value" type="number" value={total} onChange={(e) => setTotal(e.target.value)} className={`${INP} ml-2 w-44 font-normal`} /></label>}
         {list.length === 0 && <p className="text-xs text-slate-400">No samples yet. Add the samples from the sampling step (yellow highlights).</p>}
         <div className="space-y-3">

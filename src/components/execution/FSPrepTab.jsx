@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { TBSource } from './IfrsTBTab'
@@ -34,7 +35,7 @@ export default function FSPrepTab({ client, clientName }) {
   const st = out?.fs.st
   return (
     <div className="space-y-4">
-      <Card title="1. Current-year trial balance" right={<button onClick={() => { setLedgers(demoClientTB()); setPy({ bs: { ...demoPYAFS.bs }, pl: {} }); setFile(null); setInputs((x) => ({ ...x, depreciation: 9500 })); setOut(null) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+      <Card title="1. Current-year trial balance" right={<button onClick={() => { setLedgers(demoClientTB()); setPy({ bs: { ...demoPYAFS.bs }, pl: {} }); setFile(null); setInputs((x) => ({ ...x, depreciation: 9500 })); setOut(null) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => { setLedgers(demoClientTB()); setPy({ bs: { ...demoPYAFS.bs }, pl: {} }); setFile(null); setInputs((x) => ({ ...x, depreciation: 9500 })); setOut(null) }} />
         <TBSource file={file} setFile={setFile} onLedgers={(l) => { setLedgers(l); setOut(null) }} />
         <p className="mt-2 text-xs text-slate-500">Debit positive, credit negative. The closing balance is recomputed (opening + debit − credit) and compared with the supplied closing.</p>
         <label className="mt-2 block text-xs text-slate-500">Reporting date <input aria-label="Reporting date" value={period} onChange={(e) => setPeriod(e.target.value)} className={`${INP} ml-1 w-40`} /></label>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -33,7 +34,7 @@ export default function PrepaidTab({ client, clientName }) {
   }
   return (
     <div className="space-y-4">
-      <Card title="Accounting period" right={<button onClick={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+      <Card title="Accounting period" right={<button onClick={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => setItems(DEMO.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         <div className="grid gap-2 sm:grid-cols-4">
           <label className="text-[11px] font-semibold uppercase text-slate-500">From<input aria-label="Period from" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
           <label className="text-[11px] font-semibold uppercase text-slate-500">Year-end<input aria-label="Period year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>

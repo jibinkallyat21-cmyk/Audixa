@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AutoDemo from './AutoDemo'
 import { Download, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -48,7 +49,7 @@ function SalesPurchase({ ctx }) {
   const load = async (f, buffer) => { setBusy(true); setRes(null); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), SALES_FIELDS)), name: f?.name || 'Demo sales report.xlsx' }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
   const run = () => { const h = file.mapping.taxable; if (!h) return; const r = sampleSalesPurchase(file.rows.map((x) => ({ taxable: toNum(x.values[h]) ?? 0 }))); setRes(r); ctx.log(`${kind} sampled`, `${r.selectedIds.length} of ${file.rows.length} entries selected, ${pct(r.coverage)} of taxable value`) }
   return (
-    <Card title="Sales / Purchase – 50% of taxable value, highest first (maximum 30 entries)" right={<button onClick={async () => load(null, await demoBuffer(demoSales()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+    <Card title="Sales / Purchase – 50% of taxable value, highest first (maximum 30 entries)" right={<button onClick={async () => load(null, await demoBuffer(demoSales()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => load(null, await demoBuffer(demoSales()))} />
       <div className="mb-2 flex gap-2"><select aria-label="Report" value={kind} onChange={(e) => { setKind(e.target.value); setRes(null) }} className={SEL}><option>Sales Report</option><option>Sales Return Report</option><option>Purchase Report</option></select>
         <Upload label="Choose the report (Excel)" onFile={(f) => f && load(f)} busy={busy} file={file} /></div>
       <Mapping file={file} setFile={setFile} keys={['id', 'date', 'party', 'taxable']} />
@@ -74,7 +75,7 @@ function Expense({ ctx }) {
   const res = useMemo(() => (rows.length ? sampleExpense(rows, include) : null), [rows, include])
   const accounts = useMemo(() => [...new Set(rows.map((r) => r.account))].sort(), [rows])
   return (
-    <Card title="Expenses – 50% of the revised eligible population, maximum 7 per account" right={<button onClick={async () => load(null, await demoBuffer(demoExpenses()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+    <Card title="Expenses – 50% of the revised eligible population, maximum 7 per account" right={<button onClick={async () => load(null, await demoBuffer(demoExpenses()))} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => load(null, await demoBuffer(demoExpenses()))} />
       <Upload label="Choose the Consolidated Expenses Ledger" onFile={(f) => f && load(f)} busy={busy} file={file} />
       <Mapping file={file} setFile={setFile} keys={['account', 'description', 'date', 'debit', 'credit', 'amount']} />
       {res && (
@@ -108,7 +109,7 @@ function Parties({ ctx }) {
   }, [file, inp])
   const missing = [!inp.yearEnd && 'financial year-end', !inp.auditStart && 'audit start date'].filter(Boolean)
   return (
-    <Card title="AR / AP / Advances – cumulative 50% by category" right={<button onClick={async () => { await load(null, await demoBuffer(demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+    <Card title="AR / AP / Advances – cumulative 50% by category" right={<button onClick={async () => { await load(null, await demoBuffer(demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} />
       <div className="mb-2 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {[['yearEnd', 'Financial year-end', 'date'], ['auditStart', 'Audit start date', 'date'], ['today', 'Current date', 'date'], ['pct', 'Sample %', 'number'], ['tolerance', 'Nil-balance tolerance', 'number']].map(([k, l, t]) => (
           <label key={k} className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{l}<input aria-label={l} type={t} value={inp[k]} onChange={(e) => setInp({ ...inp, [k]: e.target.value })} className={`${SEL} mt-1 w-full font-normal normal-case`} /></label>))}
@@ -147,7 +148,7 @@ function Materiality({ ctx }) {
   const res = useMemo(() => (items.length && materiality ? sampleByMateriality(items.map((i) => ({ ...i, excluded: p.area === 'Expenses' && include[i.account] === false })), { materiality, risk: p.risk, size: p.size, method: p.method, seed: Number(p.seed) || 1, override: p.override === '' ? null : Number(p.override) }) : null), [items, materiality, p, include])
   const set = (k, v) => setP({ ...p, [k]: v })
   return (
-    <Card title="Materiality method – above materiality 100%, below by sample size" right={<button onClick={async () => { await load(null, await demoBuffer(demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: '4000000' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}>
+    <Card title="Materiality method – above materiality 100%, below by sample size" right={<button onClick={async () => { await load(null, await demoBuffer(demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: '4000000' })) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(demoLedgerForMateriality())); setP((x) => ({ ...x, revenue: '4000000' })) }} />
       <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-4">
         <label className="text-[11px] font-semibold uppercase text-slate-500">Test area<select aria-label="Test area" value={p.area} onChange={(e) => set('area', e.target.value)} className={`${SEL} mt-1 w-full font-normal normal-case`}><option>Revenue</option><option>COGS</option><option>Expenses</option></select></label>
         <label className="text-[11px] font-semibold uppercase text-slate-500">Revenue (this period)<input aria-label="Revenue" type="number" value={p.revenue} onChange={(e) => set('revenue', e.target.value)} className={`${SEL} mt-1 w-full font-normal`} /></label>
