@@ -801,7 +801,7 @@ function ReviewPointsSection({ canRaise }) {
 
 export default function TeamWorkspaceRequirements() {
   const [params, setParams] = useSearchParams()
-  const fileOptions = [...teamFiles, PORTAL_CLIENT]
+  const fileOptions = teamFiles.some((f) => f.slug === PORTAL_CLIENT.slug) ? [...teamFiles] : [...teamFiles, PORTAL_CLIENT]
   const slug = params.get('file') || 'al-marai'
   const selected = fileOptions.find((f) => f.slug === slug) || teamFiles[0]
   const isMis = selected.auditor === 'MISCPA'

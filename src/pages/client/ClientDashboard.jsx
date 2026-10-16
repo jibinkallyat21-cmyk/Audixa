@@ -654,6 +654,7 @@ function ActivityTicker({ events }) {
 }
 
 /* ─── Main Dashboard ─── */
+import DemoDataCard from '../../components/client/DemoDataCard'
 export default function ClientDashboard() {
   const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
   const fyData = getFYData(selectedFY)
@@ -677,6 +678,7 @@ export default function ClientDashboard() {
 
           {/* ── LEFT COLUMN ── */}
           <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+            <DemoDataCard D={D} />
             <AnimatePresence mode="wait">
               <motion.div key={selectedFY} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="flex flex-col gap-4">
 
