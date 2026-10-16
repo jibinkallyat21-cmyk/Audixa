@@ -9,7 +9,7 @@ import { useToast } from '../shared/Toast'
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 // Selecting a numerical threshold (ABCPA files): one basis is chosen, the percentage applied is inside its typical range, and the materiality follows.
-export default function MaterialityDialog({ dc, current, onClose }) {
+export default function MaterialityDialog({ dc, current, onClose, onSaved }) {
   const showToast = useToast(); const me = currentUser()
   const bench = useMemo(() => benchmarks(dc.ledgers), [dc.ledgers])
   const [basis, setBasis] = useState(current?.basis || 'revenue'); const [pcts, setPcts] = useState(current?.pcts || {})
@@ -18,7 +18,7 @@ export default function MaterialityDialog({ dc, current, onClose }) {
     if (!chosen?.amount) return
     saveMateriality(dc.slug, { basis, pct: chosen.pct, pcts, benchmark: chosen.base, materiality: chosen.amount, setBy: me.name })
     logEvent({ client: dc.slug, clientName: dc.client, category: 'work', title: 'Materiality set', description: `${chosen.label} ${chosen.pct}% = SAR ${money(chosen.amount)}`, extra: { auditArea: 'Planning', performedBy: me.name }, user: me })
-    showToast('Materiality saved. The sampling tools now use it.'); onClose()
+    showToast('Materiality saved. The sampling tools now use it.'); onClose(); onSaved?.()
   }
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-navy/50 px-4" onClick={onClose} role="dialog" aria-modal="true" aria-label="Set materiality">

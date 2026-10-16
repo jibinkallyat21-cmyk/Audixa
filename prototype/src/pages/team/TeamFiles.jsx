@@ -77,10 +77,11 @@ function FileRow({ f, idx }) {
   const [expanded, setExpanded] = useState(false)
   const pbcPercent = Math.round((f.pbcDone / f.pbcTotal) * 100)
 
+  // Entering a workspace opens the file summary: it shows where the file stands and, on ABCPA files, whether materiality is set.
+  const navigate = useNavigate()
   const handleEnterWorkspace = (e) => {
     e.stopPropagation()
-    setExpanded((v) => !v)
-    setHovered(true)
+    navigate('/team/workspace/summary')
   }
 
   return (

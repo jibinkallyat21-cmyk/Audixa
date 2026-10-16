@@ -133,3 +133,9 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
   - Equity: registration or articles for capital, shareholder resolution or prior-year statements for reserves and retained earnings (required); proof of capital paid in (if applicable).
   - End of service benefits: computation (required); employment contracts and payments to leavers (if applicable).
 - Already built earlier: prepaid, fixed asset additions, accruals, sales / purchases / expenses vouching. Not covered: salary (no ledger line to support; payroll register and WPS proof need their own design), tax and unclassified.
+
+## File summary first, materiality gate, one requirement list, remarks (built)
+
+- "Enter Workspace" opens the file summary. On an ABCPA file with no materiality set, the summary shows a red notice and a "Set materiality" button. The audit areas cannot be opened until materiality is set: opening them sends the person to the file summary with the materiality window already open, and saving it continues to the audit areas. MISCPA files are not gated.
+- The audit team's requirement list is now the same as the client's: grouped by audit area, each area holding its documents, samples and cut-off items. The separate "Samples sent" and "Cut-off sent" tabs are gone; the sent, waiting, to-review and overdue counts and the reminder button sit at the top of the list.
+- Remarks on every requirement, sample and cut-off item: the client explains what the transaction is, the audit team replies, as a thread. Where the client has no document, "Send as explanation (no document)" sends the explanation alone and the item goes to the team for review (the rule: a short explanation is required even with a document, mandatory without one). Client remarks appear in the audit log and the team's notifications.
