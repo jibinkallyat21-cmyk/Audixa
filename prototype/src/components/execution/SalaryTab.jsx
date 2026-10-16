@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import AutoDemo from './AutoDemo'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientSalarySources, clientContributors, clientTbMonthly, tbSalaries } from '../../utils/clientPayrollData'
 import { Download, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { useToast } from '../shared/Toast'
@@ -57,7 +59,9 @@ export default function SalaryTab({ client, clientName }) {
     logEvent({ client, clientName, category: 'work', title: 'Salary schedule built', description: `${built.records.length} employee-months, final status ${final.status}`, extra: { auditArea: 'Payroll', performedBy: me.name }, user: me })
   }
   const download = async () => { const wb = await buildSalaryWorkbook({ ...out, completenessResult: out.comp, client: clientName, basis: p.basis, period: p }); const url = URL.createObjectURL(await workbookToBlob(wb)); const a = document.createElement('a'); a.href = url; a.download = 'Salary_Schedule_All_Months.xlsx'; a.click(); URL.revokeObjectURL(url); showToast('Workbook downloaded') }
-  const useDemo = () => { setSources(demoSources()); setContrib(demoContrib); setP((x) => ({ ...x, tbMonthly: { '2025-01': 20450, '2025-02': 19800 }, tbTotal: '' })); setOut(null) }
+  const dc = useDemoClient()
+  // For the demo client the schedules are its own salaries and wages ledger spread over 12 months; otherwise the generic demo files.
+  const useDemo = () => { if (dc.ready) { setSources(clientSalarySources(dc.ledgers)); setContrib(clientContributors(dc.ledgers)); setP((x) => ({ ...x, tbMonthly: clientTbMonthly(dc.ledgers), tbTotal: String(tbSalaries(dc.ledgers)) })) } else { setSources(demoSources()); setContrib(demoContrib); setP((x) => ({ ...x, tbMonthly: { '2025-01': 20450, '2025-02': 19800 }, tbTotal: '' })) } setOut(null) }
   const months = [...new Set(sources.flatMap((s) => buildAllMonths([s]).records.map((r) => r.month).filter(Boolean)))].sort()
   return (
     <div className="space-y-4">

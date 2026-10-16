@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useClientProfiles } from '../../utils/clientProfiles'
+import { useDemoLoaded, DEMO_FILE } from '../../utils/demoData'
 import IfrsTBTab from './IfrsTBTab'
 import FSPrepTab from './FSPrepTab'
 
@@ -7,7 +8,7 @@ const SEL = 'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm tex
 
 // Process 3.6. Audit Team portal.
 export default function FinancialStatementsView() {
-  const profiles = useClientProfiles(); const [pid, setPid] = useState(''); const [tab, setTab] = useState('proper')
+  const profiles = useClientProfiles(); const demoOn = useDemoLoaded(); const [pid, setPid] = useState(demoOn ? DEMO_FILE.slug : ''); const [tab, setTab] = useState('proper')
   const prof = profiles.find((p) => p.id === pid); const name = prof?.client || ''
   return (
     <div className="space-y-5">

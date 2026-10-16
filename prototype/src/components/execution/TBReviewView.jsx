@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientAfs } from '../../utils/clientFsData'
 import { Download, FileSpreadsheet, Loader2, Plus, Trash2, Upload } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { FieldInput, readDocument } from './elShared'
@@ -47,7 +49,8 @@ export default function TBReviewView() {
   const showToast = useToast()
   const profiles = useClientProfiles()
   const me = currentUser()
-  const [pid, setPid] = useState('')
+  const dc = useDemoClient()
+  const [pid, setPid] = useState(dc.loaded ? dc.slug : '')
   const [p, setP] = useState({ cyFrom: '2025-01-01', cyTo: '2025-12-31', pyFrom: '2024-01-01', pyTo: '2024-12-31', currency: 'SAR', tolerance: 1, interim: false, distributions: '', convention: 'drPositive' })
   const [files, setFiles] = useState({ py: null, cy: null })
   const [demo, setDemo] = useState(null)
@@ -81,7 +84,8 @@ export default function TBReviewView() {
     } else setAfsMsg(`${r.reason || 'Not read automatically'}. Add the AFS lines by hand below.`)
     setBusy('')
   }
-  const useDemo = () => { const py = demoPY(); setDemo({ py, cy: demoCY(py) }); setFiles({ py: null, cy: null }); setAfs(demoAFS.map((x) => ({ ...x }))); setP((x) => ({ ...x, distributions: '0' })); setOut(null) }
+  // For the demo client both trial balances and last year's audited lines come from its own file; otherwise the generic demo data.
+  const useDemo = () => { if (dc.ready && dc.pyLedgers.length) { setDemo({ py: dc.pyLedgers.map((l) => ({ ...l })), cy: dc.ledgers.map((l) => ({ ...l })) }); setAfs(clientAfs(dc.pyLedgers)) } else { const py = demoPY(); setDemo({ py, cy: demoCY(py) }); setAfs(demoAFS.map((x) => ({ ...x }))) } setFiles({ py: null, cy: null }); setP((x) => ({ ...x, distributions: '0' })); setOut(null) }
 
   const ledgersOf = (which) => {
     if (demo) return { ledgers: demo[which], multi: false, sheetCount: 1 }

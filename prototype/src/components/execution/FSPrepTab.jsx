@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
+import { useDemoClient } from '../../utils/useDemoClient'
+import { clientPyAfs, clientDepreciation } from '../../utils/clientFsData'
 import { Download } from 'lucide-react'
 import { Card, Chip, DataTable, Flags } from './ReviewParts'
 import { TBSource } from './IfrsTBTab'
@@ -18,6 +20,9 @@ const AFS_TO_FS = { cash: 'cash', receivables: 'ar', prepayments: 'prepaid', inv
 
 export default function FSPrepTab({ client, clientName }) {
   const showToast = useToast(); const me = currentUser()
+  const dc = useDemoClient()
+  // For the demo client: its own trial balance, last year's audited balances and the depreciation booked in the trial balance.
+  const loadDemo = () => { if (dc.ready) { setLedgers(dc.ledgers.map((l) => ({ ...l }))); setPy(clientPyAfs(dc.pyLedgers)); setInputs((x) => ({ ...x, depreciation: clientDepreciation(dc.ledgers) })) } else { setLedgers(demoClientTB()); setPy({ bs: { ...demoPYAFS.bs }, pl: {} }); setInputs((x) => ({ ...x, depreciation: 9500 })) } setFile(null); setOut(null) }
   const [file, setFile] = useState(null); const [ledgers, setLedgers] = useState([]); const [py, setPy] = useState({ bs: {}, pl: {} }); const [msg, setMsg] = useState('')
   const [inputs, setInputs] = useState({ depreciation: '', taxPaid: '', dividends: '', reserveTransfer: '', otherEquity: '', capitalChange: '' }); const [period, setPeriod] = useState('31 Dec 2025'); const [out, setOut] = useState(null)
   const num = (v) => (v === '' ? 0 : Number(v))
@@ -35,7 +40,7 @@ export default function FSPrepTab({ client, clientName }) {
   const st = out?.fs.st
   return (
     <div className="space-y-4">
-      <Card title="1. Current-year trial balance" right={<button onClick={() => { setLedgers(demoClientTB()); setPy({ bs: { ...demoPYAFS.bs }, pl: {} }); setFile(null); setInputs((x) => ({ ...x, depreciation: 9500 })); setOut(null) }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => { setLedgers(demoClientTB()); setPy({ bs: { ...demoPYAFS.bs }, pl: {} }); setFile(null); setInputs((x) => ({ ...x, depreciation: 9500 })); setOut(null) }} />
+      <Card title="1. Current-year trial balance" right={<button onClick={() => { loadDemo() }} className="text-xs font-semibold text-slate-500 underline">Use demo data</button>}><AutoDemo run={() => { loadDemo() }} />
         <TBSource file={file} setFile={setFile} onLedgers={(l) => { setLedgers(l); setOut(null) }} />
         <p className="mt-2 text-xs text-slate-500">Debit positive, credit negative. The closing balance is recomputed (opening + debit − credit) and compared with the supplied closing.</p>
         <label className="mt-2 block text-xs text-slate-500">Reporting date <input aria-label="Reporting date" value={period} onChange={(e) => setPeriod(e.target.value)} className={`${INP} ml-1 w-40`} /></label>

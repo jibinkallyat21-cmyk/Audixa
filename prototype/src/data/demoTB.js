@@ -26,11 +26,15 @@ export function demoCY(py = demoPY()) {
   cy.find((l) => l.code === '6004').closing = -1200                                                            // expense with a credit balance
   return cy
 }
-// Same demo year with the opening balances corrected: the receivables / retained earnings difference of 7,500 is removed (the split prepayment only exists in the demo upload),
-// so every opening balance agrees to the previous year audited trial balance and nothing is flagged.
+// Same demo year, corrected: the receivables / retained earnings opening difference is removed, the near-duplicate bank ledger and the unmapped
+// consultancy income ledger are dropped, and the bank payments carry the 40,200 the year's entries were short by, so the trial balance balances
+// and every opening balance agrees to the previous year audited trial balance. Nothing is flagged.
 export function demoCorrectedLedgers() {
   const fix = { 1100: -7500, 3100: 7500 }
-  return demoCY(demoPY()).map((l) => { const opening = l.opening + (fix[l.code] || 0); return { ...l, opening, closing: opening + l.debit - l.credit } })
+  return demoCY(demoPY()).filter((l) => !['1002', '9001'].includes(l.code)).map((l) => {
+    const opening = l.opening + (fix[l.code] || 0); const credit = l.code === '1001' ? l.credit + 40200 : l.credit
+    return { ...l, opening, credit, closing: opening + l.debit - credit }
+  })
 }
 export const demoAFS = [
   { name: 'Cash and cash equivalents', line: 'cash', amount: 85000 }, { name: 'Trade receivables', line: 'receivables', amount: 410000 }, { name: 'Inventory', line: 'inventory', amount: 230000 },

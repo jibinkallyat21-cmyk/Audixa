@@ -225,94 +225,94 @@ function AIFlagPanel({ flag, isLead, onApprove, onDismiss }) {
 }
 
 /* ── Sub-task row ── */
-function SubTaskRow({ sub, isLead, locked, status = 'Not Started', setStatus, info = [], flagDraft = null, onRaise }) {
+// The working tool behind a sub-task, opened right under it. Sub-tasks without a tool say so and keep the person's own notes.
+const SUB_TOOLS = {
+  'area-cash': { label: 'Open the cash and bank confirmations', C: () => <SamplingVouchingView embedded initialTab="confirm" /> },
+  'area-ar': { label: 'Open the receivables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" /> },
+  'area-ap': { label: 'Open the payables sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="party" /> },
+  'area-rev': { label: 'Open the sales sample', C: () => <SamplingVouchingView embedded initialTab="sampling" initialMode="sales" /> },
+  'area-fa': { label: 'Open the depreciation schedule', C: () => <PayrollAssetsView embedded initialTab="dep" /> },
+  'samp-1': { label: 'Open the sampling tool', C: () => <SamplingVouchingView embedded initialTab="sampling" /> },
+  'samp-2': { label: 'Open the vouching tool', C: () => <SamplingVouchingView embedded initialTab="vouching" /> },
+  'samp-3': { label: 'Open the vouching results', C: () => <SamplingVouchingView embedded initialTab="vouching" /> },
+}
+
+function SubTaskRow({ sub, isLead, locked, status = 'Not Started', setStatus, info = [], flagDraft = null, onRaise, auto = false, note = '', setNote }) {
   const showToast = useToast()
-  const [hovered, setHovered] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [toolOpen, setToolOpen] = useState(false)
   const aiFlag = flagDraft ? { id: `qd-${sub.id}`, draft: flagDraft, pending: true, computed: true } : sub.aiFlag
   const [flagVisible, setFlagVisible] = useState(!!aiFlag)
-
-  const advance = () => {
-    if (locked) { showToast('Complete the previous procedure first'); return }
-    if (status === 'Not Started') { setStatus('In Progress'); showToast(`${sub.name}: started`) }
-    else if (status === 'In Progress') { setStatus('Complete'); showToast(`${sub.name}: marked complete`) }
-  }
+  const tool = SUB_TOOLS[sub.id]
+  const move = (to, msg) => { if (locked) { showToast('Complete the previous procedure first'); return } setStatus(to); showToast(msg) }
+  const summary = info[0] || sub.desc
 
   return (
-    <div
-      className="border-b border-slate-50 last:border-0"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Collapsed row */}
-      <div className={`flex items-center gap-3 px-5 py-3.5 transition-colors ${hovered ? 'bg-slate-50' : ''}`}>
-        <span className={`h-2 w-2 shrink-0 rounded-full ${DOT_COLOR[status]}`} />
-        <p className={`flex-1 text-sm ${locked ? 'text-slate-400' : 'text-navy'}`}>{sub.name}</p>
-        {aiFlag && flagVisible && (
-          <motion.span
-            animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 1.4, repeat: Infinity }}
-            className="rounded-full border border-amber/40 bg-amber/10 px-2 py-0.5 text-[10px] font-bold text-amber"
-          >
-            AI Flag
-          </motion.span>
-        )}
-        {locked && <Lock className="h-3.5 w-3.5 shrink-0 text-slate-300" />}
-        <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${STATUS_STYLE[status]}`}>
-          {status}
+    <div className="border-b border-slate-100 last:border-0">
+      <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 ${open ? 'bg-slate-50' : ''}`}>
+        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${DOT_COLOR[status]}`} />
+        <span className="min-w-0 flex-1">
+          <span className={`block text-sm font-semibold ${locked ? 'text-slate-400' : 'text-navy'}`}>{sub.name}</span>
+          <span className="mt-0.5 block truncate text-xs text-slate-500">{summary}</span>
         </span>
-      </div>
+        {aiFlag && flagVisible && <span className="shrink-0 rounded-full border border-amber/40 bg-amber/10 px-2.5 py-0.5 text-[10px] font-bold text-amber">Query draft</span>}
+        <span className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold ${STATUS_STYLE[status]}`}>{status}</span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
 
-      {/* Expanded details */}
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="overflow-hidden"
-          >
-            <div className="bg-slate-50 px-5 pb-4 pt-2">
-              <p className="text-xs leading-relaxed text-slate-500">{sub.desc}</p>
-              {info.length > 0 && (
-                <div className="mt-2 space-y-0.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
-                  {info.map((t, i) => <p key={i}>{t}</p>)}
-                </div>
-              )}
+      {open && (
+        <div className="space-y-5 bg-slate-50 px-5 pb-6 pt-2">
+          <section>
+            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">What to do</h4>
+            <p className="mt-1 text-sm leading-relaxed text-slate-700">{sub.desc}</p>
+          </section>
 
-              {aiFlag && flagVisible && (
-                <AIFlagPanel
-                  flag={aiFlag}
-                  isLead={isLead}
-                  onApprove={(text) => { if (onRaise) onRaise(sub, text); setFlagVisible(false); setStatus('Complete') }}
-                  onDismiss={() => setFlagVisible(false)}
-                />
-              )}
+          {info.length > 0 && (
+            <section>
+              <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">From the client's file</h4>
+              <ul className="mt-2 space-y-1.5 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+                {info.map((t, i) => <li key={i} className="flex gap-2"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{t}</li>)}
+              </ul>
+            </section>
+          )}
 
-              {!locked && status !== 'Complete' && (
-                <button
-                  onClick={advance}
-                  className={`mt-3 rounded-lg px-4 py-2 text-xs font-semibold text-white transition-colors ${
-                    status === 'In Progress' ? 'bg-brand hover:bg-[#D12C35]' : 'bg-navy hover:bg-[#0a1628]'
-                  }`}
-                >
-                  {status === 'Not Started' ? 'Begin Sub-task' : 'Mark Complete'}
-                </button>
-              )}
-              {status === 'Complete' && (
-                <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-emerald">
-                  <Check className="h-3.5 w-3.5" /> Completed
-                </p>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {aiFlag && flagVisible && (
+            <AIFlagPanel flag={aiFlag} isLead={isLead} onApprove={(text) => { if (onRaise) onRaise(sub, text); setFlagVisible(false); setStatus('Complete') }} onDismiss={() => setFlagVisible(false)} />
+          )}
+
+          <section>
+            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Working tool</h4>
+            {tool ? (
+              <div className="mt-2">
+                <button onClick={() => setToolOpen((v) => !v)} className="rounded-lg border border-navy bg-white px-4 py-2.5 text-sm font-semibold text-navy hover:bg-navy hover:text-white">{toolOpen ? 'Close the tool' : tool.label}</button>
+                {toolOpen && <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5"><tool.C /></div>}
+              </div>
+            ) : <p className="mt-1 text-sm text-slate-500">{auto ? 'This step was done in the trial balance review.' : 'No separate tool for this sub-task. Record your work in the notes below.'}</p>}
+          </section>
+
+          {!auto && (
+            <section>
+              <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Your notes</h4>
+              <textarea value={note} onChange={(e) => setNote && setNote(e.target.value)} rows={3} placeholder="What you checked, what you found, what you concluded" className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy outline-none focus:border-navy" />
+            </section>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3">
+            {auto ? <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald"><Check className="h-4 w-4" /> Completed automatically</p> : (
+              <>
+                {status === 'Not Started' && <button onClick={() => move('In Progress', `${sub.name}: started`)} className="rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a1628]">Start this sub-task</button>}
+                {status !== 'Complete' && <button onClick={() => move('Complete', `${sub.name}: marked complete`)} className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#D12C35]">Mark complete</button>}
+                {status === 'Complete' && <><p className="flex items-center gap-1.5 text-sm font-semibold text-emerald"><Check className="h-4 w-4" /> Completed</p><button onClick={() => move('In Progress', `${sub.name}: reopened`)} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-100">Reopen</button></>}
+                {status === 'In Progress' && <button onClick={() => move('Not Started', `${sub.name}: set back to not started`)} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-100">Set back to not started</button>}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-/* ── Main procedure card ── */
 function ProcedureSection({ proc, seqIndex, allStatuses, subStatuses = {}, onStatusChange, isLead, data = null, onRaise }) {
   const [open, setOpen] = useState(seqIndex === 0)
 
@@ -396,7 +396,7 @@ function ProcedureSection({ proc, seqIndex, allStatuses, subStatuses = {}, onSta
               </div>
             )}
             <p className="border-b border-slate-50 px-5 py-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Sub-tasks — hover to expand
+              Sub-tasks — click one to open it
             </p>
             {proc.subTasks.map((sub) => (
               <SubTaskRow
@@ -407,6 +407,9 @@ function ProcedureSection({ proc, seqIndex, allStatuses, subStatuses = {}, onSta
                 status={subStatuses[`${proc.id}-${sub.id}`] || 'Not Started'}
                 setStatus={(st) => onStatusChange(`${proc.id}-${sub.id}`, st)}
                 info={data ? data.info[sub.id] || [] : []}
+                auto={!!(data && data.auto[sub.id])}
+                note={subStatuses[`note:${proc.id}-${sub.id}`] || ''}
+                setNote={(v) => onStatusChange(`note:${proc.id}-${sub.id}`, v)}
                 flagDraft={data ? data.flags[sub.id] || null : null}
                 onRaise={onRaise}
               />

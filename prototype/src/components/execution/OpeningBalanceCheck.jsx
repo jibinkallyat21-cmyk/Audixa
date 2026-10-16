@@ -9,7 +9,7 @@ import { openingCheck } from '../../utils/openingCheck'
 import { flagsFromCheck, reviewOpening } from '../../utils/openingReview'
 import { requestReview } from '../../utils/openingReviewClient'
 import { setPYTB, setTBLedgers, setOpeningReview } from '../../utils/tbSubmissionStore'
-import { demoPYPayload, demoCorrectedLedgers, useDemoExisting } from '../../utils/demoData'
+import { demoPYPayload, demoCorrected, useDemoExisting } from '../../utils/demoData'
 
 const BTN = 'inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold'
 const n0 = (n) => Number(n).toLocaleString()
@@ -82,7 +82,7 @@ export default function OpeningBalanceCheck({ file, sub, onChange }) {
           <label className={`${BTN} cursor-pointer border border-slate-300 text-navy hover:bg-slate-50`}>{busy === 'file' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}{hasPY ? 'Replace the audited trial balance' : "Upload last year's audited trial balance (PDF or Excel)"}
             <input type="file" accept=".xlsx,.pdf" className="hidden" onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} /></label>
           {!hasPY && <button onClick={() => { setPYTB(file, demoPYPayload()); setConfirmed(false) }} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo audited trial balance</button>}
-          {file.isDemo && <button onClick={() => { setTBLedgers(file, compactLedgers(demoCorrectedLedgers())); setPYTB(file, demoPYPayload()); setConfirmed(false); setNote(''); asked.current = ''; showToast('Demo opening balances corrected: they now agree to the audited trial balance') }} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo with corrected opening balances</button>}
+          {file.isDemo && <button onClick={() => { setTBLedgers(file, ...demoCorrected()); setPYTB(file, demoPYPayload()); setConfirmed(false); setNote(''); asked.current = ''; showToast('Demo opening balances corrected: they now agree to the audited trial balance') }} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo with corrected opening balances</button>}
         </div>
       )}
       {err && <p className="mt-2 text-alert-red" role="alert">{err}</p>}
