@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Download, Loader2, Upload, CheckCircle2, AlertCircle, Clock, FileSpreadsheet } from 'lucide-react'
 import { useToast } from '../shared/Toast'
 import { readTBWorkbook } from '../../utils/tbExcel'
@@ -6,6 +6,7 @@ import { checkTBFormat, compactLedgers, PRESCRIBED_COLUMNS } from '../../utils/t
 import { readGLWorkbook, checkGL, demoGLTransactions } from '../../utils/generalLedger'
 import { buildTBTemplate, buildGLTemplate } from '../../utils/tbTemplate'
 import { useTBSubmissions, submitTB } from '../../utils/tbSubmissionStore'
+import { openingCheck } from '../../utils/openingCheck'
 import { demoCY, demoPY } from '../../data/demoTB'
 import { DEMO_FILE } from '../../utils/demoData'
 
@@ -19,6 +20,9 @@ export default function TBUploadStep({ D }) {
   const [busy, setBusy] = useState('')
   const [tb, setTb] = useState(null)   // { fileName, ledgers, warnings, sheetName }
   const [gl, setGl] = useState(null)   // { fileName, rows }
+  const [py, setPy] = useState(null)   // previous year audited trial balance
+  const [firstYear, setFirstYear] = useState(false)
+  const [pyErr, setPyErr] = useState([])
   const [tbErr, setTbErr] = useState([])
   const [glErr, setGlErr] = useState([])
   const card = { background: D.card, border: `1px solid ${D.border}` }
@@ -29,16 +33,27 @@ export default function TBUploadStep({ D }) {
     const r = checkGL(t.ledgers, g.txns)
     return { rows: r.partyRows, errors: r.errors, stats: r.stats }
   }
-  const setBoth = (t, g) => { setTb(t); setGl(g); setGlErr(g ? crossCheck(t, g).errors : []) }
+  // Uploads can finish in any order, so the latest values are kept in a ref instead of being read from a stale closure.
+  const cur = useRef({ tb: null, gl: null })
+  const setBoth = (t, g) => { cur.current = { tb: t, gl: g }; setTb(t); setGl(g); setGlErr(g ? crossCheck(t, g).errors : []) }
 
   const onTB = async (f) => {
     if (!f) return
     setBusy('tb'); setTbErr([])
     try {
       const r = checkTBFormat(await readTBWorkbook(await f.arrayBuffer()))
-      if (!r.ok) { setTbErr(r.errors); setBoth(null, gl) }
-      else setBoth({ fileName: f.name, ledgers: compactLedgers(r.ledgers), warnings: r.warnings, sheetName: r.sheetName }, gl)
+      if (!r.ok) { setTbErr(r.errors); setBoth(null, cur.current.gl) }
+      else setBoth({ fileName: f.name, ledgers: compactLedgers(r.ledgers), warnings: r.warnings, sheetName: r.sheetName }, cur.current.gl)
     } catch { setTbErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']) }
+    setBusy('')
+  }
+  const onPY = async (f) => {
+    if (!f) return
+    setBusy('py'); setPyErr([])
+    try {
+      const r = checkTBFormat(await readTBWorkbook(await f.arrayBuffer()))
+      if (!r.ok) { setPyErr(r.errors); setPy(null) } else setPy({ fileName: f.name, ledgers: compactLedgers(r.ledgers) })
+    } catch { setPyErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']); setPy(null) }
     setBusy('')
   }
   const onGL = async (f) => {
@@ -46,28 +61,29 @@ export default function TBUploadStep({ D }) {
     setBusy('gl'); setGlErr([])
     try {
       const r = await readGLWorkbook(await f.arrayBuffer())
-      if (!r.ok) { setGlErr([`The general ledger needs these columns: ${r.missing.join(', ')}. It must list every transaction recorded in the books.`]); setGl(null) }
-      else if (!r.txns.length) { setGlErr(['The general ledger has no transactions.']); setGl(null) }
-      else { const g = { fileName: f.name, txns: r.txns }; setGl(g); setGlErr(crossCheck(tb, g).errors) }
-    } catch { setGlErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']); setGl(null) }
+      if (!r.ok) { setGlErr([`The general ledger needs these columns: ${r.missing.join(', ')}. It must list every transaction recorded in the books.`]); cur.current.gl = null; setGl(null) }
+      else if (!r.txns.length) { setGlErr(['The general ledger has no transactions.']); cur.current.gl = null; setGl(null) }
+      else setBoth(cur.current.tb, { fileName: f.name, txns: r.txns })
+    } catch { setGlErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']); cur.current.gl = null; setGl(null) }
     setBusy('')
   }
-  const ready = !!tb && !!gl && glErr.length === 0
+  const ready = !!tb && !!gl && glErr.length === 0 && (firstYear || !!py)
+  const oc = tb && py && !firstYear ? openingCheck(py.ledgers, tb.ledgers) : null
   const send = () => {
     const { rows, stats } = crossCheck(tb, gl)
-    submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats })
+    submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats, pyFileName: firstYear ? '' : py.fileName, pyLedgers: firstYear ? [] : py.ledgers, firstYear })
     showToast('Trial balance and general ledger sent to the audit team')
   }
   const demoGL = (ledgers) => { const txns = demoGLTransactions(ledgers); const r = checkGL(ledgers, txns); return { glRows: r.partyRows, glStats: r.stats } }
   const useDemo = () => {
     const ledgers = compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit })))
-    submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', ...demoGL(ledgers) })
-    showToast('Demo trial balance and general ledger sent to the audit team')
+    submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', ...demoGL(ledgers), pyFileName: 'Demo previous year audited trial balance.xlsx', pyLedgers: compactLedgers(demoPY()) })
+    showToast('Demo files sent to the audit team')
   }
 
   if (sub?.status === 'Submitted') return (
     <div className="rounded-xl p-6" style={card}>
-      <p className="flex items-center gap-2 text-sm font-semibold text-amber"><Clock className="h-4 w-4" />Trial balance and general ledger received. Waiting for the audit team to approve them.</p>
+      <p className="flex items-center gap-2 text-sm font-semibold text-amber"><Clock className="h-4 w-4" />Trial balance, general ledger and previous year audited trial balance received. Waiting for the audit team to approve them.</p>
       <p className="mt-2 text-xs" style={{ color: D.muted }}>{sub.fileName} · {sub.ledgers.length} ledgers{sub.glFileName ? ` · ${sub.glFileName}` : ''} · sent {new Date(sub.submittedAt).toLocaleString()}. Your requirement list will appear here once they are approved.</p>
     </div>
   )
@@ -107,10 +123,16 @@ export default function TBUploadStep({ D }) {
         {slot({ title: 'Trial balance', hint: 'Ledger level, no group or sub-group balances. Receivables, payables and the two advance accounts may be one line each.', file: tb && `${tb.fileName} · ${tb.ledgers.length} ledgers`, errs: tbErr, onPick: onTB, kind: 'tb', template: 'Download the trial balance format', templateName: 'Trial_Balance_Format.xlsx', builder: buildTBTemplate })}
         {slot({ title: 'Detailed general ledger', hint: 'Every transaction recorded in your books for the period, one row per entry, with the opening balance of each account as an "Opening balance" line. For receivables, payables and advances give the party name on each line. Movements must agree with your trial balance.', file: gl && `${gl.fileName} · ${gl.txns.length} transactions`, errs: glErr, onPick: onGL, kind: 'gl', template: 'Download the general ledger format', templateName: 'General_Ledger_Format.xlsx', builder: buildGLTemplate })}
       </div>
+      <div className="mt-3">
+        {!firstYear && slot({ title: 'Previous year audited trial balance', hint: 'The audited trial balance of last year, in the same format. Your opening balances are checked against its closing balances.', file: py && `${py.fileName} · ${py.ledgers.length} ledgers`, errs: pyErr, onPick: onPY, kind: 'py', template: 'Download the trial balance format', templateName: 'Trial_Balance_Format.xlsx', builder: buildTBTemplate })}
+        <label className="mt-2 flex items-center gap-2 text-xs" style={{ color: D.muted }}><input type="checkbox" checked={firstYear} onChange={(e) => setFirstYear(e.target.checked)} />This is our first audit, so there is no previous year audited trial balance</label>
+        {oc && !oc.aligned && <p className="mt-2 rounded-lg px-3 py-2 text-xs text-amber" style={{ background: 'rgba(245,158,11,0.1)' }}>{oc.differences} area{oc.differences === 1 ? '' : 's'} of your opening balances differ from last year's audited closing balances. You can still send; the audit team will ask you to explain the difference.</p>}
+        {oc && oc.aligned && <p className="mt-2 text-xs text-emerald">Your opening balances agree with last year's audited trial balance.</p>}
+      </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button disabled={!ready} onClick={send} className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Send to the audit team</button>
-        {!ready && <span className="text-xs" style={{ color: D.muted }}>Both files are needed.</span>}
-        <button onClick={useDemo} className="rounded-lg px-4 py-2 text-sm font-semibold underline" style={{ color: D.muted }}>Use demo trial balance and general ledger</button>
+        {!ready && <span className="text-xs" style={{ color: D.muted }}>The trial balance, the general ledger and last year's audited trial balance are needed.</span>}
+        <button onClick={useDemo} className="rounded-lg px-4 py-2 text-sm font-semibold underline" style={{ color: D.muted }}>Use demo files</button>
       </div>
     </div>
   )
