@@ -3,7 +3,7 @@
 import { teamFiles } from '../data/sampleData.js'
 import { withdrawList, PORTAL_CLIENT } from './requirementsStore.js'
 import { clearTB, submitTB } from './tbSubmissionStore.js'
-import { demoPY, demoCY } from '../data/demoTB.js'
+import { demoPY, demoCY, demoCorrectedLedgers } from '../data/demoTB.js'
 import { compactLedgers } from './tbFormat.js'
 import { demoGLTransactions, checkGL } from './generalLedger.js'
 import { useStore, readStore, writeStore } from './store.js'
@@ -36,6 +36,7 @@ export function demoPayload(existing = true) {
   const gl = checkGL(ledgers, demoGLTransactions(ledgers))
   return { fileName: 'Demo trial balance.xlsx', ledgers, sheetName: 'Trial Balance', glFileName: 'Demo general ledger.xlsx', glRows: gl.partyRows, glStats: gl.stats, ...(existing ? {} : { pyFileName: 'Demo previous year audited trial balance.xlsx', pyLedgers: compactLedgers(demoPY()) }) }
 }
+export { demoCorrectedLedgers }
 export const demoPYPayload = () => ({ fileName: 'Demo previous year audited trial balance.xlsx', ledgers: compactLedgers(demoPY()) })
 
 export function loadDemoData(auditor = 'MISCPA', existing = true) {

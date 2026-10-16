@@ -26,6 +26,12 @@ export function demoCY(py = demoPY()) {
   cy.find((l) => l.code === '6004').closing = -1200                                                            // expense with a credit balance
   return cy
 }
+// Same demo year with the opening balances corrected: the receivables / retained earnings difference of 7,500 is removed (the split prepayment only exists in the demo upload),
+// so every opening balance agrees to the previous year audited trial balance and nothing is flagged.
+export function demoCorrectedLedgers() {
+  const fix = { 1100: -7500, 3100: 7500 }
+  return demoCY(demoPY()).map((l) => { const opening = l.opening + (fix[l.code] || 0); return { ...l, opening, closing: opening + l.debit - l.credit } })
+}
 export const demoAFS = [
   { name: 'Cash and cash equivalents', line: 'cash', amount: 85000 }, { name: 'Trade receivables', line: 'receivables', amount: 410000 }, { name: 'Inventory', line: 'inventory', amount: 230000 },
   { name: 'Prepayments', line: 'prepayments', amount: 18000 }, { name: 'Property, plant and equipment', line: 'ppe', amount: 198000 },
