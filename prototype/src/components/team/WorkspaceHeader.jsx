@@ -230,21 +230,21 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
           </div>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex gap-x-4 overflow-x-auto 2xl:gap-x-6">
           {tabs.map((tab) => {
             const active = location.pathname === tab.href
             return (
               <Link
                 key={tab.id}
                 to={tab.href}
-                className={`relative flex items-center gap-1.5 pb-3 text-sm font-medium transition-colors ${
+                className={`relative flex shrink-0 items-center gap-1.5 whitespace-nowrap pb-3 text-sm font-medium transition-colors ${
                   active ? 'text-brand' : 'text-slate-500 hover:text-navy'
                 }`}
               >
                 {tab.label}
-                <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${badgeClass[tab.badgeTone]}`}>
+                {tab.badge && <span className={`whitespace-nowrap rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${badgeClass[tab.badgeTone]} ${tab.badgeTone === 'grey' ? 'hidden 2xl:inline' : ''}`}>
                   {tab.badge}
-                </span>
+                </span>}
                 {active && <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-brand" />}
               </Link>
             )

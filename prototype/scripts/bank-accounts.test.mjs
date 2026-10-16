@@ -51,3 +51,8 @@ test('old all-bank cut-off block is moved to the account and duplicates are remo
   assert.deepEqual(m.rec.categories.find((c) => c.id === 'cut-bank').items.map((i) => i.ref), ['CUT-BANK-03'])   // a ledger not in the list stays
   assert.equal(withCutoffMigration(m.rec, accs).changed, false)
 })
+test('leftover ungrouped sample blocks are removed', () => {
+  const r = { categories: [{ id: 'smp-materiality', title: 'Samples: Revenue (materiality method)', items: [{ ref: 'SMP-MATERIALITY-01', status: 'Pending Client', text: 'x' }] }, { id: 'SALES', title: 'Sales', items: [{ ref: 'S1', status: 'Pending Client', text: 'x' }] }] }
+  assert.deepEqual(groupRequirements(r).map((g) => g.id), ['revenue'])
+  const m = withCutoffMigration(r, accs); assert.equal(m.changed, true); assert.deepEqual(m.rec.categories.map((c) => c.id), ['SALES']); assert.equal(m.rec.itemCount, 1)
+})
