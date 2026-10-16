@@ -437,7 +437,7 @@ function RequirementRow({ item, index, onUpdateItem }) {
         <motion.div
           animate={flash ? { backgroundColor: ['rgba(5,150,105,0)', 'rgba(5,150,105,0.25)', 'rgba(5,150,105,0)'] } : {}}
           transition={{ duration: 0.55 }}
-          className="flex w-40 shrink-0 items-center rounded-full"
+          className="flex w-44 shrink-0 items-center rounded-full [&>span]:w-full"
         >
           <StatusPill status={item.status} />
         </motion.div>
@@ -565,7 +565,7 @@ function CategorySection({ category, onUpdateItem, statusFilter, searchQuery }) 
                 <span className="w-4 shrink-0" />
                 <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Ref #</span>
                 <span className="flex-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Document name</span>
-                <span className="w-40 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Status</span>
+                <span className="w-44 shrink-0 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">Status</span>
                 <span className="hidden w-44 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 xl:block">Submitted file</span>
                 <span className="w-[25rem] shrink-0 text-right text-[10px] font-semibold uppercase tracking-wide text-slate-400">Action</span>
               </div>
