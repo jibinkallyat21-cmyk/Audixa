@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, FileSpreadsheet, Loader2, Send, Undo2, Plus, Minus } from 'lucide-react'
 import AuditorChip from '../shared/AuditorChip'
 import { useToast } from '../shared/Toast'
-import { MIS_REQUIREMENTS } from '../../data/misRequirements'
+import { requirementsFor } from '../../data/firmRequirements'
 import { detectBranches } from '../../utils/tbCore'
 import { buildIssuedList, presetList } from '../../utils/requirementsEngine'
 import { useIssuedLists, issueList, withdrawList } from '../../utils/requirementsStore'
@@ -58,7 +58,7 @@ function MisList({ file, renderIssued }) {
 
   const effLedgers = clientTB ? clientTB.ledgers : null
   const effMulti = clientTB ? detectBranches(clientTB.ledgers, 1).multi : false
-  const built = useMemo(() => (effLedgers ? buildIssuedList(MIS_REQUIREMENTS, effLedgers, { consolidated: effMulti, overrides }) : null), [effLedgers, effMulti, overrides])
+  const built = useMemo(() => (effLedgers ? buildIssuedList(requirementsFor(file.auditor), effLedgers, { consolidated: effMulti, overrides }) : null), [effLedgers, effMulti, overrides])
   const toggle = (c) => setOverrides((o) => {
     const next = { ...o }; const want = !c.include
     if (want === c.applies) delete next[c.id]; else next[c.id] = want
@@ -80,7 +80,7 @@ function MisList({ file, renderIssued }) {
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="flex items-center gap-2 text-sm font-semibold text-navy">MISCPA general audit requirements <AuditorChip auditor="MISCPA" /></p>
+            <p className="flex items-center gap-2 text-sm font-semibold text-navy">{file.auditor} general audit requirements <AuditorChip auditor={file.auditor} /></p>
             <p className="mt-0.5 text-xs text-slate-500">{file.client}. The requirement list is prepared from the client's approved trial balance: only the relevant requirements are kept.</p>
           </div>
 
@@ -179,13 +179,12 @@ function MisList({ file, renderIssued }) {
 }
 
 export default function RequirementsListView({ file, renderIssued }) {
-  if (file.auditor !== 'MISCPA') {
+  if (!requirementsFor(file.auditor).length) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="flex items-center gap-2 text-sm font-semibold text-navy">Requirement list <AuditorChip auditor={file.auditor} /></p>
-        <p className="mt-2 text-sm text-slate-600">The ABCPA general requirement list will be provided later. Until then the list below is the sample ABCPA list.</p>
+        <p className="text-sm text-slate-600">No general requirement list is set up for {file.auditor || 'this auditor'}.</p>
       </div>
     )
   }
-  return <MisList key={file.slug} file={file} renderIssued={renderIssued} />
+  return <MisList key={`${file.slug}-${file.auditor}`} file={file} renderIssued={renderIssued} />
 }

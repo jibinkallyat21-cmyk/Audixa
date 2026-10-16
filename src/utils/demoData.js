@@ -15,21 +15,22 @@ export const DEMO_FILE = {
   attentionLevel: 'NORMAL', pbcDone: 0, pbcTotal: 0, daysOpen: 1, statutoryDue: '30 Apr 2027', lead: 'Fahad Al-Otaibi', associate: 'Khalid Bin-Salman', urgent: false, isDemo: true,
 }
 
-function attach(on) {
+function attach(on, auditor = 'MISCPA') {
   const i = teamFiles.findIndex((f) => f.slug === DEMO_FILE.slug)
-  if (on && i < 0) teamFiles.unshift({ ...DEMO_FILE })
-  if (!on && i >= 0) teamFiles.splice(i, 1)
+  if (i >= 0) teamFiles.splice(i, 1)
+  if (on) teamFiles.unshift({ ...DEMO_FILE, auditor })
 }
-attach(!!readStore(KEY, null)) // restore after a page reload
+attach(!!readStore(KEY, null), readStore(KEY, null)?.auditor) // restore after a page reload
 
 export const useDemoLoaded = () => !!useStore(KEY, null)[0]
+export const useDemoAuditor = () => useStore(KEY, null)[0]?.auditor || 'MISCPA'
 
-export function loadDemoData() {
-  attach(true)
+export function loadDemoData(auditor = 'MISCPA') {
+  attach(true, auditor)
   // Demo data stands in for the client's upload: the trial balance is already received and waits for the audit team's approval.
   submitTB(DEMO_FILE, { fileName: 'Demo trial balance.xlsx', ledgers: compactLedgers(demoCY(demoPY()).map((l) => ({ ...l, closing: l.opening + l.debit - l.credit }))), sheetName: 'Trial Balance' })
-  writeStore(KEY, { at: new Date().toISOString() })
-  logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio; trial balance received, waiting for approval` })
+  writeStore(KEY, { at: new Date().toISOString(), auditor })
+  logEvent({ clientName: DEMO_FILE.client, category: 'demo', title: 'Demo data loaded', description: `${DEMO_FILE.client} added to the team portfolio as a ${auditor} file; trial balance received, waiting for approval` })
 }
 export function clearDemoData() {
   attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore(KEY, null)
