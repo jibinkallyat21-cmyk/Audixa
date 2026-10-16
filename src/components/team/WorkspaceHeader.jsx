@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, MessageCircle, X, Send, Table2 } from 'lucide-react'
+import { MessageCircle, X, Send } from 'lucide-react'
 import AuditorChip from '../shared/AuditorChip'
 import AuditTypeChip from '../shared/AuditTypeChip'
 import {
@@ -9,8 +9,6 @@ import {
   teamQueries,
   teamProcedures,
   teamConversations,
-  engagementStateTemplate,
-  getLifecycleStages,
 } from '../../data/sampleData'
 import { useTB } from '../../context/TBContext'
 
@@ -56,65 +54,6 @@ function DeadlineChip({ dueLabel }) {
     >
       {days >= 0 ? `${days} Days Remaining` : `${Math.abs(days)} Days Overdue`}
     </motion.span>
-  )
-}
-
-function CompactLifecycleBar() {
-  const stages = getLifecycleStages(engagementStateTemplate)
-  const activeIndex = stages.findIndex((s) => s.status === 'active')
-  const progressPercent = (Math.max(activeIndex, 0) / (stages.length - 1)) * 100
-
-  return (
-    <div className="relative flex items-center justify-between px-1 py-3">
-      <svg className="absolute left-0 top-1/2 h-0.5 w-full -translate-y-1/2 overflow-visible" preserveAspectRatio="none">
-        <line x1="0" y1="1" x2="100%" y2="1" stroke="#E2E8F0" strokeWidth="2" strokeLinecap="round" />
-        <motion.line
-          x1="0"
-          y1="1"
-          x2={`${progressPercent}%`}
-          y2="1"
-          stroke="#059669"
-          strokeWidth="2"
-          strokeLinecap="round"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.2, ease: 'easeInOut' }}
-        />
-      </svg>
-
-      {stages.map((stage, idx) => (
-        <div key={stage.id} className="relative z-10 flex flex-col items-center">
-          {stage.status === 'completed' && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 420, damping: 16, delay: idx * 0.05 }}
-              className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald text-white"
-            >
-              <Check className="h-3 w-3" />
-            </motion.div>
-          )}
-          {stage.status === 'active' && (
-            <div className="relative flex h-5 w-5 items-center justify-center">
-              <motion.div
-                className="absolute h-5 w-5 rounded-full bg-amber/40"
-                animate={{ scale: [1, 1.4, 1], opacity: [0.7, 0.1, 0.7] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <div className="relative h-5 w-5 rounded-full bg-amber" />
-            </div>
-          )}
-          {stage.status === 'upcoming' && <div className="h-5 w-5 rounded-full border-2 border-slate-200 bg-white" />}
-          <span
-            className={`mt-1 hidden text-[10px] leading-tight min-[1280px]:block ${
-              stage.status === 'active' ? 'font-semibold text-amber' : stage.status === 'completed' ? 'text-emerald' : 'text-slate-400'
-            }`}
-          >
-            {stage.label}
-          </span>
-        </div>
-      ))}
-    </div>
   )
 }
 
@@ -280,8 +219,6 @@ export default function WorkspaceHeader({ fileSlug = 'al-marai' }) {
             </span>
           </div>
         </div>
-
-        <CompactLifecycleBar />
 
         <div className="flex gap-6">
           {tabs.map((tab) => {
