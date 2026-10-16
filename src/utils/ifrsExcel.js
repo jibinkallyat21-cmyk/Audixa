@@ -1,6 +1,6 @@
 // Process 3.6 Step 1 Excel: the IFRS TB workbook (bridge Client TB → adjustments → final, with live formulas).
 import { loadExcelJS } from './eosbExcel.js'
-import { IFRS, ifrsByCode } from './ifrs.js'
+import { ifrsByCode } from './ifrs.js'
 
 const ARIAL = { name: 'Arial', size: 10 }
 const fill = (argb) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } })

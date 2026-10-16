@@ -16,9 +16,6 @@ const ALIAS = {
   narration: ['narration', 'description', 'particulars', 'remarks', 'memo', 'details', 'text'],
   debit: ['debit', 'dr', 'debits', 'debitamount'], credit: ['credit', 'cr', 'credits', 'creditamount'],
 }
-export const GL_COLUMNS = [
-  ['Date', true], ['Voucher / reference no.', false], ['Account name (and/or account code)', true], ['Party name (receivable, payable and advance accounts)', false], ['Narration', true], ['Debit', true], ['Credit', true],
-]
 const OPENING = /opening\s*bal|balance\s*(b\/?f|brought|forward)|brought\s*forward|\bb\/f\b|\bo\/b\b/i
 const same = (l, t) => (t.accountName && norm(t.accountName) === norm(l.name)) || (t.accountCode && l.code && norm(t.accountCode) === norm(l.code)) || (!t.accountCode && !t.accountName ? false : (t.accountName && l.code && norm(t.accountName) === norm(l.code)))
 

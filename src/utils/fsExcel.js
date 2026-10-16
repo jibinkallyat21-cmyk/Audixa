@@ -1,6 +1,6 @@
 // Process 3.6 Step 1 — FS workbook. Direct-link rule: statement → note → Client TB cell. No SUMIF / lookups on the statements and notes.
 import { loadExcelJS } from './eosbExcel.js'
-import { IFRS, ifrsByCode } from './ifrs.js'
+import { ifrsByCode } from './ifrs.js'
 import { PY_BS_LINES, PY_PL_LINES } from './fsPrep.js'
 
 const TNR = { name: 'Times New Roman', size: 11 }

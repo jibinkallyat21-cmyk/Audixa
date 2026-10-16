@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from 'recharts'
-import { Download, ChevronDown, Info } from 'lucide-react'
+import { ChevronDown, Info } from 'lucide-react'
 import ManagerLayout from '../../components/manager/ManagerLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'

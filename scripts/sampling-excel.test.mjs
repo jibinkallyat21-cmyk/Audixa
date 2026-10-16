@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import ExcelJS from 'exceljs'
 import { sampleSalesPurchase, sampleExpense, sampleParties, sampleByMateriality } from '../src/utils/sampling.js'
-import { readLedgerSheet, buildSalesWorkbook, buildExpenseWorkbook, buildPartyWorkbook, buildMaterialityWorkbook, SALES_FIELDS, PARTY_FIELDS } from '../src/utils/samplingExcel.js'
+import { readLedgerSheet, buildSalesWorkbook, buildExpenseWorkbook, buildPartyWorkbook, buildMaterialityWorkbook, SALES_FIELDS } from '../src/utils/samplingExcel.js'
 
 const toBuf = async (wb) => { const b = await wb.xlsx.writeBuffer(); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) }
 async function ledgerBuf(headers, rows) { const wb = new ExcelJS.Workbook(); const ws = wb.addWorksheet('Sales'); ws.addRow(headers); rows.forEach((r) => ws.addRow(r)); return toBuf(wb) }

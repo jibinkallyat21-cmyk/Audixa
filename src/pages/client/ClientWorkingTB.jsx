@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, Download, CheckCircle2, XCircle, ChevronDown, ChevronUp, AlertTriangle, X } from 'lucide-react'
+import { Download, CheckCircle2, XCircle, ChevronDown, ChevronUp, AlertTriangle, X } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
@@ -38,8 +38,8 @@ function getClosingBalance(line) {
 
 /* ─── WTB Table with proper column headers ─── */
 function TBTable({ lines }) {
-  const [showHint, setShowHint] = useState(true)
   const { isDark } = useTheme()
+  const [showHint, setShowHint] = useState(true)
 
   const categories = [...new Set(lines.map((l) => l.category))]
   const headerBg = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC'
@@ -208,9 +208,9 @@ function RejectReasonModal({ onConfirm, onClose }) {
 
 /* ─── Adjustment card — collapsed list row, expands on hover ─── */
 function AdjustmentCard({ adj, onApprove, onReject }) {
+  const { isDark } = useTheme()
   const [hovered, setHovered] = useState(false)
   const [rejectModal, setRejectModal] = useState(false)
-  const { isDark } = useTheme()
 
   const handleRejectConfirm = (reason) => {
     onReject(adj.id, reason)
@@ -315,7 +315,6 @@ export default function ClientWorkingTB() {
   const { lastUpdated, tbLines: fy2024Lines, adjustments, pendingAdjustments, approveAdjustment, rejectAdjustment } = useTB()
   const { selectedFY } = useClientFY()
   const [reviewedExpanded, setReviewedExpanded] = useState(false)
-  const { isDark } = useTheme()
 
   const isCurrentFY = selectedFY === 'FY2024'
   // For historical FYs show static finalised data; no pending adjustments

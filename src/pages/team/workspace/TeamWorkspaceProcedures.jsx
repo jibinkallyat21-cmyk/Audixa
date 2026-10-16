@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, Check, ChevronDown, ChevronUp, Clock, FlaskConical, Lock, Send } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, FlaskConical, Lock, Send } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
@@ -156,9 +156,9 @@ const DOT_COLOR = {
 
 /* ── AI Flag approval panel ── */
 function AIFlagPanel({ flag, isLead, onApprove, onDismiss }) {
+  const showToast = useToast()
   const [text, setText] = useState(flag.draft)
   const [editing, setEditing] = useState(false)
-  const showToast = useToast()
 
   const handleApprove = () => {
     showToast('Query approved and added to Queries tab — pending client review')
@@ -218,10 +218,10 @@ function AIFlagPanel({ flag, isLead, onApprove, onDismiss }) {
 
 /* ── Sub-task row ── */
 function SubTaskRow({ sub, isLead, locked }) {
+  const showToast = useToast()
   const [hovered, setHovered] = useState(false)
   const [status, setStatus] = useState('Not Started')
   const [flagVisible, setFlagVisible] = useState(!!sub.aiFlag)
-  const showToast = useToast()
 
   const advance = () => {
     if (locked) { showToast('Complete the previous procedure first'); return }
@@ -302,7 +302,6 @@ function SubTaskRow({ sub, isLead, locked }) {
 /* ── Main procedure card ── */
 function ProcedureSection({ proc, seqIndex, allStatuses, onStatusChange, isLead }) {
   const [open, setOpen] = useState(seqIndex === 0)
-  const showToast = useToast()
 
   // A procedure is locked if the previous one hasn't started yet
   const locked = seqIndex > 0 && allStatuses[seqIndex - 1] === 'Not Started'
@@ -403,7 +402,6 @@ function ProcedureSection({ proc, seqIndex, allStatuses, onStatusChange, isLead 
 }
 
 export default function TeamWorkspaceProcedures() {
-  const showToast = useToast()
   const [role] = useTeamRole()
   const isLead = role === 'Audit Lead'
   const [statuses, setStatuses] = useState({})

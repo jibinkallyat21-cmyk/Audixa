@@ -3,11 +3,10 @@ import { Download, Loader2, Upload, CheckCircle2, AlertCircle, Clock, FileSpread
 import { useToast } from '../shared/Toast'
 import { readTBWorkbook } from '../../utils/tbExcel'
 import { checkTBFormat, compactLedgers, PRESCRIBED_COLUMNS } from '../../utils/tbFormat'
-import { readGLWorkbook, checkGL, demoGLTransactions } from '../../utils/generalLedger'
+import { readGLWorkbook, checkGL } from '../../utils/generalLedger'
 import { buildTBTemplate, buildGLTemplate } from '../../utils/tbTemplate'
 import { useTBSubmissions, submitTB } from '../../utils/tbSubmissionStore'
 import { openingCheck } from '../../utils/openingCheck'
-import { demoCY, demoPY } from '../../data/demoTB'
 import { DEMO_FILE, demoPayload, useDemoExisting } from '../../utils/demoData'
 
 const save = async (blob, name) => { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url) }

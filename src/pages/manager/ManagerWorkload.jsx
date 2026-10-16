@@ -1,16 +1,13 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Download, UserPlus, X, Sparkles, ChevronDown, ChevronRight, Pencil, Trash2, Check } from 'lucide-react'
+import { Download, UserPlus, X, Sparkles, Pencil, Trash2, Check } from 'lucide-react'
 import ManagerLayout from '../../components/manager/ManagerLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import CoordinatorCard from '../../components/execution/CoordinatorCard'
 import AuditTypeChip from '../../components/shared/AuditTypeChip'
 import { useToast } from '../../components/shared/Toast'
 import { useModal } from '../../components/shared/Modal'
-import {
-  leadWorkload, capacityTone, workloadSummary, unallocatedFiles,
-  teamPlanSummary, abcpaTeamPlan, SENIORITY_OPTIONS,
-} from '../../data/sampleData'
+import { leadWorkload, capacityTone, workloadSummary, unallocatedFiles, teamPlanSummary, abcpaTeamPlan } from '../../data/sampleData'
 
 const TONE_BAR = { emerald: 'bg-emerald', amber: 'bg-amber', 'alert-red': 'bg-alert-red' }
 const AUDIT_TYPE_LABEL = { Proper: 'Proper Audit', Disclaimer: 'Disclaimer' }

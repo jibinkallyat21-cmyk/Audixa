@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { FileText, MessageCircle, ShieldAlert, Clock, ArrowRight, AlertTriangle, ChevronDown, ChevronUp, Video, CalendarDays, X, Send } from 'lucide-react'
+import { FileText, MessageCircle, ShieldAlert, Clock, ArrowRight, AlertTriangle, ChevronDown, ChevronUp, Video, CalendarDays, X } from 'lucide-react'
 import AuditTeamLayout from '../../components/team/AuditTeamLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import AuditorChip from '../../components/shared/AuditorChip'
@@ -38,7 +38,6 @@ const LEVEL_BADGE = { 1: 'bg-amber/10 text-amber', 2: 'bg-orange-100 text-orange
 function UpwardEscalationModal({ onClose }) {
   const [selected, setSelected] = useState(null)
   const [issue, setIssue] = useState('')
-  const showToast = () => {}
 
   const handleSubmit = () => {
     if (!selected || !issue.trim()) return

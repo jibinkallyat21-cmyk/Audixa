@@ -1,17 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Lock, CheckCircle2, AlertCircle, FileText, ChevronRight,
-  Calendar, ChevronDown, X, Send, TrendingUp, Search, LineChart,
-  AlertTriangle, ChevronUp, Clock, Eye,
-} from 'lucide-react'
+import { Lock, CheckCircle2, AlertCircle, FileText, ChevronRight, Calendar, X, Send, TrendingUp, LineChart, AlertTriangle, Clock, Eye } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import LifecycleStepper from '../../components/shared/LifecycleStepper'
 import { clientPortal, teamFiles } from '../../data/sampleData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
-import { getActivityEvents } from '../../data/activityLog'
 import { raiseEscalation } from '../../utils/escalations'
 import { useToast } from '../../components/shared/Toast'
 
@@ -110,45 +105,8 @@ const AUDIT_TEAM_FY2022 = [
   { initials: 'KM', name: 'Khalid Mansour', role: 'Audit Lead',      online: false, fileHandler: false },
   { initials: 'NB', name: 'Noura Bilal',    role: 'Audit Associate', online: false, fileHandler: true  },
 ]
-
-const UNDER_REVIEW_DOCS = [
-  { ref: 'REV-02', name: 'Top 10 Customer Contracts', uploadedOn: '09 Oct 2024', reviewer: 'S. Rashid' },
-  { ref: 'PPE-05', name: 'Asset Impairment Assessment', uploadedOn: '10 Oct 2024', reviewer: 'L. Khalid' },
-  { ref: 'PPE-09', name: 'Right-of-Use Asset Schedule', uploadedOn: '10 Oct 2024', reviewer: 'S. Rashid' },
-  { ref: 'TAX-06', name: 'Transfer Pricing Documentation', uploadedOn: '07 Oct 2024', reviewer: 'L. Khalid' },
-  { ref: 'REV-05', name: 'ZATCA E-Invoicing Samples', uploadedOn: '06 Oct 2024', reviewer: 'S. Rashid' },
-  { ref: 'COG-11', name: 'Related Party Declaration', uploadedOn: '05 Oct 2024', reviewer: 'L. Khalid' },
-  { ref: 'PPE-03', name: 'Additions List (New Assets FY24)', uploadedOn: '04 Oct 2024', reviewer: 'S. Rashid' },
-  { ref: 'TAX-03', name: 'Zakat Declaration Form', uploadedOn: '03 Oct 2024', reviewer: 'L. Khalid' },
-  { ref: 'COG-09', name: 'Municipal License Renewal', uploadedOn: '02 Oct 2024', reviewer: 'S. Rashid' },
-  { ref: 'REV-04', name: 'Year-end Cutoff Invoices (Partial)', uploadedOn: '01 Oct 2024', reviewer: 'L. Khalid' },
-  { ref: 'PPE-08', name: 'Insurance Certificates (Major Assets)', uploadedOn: '30 Sep 2024', reviewer: 'S. Rashid' },
-]
-
 const EVENT_ICON = { emerald: CheckCircle2, red: AlertCircle, amber: AlertCircle, blue: FileText, navy: TrendingUp }
 const EVENT_COLOR = { emerald: '#10B981', red: '#E63946', amber: '#F59E0B', blue: '#3B82F6', navy: '#6366F1' }
-
-const OUTSTANDING_ITEMS = [
-  { ref: 'BNK-03', name: 'Bank Statement October 2024' },
-  { ref: 'TAX-07', name: 'ZATCA VAT Return Q3 2024' },
-  { ref: 'PPE-10', name: 'Fixed Asset Register (Updated)' },
-  { ref: 'REV-08', name: 'Revenue Reconciliation Schedule' },
-  { ref: 'PAY-04', name: 'Payroll Summary September 2024' },
-  { ref: 'COG-14', name: 'Inventory Count Sheets (Sep)' },
-  { ref: 'BNK-04', name: 'Bank Statement November 2024' },
-]
-
-const OPEN_QUERIES = [
-  { ref: 'Q-041', name: 'Explain variance in COGS vs prior year' },
-  { ref: 'Q-038', name: 'Confirm related party transaction terms' },
-  { ref: 'Q-035', name: 'Provide aging analysis for receivables' },
-  { ref: 'Q-033', name: 'Clarify depreciation method change' },
-  { ref: 'Q-029', name: 'Upload signed lease agreement' },
-  { ref: 'Q-027', name: 'Reconcile revenue to ZATCA filings' },
-  { ref: 'Q-024', name: 'Confirm write-off approval authority' },
-  { ref: 'Q-021', name: 'Provide board resolution for dividend' },
-]
-
 /* ─── Expandable stat card ─── */
 function ExpandableStatCard({ label, value, sub, accent, items, linkTo, statusParam }) {
   const count = useCountUp(value)
@@ -488,7 +446,6 @@ function EscalationModal({ onClose, onRecord }) {
             <div className="space-y-2">
               {ESCALATION_LEVELS.map((lvl, idx) => {
                 const isSelected = selectedLevel?.level === lvl.level
-                const prevAvail  = idx === 0 || !ESCALATION_LEVELS[idx - 1]?.locked
                 return (
                   <motion.button
                     key={lvl.level}
@@ -661,7 +618,7 @@ import { useAuditLog } from '../../utils/auditLog'
 import { useQueries } from '../../utils/queriesStore'
 import { useTBSubmissions } from '../../utils/tbSubmissionStore'
 function ClientDashboardLive() {
-  const { selectedFY, setSelectedFY, availableFYs } = useClientFY()
+  const { selectedFY } = useClientFY()
   const rec = useIssuedLists()[PORTAL_CLIENT.slug]
   const issuedItems = (rec?.categories || []).flatMap((c) => c.items.map((i) => ({ ref: i.ref, name: i.text, status: i.status, uploadedOn: i.filename || '', reviewer: 'Audit team' })))
   const count = (...st) => issuedItems.filter((i) => st.includes(i.status))

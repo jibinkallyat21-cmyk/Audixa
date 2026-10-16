@@ -10,22 +10,7 @@ import ManagerLayout from '../../components/manager/ManagerLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
-import {
-  managerUser,
-  departmentStats,
-  managerActionCards,
-  abcpaPortfolio,
-  abcpaDeptManagers,
-  abcpaUrgentFiles,
-  firmPerformanceSummary,
-  leadWorkload,
-  capacityTone,
-  parkedFilesReview,
-  managerTodaysActivity,
-  managerEscalationAlerts,
-  statusBoardFiles,
-  statusBoardFilterCounts,
-} from '../../data/sampleData'
+import { managerUser, departmentStats, managerActionCards, abcpaPortfolio, firmPerformanceSummary, leadWorkload, capacityTone, parkedFilesReview, managerTodaysActivity, statusBoardFiles, statusBoardFilterCounts } from '../../data/sampleData'
 
 const ICONS = { Clock, Users, PauseCircle, Banknote }
 const TONE = {
@@ -40,8 +25,6 @@ const STAT_CHIPS = [
   { label: 'Critical', value: departmentStats.critical, tone: 'bg-alert-red/10 text-alert-red' },
   { label: 'Unallocated', value: departmentStats.unallocated, tone: 'bg-yellow-100 text-yellow-700' },
 ]
-
-const STATUS_TONE = { Active: 'text-emerald', 'On Hold': 'text-amber', Parked: 'text-violet-600' }
 const REASON_STYLE = {
   Capacity: 'bg-navy/10 text-navy border-navy/30',
   'Reviewer Busy': 'bg-slate-100 text-slate-600 border-slate-300',

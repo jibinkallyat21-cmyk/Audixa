@@ -116,7 +116,6 @@ export default function ClientQueries() {
 
             <div>
               {visibleQueries.map((query, idx) => {
-                const isSelected = query.id === selectedId
                 return (
                   <motion.button
                     key={query.id}

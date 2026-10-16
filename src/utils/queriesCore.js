@@ -4,7 +4,6 @@
 
 export const AREAS = ['Revenue', 'Trade receivables', 'Trade payables', 'Cash and bank', 'Inventory', 'Fixed assets', 'Payroll and GOSI', 'Tax and Zakat', 'Related parties', 'Equity', 'Opening balances', 'Other']
 export const PRIORITIES = ['Normal', 'High', 'Critical']
-export const STATUSES = ['Open', 'Replied', 'Follow-up', 'Escalated', 'Closed']
 export const FOLLOW_UP_DAYS = { Normal: 3, High: 2, Critical: 1 }
 export const LONG_PENDING_DAYS = 7
 

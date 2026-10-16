@@ -1,6 +1,6 @@
 // Process 3.5 Excel output for prepaid expenses and depreciation. Every figure is a live formula.
 import { loadExcelJS } from './eosbExcel.js'
-import { DEP_CLASSES, EXTRA_CLASSES, depSchedule, depReview, depChecks, adjustingEntry } from './prepaidDep.js'
+import { DEP_CLASSES, EXTRA_CLASSES, depSchedule, depReview, depChecks } from './prepaidDep.js'
 
 const TNR = { name: 'Times New Roman', size: 11 }
 const fill = (argb) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } })
@@ -48,7 +48,6 @@ export async function buildPrepaidWorkbook({ byCategory, yearStart, yearEnd, vat
   sheets.forEach(({ ws, s }, i) => { const k = 4 + i; const q = `'${ws.name}'`; sm.getRow(k).values = [ws.name, { formula: `${q}!C${s.totRow}` }, s.rows.length, { formula: `${q}!F${s.totRow}` }, { formula: `${q}!G${s.totRow}` }, { formula: `${q}!H${s.totRow}` }, { formula: `${q}!I${s.totRow}` }, { formula: `${q}!L${s.totRow}` }, { formula: `${q}!M${s.totRow}` }]; sm.getRow(k).eachCell((c, j) => { if (j > 1) c.font = { ...TNR, color: { argb: 'FF00B050' } } }) })
   const gt = 4 + sheets.length; sm.getCell(`A${gt}`).value = 'Grand total'; ;['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach((L) => { sm.getCell(`${L}${gt}`).value = { formula: `SUM(${L}4:${L}${gt - 1})` } }); sm.getRow(gt).eachCell({ includeEmpty: true }, (c) => { c.fill = NAVY; c.font = white })
   for (let r = 4; r <= gt; r++) for (let j = 2; j <= 9; j++) if (j !== 3) sm.getCell(r, j).numFmt = ACC
-  const ae = adjustingEntry(byCategory)
   sm.getCell(`A${gt + 2}`).value = 'Proposed adjusting entry at year-end'; sm.getCell(`A${gt + 2}`).font = { ...TNR, bold: true }
   sm.getCell(`A${gt + 3}`).value = 'Dr Prepaid Expenses'; sm.getCell(`B${gt + 3}`).value = { formula: `G${gt}` }
   sheets.forEach(({ ws }, i) => { sm.getCell(`A${gt + 4 + i}`).value = `   Cr ${ws.name} expense`; sm.getCell(`B${gt + 4 + i}`).value = { formula: `G${4 + i}` } })

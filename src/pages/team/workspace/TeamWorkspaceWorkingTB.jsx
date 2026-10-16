@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, Plus, Minus, CheckCircle2, XCircle, Calculator, ChevronDown, RefreshCw, Download } from 'lucide-react'
+import { Upload, Plus, Minus, CheckCircle2, XCircle, ChevronDown, RefreshCw, Download } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
 import WorkspaceHeader from '../../../components/team/WorkspaceHeader'
 import PageTransition from '../../../components/shared/PageTransition'
 import { useToast } from '../../../components/shared/Toast'
 import { useTB } from '../../../context/TBContext'
-import { calculateZakat, ZAKAT_CLASSIFICATIONS, formatSAR } from '../../../utils/zakatCalculator'
+import { calculateZakat, ZAKAT_CLASSIFICATIONS } from '../../../utils/zakatCalculator'
 
 function getClosingBalance(line) {
   return (

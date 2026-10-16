@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, X, CheckCircle2, AlertCircle, Clock, Eye, RefreshCw, Search, ChevronRight } from 'lucide-react'
+import { Upload, X, CheckCircle2, Clock, Eye, RefreshCw, Search, ChevronRight } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
@@ -11,15 +11,6 @@ import { useIssuedLists, PORTAL_CLIENT, setItemStatus } from '../../utils/requir
 import TBUploadStep from '../../components/client/TBUploadStep'
 import { DEMO_FILE } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
-
-// Flatten categories into a table-ready list with plain-language descriptions
-const PLAIN_DESCRIPTIONS = {
-  'REV-01': 'A record of all your sales, broken down by customer and region.',
-  'REV-02': 'Signed agreements with your top 10 customers.',
-  'REV-03': 'A calculation showing expected bad debts on your receivables.',
-  'REV-04': 'Invoices issued right at year-end to confirm the correct period.',
-  'REV-05': 'Sample e-invoices generated through the ZATCA system.',
-}
 
 function rowsFromIssued(rec) {
   const rows = []
@@ -41,16 +32,6 @@ function docStats(rows) {
   const needsCorrection = items.filter((r) => r.status === 'Rejected').length
   return { total, submitted, approved, needsCorrection, stillNeeded: total - submitted, isComplete: total > 0 && approved === total }
 }
-
-const STATUS_COLORS = {
-  Accepted: 'emerald',
-  Rejected: 'alert-red',
-  'Under Review': 'amber',
-  'Pending Client': 'grey',
-  'Uploaded Processing': 'blue',
-  'Action Required': 'amber',
-}
-
 function RejectionTooltip({ reason }) {
   return (
     <motion.div
@@ -330,7 +311,6 @@ const STATUS_FILTER_MAP = {
 }
 
 export default function ClientDocuments() {
-  const showToast = useToast()
   const { isDark } = useTheme()
   const { selectedFY } = useClientFY()
   const rec = useIssuedLists()[PORTAL_CLIENT.slug]

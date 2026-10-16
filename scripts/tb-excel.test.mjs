@@ -2,7 +2,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import ExcelJS from 'exceljs'
-import { groupOf, toLedgers, consolidate, detectBranches } from '../src/utils/tbCore.js'
+import { toLedgers, consolidate, detectBranches } from '../src/utils/tbCore.js'
 import { compareOpening, runChecks, ratios, buildNotes } from '../src/utils/tbChecks.js'
 import { readTBWorkbook, buildTBReviewWorkbook } from '../src/utils/tbExcel.js'
 

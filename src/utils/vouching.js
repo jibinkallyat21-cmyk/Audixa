@@ -115,7 +115,6 @@ export function confirmationOverall(tests, { available = true, c = null } = {}) 
 export function signatureLabel({ sealPresent, signaturePresent }) { return !sealPresent && !signaturePresent ? 'Multiple Issues' : !sealPresent ? 'Seal/Stamp Missing' : !signaturePresent ? 'Signature Missing' : null }
 export const bankStatementRecon = ({ opening, credits, debits, closing }) => { const calc = r2(num(opening) + num(credits) - num(debits)); return { calculated: calc, diff: r2(calc - num(closing)), ok: r2(calc - num(closing)) === 0 } }
 export function denominationCheck(lines, confirmed) { const total = r2(lines.reduce((n, l) => n + num(l.denomination) * num(l.quantity), 0)); return { total, diff: r2(total - num(confirmed)), ok: r2(total - num(confirmed)) === 0 } }
-export const nextConfRef = (type, issued = []) => nextRef(type === 'Cash' ? '5001.01' : '5002.01', issued)
 export function confirmationCompletion({ confirmations, logComplete = true }) {
   const blockers = []
   if (!confirmations.length) blockers.push('No confirmation has been listed.')

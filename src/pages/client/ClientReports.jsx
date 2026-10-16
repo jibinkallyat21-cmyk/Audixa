@@ -1,15 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  FileText, FileCheck2, Eye, Download, CheckCircle2, Lock,
-  FileSignature, Upload, X, Paperclip, Calculator, AlertTriangle,
-  ChevronRight, FileSearch, XCircle, Pencil, Loader2, Info, Clock,
-} from 'lucide-react'
+import { FileText, FileCheck2, Eye, Download, CheckCircle2, Lock, FileSignature, Upload, X, Paperclip, Calculator, AlertTriangle, ChevronRight, FileSearch, XCircle, Pencil, Loader2, Info } from 'lucide-react'
 import ClientLayout from '../../components/client/ClientLayout'
 import PageTransition from '../../components/shared/PageTransition'
 import { useToast } from '../../components/shared/Toast'
-import { clientPortal } from '../../data/sampleData'
-import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
+import { useClientFY } from '../../context/ClientFYContext'
 import { getClientUpload, setClientUpload, onUploadsChange } from '../../data/clientUploads'
 import { calculateZakat, calculateCIT, OWNERSHIP_TYPES } from '../../utils/zakatCalculator'
 import { useTB } from '../../context/TBContext'

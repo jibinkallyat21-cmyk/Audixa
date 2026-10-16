@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, FileSpreadsheet, Loader2, Send, Undo2, Plus, Minus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Send, Undo2, Plus, Minus } from 'lucide-react'
 import AuditorChip from '../shared/AuditorChip'
 import { useToast } from '../shared/Toast'
 import { requirementsFor } from '../../data/firmRequirements'
@@ -49,7 +49,6 @@ function MisList({ file, renderIssued }) {
   const issuedAll = useIssuedLists()
   const issued = issuedAll[file.slug]
   const [overrides, setOverrides] = useState({})
-  const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const sub = useTBSubmissions()[file.slug]
   const clientTB = sub && ['Submitted', 'Approved'].includes(sub.status) && sub.ledgers?.length ? sub : null

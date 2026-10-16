@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { tbIds, tbValidate, pyVsOpening, buildFS, PY_BS_LINES } from '../src/utils/fsPrep.js'
+import { tbIds, tbValidate, buildFS, PY_BS_LINES } from '../src/utils/fsPrep.js'
 
 const L = (code, name, opening, debit, credit, extra = {}) => ({ code, name, opening, debit, credit, adjDr: 0, adjCr: 0, ...extra })
 // opening balances balance; movements balance
