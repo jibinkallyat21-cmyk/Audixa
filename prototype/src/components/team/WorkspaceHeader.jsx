@@ -21,7 +21,7 @@ const TABS_BASE = [
   { id: 'queries', label: 'Queries', href: '/team/workspace/queries' },
   { id: 'summary', label: 'File summary', href: '/team/workspace/summary' },
   { id: 'areas', label: 'Audit areas', href: '/team/workspace/areas' },
-  { id: 'procedures', label: 'Procedures', href: '/team/workspace/procedures' },
+  { id: 'procedures', label: 'Other procedures', href: '/team/workspace/procedures' },
   { id: 'working-tb', label: 'Working TB', href: '/team/workspace/working-tb' },
   { id: 'deliverables', label: 'Deliverables', href: '/team/workspace/deliverables' },
   { id: 'audit-trail', label: 'Audit Trail', href: '/team/workspace/audit-trail' },

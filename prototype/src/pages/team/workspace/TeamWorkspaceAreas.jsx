@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { ChevronRight, ArrowRight, Wrench, Scissors, FileText, PenLine, CheckCircle2 } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -16,7 +16,8 @@ import DepreciationTab from '../../../components/execution/DepreciationTab'
 import { useDemoClient } from '../../../utils/useDemoClient'
 import { useIssuedLists } from '../../../utils/requirementsStore'
 import { useProcedureStatuses, setSubStatus } from '../../../utils/procedureStore'
-import { AREAS, findArea, areaFigures, areaProgress, procStatusKey } from '../../../utils/auditAreas'
+import { AREAS, SECTIONS, findArea, areaFigures, areaProgress, procStatusKey } from '../../../utils/auditAreas'
+import { fileSummary } from '../../../utils/sampleTracking'
 
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const KIND = { tool: [Wrench, 'Working tool'], cutoff: [Scissors, 'Cut-off'], requirement: [FileText, 'From the client'], notes: [PenLine, 'Your notes'] }
@@ -59,22 +60,46 @@ function ToolBody({ proc, dc }) {
   }
 }
 
-function AreaGrid({ dc, statuses }) {
+const FILTERS = [['all', 'All'], ['progress', 'In progress'], ['client', 'Waiting for the client'], ['done', 'Done']]
+const DOT = { Complete: 'bg-emerald', 'In Progress': 'bg-amber', 'Not Started': 'bg-slate-300' }
+
+// The areas the way the financial statements read: assets, liabilities, equity, income and expenses. One line per area, with a dot for each procedure.
+function AreaList({ dc, statuses, issued }) {
+  const [filter, setFilter] = useState('all'); const [search, setSearch] = useState('')
+  const sum = useMemo(() => fileSummary({ areas: AREAS, ledgers: dc.ledgers, rec: issued, statuses }), [dc.ledgers, issued, statuses])
+  const info = (a) => { const r = sum.rows.find((x) => x.id === a.id); const pr = areaProgress(a, statuses); const f = areaFigures(a, dc.ledgers); return { r, pr, f } }
+  const keep = (a) => { const { r, pr, f } = info(a); if (search && !`${a.label} ${a.blurb}`.toLowerCase().includes(search.toLowerCase()) && !f.ledgers.some((l) => l.name.toLowerCase().includes(search.toLowerCase()))) return false
+    if (filter === 'progress') return r.started > 0 && pr.done < pr.total; if (filter === 'client') return r.waiting > 0 || r.rejected > 0; if (filter === 'done') return pr.done === pr.total; return true }
+  const total = sum.procedures
   return (
     <div className="space-y-6">
-      <div><h2 className="text-xl font-bold text-navy">Audit areas</h2><p className="mt-1 text-sm text-slate-500">Pick an area to see its accounts and the procedures to follow. Everything below comes from {dc.client}'s trial balance.</p></div>
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {AREAS.map((a) => {
-          const f = areaFigures(a, dc.ledgers); const pr = areaProgress(a, statuses)
-          return (
-            <Link key={a.id} to={`?area=${a.id}`} className="group block rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-              <div className="flex items-start justify-between gap-3"><div><h3 className="text-base font-semibold text-navy">{a.label}</h3><p className="mt-1 text-sm text-slate-500">{a.blurb}</p></div><ArrowRight className="h-5 w-5 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-navy" /></div>
-              <div className="mt-5 flex items-end justify-between"><div><p className="text-xs font-medium text-slate-500">Balance in the trial balance</p><p className="mt-0.5 text-xl font-bold text-navy">{f.ledgers.length ? money(Math.abs(f.total)) : '—'}<span className="ml-1.5 text-xs font-medium text-slate-400">{f.ledgers.length ? (f.total >= 0 ? 'Dr' : 'Cr') : ''}</span></p></div><p className="text-sm text-slate-500">{f.ledgers.length} account{f.ledgers.length === 1 ? '' : 's'}</p></div>
-              <div className="mt-5"><div className="mb-1.5 flex justify-between text-xs"><span className="font-medium text-slate-600">{pr.done} of {pr.total} procedure{pr.total === 1 ? '' : 's'} done</span><span className="text-slate-400">{pr.pct}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald" style={{ width: `${pr.pct}%` }} /></div></div>
-            </Link>
-          )
-        })}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div><h2 className="text-xl font-bold text-navy">Audit areas</h2><p className="mt-1 text-sm text-slate-500">Laid out like the financial statements. Pick an area to see its accounts and the procedures to follow. Every figure comes from {dc.client}'s trial balance.</p></div>
+        <div className="min-w-[240px] rounded-xl border border-slate-200 bg-white px-5 py-3"><div className="mb-1.5 flex justify-between text-xs"><span className="font-medium text-slate-600">{total.done} of {total.total} procedures done</span><span className="text-slate-400">{total.total ? Math.round((total.done / total.total) * 100) : 0}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald" style={{ width: `${total.total ? (total.done / total.total) * 100 : 0}%` }} /></div></div>
       </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap gap-2" role="tablist">{FILTERS.map(([id, l]) => <button key={id} role="tab" aria-selected={filter === id} onClick={() => setFilter(id)} className={`rounded-full px-4 py-2 text-sm font-semibold ${filter === id ? 'bg-navy text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{l}</button>)}</div>
+        <input aria-label="Search areas and accounts" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search an area or an account" className="ml-auto w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-navy outline-none focus:border-navy" />
+      </div>
+      {SECTIONS.map((sec) => {
+        const list = AREAS.filter((a) => a.section === sec && keep(a)); if (!list.length) return null
+        return (
+          <section key={sec}>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{sec}</h3>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              {list.map((a, k) => { const { r, pr, f } = info(a); return (
+                <Link key={a.id} to={`?area=${a.id}`} className={`group flex flex-wrap items-center gap-x-6 gap-y-3 px-6 py-5 hover:bg-slate-50 ${k ? 'border-t border-slate-100' : ''}`}>
+                  <div className="min-w-[220px] flex-1"><p className="text-base font-semibold text-navy">{a.label}</p><p className="mt-0.5 text-sm text-slate-500">{a.blurb} · {f.ledgers.length} account{f.ledgers.length === 1 ? '' : 's'}</p></div>
+                  <div className="w-44 text-right"><p className="text-base font-bold tabular-nums text-navy">{f.ledgers.length ? money(Math.abs(f.total)) : '—'}</p><p className="text-xs text-slate-400">{f.ledgers.length ? (f.total >= 0 ? 'Debit' : 'Credit') : 'No balance'}</p></div>
+                  <div className="w-48"><div className="flex flex-wrap gap-1.5">{a.procedures.map((p) => <span key={p.id} title={`${p.label}: ${statuses[procStatusKey(a.id, p.id)] || 'Not Started'}`} className={`h-3 w-7 rounded-full ${DOT[statuses[procStatusKey(a.id, p.id)] || 'Not Started']}`} />)}</div><p className="mt-1.5 text-xs text-slate-500">{pr.done} of {pr.total} procedure{pr.total === 1 ? '' : 's'} done</p></div>
+                  <div className="w-40 text-sm">{r.rejected ? <span className="font-semibold text-alert-red">{r.rejected} rejected</span> : r.waiting ? <span className="font-semibold text-amber">{r.waiting} waiting for the client</span> : r.sent ? <span className="font-medium text-emerald">All received</span> : <span className="text-slate-400">Nothing sent yet</span>}</div>
+                  <ArrowRight className="h-5 w-5 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-navy" />
+                </Link>) })}
+            </div>
+          </section>
+        )
+      })}
+      {AREAS.every((a) => !keep(a)) && <Empty>No area matches. Clear the search or choose another filter.</Empty>}
     </div>
   )
 }
@@ -147,7 +172,7 @@ export default function TeamWorkspaceAreas() {
     if (!dc.ready) return <Empty>Load the demo client to try the audit areas. Every figure here comes from the client's trial balance.</Empty>
     if (area && proc) return <ProcView area={area} proc={proc} dc={dc} statuses={statuses} issued={issued} />
     if (area) return <AreaView area={area} dc={dc} statuses={statuses} issued={issued} />
-    return <AreaGrid dc={dc} statuses={statuses} />
+    return <AreaList dc={dc} statuses={statuses} issued={issued} />
   }, [dc, area, proc, statuses, issued])
   return (
     <AuditTeamLayout title="File Workspace">
