@@ -12,7 +12,7 @@ import { useQueries } from '../../../utils/queriesStore'
 import { AREAS } from '../../../utils/auditAreas'
 import { fileSummary } from '../../../utils/sampleTracking'
 import MaterialityDialog from '../../../components/execution/MaterialityDialog'
-import { useMateriality } from '../../../utils/materialityStore'
+import { useLiveMateriality } from '../../../utils/materialityStore'
 import { BASES, sampleMateriality } from '../../../utils/materiality'
 
 const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -42,7 +42,7 @@ function AreaTable({ title, ids, sum }) {
 export default function TeamWorkspaceSummary() {
   const dc = useDemoClient(); const statuses = useProcedureStatuses(dc.slug); const issued = useIssuedLists()[dc.slug]; const { queries } = useQueries()
   const sum = useMemo(() => (dc.ready ? fileSummary({ areas: AREAS, ledgers: dc.ledgers, rec: issued, statuses, queries: queries.filter((q) => q.client === dc.slug), tb: dc.tb }) : null), [dc, issued, statuses, queries])
-  const mat = useMateriality(dc.slug); const [matOpen, setMatOpen] = useState(false)
+  const mat = useLiveMateriality(dc); const [matOpen, setMatOpen] = useState(false)
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
   return (
     <AuditTeamLayout title="File Workspace">

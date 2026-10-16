@@ -15,7 +15,7 @@ import { clientSales, clientPurchases, clientExpenses, clientParties, clientLedg
 import { salesItems, expenseItems, partyItems, materialityItems } from '../../utils/sampleItems'
 import SendSamples from './SendSamples'
 import { Link } from 'react-router-dom'
-import { useMateriality } from '../../utils/materialityStore'
+import { useLiveMateriality } from '../../utils/materialityStore'
 import { sampleMateriality } from '../../utils/materiality'
 
 const SEL = 'rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-navy outline-none transition-colors focus:border-navy focus:ring-2 focus:ring-navy/10'
@@ -151,7 +151,7 @@ function Parties({ ctx }) {
 // The test areas of the materiality method. Ledger areas read the voucher ledger and only take the accounts of that area; party areas read the party list.
 const AREAS = [['Revenue', 'ledger', ['revenue']], ['COGS', 'ledger', ['cogs']], ['Expenses', 'ledger', ['opex', 'finance']], ['Trade receivables', 'party'], ['Trade payables', 'party']]
 function Materiality({ ctx, initialArea = 'Revenue', lockArea = false }) {
-  const dc = useDemoClient(); const stored = useMateriality(dc.slug); const showToast = useToast(); const [file, setFile] = useState(null); const [pfile, setPfile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
+  const dc = useDemoClient(); const stored = useLiveMateriality(dc); const showToast = useToast(); const [file, setFile] = useState(null); const [pfile, setPfile] = useState(null); const [busy, setBusy] = useState(false); const [include, setInclude] = useState({})
   const [p, setP] = useState({ area: initialArea, revenue: '', matPct: 0.5, manual: '', risk: 'Moderate (3)', size: 'Medium', method: 'random', seed: 1, override: '' })
   const kind = AREAS.find((a) => a[0] === p.area)
   const load = async (f, buffer) => { setBusy(true); setInclude({}); try { setFile({ ...(await readLedgerSheet(buffer ?? (await f.arrayBuffer()), MAT_FIELDS)), name: f?.name || (dc.ready ? `${dc.client} ledger` : 'Demo ledger.xlsx') }) } catch (e) { setFile({ error: e.message, rows: [], headers: [], mapping: {}, name: f?.name }) } setBusy(false) }
