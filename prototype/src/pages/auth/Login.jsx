@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '../../components/shared/PageTransition'
 import { ROLES, ROLE_ORDER } from '../../data/sampleData'
 import { fxCss, fxClass, initFx, morph, dolly } from './loginFx'
-import { setPortal, PORTAL_HOME } from '../../utils/portalSession'
-import { cloudOn, signIn } from '../../utils/supabase'
+import { setPortal } from '../../utils/portalSession'
 
 const PLACES = ['Kuwait', 'Bahrain', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Oman', 'India', 'Singapore', 'Hong Kong', 'China']
 
@@ -197,7 +196,6 @@ export default function Login() {
 
     $('open-signin').onclick = () => open('choose')
     $('open-demo').onclick = () => open('demo')
-    if (cloudOn) { const d = $('open-demo'); if (d) d.style.display = 'none' }   // no demo shortcut when real sign-in is on
     $('pick-client').onclick = () => { setTab('client'); view('signin', 'em') }
     $('pick-team').onclick = () => { setTab('team'); view('signin', 'em') }
     $('close').onclick = close
@@ -230,19 +228,9 @@ export default function Login() {
       $('go').classList.add('loading')
       $('go').disabled = true
       $('go-label').textContent = 'Signing in…'
-      const welcome = (who) => { $('welcome').textContent = 'Welcome, ' + who }
-      const reset = () => { $('go').classList.remove('loading'); $('go').disabled = false; $('go-label').textContent = 'Sign in' }
-      if (cloudOn) {
-        // Real sign-in: the account decides which portal opens.
-        signIn(email, pw).then(({ portal }) => {
-          welcome(email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
-          enter(PORTAL_HOME[portal], portal)
-        }).catch((e) => { reset(); fail(e.message, 'pw') })
-        return
-      }
       timer = later(() => {
         const n = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-        welcome(n)
+        $('welcome').textContent = 'Welcome, ' + n
         enter(TAB_ROLES[tab].route, TAB_ROLES[tab].route.split('/')[1])
       }, 1400)
     }

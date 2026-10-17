@@ -1,13 +1,13 @@
-# Moving from Supabase to the company PostgreSQL
+# Backend handover (PostgreSQL)
 
-The prototype talks to its backend through four small files. Everything else in the app (screens, tools, tests) is unaware of Supabase.
+The prototype keeps its data in the browser. Everything that touches storage, sign-in and files goes through a few small places, so a real backend can be plugged in without touching the screens.
 
-| File | What it does today with Supabase | What the company backend must provide |
+| Where | What the prototype does | What the backend must provide |
 |---|---|---|
-| `src/utils/store.js` (`connectCloud`, `flush`, `disconnectCloud`) | Loads all rows of table `kv` at sign-in, keeps them in memory (reads stay synchronous), saves changed keys in batches, follows other users' changes live | Read all allowed keys; save a batch of keys; push changes made by others |
-| `src/utils/supabase.js` | Email and password sign-in, session restore, sign-out; the account's `app_metadata.portal` decides the portal | Sign-in returning the user's portal (`client`, `team`, `manager`, `fo`, `management`), title and `client_slug` |
-| `src/utils/files.js` | Uploads to a private bucket `documents`, opens a file through a five-minute link | Upload, and a short-lived download link |
-| `api/*.js` (Vercel functions) | AI steps and e-mail | Same endpoints in the company API; the AI helper is `api/_ai.js` |
+| `src/utils/store.js` (`readStore`, `writeStore`, `useStore`) | Keeps each key's JSON in browser storage; reads are synchronous | Load every key the user may read at sign-in and keep an in-memory copy (reads stay synchronous); save changed keys in batches; push other users' changes; refuse keys the role may not write (the screen then reloads the saved value) |
+| `src/pages/auth/Login.jsx`, `src/utils/portalSession.js` | A demo sign-in that only chooses a portal | Real sign-in returning the user's portal (`client`, `team`, `manager`, `fo`, `management`), title and `client_slug`; sign-out |
+| `src/utils/files.js` (`setStorage`) | Keeps file names only | Upload, and a short-lived download link |
+| `api/*.js` | AI steps and e-mail (serverless functions) | The same endpoints in the company API; the AI helper is `api/_ai.js` |
 
 ## Data model (plain PostgreSQL)
 
@@ -48,7 +48,7 @@ create trigger kv_notify after insert or update or delete on kv for each row exe
 | personal | `u:<user id>:*` (the app stores `audit360-*` and `audixa-*` preferences this way) | own only | own only | own only | own only |
 
 Documents: team, manager and management read and write all; a client only paths whose first segment equals its `client_slug`; front office none.
-The same rules exist as SQL in the Supabase project (functions `kv_portal`, `kv_group`, `kv_ok`, `documents_ok`); the Python or TypeScript version must behave the same. The test that proves it is: for each portal and each key group, one allowed and one refused read and write.
+Implement these rules once on the server. The test that proves them: for each portal and each key group, one allowed and one refused read and write; the same for document paths.
 
 ## Server endpoints the front end will call (suggested)
 
@@ -60,10 +60,10 @@ The same rules exist as SQL in the Supabase project (functions `kv_portal`, `kv_
 
 ## What to change in the front end
 
-1. `supabase.js`: replace the client with calls to the endpoints above; keep the exported names (`cloudOn`, `signIn`, `restoreSession`, `signOut`) so nothing else changes.
-2. `store.js`: `connectCloud(client)` and `flush()` take a Supabase-shaped client. Either give them a small adapter object with `from('kv').select()/upsert()`, `channel()`, `removeChannel()` and `auth.getSession()`, or rewrite those two functions against the endpoints. The tests in `scripts/cloudstore.test.mjs` show the exact behaviour expected.
-3. `files.js`: replace the two storage calls (`upload`, `createSignedUrl`).
-4. Environment: the front end needs only the API base URL; keep every secret on the server.
+1. `store.js`: keep the exported functions; fill the data from the API at sign-in and save through it. Preferences that belong to one person (keys starting `audit360-` or `audixa-`) must be stored per user so one person's choice never changes another's.
+2. Sign-in: replace the demo login with the API sign-in and set the portal from the account (`portalSession.setPortal`); sign-out clears it.
+3. `files.js`: call `setStorage({ upload, link })` once after sign-in.
+4. The audit log is split in two keys: `audit-log` (staff) and `client-activity` (what a client may see; a client's own actions are written only there). `useAuditLog` merges both.
 
 ## Known gaps to close in the company build
 

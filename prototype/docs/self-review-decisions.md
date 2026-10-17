@@ -185,24 +185,9 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - Real client file: on the client dashboard choose Data = "My own client files", enter the client name. Nothing is pre-loaded; the client uploads the trial balance, general ledger and previous year trial balance. Tools no longer auto-fill sample data for such a file, and their sample-data buttons say "Fill with sample data (not your file)".
 - Fixed while testing: the client's trial balance upload step was not shown on the Requirement List before a list was issued; uploading the general ledger crashed the step (variable used before it was defined).
 
-## Supabase (temporary test backend)
-
-- `utils/store.js` stays the only storage module. With `VITE_SUPABASE_URL` and `VITE_SUPABASE_KEY` set (`.env.local`, see `.env.example`) and a signed-in user, it loads the shared `kv` table into memory (reads stay synchronous), saves writes in batches, and follows other users' changes in real time. Without them the app runs on browser storage as before.
-- `utils/supabase.js` holds the connection and sign-in. The account decides the portal (`app_metadata.portal`: client, team, manager, fo, management; `title`: Audit Lead or Associate). The demo shortcut on the login page is hidden when Supabase is on; "Exit Demo" becomes "Sign out".
-- Table `public.kv (key, value jsonb, updated_at, updated_by)` with row level security: signed-out users see nothing; any signed-in user can read and write. Six test users were created (see the local file `prototype/test-logins.local.md`, not committed).
-- Known limits: each key is one JSON blob, so two people editing the same key at the same moment overwrite each other (last write wins); roles are not yet enforced in the database (any signed-in user can read all keys); uploaded document files are not stored yet (stage 3, a storage bucket).
-- Moving to the company account: create the same table and policies (migration `audit360_kv_store`), create the users, change the two environment values.
-
-## Document storage (Supabase Storage)
-
-- Private bucket `documents` (50 MB per file), signed-in users only (migration `audit360_documents_bucket`). Path: `<client slug>/<requirement ref>/<time>-<safe file name>`; a re-upload never overwrites, the old file stays.
-- `utils/files.js`: `uploadItemFile` (client uploads; the item keeps `filePath`, `fileSize`, `fileType` and the original `filename`), `storeFile` (trial balance, general ledger and previous year file; paths kept on the submission), `openStoredFile` (five-minute signed link in a new tab). Without Supabase only the file name is kept, as before.
-- The team opens files from the requirement list (View File and the download button), the sent samples table, the party samples list and the trial balance header. Evidence panels still show stand-in fields: reading the content of real documents is not built.
-- Not yet: deleting stored files when an item is withdrawn, a virus scan, previews inside the app, the alternative-procedure folder ZIP built from the real files.
-
 ## Role-based access in the database
 
-The portal of each account is fixed in its signed token (`app_metadata.portal`, set by an administrator; users cannot change it). Row level security on `public.kv` and on the `documents` bucket uses it (migrations `audit360_access_functions` and the policy changes noted in the Supabase project).
+Rules for the company backend (the prototype itself has no server): the portal of each account is fixed on the server, set by an administrator; users cannot change it. The matrix below is what the server must enforce on every read and write of stored data and of documents.
 
 | Keys | client | team | manager, management | front office |
 |---|---|---|---|---|
@@ -214,9 +199,8 @@ The portal of each account is fixed in its signed token (`app_metadata.portal`, 
 
 - Documents: team, manager and management open all files; a client only the folder named by its `client_slug` (the first part of the path); front office none.
 - The full audit log is staff-only. What a client may see of its own file is written to `client-activity` (the client's own actions go only there). `useAuditLog` merges both, so screens did not change.
-- A save the role may not make is refused by the database; the screen drops it and goes back to the saved value (message in `cloudState().error`).
-- Tested in the database by impersonating each portal for each key group and each document path.
-- Known limit: the shared keys hold every client's data in one block each, so with several clients one client's token could read another's blocks. Before a second client is added, split these keys per client (for example `c:<client>:requirements:issued`) and require the client slug in the policy.
+- To prove it: for each portal and each key group, one allowed and one refused read and write; the same for document paths.
+- Known limit: the shared keys hold every client's data in one block each, so with several clients one client could read another's blocks. Before a second client is added, split these keys per client (for example `c:<client>:requirements:issued`) and require the client slug in the policy.
 
 ## Demo data switch
 
@@ -229,6 +213,6 @@ All demo conveniences (demo client and files, "use demo data" buttons, sample do
 - New: placing ledgers the name rules cannot place (`api/classify-ledgers.js`, `utils/ledgerReview.js`, `components/execution/LedgerPlacement.jsx`). Runs once when a trial balance arrives and only when the code left ledgers unplaced; the audit team chooses the group (the AI's suggestion is preselected); only the group changes; the requirement list is then built from the groups.
 - Lead scoring stays code. Reading uploaded documents is not yet wired to any model.
 
-## Supabase values are not in the repository
+## Document storage seam
 
-The project URL and key are no longer committed. They live in the Vercel environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_KEY`) and, for a local run, in `prototype/.env.local` (ignored by git). `.env.production` is ignored too. Without them the app runs on browser storage only.
+`utils/files.js` keeps only file names in the prototype. `setStorage({ upload(path, file), link(path) })` is the one place the company file store plugs in; the requirement list, the sample screens, the party list and the trial balance header already open stored files through it. Paths are `<client slug>/<requirement ref>/<time>-<safe name>`; a re-upload never overwrites.
