@@ -2,10 +2,9 @@
 // closing balances in code and sends only the flagged ledgers here. Claude proposes which previous year and this year ledgers are the same
 // balance under a different name, code or grouping. The browser verifies every proposal by adding the amounts, so nothing here is trusted
 // on its own and no amount is ever changed.
-// Vercel environment variables: ANTHROPIC_API_KEY (without it the answer is {source:'unavailable'}), ANTHROPIC_MODEL (optional), ALLOWED_ORIGIN (optional).
-import Anthropic from '@anthropic-ai/sdk'
+// Vercel environment variables: OPENROUTER_API_KEY (free models, dummy data only) or ANTHROPIC_API_KEY (see _ai.js); without either the answer is {source:'unavailable'}. ALLOWED_ORIGIN (optional).
+import { askJson } from './_ai.js'
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5'
 const MAX_FLAGS = 80
 
 const SYSTEM = 'You help an audit team reconcile opening balances. You are given ledgers flagged as not agreeing between the previous year audited trial balance (PY, closing balance) and the current year trial balance (CY, opening balance). Names may differ in wording, language, spelling, coding or grouping, and one ledger may have been split or merged. Propose sets of PY ledgers and CY ledgers that are the same balance. Use the names exactly as given. Do not change, add or invent amounts or ledgers. If you are not confident that ledgers are the same balance, do not propose them.'
@@ -34,23 +33,9 @@ export default async function handler(req, res) {
   if (allowed && req.headers.origin && req.headers.origin !== allowed) return res.status(403).json({ ok: false, error: 'Origin not allowed' })
   const { flags, error } = validate(req.body)
   if (error) return res.status(400).json({ ok: false, error })
-  if (!process.env.ANTHROPIC_API_KEY) return res.status(200).json({ ok: true, source: 'unavailable', reason: 'The AI review is not configured yet (no ANTHROPIC_API_KEY)' })
-  try {
-    const client = new Anthropic({ timeout: 55000, maxRetries: 1 })
-    const response = await client.messages.create({
-      model: MODEL, max_tokens: 3000, system: SYSTEM,
-      output_config: { effort: 'low', format: { type: 'json_schema', schema } },
-      messages: [{ role: 'user', content: `Flagged ledgers (JSON, amounts as debit positive / credit negative):\n${JSON.stringify(flags)}\n\nPropose the sets that are the same balance.` }],
-    })
-    if (response.stop_reason === 'refusal') return res.status(200).json({ ok: true, source: 'unavailable', reason: 'The AI review could not be done' })
-    const text = response.content.find((b) => b.type === 'text')?.text
-    if (response.stop_reason === 'max_tokens' || !text) return res.status(502).json({ ok: false, error: 'The review did not finish' })
-    const out = JSON.parse(text)
-    return res.status(200).json({ ok: true, source: 'claude', proposals: out.proposals, notes: out.notes })
-  } catch (e) {
-    if (e instanceof Anthropic.AuthenticationError) return res.status(502).json({ ok: false, error: 'Claude API key was rejected' })
-    if (e instanceof Anthropic.RateLimitError) return res.status(429).json({ ok: false, error: 'Claude is busy, try again shortly' })
-    if (e instanceof Anthropic.APIError) return res.status(502).json({ ok: false, error: `Claude API error ${e.status}` })
-    return res.status(502).json({ ok: false, error: `Review failed: ${e.name === 'AbortError' ? 'request timed out' : e.message}` })
-  }
+  const r = await askJson({ system: SYSTEM, user: `Flagged ledgers (JSON, amounts as debit positive / credit negative):\n${JSON.stringify(flags)}\n\nPropose the sets that are the same balance.`, schema, maxTokens: 3000 })
+  if (r.unavailable) return res.status(200).json({ ok: true, source: 'unavailable', reason: r.reason })
+  if (!r.ok) return res.status(r.status === 200 ? 200 : r.status).json(r.status === 200 ? { ok: true, source: 'unavailable', reason: r.reason } : { ok: false, error: r.reason })
+  const proposals = Array.isArray(r.data?.proposals) ? r.data.proposals.filter((p) => Array.isArray(p?.py) && Array.isArray(p?.cy)).map((p) => ({ py: p.py.map(String), cy: p.cy.map(String), reason: String(p.reason || '') })) : []
+  return res.status(200).json({ ok: true, source: 'ai', engine: r.engine, proposals, notes: Array.isArray(r.data?.notes) ? r.data.notes.map(String) : [] })
 }

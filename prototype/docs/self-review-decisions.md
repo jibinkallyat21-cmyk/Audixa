@@ -221,3 +221,10 @@ The portal of each account is fixed in its signed token (`app_metadata.portal`, 
 ## Demo data switch
 
 All demo conveniences (demo client and files, "use demo data" buttons, sample document fillers, auto-fill of tools) are behind `DEMO_DATA` in `src/utils/features.js`, read from `VITE_DEMO_DATA`. It is off by default; the client dashboard card then only starts a real client file. Nothing was deleted. To bring the demo back set `VITE_DEMO_DATA=on` (in `.env.production` or the Vercel environment variables) and rebuild.
+
+## AI steps and the free OpenRouter option
+
+- `api/_ai.js` is the only place that talks to a model. `OPENROUTER_API_KEY` (free `:free` models, `OPENROUTER_MODELS` = up to three ids tried in order) or `ANTHROPIC_API_KEY`; OpenRouter wins when both are set; with neither, every AI step answers "unavailable" and the app falls back to code. Free models can keep prompts: dummy data only. OpenRouter's free limits (checked 17 Oct 2026, they change): 20 requests a minute; 50 a day, or 1,000 a day after $10 of credit has ever been bought.
+- Opening balance review (`api/opening-review.js`): unchanged in logic, now through `_ai.js`; every proposal is still verified by adding amounts in the browser.
+- New: placing ledgers the name rules cannot place (`api/classify-ledgers.js`, `utils/ledgerReview.js`, `components/execution/LedgerPlacement.jsx`). Runs once when a trial balance arrives and only when the code left ledgers unplaced; the audit team chooses the group (the AI's suggestion is preselected); only the group changes; the requirement list is then built from the groups.
+- Lead scoring stays code. Reading uploaded documents is not yet wired to any model.

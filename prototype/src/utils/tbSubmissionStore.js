@@ -48,4 +48,10 @@ export function setOpeningReview(file, review) {
   put(file.slug, { ...cur, openingReview: review })
   log(file.client, 'Opening balance review', `${review.source === 'ai' ? 'AI review' : 'Amount matching'} of ${review.flagCount} flagged ledger(s): ${review.verifiedCount} resolved`)
 }
+// The AI's suggestions for ledgers the name rules could not place, kept so they are not asked (or paid) for twice.
+export function setLedgerReview(file, review) {
+  const cur = getTBSubmission(file.slug); if (!cur) return
+  put(file.slug, { ...cur, ledgerReview: review })
+  log(file.client, 'Ledger placement', `${review.source === 'ai' ? 'AI suggestions' : 'No AI suggestions'} for ${review.count} unplaced ledger(s)`)
+}
 export const clearTB = (slug) => { const all = { ...readStore(KEY, {}) }; delete all[slug]; writeStore(KEY, all) }

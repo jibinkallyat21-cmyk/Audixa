@@ -11,6 +11,7 @@ import { partyKindOf } from '../../utils/tbFormat'
 import OpeningBalanceCheck from './OpeningBalanceCheck'
 import { useTBSubmissions, approveTB, returnTB, setTBLedgers } from '../../utils/tbSubmissionStore'
 import FileLink from '../shared/FileLink'
+import LedgerPlacement from './LedgerPlacement'
 import { tbTally } from '../../utils/tbFormat'
 
 const n0 = (n) => Number(n).toLocaleString()
@@ -125,6 +126,7 @@ function MisList({ file, renderIssued }) {
               <div className="mt-2 grid gap-2 sm:grid-cols-4">{[['Opening balances', tally.opening], ['Total debits', tally.debit], ['Total credits', tally.credit], ['Closing balances', tally.closing]].map(([l, v]) => <span key={l} className="rounded-md bg-white px-3 py-2 text-slate-600">{l}<br /><b className="text-navy">{n0(Math.round(v * 100) / 100)}</b></span>)}</div>
               {!tally.ok && <div className="mt-2 space-y-2"><p className="text-alert-red">{tally.message}</p>{clientTB.status === 'Submitted' && <button onClick={() => setReason(tally.message)} className={`${BTN} border border-slate-300 text-navy hover:bg-white`}>Use this as the reason to return it</button>}</div>}
             </div>
+            <LedgerPlacement file={file} sub={clientTB} />
             <OpeningBalanceCheck file={file} sub={clientTB} onChange={setOpening} />
             {clientTB.status === 'Submitted' && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
