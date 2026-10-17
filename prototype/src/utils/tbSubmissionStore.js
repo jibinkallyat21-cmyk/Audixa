@@ -11,10 +11,10 @@ export const getTBSubmission = (slug) => readStore(KEY, {})[slug] || null
 const put = (slug, rec) => writeStore(KEY, { ...readStore(KEY, {}), [slug]: rec })
 const log = (client, title, description) => { try { logEvent({ client: 'kingdom-retail', clientName: client, category: 'client-response', title, description }) } catch { /* log is optional */ } }
 
-export function submitTB(file, { fileName, ledgers, warnings = [], sheetName = '', glFileName = '', glRows = [], glStats = null, pyFileName = '', pyLedgers = [], firstYear = false }) {
+export function submitTB(file, { fileName, ledgers, warnings = [], sheetName = '', glFileName = '', glRows = [], glStats = null, pyFileName = '', pyLedgers = [], firstYear = false, tbPath = '', glPath = '', pyPath = '' }) {
   const tally = tbTally(ledgers)
   if (!tally.ok) { log(file.client, 'Trial balance rejected: does not tally', `${fileName}: ${tally.issues.join('; ')}`); return { ok: false, errors: [tally.message] } }
-  put(file.slug, { status: 'Submitted', fileName, ledgers, warnings, sheetName, glFileName, glRows, glStats, pyFileName, pyLedgers, firstYear, submittedAt: new Date().toISOString(), returnReason: '' })
+  put(file.slug, { status: 'Submitted', fileName, ledgers, warnings, sheetName, glFileName, glRows, glStats, pyFileName, pyLedgers, firstYear, tbPath, glPath, pyPath, submittedAt: new Date().toISOString(), returnReason: '' })
   log(file.client, 'Trial balance uploaded', `${fileName}: ${ledgers.length} ledgers${glFileName ? `, with the general ledger ${glFileName}` : ''}; waiting for audit team approval`)
   return { ok: true, errors: [] }
 }

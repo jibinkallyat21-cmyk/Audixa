@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { openStoredFile } from '../../../utils/files'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ChevronRight, Download, Check, X, Info } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -253,7 +254,8 @@ function RequirementRow({ item, index, onUpdateItem, slug }) {
     })
   }
 
-  const handleGenericAction = () => showToast(`${action} — ${item.name}`)
+  const openFile = async () => { const r = await openStoredFile(item.filePath); if (!r.ok) showToast(r.error) }
+  const handleGenericAction = () => (item.filePath ? openFile() : showToast(`${action} — ${item.name}`))
 
   const hasFlag = !!item.aiFlag
   const longName = item.name.length > 60
@@ -327,7 +329,7 @@ function RequirementRow({ item, index, onUpdateItem, slug }) {
           ) : null}
           {item.status === 'Accepted' && (
             <button
-              onClick={() => showToast(`Download starting — ${filename}`)}
+              onClick={() => (item.filePath ? openFile() : showToast(`Download starting — ${filename}`))}
               aria-label={`Download ${filename}`}
               className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 text-navy hover:bg-slate-50"
             >
@@ -461,7 +463,7 @@ function IssuedReview({ rec, slug }) {
     return {
       id: c.id, title: c.title, completed: done, total: c.items.length, percent: Math.round((done / c.items.length) * 100), statusColor,
       status: done === c.items.length ? 'Complete' : statusColor === 'amber' ? 'In review' : 'Awaiting client', defaultOpen: false,
-      items: c.items.map((i) => ({ ref: i.ref, name: i.text, status: i.status, fileInfo: i.explanationOnly ? 'Explanation only, no document' : i.filename ? `${i.filename} · ${i.status === 'Accepted' ? 'Accepted' : i.status === 'Rejected' ? 'Rejected' : 'Uploaded'}` : '', action: i.filename ? 'View File' : null, rejectReason: i.alert || '', remarks: i.remarks, explanationOnly: i.explanationOnly })),
+      items: c.items.map((i) => ({ ref: i.ref, name: i.text, status: i.status, fileInfo: i.explanationOnly ? 'Explanation only, no document' : i.filename ? `${i.filename} · ${i.status === 'Accepted' ? 'Accepted' : i.status === 'Rejected' ? 'Rejected' : 'Uploaded'}` : '', action: i.filename ? 'View File' : null, filePath: i.filePath, rejectReason: i.alert || '', remarks: i.remarks, explanationOnly: i.explanationOnly })),
     }
   }
   const onUpdate = (_cat, ref, patch) => {

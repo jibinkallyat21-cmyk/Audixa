@@ -192,3 +192,10 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - Table `public.kv (key, value jsonb, updated_at, updated_by)` with row level security: signed-out users see nothing; any signed-in user can read and write. Six test users were created (see the local file `prototype/test-logins.local.md`, not committed).
 - Known limits: each key is one JSON blob, so two people editing the same key at the same moment overwrite each other (last write wins); roles are not yet enforced in the database (any signed-in user can read all keys); uploaded document files are not stored yet (stage 3, a storage bucket).
 - Moving to the company account: create the same table and policies (migration `audit360_kv_store`), create the users, change the two environment values.
+
+## Document storage (Supabase Storage)
+
+- Private bucket `documents` (50 MB per file), signed-in users only (migration `audit360_documents_bucket`). Path: `<client slug>/<requirement ref>/<time>-<safe file name>`; a re-upload never overwrites, the old file stays.
+- `utils/files.js`: `uploadItemFile` (client uploads; the item keeps `filePath`, `fileSize`, `fileType` and the original `filename`), `storeFile` (trial balance, general ledger and previous year file; paths kept on the submission), `openStoredFile` (five-minute signed link in a new tab). Without Supabase only the file name is kept, as before.
+- The team opens files from the requirement list (View File and the download button), the sent samples table, the party samples list and the trial balance header. Evidence panels still show stand-in fields: reading the content of real documents is not built.
+- Not yet: deleting stored files when an item is withdrawn, a virus scan, previews inside the app, the alternative-procedure folder ZIP built from the real files.

@@ -10,6 +10,7 @@ import { applyPartyBreakdown } from '../../utils/partyBreakdown'
 import { partyKindOf } from '../../utils/tbFormat'
 import OpeningBalanceCheck from './OpeningBalanceCheck'
 import { useTBSubmissions, approveTB, returnTB, setTBLedgers } from '../../utils/tbSubmissionStore'
+import FileLink from '../shared/FileLink'
 import { tbTally } from '../../utils/tbFormat'
 
 const n0 = (n) => Number(n).toLocaleString()
@@ -96,7 +97,7 @@ function MisList({ file, renderIssued }) {
           <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
             {(() => { const tbOpen = tbShow ?? clientTB.status !== 'Approved'; return (<>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-semibold text-navy">Client trial balance: {clientTB.fileName} · {clientTB.ledgers.length} ledgers · {clientTB.status === 'Approved' ? `Approved by ${sub.approvedBy}` : 'Format check passed, waiting for your approval'}</p>
+              <p className="font-semibold text-navy">Client trial balance: <FileLink item={{ filename: clientTB.fileName, filePath: clientTB.tbPath }} /> {clientTB.glPath ? <>· general ledger <FileLink item={{ filename: clientTB.glFileName, filePath: clientTB.glPath }} /></> : null} {clientTB.pyPath ? <>· previous year <FileLink item={{ filename: clientTB.pyFileName, filePath: clientTB.pyPath }} /></> : null} · {clientTB.ledgers.length} ledgers · {clientTB.status === 'Approved' ? `Approved by ${sub.approvedBy}` : 'Format check passed, waiting for your approval'}</p>
               {clientTB.status === 'Approved' && <button onClick={() => setTbShow(!tbOpen)} aria-expanded={tbOpen} className={`${BTN} border border-slate-300 text-navy hover:bg-white`}>{tbOpen ? 'Hide the checks' : 'Show the checks'}</button>}
             </div>
             {!tbOpen && <p className="mt-1 text-emerald">Party-wise balances {clientTB.partyWise ? 'applied' : 'not needed'}; opening balances checked against the previous year and confirmed.</p>}
