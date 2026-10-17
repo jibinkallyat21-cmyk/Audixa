@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../../utils/features'
 import { useSearchParams, Link, Navigate } from 'react-router-dom'
 import { useLiveMateriality } from '../../../utils/materialityStore'
 import { ChevronRight, ArrowRight, Wrench, Scissors, FileText, PenLine, CheckCircle2, ListChecks, ScanSearch, FolderOpen, Landmark } from 'lucide-react'
@@ -197,7 +198,7 @@ export default function TeamWorkspaceAreas() {
   const statuses = useProcedureStatuses(dc.slug); const issued = useIssuedLists()[dc.slug]
   const area = findArea(params.get('area')); const proc = area?.procedures.find((p) => p.id === params.get('proc'))
   const body = useMemo(() => {
-    if (!dc.ready) return <Empty>Load the demo client to try the audit areas. Every figure here comes from the client's trial balance.</Empty>
+    if (!dc.ready) return <Empty>{DEMO_DATA ? 'Load the demo client to try the audit areas. ' : 'The audit areas open once the client\'s trial balance is approved. '}Every figure here comes from the client's trial balance.</Empty>
     if (area && proc) return <ProcView area={area} proc={proc} dc={dc} statuses={statuses} issued={issued} />
     if (area) return <AreaView area={area} dc={dc} statuses={statuses} issued={issued} />
     return <AreaList dc={dc} statuses={statuses} issued={issued} />

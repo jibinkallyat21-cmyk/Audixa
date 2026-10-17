@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import { Loader2, FileSpreadsheet, RefreshCw } from 'lucide-react'
 import { useToast } from '../shared/Toast'
 import { readDocument } from './elShared'
@@ -81,8 +82,8 @@ export default function OpeningBalanceCheck({ file, sub, onChange }) {
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <label className={`${BTN} cursor-pointer border border-slate-300 text-navy hover:bg-slate-50`}>{busy === 'file' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}{hasPY ? 'Replace the audited trial balance' : "Upload last year's audited trial balance (PDF or Excel)"}
             <input type="file" accept=".xlsx,.pdf" className="hidden" onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} /></label>
-          {!hasPY && <button onClick={() => { setPYTB(file, demoPYPayload()); setConfirmed(false) }} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo audited trial balance</button>}
-          {file.isDemo && <button onClick={() => { setTBLedgers(file, ...demoCorrected()); setPYTB(file, demoPYPayload()); setConfirmed(false); setNote(''); asked.current = ''; showToast('Demo opening balances corrected: they now agree to the audited trial balance') }} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo with corrected opening balances</button>}
+          {DEMO_DATA && !hasPY && <button onClick={() => { setPYTB(file, demoPYPayload()); setConfirmed(false) }} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo audited trial balance</button>}
+          {DEMO_DATA && file.isDemo && <button onClick={() => { setTBLedgers(file, ...demoCorrected()); setPYTB(file, demoPYPayload()); setConfirmed(false); setNote(''); asked.current = ''; showToast('Demo opening balances corrected: they now agree to the audited trial balance') }} className={`${BTN} border border-slate-300 text-navy hover:bg-slate-50`}>Use demo with corrected opening balances</button>}
         </div>
       )}
       {err && <p className="mt-2 text-alert-red" role="alert">{err}</p>}

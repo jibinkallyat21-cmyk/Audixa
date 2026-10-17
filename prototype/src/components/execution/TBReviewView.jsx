@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { useDemoClient, demoLabel } from '../../utils/useDemoClient'
 import { clientAfs } from '../../utils/clientFsData'
@@ -153,8 +154,8 @@ export default function TBReviewView() {
         </div>
       </Card>
 
-      <Card title="2. Trial balances" right={<button onClick={useDemo} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button>}><AutoDemo run={useDemo} />
-        {demo ? <p className="rounded-lg bg-amber/10 px-3 py-2 text-xs text-amber">Demo data is loaded: a prior-year TB, a current-year TB with deliberate issues, and a prior-year AFS.</p> : (
+      <Card title="2. Trial balances" right={DEMO_DATA ? <button onClick={useDemo} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button> : null}><AutoDemo run={useDemo} />
+        {DEMO_DATA && demo ? <p className="rounded-lg bg-amber/10 px-3 py-2 text-xs text-amber">Demo data is loaded: a prior-year TB, a current-year TB with deliberate issues, and a prior-year AFS.</p> : (
           <div className="grid gap-3 md:grid-cols-2">
             <FileBlock title="Prior-year audited TB" file={files.py} busy={busy === 'py'} onFile={(f) => load('py', f)} onMap={(i, k, h) => setMap('py', i, k, h)} />
             <FileBlock title="Current-year TB" file={files.cy} busy={busy === 'cy'} onFile={(f) => load('cy', f)} onMap={(i, k, h) => setMap('cy', i, k, h)} />

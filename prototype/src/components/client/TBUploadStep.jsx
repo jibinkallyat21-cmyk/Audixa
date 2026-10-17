@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import { Download, Loader2, Upload, CheckCircle2, AlertCircle, Clock, FileSpreadsheet } from 'lucide-react'
 import { useToast } from '../shared/Toast'
 import { readTBWorkbook } from '../../utils/tbExcel'
@@ -132,7 +133,7 @@ export default function TBUploadStep({ D }) {
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button disabled={!ready} onClick={send} className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Send to the audit team</button>
         {!ready && <span className="text-xs" style={{ color: D.muted }}>{existing ? 'The trial balance and the general ledger are needed.' : "The trial balance, the general ledger and last year's audited trial balance are needed."}</span>}
-        <button onClick={useDemo} className="rounded-lg px-4 py-2 text-sm font-semibold underline" style={{ color: D.muted }}>Use demo files</button>
+        {DEMO_DATA && <button onClick={useDemo} className="rounded-lg px-4 py-2 text-sm font-semibold underline" style={{ color: D.muted }}>Use demo files</button>}
       </div>
     </div>
   )

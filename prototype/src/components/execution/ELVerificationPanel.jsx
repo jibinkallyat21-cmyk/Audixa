@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import { CheckCircle2, Loader2, MessageSquarePlus, Upload } from 'lucide-react'
 import { FieldInput, readDocument } from './elShared'
 import { fmtDate, fmtAmount, setPath } from '../../utils/elRequest.js'
@@ -120,7 +121,7 @@ export default function ELVerificationPanel({ req, canAct, onUpdate }) {
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}{elr.doc ? 'Replace and read' : 'Upload and read'}
               <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.doc,.docx" disabled={!canAct || busy} onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} />
             </label>
-            {canAct && <>
+            {DEMO_DATA && canAct && <>
               <button onClick={() => loadSample(false)} className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50">Fill demo EL</button>
               <button onClick={() => loadSample(true)} className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50">Fill demo EL with issues</button>
             </>}

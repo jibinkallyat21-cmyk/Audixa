@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import { Download, FileSpreadsheet, Loader2, Upload } from 'lucide-react'
 import Shell from '../../components/execution/Shell'
 import { useToast } from '../../components/shared/Toast'
@@ -215,7 +216,7 @@ function EosbTab({ period: initialPeriod }) {
         {err && <p className="mt-2 text-xs text-alert-red">{err}</p>}
         <div className="mt-3 flex flex-wrap gap-2">
           <button onClick={() => run(false)} disabled={!!busy || (files.Active.length + files.Inactive.length === 0)} className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy/90 disabled:opacity-40">{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}{busy || 'Build the workbook'}</button>
-          <button onClick={() => run(true)} disabled={!!busy} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50">Use demo lists</button>
+          {DEMO_DATA && <button onClick={() => run(true)} disabled={!!busy} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50">Use demo lists</button>}
         </div>
       </Card>
 

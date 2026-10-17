@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { Download, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { Card, Chip, DataTable, Flags, Stat, Field, FieldGrid, Section, Toggle, PrimaryButton, SecondaryButton } from './ReviewParts'
@@ -63,7 +64,7 @@ function SalesPurchase({ ctx, initialKind = 'Sales Report' }) {
   return (
     <div className="space-y-6">
     <SentItems slug={dc.slug} area={kind.replace(/ Report$/, '')} group="samples" />
-    <Card title="Sales / Purchase – 50% of taxable value, highest first (maximum 30 entries)" right={<button onClick={async () => load(null, await demoBuffer(dc.ready ? (/purchase/i.test(kind) ? clientPurchases(dc.ledgers) : clientSales(dc.ledgers)) : demoSales()))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button>}><AutoDemo run={async () => load(null, await demoBuffer(dc.ready ? (/purchase/i.test(kind) ? clientPurchases(dc.ledgers) : clientSales(dc.ledgers)) : demoSales()))} />
+    <Card title="Sales / Purchase – 50% of taxable value, highest first (maximum 30 entries)" right={DEMO_DATA ? <button onClick={async () => load(null, await demoBuffer(dc.ready ? (/purchase/i.test(kind) ? clientPurchases(dc.ledgers) : clientSales(dc.ledgers)) : demoSales()))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button> : null}><AutoDemo run={async () => load(null, await demoBuffer(dc.ready ? (/purchase/i.test(kind) ? clientPurchases(dc.ledgers) : clientSales(dc.ledgers)) : demoSales()))} />
       <div className="mb-2 flex gap-2"><select aria-label="Report" value={kind} onChange={(e) => { setKind(e.target.value); setRes(null) }} className={SEL}><option>Sales Report</option><option>Sales Return Report</option><option>Purchase Report</option></select>
         <Upload label="Choose the report (Excel)" onFile={(f) => f && load(f)} busy={busy} file={file} /></div>
       <Mapping file={file} setFile={setFile} keys={['id', 'date', 'party', 'taxable']} />
@@ -93,7 +94,7 @@ function Expense({ ctx }) {
   return (
     <div className="space-y-6">
     <SentItems slug={dc.slug} area={'Expenses'} group="samples" />
-    <Card title="Expenses – 50% of the revised eligible population, maximum 7 per account" right={<button onClick={async () => load(null, await demoBuffer(dc.ready ? clientExpenses(dc.ledgers) : demoExpenses()))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button>}><AutoDemo run={async () => load(null, await demoBuffer(dc.ready ? clientExpenses(dc.ledgers) : demoExpenses()))} />
+    <Card title="Expenses – 50% of the revised eligible population, maximum 7 per account" right={DEMO_DATA ? <button onClick={async () => load(null, await demoBuffer(dc.ready ? clientExpenses(dc.ledgers) : demoExpenses()))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button> : null}><AutoDemo run={async () => load(null, await demoBuffer(dc.ready ? clientExpenses(dc.ledgers) : demoExpenses()))} />
       <Upload label="Choose the Consolidated Expenses Ledger" onFile={(f) => f && load(f)} busy={busy} file={file} />
       <Mapping file={file} setFile={setFile} keys={['account', 'description', 'date', 'debit', 'credit', 'amount']} />
       {res && (
@@ -131,7 +132,7 @@ function Parties({ ctx }) {
   return (
     <div className="space-y-6">
     <SentItems slug={dc.slug} area={'ARAP'} group="samples" />
-    <Card title="AR / AP / Advances – cumulative 50% by category" right={<button onClick={async () => { await load(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button>}><AutoDemo run={async () => { await load(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} />
+    <Card title="AR / AP / Advances – cumulative 50% by category" right={DEMO_DATA ? <button onClick={async () => { await load(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button> : null}><AutoDemo run={async () => { await load(null, await demoBuffer(dc.ready ? clientParties(dc.ledgers) : demoParties())); setInp((x) => ({ ...x, yearEnd: '2025-12-31', auditStart: '2026-03-01' })) }} />
       <div className="mb-2 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {[['yearEnd', 'Financial year-end', 'date'], ['auditStart', 'Audit start date', 'date'], ['today', 'Current date', 'date'], ['pct', 'Sample %', 'number'], ['tolerance', 'Nil-balance tolerance', 'number']].map(([k, l, t]) => (
           <label key={k} className="text-xs font-medium text-slate-600">{l}<input aria-label={l} type={t} value={inp[k]} onChange={(e) => setInp({ ...inp, [k]: e.target.value })} className={`${SEL} mt-1 w-full font-normal normal-case`} /></label>))}
@@ -195,7 +196,7 @@ function Materiality({ ctx, initialArea = 'Revenue', lockArea = false }) {
     <div className="space-y-6">
       <SentItems slug={dc.slug} area={p.area} group="samples" />
       <Card title="Materiality method" subtitle={useStored ? `Everything above materiality (SR ${money(stored.materiality)}, set in the file summary) is tested. Below it, a sample is chosen by the sample size.` : 'Everything above materiality is tested. Below it, a sample is chosen by the sample size.'}
-        right={<SecondaryButton onClick={loadClient}>{demoLabel(dc)}</SecondaryButton>}><AutoDemo run={loadClient} />
+        right={DEMO_DATA ? <SecondaryButton onClick={loadClient}>{demoLabel(dc)}</SecondaryButton> : null}><AutoDemo run={loadClient} />
         <Section title="1. What are you testing?">
           {lockArea && <p className="text-sm text-navy">Testing <b>{p.area}</b>: only the accounts of this area are used{isParty ? ' (party list: debit balances for receivables, credit balances for payables)' : ''}.</p>}
           {!lockArea && <FieldGrid cols={2}>
