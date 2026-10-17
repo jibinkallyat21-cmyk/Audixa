@@ -27,3 +27,4 @@ scripts/screenshots
 *.sw?
 test-logins.local.md
 .env.local
+.env.production
