@@ -142,3 +142,15 @@ Q9, Q27, Q46 (to be answered). The documents each area needs (section 5, assumpt
 - `utils/assetInvoices.js` (tests: `scripts/assetInvoices.test.mjs`): suggests the asset class from the invoice wording, queries repairs or maintenance, leaves unknown wording unclassified; builds one schedule line per confirmed invoice; compares invoice total with TB additions.
 - `components/execution/AssetInvoices.jsx` in the fixed assets tool: each invoice and its payment proof are viewable (renamed to standard names), class and "treat as asset" are confirmed by a person, then "Create the asset lines". `assetsExcel.js` adds a "Source invoices" sheet to the depreciation workbook.
 - Real app: read the invoices (OCR or reader) instead of `demoAssetInvoices`; same confirm-then-build flow.
+
+## Addendum: trial balance tally and real client files
+
+- Add `tbTally` (opening, debits and credits, closing) to the trial balance format check; reject at upload with the amounts; re-check on submit, in the review (approval blocked) and in the approve action. `workingTbTally` drives the "Balanced" indicator on the working trial balance (client and team); never hard-code it.
+- The working trial balance is created only from an approved trial balance (tally + opening balance check + other checks).
+- Client upload step must be visible on the Requirement List until a list is issued.
+- Demo trial balance adjusted to tally (`data/demoTB.js`).
+- Data source switch for a real client file (`demoData.loadDemoData(..., { own, clientName })`).
+
+## Addendum: Supabase test backend
+
+See `prototype/docs/self-review-decisions.md` (Supabase section). Only `utils/store.js`, `utils/supabase.js`, `main.jsx`, the login page and the sign-out button changed. The real app should use its own API instead, keeping the same storage boundary.

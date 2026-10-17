@@ -55,6 +55,29 @@ export function findGroupBalances(ledgers) {
 
 const money = (n) => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 })
 
+// A trial balance tallies when the opening balances, the year's debits and credits, and the closing balances each cancel out (debits positive, credits negative).
+// The tolerance absorbs rounding only; anything larger is an error in the file.
+export function tbTally(ledgers, tolerance = 1) {
+  const sum = (k) => ledgers.reduce((n, l) => n + (Number(l[k]) || 0), 0)
+  const opening = sum('opening'), debit = sum('debit'), credit = sum('credit')
+  const closing = ledgers.some((l) => l.closing !== undefined && l.closing !== null && l.closing !== '') ? sum('closing') : opening + debit - credit
+  const diff = debit - credit
+  const issues = []
+  if (Math.abs(opening) > tolerance) issues.push(`the opening balances add up to ${money(opening)} instead of nil`)
+  if (Math.abs(diff) > tolerance) issues.push(`total debits ${money(debit)} and total credits ${money(credit)} differ by ${money(Math.abs(diff))}`)
+  if (Math.abs(closing) > tolerance) issues.push(`the closing balances add up to ${money(closing)} instead of nil`)
+  return { opening, debit, credit, closing, diff, ok: issues.length === 0, issues, message: issues.length ? `The trial balance does not tally: ${issues.join('; ')}. Please correct the entries or the missing ledger and upload it again.` : '' }
+}
+
+// The working trial balance (lines with opening, year debits and credits and adjustments) must still tally after every adjustment.
+export function workingTbTally(lines, tolerance = 1) {
+  const sum = (k) => lines.reduce((n, l) => n + (Number(l[k]) || 0), 0)
+  const opening = sum('openingBalance'), debit = sum('currentYearDebit') + sum('adjustmentDebit'), credit = sum('currentYearCredit') + sum('adjustmentCredit')
+  const closing = opening + debit - credit
+  const ok = lines.length > 0 && Math.abs(opening) <= tolerance && Math.abs(debit - credit) <= tolerance && Math.abs(closing) <= tolerance
+  return { opening, debit, credit, closing, diff: debit - credit, ok }
+}
+
 // sheets = readTBWorkbook() output. Returns { ok, errors, missing, ledgers, sheetName, warnings, partyLines, reason }.
 export function checkTBFormat(sheets) {
   const empty = { ok: false, errors: [], missing: PRESCRIBED_COLUMNS.filter((c) => c.required).map((c) => c.label), ledgers: [], sheetName: '', warnings: [], partyLines: [] }
@@ -68,6 +91,7 @@ export function checkTBFormat(sheets) {
     if (!ledgers.length) errors.push('The sheet has no ledger rows.')
     const bad = ledgers.filter((l) => l.closingSupplied && Math.abs(l.opening + l.debit - l.credit - l.closing) > 1)
     if (bad.length) errors.push(`${bad.length} ledger${bad.length === 1 ? ' does' : 's do'} not add up (opening + debit - credit must equal closing): ${bad.slice(0, 5).map((l) => `${l.name} (${money(l.opening)} + ${money(l.debit)} - ${money(l.credit)} = ${money(l.opening + l.debit - l.credit)}, but closing is ${money(l.closing)})`).join('; ')}${bad.length > 5 ? `; and ${bad.length - 5} more` : ''}.`)
+    const tally = tbTally(ledgers); if (!tally.ok) errors.push(tally.message)
     const groups = findGroupBalances(ledgers)
     if (groups.length) errors.push(`The trial balance must be at ledger level, with no group or sub-group balances. Remove or replace: ${groups.slice(0, 5).map((g) => `${g.name} (${g.why})`).join('; ')}${groups.length > 5 ? `; and ${groups.length - 5} more` : ''}.`)
     if (!best.s.mapping.code) warnings.push('No account code column. Codes are recommended.')

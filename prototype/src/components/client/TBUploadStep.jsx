@@ -16,6 +16,7 @@ const save = async (blob, name) => { const url = URL.createObjectURL(blob); cons
 export default function TBUploadStep({ D }) {
   const showToast = useToast()
   const sub = useTBSubmissions()[DEMO_FILE.slug]
+  const existing = useDemoExisting()
   const [busy, setBusy] = useState('')
   const [tb, setTb] = useState(null)   // { fileName, ledgers, warnings, sheetName }
   const [gl, setGl] = useState(null)   // { fileName, rows }
@@ -70,11 +71,11 @@ export default function TBUploadStep({ D }) {
   const oc = tb && py && !firstYear && !existing ? openingCheck(py.ledgers, tb.ledgers) : null
   const send = () => {
     const { rows, stats } = crossCheck(tb, gl)
-    submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats, pyFileName: existing || firstYear ? '' : py.fileName, pyLedgers: existing || firstYear ? [] : py.ledgers, firstYear: !existing && firstYear })
+    const r = submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats, pyFileName: existing || firstYear ? '' : py.fileName, pyLedgers: existing || firstYear ? [] : py.ledgers, firstYear: !existing && firstYear })
+    if (!r.ok) { setTbErr(r.errors); setTb(null); cur.current.tb = null; return }
     showToast('Trial balance and general ledger sent to the audit team')
   }
-  const existing = useDemoExisting()
-  const useDemo = () => { submitTB(DEMO_FILE, demoPayload(existing)); showToast('Demo files sent to the audit team') }
+  const useDemo = () => { const r = submitTB(DEMO_FILE, demoPayload(existing)); if (!r.ok) { setTbErr(r.errors); return }; showToast('Demo files sent to the audit team') }
 
   if (sub?.status === 'Submitted') return (
     <div className="rounded-xl p-6" style={card}>

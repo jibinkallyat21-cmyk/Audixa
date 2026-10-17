@@ -426,6 +426,8 @@ export default function ClientDocuments() {
             </div>
           </div>
 
+          {!rec && <TBUploadStep D={D} />}
+
           {rec && (<>
           {/* Bento stat cards */}
           <motion.div key={selectedFY} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="grid grid-cols-12 gap-3">
@@ -487,11 +489,9 @@ export default function ClientDocuments() {
           </div>
           </>)}
 
-          {!rec && <TBUploadStep D={D} />}
-
           {/* Table */}
           </>)}
-          {tab === 'areas' && <><div className="flex flex-wrap items-center justify-between gap-3"><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search an area or a document..." className="w-72 rounded-lg px-4 py-2 text-sm outline-none" style={{ border: `1px solid ${D.border}`, background: D.card, color: D.text }} />{demoOn && <button onClick={() => { const n = uploadDemoDocuments(PORTAL_CLIENT.slug); showToast(n ? `${n} demo documents uploaded for the audit team to review` : 'Every requirement already has a document.') }} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50" style={{ color: D.text }}>Upload demo documents</button>}</div><AreaRequirements rec={rec} search={search} /></>}
+          {tab === 'areas' && rec && <><div className="flex flex-wrap items-center justify-between gap-3"><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search an area or a document..." className="w-72 rounded-lg px-4 py-2 text-sm outline-none" style={{ border: `1px solid ${D.border}`, background: D.card, color: D.text }} />{demoOn && <button onClick={() => { const n = uploadDemoDocuments(PORTAL_CLIENT.slug); showToast(n ? `${n} demo documents uploaded for the audit team to review` : 'Every requirement already has a document.') }} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50" style={{ color: D.text }}>Upload demo documents</button>}</div><AreaRequirements rec={rec} search={search} /></>}
           {rec && tab === 'documents' && <div className="overflow-hidden rounded-xl shadow-sm" style={{ border: `1px solid ${D.border}`, background: D.card }}>
             {/* Table header */}
             <div className="hidden items-center gap-3 px-4 py-2.5 md:flex" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderBottom: `1px solid ${D.border}` }}>

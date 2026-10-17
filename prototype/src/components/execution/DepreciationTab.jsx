@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import AutoDemo from './AutoDemo'
-import { useDemoClient } from '../../utils/useDemoClient'
+import { useDemoClient, demoLabel } from '../../utils/useDemoClient'
 import { clientAssets } from '../../utils/clientPayrollData'
 import { Download, Plus, Trash2 } from 'lucide-react'
 import { Card, DataTable, Flags, Chip, Field, FieldGrid } from './ReviewParts'
@@ -53,7 +53,7 @@ export default function DepreciationTab({ client, clientName }) {
   }
   return (
     <div className="space-y-4">
-      <Card title="Year" right={<button onClick={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{dc.ready ? "Use the client's data" : 'Use demo data'}</button>}><AutoDemo run={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
+      <Card title="Year" right={<button onClick={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button>}><AutoDemo run={() => setAssets(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         <div className="grid gap-2 sm:grid-cols-3">
           <label className="text-xs font-medium text-slate-600">Year start<input aria-label="Year start" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
           <label className="text-xs font-medium text-slate-600">Year end<input aria-label="Year end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
