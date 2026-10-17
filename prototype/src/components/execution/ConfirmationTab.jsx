@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { useDemoClient, demoLabel } from '../../utils/useDemoClient'
 import { clientConfirmations, clientBankStatement } from '../../utils/clientSamplingData'
@@ -70,7 +71,7 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
   return (
     <div className="space-y-6">
       <Card title="Cash and bank confirmations" subtitle="Compare each confirmation with the trial balance, check the document, and see the result. Open a confirmation to work on it."
-        right={<><SecondaryButton onClick={load}>{demoLabel(dc)}</SecondaryButton><SecondaryButton onClick={() => add('Bank')}><Plus className="h-4 w-4" />Add bank</SecondaryButton><SecondaryButton onClick={() => add('Cash')}><Plus className="h-4 w-4" />Add cash</SecondaryButton></>}>
+        right={<>{DEMO_DATA && <SecondaryButton onClick={load}>{demoLabel(dc)}</SecondaryButton>}<SecondaryButton onClick={() => add('Bank')}><Plus className="h-4 w-4" />Add bank</SecondaryButton><SecondaryButton onClick={() => add('Cash')}><Plus className="h-4 w-4" />Add cash</SecondaryButton></>}>
         <AutoDemo run={load} />
         <FieldGrid cols={2}>
           <Field label="Client legal name" hint="Compared exactly with the name on each confirmation (case and spaces ignored)"><input aria-label="Client legal name" value={legalName} onChange={(e) => setLegalName(e.target.value)} className={INPUT} /></Field>
@@ -79,7 +80,7 @@ export default function ConfirmationTab({ client, clientName, legalName: initial
         {rows.length > 0 && <div className="grid gap-3 sm:grid-cols-3"><Stat label="Confirmations" value={rows.length} /><Stat label="Matched" value={matched} tone="green" /><Stat label="Need attention" value={attention} tone={attention ? 'red' : 'green'} /></div>}
       </Card>
 
-      {rows.length === 0 && <Empty>No confirmations yet. Press “{demoLabel(dc)}” or add a bank or cash confirmation. Cash is numbered 5001.xx and bank 5002.xx in the order added.</Empty>}
+      {rows.length === 0 && <Empty>No confirmations yet. {DEMO_DATA ? <>Press “{demoLabel(dc)}” or add</> : 'Add'} a bank or cash confirmation. Cash is numbered 5001.xx and bank 5002.xx in the order added.</Empty>}
 
       {rows.map((c) => {
         const open = openId === c.id; const d = diffOf(c); const good = c.overall === 'Confirmed / Matched'

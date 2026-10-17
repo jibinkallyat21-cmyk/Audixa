@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { useDemoClient, demoLabel } from '../../utils/useDemoClient'
 import { clientPyAfs, clientDepreciation } from '../../utils/clientFsData'
@@ -40,7 +41,7 @@ export default function FSPrepTab({ client, clientName }) {
   const st = out?.fs.st
   return (
     <div className="space-y-4">
-      <Card title="1. Current-year trial balance" right={<button onClick={() => { loadDemo() }} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button>}><AutoDemo run={() => { loadDemo() }} />
+      <Card title="1. Current-year trial balance" right={DEMO_DATA ? <button onClick={() => { loadDemo() }} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button> : null}><AutoDemo run={() => { loadDemo() }} />
         <TBSource file={file} setFile={setFile} onLedgers={(l) => { setLedgers(l); setOut(null) }} />
         <p className="mt-2 text-xs text-slate-500">Debit positive, credit negative. The closing balance is recomputed (opening + debit − credit) and compared with the supplied closing.</p>
         <label className="mt-2 block text-xs text-slate-500">Reporting date <input aria-label="Reporting date" value={period} onChange={(e) => setPeriod(e.target.value)} className={`${INP} ml-1 w-40`} /></label>

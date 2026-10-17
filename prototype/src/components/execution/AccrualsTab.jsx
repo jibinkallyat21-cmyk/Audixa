@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { Plus, Trash2 } from 'lucide-react'
 import { Card, Field, FieldGrid, Chip } from './ReviewParts'
@@ -22,7 +23,7 @@ export default function AccrualsTab({ client, clientName }) {
   const tie = dc.ready && lines.length ? accrualTie(lines, dc.ledgers) : null
   return (
     <div className="space-y-4">
-      <Card title="Accrued expenses" subtitle="Each accrual is backed by the invoice or contract and the payment made after the year end." right={<div className="flex gap-3"><button onClick={load} className="text-xs font-semibold text-slate-500 underline">{demoLabel(dc)}</button><button onClick={() => setLines((l) => [...l, blank()])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add accrual</button></div>}>
+      <Card title="Accrued expenses" subtitle="Each accrual is backed by the invoice or contract and the payment made after the year end." right={<div className="flex gap-3">{DEMO_DATA && <button onClick={load} className="text-xs font-semibold text-slate-500 underline">{demoLabel(dc)}</button>}<button onClick={() => setLines((l) => [...l, blank()])} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><Plus className="h-3 w-3" />Add accrual</button></div>}>
         <AutoDemo run={load} />
         {tie && <p className="mb-3 text-sm text-navy">Accruals listed <b>{money(tie.sum)}</b> · Trial balance <b>{money(tie.tb)}</b> · Difference <b>{money(tie.difference)}</b> <Chip value={tie.difference === 0 ? 'Pass' : 'Fail'} /></p>}
         {lines.length === 0 && <p className="text-xs text-slate-400">No accruals yet. Add each cost owed at the year end, or load the client's data.</p>}

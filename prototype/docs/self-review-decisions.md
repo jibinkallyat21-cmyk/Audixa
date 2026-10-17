@@ -199,3 +199,25 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - `utils/files.js`: `uploadItemFile` (client uploads; the item keeps `filePath`, `fileSize`, `fileType` and the original `filename`), `storeFile` (trial balance, general ledger and previous year file; paths kept on the submission), `openStoredFile` (five-minute signed link in a new tab). Without Supabase only the file name is kept, as before.
 - The team opens files from the requirement list (View File and the download button), the sent samples table, the party samples list and the trial balance header. Evidence panels still show stand-in fields: reading the content of real documents is not built.
 - Not yet: deleting stored files when an item is withdrawn, a virus scan, previews inside the app, the alternative-procedure folder ZIP built from the real files.
+
+## Role-based access in the database
+
+The portal of each account is fixed in its signed token (`app_metadata.portal`, set by an administrator; users cannot change it). Row level security on `public.kv` and on the `documents` bucket uses it (migrations `audit360_access_functions` and the policy changes noted in the Supabase project).
+
+| Keys | client | team | manager, management | front office |
+|---|---|---|---|---|
+| shared: `requirements:issued`, `requirements:tb`, `queries`, `client-activity`, `workingtb:*`, direct messages, escalations raised, `demo:loaded` | read and write | read and write | read and write | read and write |
+| staff: `client-profiles`, `audit-log`, `el-requests`, `el-coordinators` | none | read and write | read and write | read and write |
+| front office: `fo-*`, generated proposals | none | read only | read and write | read and write |
+| internal (materiality, procedure status, allocations, closure, intake and the rest) | none | read and write | read and write | none |
+| personal preferences (`audit360-*`, `audixa-*`, saved as `u:<user id>:...`) | own only | own only | own only | own only |
+
+- Documents: team, manager and management open all files; a client only the folder named by its `client_slug` (the first part of the path); front office none.
+- The full audit log is staff-only. What a client may see of its own file is written to `client-activity` (the client's own actions go only there). `useAuditLog` merges both, so screens did not change.
+- A save the role may not make is refused by the database; the screen drops it and goes back to the saved value (message in `cloudState().error`).
+- Tested in the database by impersonating each portal for each key group and each document path.
+- Known limit: the shared keys hold every client's data in one block each, so with several clients one client's token could read another's blocks. Before a second client is added, split these keys per client (for example `c:<client>:requirements:issued`) and require the client slug in the policy.
+
+## Demo data switch
+
+All demo conveniences (demo client and files, "use demo data" buttons, sample document fillers, auto-fill of tools) are behind `DEMO_DATA` in `src/utils/features.js`, read from `VITE_DEMO_DATA`. It is off by default; the client dashboard card then only starts a real client file. Nothing was deleted. To bring the demo back set `VITE_DEMO_DATA=on` (in `.env.production` or the Vercel environment variables) and rebuild.

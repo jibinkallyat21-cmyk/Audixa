@@ -37,3 +37,29 @@ test('changes from another user arrive, own echoes do not undo newer local edits
   c.emit({ eventType: 'DELETE', old: { key: 'x' } }); await flush()
   await disconnectCloud(); assert.equal(c.calls.removed, 1); assert.equal(cloudState().connected, false)
 })
+
+test('personal preferences are saved under the person, so users never overwrite each other', async () => {
+  const c = fakeClient(); c.auth = { getSession: async () => ({ data: { session: { user: { id: 'U1' } } } }) }
+  await connectCloud(c)
+  writeStore('audit360-team-view-role', 'Associate'); writeStore('queries', [1]); await flush()
+  assert.deepEqual(c.calls.upserts[0].map((r) => r.key).sort(), ['queries', 'u:U1:audit360-team-view-role'])
+  assert.equal(readStore('audit360-team-view-role', ''), 'Associate')
+  await disconnectCloud()
+})
+test('a key the role may not write is dropped and the saved value comes back; other keys still save', async () => {
+  const rows = [{ key: 'materiality', value: { v: 'saved' } }]
+  const c = fakeClient(rows)
+  c.from = () => ({
+    select: async () => ({ data: rows, error: null }),
+    upsert: async (batch) => (batch.some((r) => r.key === 'materiality') ? { error: { code: '42501', message: 'new row violates row-level security policy' } } : (c.calls.upserts.push(batch), { error: null })),
+  })
+  c.from = Object.assign(c.from, {})
+  const origFrom = c.from
+  c.from = (t) => { const o = origFrom(t); return { ...o, select: () => ({ in: async () => ({ data: rows }), then: (f) => f({ data: rows, error: null }) }) } }
+  await connectCloud(c)
+  writeStore('materiality', { v: 'mine' }); writeStore('queries', [2]); await flush()
+  assert.equal(cloudState().pending, 0); assert.match(cloudState().error, /materiality/)
+  assert.deepEqual(readStore('materiality', null), { v: 'saved' })
+  assert.deepEqual(c.calls.upserts.at(-1).map((r) => r.key), ['queries'])
+  await disconnectCloud()
+})

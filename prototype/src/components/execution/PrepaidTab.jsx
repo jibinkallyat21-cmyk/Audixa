@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { useDemoClient, demoLabel } from '../../utils/useDemoClient'
 import { clientPrepaid } from '../../utils/clientPayrollData'
@@ -41,7 +42,7 @@ export default function PrepaidTab({ client, clientName }) {
   }
   return (
     <div className="space-y-4">
-      <Card title="Accounting period" right={<button onClick={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button>}><AutoDemo run={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
+      <Card title="Accounting period" right={DEMO_DATA ? <button onClick={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-slate-50">{demoLabel(dc)}</button> : null}><AutoDemo run={() => setItems(demoList().map((d) => ({ ...d, id: Math.random().toString(36).slice(2) })))} />
         <div className="grid gap-2 sm:grid-cols-4">
           <label className="text-xs font-medium text-slate-600">From<input aria-label="Period from" type="date" value={yearStart} onChange={(e) => setYearStart(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>
           <label className="text-xs font-medium text-slate-600">Year-end<input aria-label="Period year-end" type="date" value={yearEnd} onChange={(e) => setYearEnd(e.target.value)} className={`${INP} mt-1 w-full font-normal`} /></label>

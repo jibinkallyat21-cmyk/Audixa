@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../../utils/features'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { Printer, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import AuditTeamLayout from '../../../components/team/AuditTeamLayout'
@@ -51,7 +52,7 @@ export default function TeamWorkspaceSummary() {
     <AuditTeamLayout title="File Workspace">
       <PageTransition>
         <WorkspaceHeader fileSlug="al-marai" />
-        {!sum ? <div className="mt-2"><Empty>Load the demo client to see its file summary.</Empty></div> : (
+        {!sum ? <div className="mt-2"><Empty>{DEMO_DATA ? 'Load the demo client to see its file summary.' : 'The file summary appears once the client has uploaded its trial balance.'}</Empty></div> : (
           <div className="mt-2 space-y-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div><h2 className="text-xl font-bold text-navy">File summary</h2><p className="mt-1 text-sm text-slate-500">{dc.client} · {dc.file.code} · {dc.auditor} · statutory deadline {dc.file.statutoryDue} · as at {today}</p></div>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import { AlertTriangle, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { Card } from './ReviewParts'
 import { FieldInput } from './elShared'
@@ -163,7 +164,7 @@ export default function QueryTrackerView() {
           <p className="mt-1 text-sm text-slate-500">Process 6.2. Every client query in one place, with owners, due dates, follow-up and escalation.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => { setQueries((cur) => [...demoQueries(profiles, cur), ...cur]); showToast('Demo queries added') }} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50">Add demo queries</button>
+          {DEMO_DATA && <button onClick={() => { setQueries((cur) => [...demoQueries(profiles, cur), ...cur]); showToast('Demo queries added') }} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50">Add demo queries</button>}
           <button onClick={() => setAdding((v) => !v)} className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3 py-2 text-xs font-semibold text-white hover:bg-[#D12C35]"><Plus className="h-3.5 w-3.5" />Raise a query</button>
         </div>
       </div>

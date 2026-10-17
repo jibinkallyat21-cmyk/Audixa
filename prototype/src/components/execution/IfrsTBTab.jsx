@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { useDemoClient, demoLabel } from '../../utils/useDemoClient'
 import { clientBis } from '../../utils/clientFsData'
@@ -87,7 +88,7 @@ export default function IfrsTBTab({ mode, client, clientName }) {
       {mode === 'disclaimer' && <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">Disclaimer audit: the IFRS TB is prepared from what the client provides, either a Trial Balance or a Basic Information Sheet (BIS). An unbalanced TB is documented as an unresolved difference and referred for review; a related-party / partner account is used only with support.</div>}
 
       <Card title="Step 1 · The client's figures" subtitle="Load the trial balance and set the period."
-        right={<SecondaryButton onClick={useDemo}>{demoLabel(dc)}</SecondaryButton>}><AutoDemo run={useDemo} />
+        right={DEMO_DATA ? <SecondaryButton onClick={useDemo}>{demoLabel(dc)}</SecondaryButton> : null}><AutoDemo run={useDemo} />
         {mode === 'disclaimer' && <div className="grid gap-3 sm:grid-cols-2">{[['tb', 'Client trial balance'], ['bis', 'Basic Information Sheet (BIS)']].map(([v, l]) => <Toggle key={v} label={l} checked={source === v} onChange={() => { setSource(v); setOut(null) }} />)}</div>}
         {source === 'tb' || mode !== 'disclaimer' ? <TBSource file={file} setFile={setFile} onLedgers={(l) => { setLedgers(l); setOut(null) }} /> : (
           <div className="space-y-4">{bis.map((b, i) => (

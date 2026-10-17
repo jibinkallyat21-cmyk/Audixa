@@ -1,4 +1,5 @@
 import { Database } from 'lucide-react'
+import { DEMO_DATA } from '../../utils/features'
 import { Link } from 'react-router-dom'
 import { useDemoLoaded } from '../../utils/demoData'
 
@@ -10,7 +11,7 @@ export default function DemoGate({ children, client = false }) {
     <div style={{ borderColor: 'rgba(128,128,128,0.45)' }} className="mx-auto mt-10 max-w-lg rounded-2xl border border-dashed p-8 text-center opacity-80">
       <Database className="mx-auto h-6 w-6 opacity-60" />
       <p className="mt-3 text-sm font-semibold">Nothing here yet</p>
-      <p className="mt-1 text-xs">{client ? 'Load the demo data from the Engagement Dashboard to see this page filled in.' : 'No client file exists yet. In the Client portal, open the Engagement Dashboard and choose Load demo data.'}</p>
+      <p className="mt-1 text-xs">{DEMO_DATA ? (client ? 'Load the demo data from the Engagement Dashboard to see this page filled in.' : 'No client file exists yet. In the Client portal, open the Engagement Dashboard and choose Load demo data.') : 'No client file has been started yet. Start it from the client\'s Engagement Dashboard; the page fills in once the trial balance is approved.'}</p>
       {client && <Link to="/client/dashboard" className="mt-4 inline-block rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-white">Go to Engagement Dashboard</Link>}
     </div>
   )

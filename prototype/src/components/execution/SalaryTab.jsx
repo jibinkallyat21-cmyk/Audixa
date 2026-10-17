@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { DEMO_DATA } from '../../utils/features'
 import AutoDemo from './AutoDemo'
 import { useDemoClient, demoLabel } from '../../utils/useDemoClient'
 import { clientSalarySources, clientContributors, clientTbMonthly, tbSalaries } from '../../utils/clientPayrollData'
@@ -69,7 +70,7 @@ export default function SalaryTab({ client, clientName }) {
   return (
     <div className="space-y-6">
       <Card title="Step 1 · Audit period and the trial balance figure" subtitle="Tell the tool which months to expect and what the trial balance shows for salaries."
-        right={<SecondaryButton onClick={useDemo}>{demoLabel(dc)}</SecondaryButton>}><AutoDemo run={useDemo} />
+        right={DEMO_DATA ? <SecondaryButton onClick={useDemo}>{demoLabel(dc)}</SecondaryButton> : null}><AutoDemo run={useDemo} />
         <FieldGrid cols={4}>
           <Field label="Audit period starts"><input aria-label="Audit period start" type="date" value={p.auditStart} onChange={(e) => setP({ ...p, auditStart: e.target.value })} className={`${INP} w-full`} /></Field>
           <Field label="Audit period ends"><input aria-label="Audit period end" type="date" value={p.auditEnd} onChange={(e) => setP({ ...p, auditEnd: e.target.value })} className={`${INP} w-full`} /></Field>
@@ -86,7 +87,7 @@ export default function SalaryTab({ client, clientName }) {
 
       <Card title="Step 2 · The client's salary schedules" subtitle="Excel files, one or many. Every sheet that looks like a schedule becomes a source. Nothing in the client's file is changed."
         right={fileBtn(<>{busy === 'src' ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}Add files</>, (e) => { addFiles([...(e.target.files || [])]); e.target.value = '' }, true)}>
-        {sources.length === 0 ? <Empty>No schedules yet. Add the client's salary files, or press “{demoLabel(dc)}”.</Empty> : (
+        {sources.length === 0 ? <Empty>No schedules yet. Add the client's salary files{DEMO_DATA ? <>, or press “{demoLabel(dc)}”</> : null}.</Empty> : (
           <>
             <div className="grid gap-3 sm:grid-cols-3"><Stat label="Schedules loaded" value={sources.length} /><Stat label="Employee rows" value={sources.reduce((n, x) => n + x.rows.length, 0)} /><Stat label="Columns still to map" value={unmapped} tone={unmapped ? 'amber' : 'green'} /></div>
             <details className="rounded-xl border border-slate-200 bg-white" open={sources.length <= 2}><summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-navy">Show the schedules and how their columns were read</summary>

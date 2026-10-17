@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react'
+import { engagementCode } from '../utils/demoData'
 import { useStore, readStore } from '../utils/store'
 
 const ClientFYContext = createContext(null)
@@ -6,9 +7,8 @@ const ClientFYContext = createContext(null)
 export const AVAILABLE_FYS = ['FY2024', 'FY2023', 'FY2022']
 
 // With the demo data loaded the client has one engagement: the demo file.
-const DEMO_REF = 'ENG-DEMO-0001'
 export const ENGAGEMENT_REFS = {
-  get FY2024() { return readStore('demo:loaded', null) ? DEMO_REF : 'KSA-2024-8841' },
+  get FY2024() { return readStore('demo:loaded', null) ? engagementCode() : 'KSA-2024-8841' },
   FY2023: 'KSA-2023-7712',
   FY2022: 'KSA-2022-6305',
 }

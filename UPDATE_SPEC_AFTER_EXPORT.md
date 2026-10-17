@@ -154,3 +154,10 @@ Q9, Q27, Q46 (to be answered). The documents each area needs (section 5, assumpt
 ## Addendum: Supabase test backend
 
 See `prototype/docs/self-review-decisions.md` (Supabase section). Only `utils/store.js`, `utils/supabase.js`, `main.jsx`, the login page and the sign-out button changed. The real app should use its own API instead, keeping the same storage boundary.
+
+## Addendum: role-based access, demo switch, documents
+
+- Access rules by portal (see `prototype/docs/self-review-decisions.md`, "Role-based access in the database"): the real app must enforce them on the server, with per-client data separation from the start.
+- The audit log is split: full log (staff) and `client-activity` (what the client may see).
+- Personal preferences are stored per user.
+- Demo switch: `VITE_DEMO_DATA`; `prototype/docs/restore-demo-data.md`.

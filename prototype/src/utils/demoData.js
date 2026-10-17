@@ -26,7 +26,9 @@ function attach(on, auditor = 'MISCPA') {
 }
 // A real client file: the name entered when it was started replaces the demo client's name everywhere (kept after a reload).
 const DEMO_NAME = PORTAL_CLIENT.client
-export function applyClientName(name) { const n = name || DEMO_NAME; DEMO_FILE.client = n; PORTAL_CLIENT.client = n; clientPortal.clientName = n }
+// A real client file also gets its own engagement code (the demo one says DEMO).
+export const engagementCode = () => (DEMO_FILE.client === DEMO_NAME ? 'ENG-DEMO-0001' : 'ENG-0001')
+export function applyClientName(name) { const n = name || DEMO_NAME; DEMO_FILE.client = n; PORTAL_CLIENT.client = n; clientPortal.clientName = n; DEMO_FILE.code = engagementCode() }
 applyClientName(readStore(KEY, null)?.clientName)
 attach(!!readStore(KEY, null), readStore(KEY, null)?.auditor) // restore after a page reload
 
@@ -63,5 +65,5 @@ export function loadDemoData(auditor = 'MISCPA', existing = true, { own = false,
 }
 export function clearDemoData() {
   applyClientName('')
-  attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore('workingtb:adjustments', []); removeClientProfile(DEMO_FILE.slug); writeStore('queries', readStore('queries', []).filter((q) => q.client !== DEMO_FILE.slug)); writeStore('workingtb:classOverrides', {}); writeStore('audit-log', readStore('audit-log', []).filter((e) => e.clientName !== DEMO_FILE.client)); clearProcedureStatuses(DEMO_FILE.slug); clearMateriality(DEMO_FILE.slug); writeStore(KEY, null)
+  attach(false); withdrawList(DEMO_FILE.slug); clearTB(DEMO_FILE.slug); writeStore('workingtb:adjustments', []); removeClientProfile(DEMO_FILE.slug); writeStore('queries', readStore('queries', []).filter((q) => q.client !== DEMO_FILE.slug)); writeStore('workingtb:classOverrides', {}); writeStore('audit-log', readStore('audit-log', []).filter((e) => e.clientName !== DEMO_FILE.client)); writeStore('client-activity', readStore('client-activity', []).filter((e) => e.clientName !== DEMO_FILE.client)); clearProcedureStatuses(DEMO_FILE.slug); clearMateriality(DEMO_FILE.slug); writeStore(KEY, null)
 }
