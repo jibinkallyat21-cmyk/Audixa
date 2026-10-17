@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import FileLink from '../shared/FileLink'
 import { Check, X, BellRing } from 'lucide-react'
 import { Card, Chip, Stat, Empty, PrimaryButton, INPUT } from './ReviewParts'
 import RemarkThread from '../shared/RemarkThread'
@@ -27,7 +28,7 @@ function Row({ it, slug, odd, focus }) {
         <td className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-navy">{money(r.amount)}</td>
         <td className="px-4 py-3 text-xs text-slate-500">{it.sentBy || '—'}<span className="block">{fmt(it.sentAt)}</span></td>
         <td className="px-4 py-3"><Chip value={it.status === 'Uploaded Processing' ? 'Uploaded' : it.status} />{it.remindedAt ? <span className="mt-1 block text-xs text-amber">Reminded {fmt(it.remindedAt)}{it.reminders > 1 ? ` (${it.reminders}×)` : ''}</span> : null}</td>
-        <td className="px-4 py-3 text-xs text-slate-500">{it.filename || '—'}</td>
+        <td className="px-4 py-3 text-xs text-slate-500"><FileLink item={it} /></td>
         <td className="px-4 py-3 text-right">{canReview ? (
           <div className="flex justify-end gap-2">
             <button onClick={() => { setItemStatus(slug, it.ref, { status: 'Accepted', alert: '' }); showToast(`${it.ref} accepted`) }} className="inline-flex items-center gap-1 rounded-lg bg-emerald px-3 py-2 text-xs font-semibold text-white"><Check className="h-3.5 w-3.5" />Accept</button>

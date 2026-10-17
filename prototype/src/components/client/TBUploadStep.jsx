@@ -6,6 +6,7 @@ import { checkTBFormat, compactLedgers, PRESCRIBED_COLUMNS } from '../../utils/t
 import { readGLWorkbook, checkGL } from '../../utils/generalLedger'
 import { buildTBTemplate, buildGLTemplate } from '../../utils/tbTemplate'
 import { useTBSubmissions, submitTB } from '../../utils/tbSubmissionStore'
+import { storeFile } from '../../utils/files'
 import { openingCheck } from '../../utils/openingCheck'
 import { DEMO_FILE, demoPayload, useDemoExisting } from '../../utils/demoData'
 
@@ -43,7 +44,7 @@ export default function TBUploadStep({ D }) {
     try {
       const r = checkTBFormat(await readTBWorkbook(await f.arrayBuffer()))
       if (!r.ok) { setTbErr(r.errors); setBoth(null, cur.current.gl) }
-      else setBoth({ fileName: f.name, ledgers: compactLedgers(r.ledgers), warnings: r.warnings, sheetName: r.sheetName }, cur.current.gl)
+      else setBoth({ file: f, fileName: f.name, ledgers: compactLedgers(r.ledgers), warnings: r.warnings, sheetName: r.sheetName }, cur.current.gl)
     } catch { setTbErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']) }
     setBusy('')
   }
@@ -52,7 +53,7 @@ export default function TBUploadStep({ D }) {
     setBusy('py'); setPyErr([])
     try {
       const r = checkTBFormat(await readTBWorkbook(await f.arrayBuffer()))
-      if (!r.ok) { setPyErr(r.errors); setPy(null) } else setPy({ fileName: f.name, ledgers: compactLedgers(r.ledgers) })
+      if (!r.ok) { setPyErr(r.errors); setPy(null) } else setPy({ file: f, fileName: f.name, ledgers: compactLedgers(r.ledgers) })
     } catch { setPyErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']); setPy(null) }
     setBusy('')
   }
@@ -63,15 +64,17 @@ export default function TBUploadStep({ D }) {
       const r = await readGLWorkbook(await f.arrayBuffer())
       if (!r.ok) { setGlErr([`The general ledger needs these columns: ${r.missing.join(', ')}. It must list every transaction recorded in the books.`]); cur.current.gl = null; setGl(null) }
       else if (!r.txns.length) { setGlErr(['The general ledger has no transactions.']); cur.current.gl = null; setGl(null) }
-      else setBoth(cur.current.tb, { fileName: f.name, txns: r.txns })
+      else setBoth(cur.current.tb, { file: f, fileName: f.name, txns: r.txns })
     } catch { setGlErr(['This file could not be read. Please upload an Excel (.xlsx) file in the prescribed format.']); cur.current.gl = null; setGl(null) }
     setBusy('')
   }
   const ready = !!tb && !!gl && glErr.length === 0 && (existing || firstYear || !!py)
   const oc = tb && py && !firstYear && !existing ? openingCheck(py.ledgers, tb.ledgers) : null
-  const send = () => {
+  const send = async () => {
+    let paths = { tbPath: '', glPath: '', pyPath: '' }
+    try { paths = { tbPath: await storeFile(DEMO_FILE.slug, 'trial-balance', tb.file), glPath: await storeFile(DEMO_FILE.slug, 'general-ledger', gl.file), pyPath: existing || firstYear ? '' : await storeFile(DEMO_FILE.slug, 'previous-year', py.file) } } catch (e) { setTbErr([e.message]); return }
     const { rows, stats } = crossCheck(tb, gl)
-    const r = submitTB(DEMO_FILE, { fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats, pyFileName: existing || firstYear ? '' : py.fileName, pyLedgers: existing || firstYear ? [] : py.ledgers, firstYear: !existing && firstYear })
+    const r = submitTB(DEMO_FILE, { ...paths, fileName: tb.fileName, ledgers: tb.ledgers, warnings: tb.warnings, sheetName: tb.sheetName, glFileName: gl.fileName, glRows: rows, glStats: stats, pyFileName: existing || firstYear ? '' : py.fileName, pyLedgers: existing || firstYear ? [] : py.ledgers, firstYear: !existing && firstYear })
     if (!r.ok) { setTbErr(r.errors); setTb(null); cur.current.tb = null; return }
     showToast('Trial balance and general ledger sent to the audit team')
   }

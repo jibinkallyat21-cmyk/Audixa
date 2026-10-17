@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Eye, Check, X, FolderTree, Download, Send } from 'lucide-react'
 import { Card, Chip, Empty, Stat, PrimaryButton, SecondaryButton } from './ReviewParts'
+import FileLink from '../shared/FileLink'
 import RemarkThread from '../shared/RemarkThread'
 import { useIssuedLists, setItemStatus, setAap, patchAap } from '../../utils/requirementsStore'
 import { sampleArea } from '../../utils/requirementAreas'
@@ -71,7 +72,7 @@ export default function PartySamples({ dc, side }) {
             {it.aap?.enabled && (
               <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
                 <p className="text-sm font-semibold text-navy">Alternative audit procedure {it.aap.by === 'Client' ? '(client could not confirm)' : `(enabled by ${it.aap.by})`}</p>
-                <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">{items.map((x) => <div key={x.ref} className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-sm"><span className="min-w-[200px] flex-1 text-navy">{x.row?.description?.split(': ')[1] || x.text}{x.filename ? <span className="block text-xs text-slate-400">uploaded as {x.filename}</span> : null}</span><Chip value={x.status === 'Uploaded Processing' ? 'Uploaded' : x.status} /></div>)}</div>
+                <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">{items.map((x) => <div key={x.ref} className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-sm"><span className="min-w-[200px] flex-1 text-navy">{x.row?.description?.split(': ')[1] || x.text}{x.filename ? <span className="block text-xs text-slate-400">uploaded as <FileLink item={x} /></span> : null}</span><Chip value={x.status === 'Uploaded Processing' ? 'Uploaded' : x.status} /></div>)}</div>
                 {!ready && <p className="text-sm text-slate-500">The test runs once the ledger and the {w.inPl} after the year end are received.</p>}
                 {result && (
                   <div className="space-y-4">

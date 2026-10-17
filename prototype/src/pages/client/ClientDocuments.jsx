@@ -7,7 +7,8 @@ import PageTransition from '../../components/shared/PageTransition'
 import StatusPill from '../../components/shared/StatusPill'
 import { useToast } from '../../components/shared/Toast'
 import { useTheme } from '../../context/ThemeContext'
-import { useIssuedLists, PORTAL_CLIENT, setItemStatus, uploadDemoDocuments } from '../../utils/requirementsStore'
+import { useIssuedLists, PORTAL_CLIENT, uploadDemoDocuments } from '../../utils/requirementsStore'
+import { uploadItemFile } from '../../utils/files'
 import TBUploadStep from '../../components/client/TBUploadStep'
 import { DEMO_FILE, useDemoLoaded } from '../../utils/demoData'
 import { useClientFY, ENGAGEMENT_REFS } from '../../context/ClientFYContext'
@@ -122,7 +123,7 @@ function TableRow({ row, highlighted }) {
             </button>
           ) : canUpload ? (
             <label className={`${btnBase} cursor-pointer bg-brand text-white hover:bg-[#D12C35]`}>
-              <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) { setItemStatus(PORTAL_CLIENT.slug, row.ref, { status: 'Uploaded Processing', filename: f.name, alert: '' }); showToast(`${f.name} uploaded`) } }} />
+              <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadItemFile(PORTAL_CLIENT.slug, row.ref, f).then((r) => showToast(r.ok ? `${f.name} uploaded` : r.error)) }} />
               <Upload className="h-3 w-3" />
               {isRejected ? 'Re-upload' : 'Upload'}
             </label>
