@@ -1,20 +1,22 @@
 import { useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { clearPortal } from '../../utils/portalSession'
+import { signOut, cloudOn } from '../../utils/supabase'
 
 const CLIENT_GREETING_KEY = 'audit360_client_greeted_v3'
 
 export default function ExitDemoButton() {
   const navigate = useNavigate()
 
-  const handleExit = () => {
+  const handleExit = async () => {
     try { sessionStorage.removeItem(CLIENT_GREETING_KEY) } catch {}
+    if (cloudOn) await signOut()
     clearPortal()
     navigate('/login')
   }
 
   return (
-    <button aria-label="Exit demo"
+    <button aria-label={cloudOn ? 'Sign out' : 'Exit demo'}
       type="button"
       onClick={handleExit}
       className="flex items-center rounded-[20px] border font-medium text-white transition-colors"
@@ -40,7 +42,7 @@ export default function ExitDemoButton() {
       }}
     >
       <LogOut size={13} />
-      <span className="hidden sm:inline">Exit Demo</span>
+      <span className="hidden sm:inline">{cloudOn ? 'Sign out' : 'Exit Demo'}</span>
     </button>
   )
 }

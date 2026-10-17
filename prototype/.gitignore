@@ -25,3 +25,5 @@ scripts/screenshots
 *.njsproj
 *.sln
 *.sw?
+test-logins.local.md
+.env.local

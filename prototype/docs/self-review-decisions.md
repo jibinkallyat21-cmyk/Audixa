@@ -184,3 +184,11 @@ Agreed with the audit lead, prepaid first; the other areas follow the same patte
 - The demo trial balance now tallies (its deliberate flaws are the opening-balance differences and the near-duplicate ledger, not an arithmetic gap).
 - Real client file: on the client dashboard choose Data = "My own client files", enter the client name. Nothing is pre-loaded; the client uploads the trial balance, general ledger and previous year trial balance. Tools no longer auto-fill sample data for such a file, and their sample-data buttons say "Fill with sample data (not your file)".
 - Fixed while testing: the client's trial balance upload step was not shown on the Requirement List before a list was issued; uploading the general ledger crashed the step (variable used before it was defined).
+
+## Supabase (temporary test backend)
+
+- `utils/store.js` stays the only storage module. With `VITE_SUPABASE_URL` and `VITE_SUPABASE_KEY` set (`.env.local`, see `.env.example`) and a signed-in user, it loads the shared `kv` table into memory (reads stay synchronous), saves writes in batches, and follows other users' changes in real time. Without them the app runs on browser storage as before.
+- `utils/supabase.js` holds the connection and sign-in. The account decides the portal (`app_metadata.portal`: client, team, manager, fo, management; `title`: Audit Lead or Associate). The demo shortcut on the login page is hidden when Supabase is on; "Exit Demo" becomes "Sign out".
+- Table `public.kv (key, value jsonb, updated_at, updated_by)` with row level security: signed-out users see nothing; any signed-in user can read and write. Six test users were created (see the local file `prototype/test-logins.local.md`, not committed).
+- Known limits: each key is one JSON blob, so two people editing the same key at the same moment overwrite each other (last write wins); roles are not yet enforced in the database (any signed-in user can read all keys); uploaded document files are not stored yet (stage 3, a storage bucket).
+- Moving to the company account: create the same table and policies (migration `audit360_kv_store`), create the users, change the two environment values.

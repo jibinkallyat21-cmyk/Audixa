@@ -150,3 +150,7 @@ Q9, Q27, Q46 (to be answered). The documents each area needs (section 5, assumpt
 - Client upload step must be visible on the Requirement List until a list is issued.
 - Demo trial balance adjusted to tally (`data/demoTB.js`).
 - Data source switch for a real client file (`demoData.loadDemoData(..., { own, clientName })`).
+
+## Addendum: Supabase test backend
+
+See `prototype/docs/self-review-decisions.md` (Supabase section). Only `utils/store.js`, `utils/supabase.js`, `main.jsx`, the login page and the sign-out button changed. The real app should use its own API instead, keeping the same storage boundary.
